@@ -1,4 +1,3 @@
-#Requires -Version 6.0
 function Get-OpenPullRequests
 {
     [CmdletBinding()]
