@@ -31,7 +31,6 @@ Invoke-DownloadMethod `
 
 This would download the file at 'https://example.com/myfile.zip' to 'C:\MyFile.zip'
 
-
 ## PARAMETERS
 
 ### -DownloadURI

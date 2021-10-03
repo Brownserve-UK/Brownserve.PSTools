@@ -24,7 +24,6 @@ This allows us to lock vault to different versions across projects if we need to
 
 You can set the environment variable `$global:RepoVaultVersion` for a given project to save having to specify the `-VaultVersion` parameter.
 
-
 ## EXAMPLES
 
 ### EXAMPLE 1: Using the default version
