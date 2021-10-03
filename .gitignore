@@ -4,6 +4,7 @@
 # Paket fluff
 paket.lock
 packages/
+paket-files/
 
 # Binary directory
 .bin/
