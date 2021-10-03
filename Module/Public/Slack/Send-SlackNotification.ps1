@@ -1,4 +1,4 @@
-function Invoke-SlackNotification
+function Send-SlackNotification
 {
     [CmdletBinding()]
     Param(
