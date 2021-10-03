@@ -1,14 +1,14 @@
 ---
 Module Name: Brownserve.PSTools
 Module Guid: 44b45ef7-6e06-4d07-901a-210b8df05b96
-Download Help Link: {{ Update Download Link }}
-Help Version: {{ Please enter version of help manually (X.X.X.X) format }}
+Download Help Link: https://github.com/Brownserve-UK/Brownserve.PSTools/.docs/Module
+Help Version: 0.1.0.0
 Locale: en-US
 ---
 
 # Brownserve.PSTools Module
 ## Description
-{{ Fill in the Description }}
+A collection of PowerShell tools used in various projects.
 
 ## Brownserve.PSTools Cmdlets
 ### [Add-ChangelogEntry](Add-ChangelogEntry.md)
