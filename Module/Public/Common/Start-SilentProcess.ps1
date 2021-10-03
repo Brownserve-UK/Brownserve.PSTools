@@ -52,7 +52,7 @@ function Start-SilentProcess
         )]
         [ValidateNotNullOrEmpty()]
         [string]
-        $RedirectOutputPath = "$(if ($env:RepoLogDirectory) { $env:RepoLogDirectory }else { $env:TMPDIR })",
+        $RedirectOutputPath,
 
         # The prefix to use on the redirected streams, defaults to the command run time
         [Parameter(
@@ -96,9 +96,9 @@ function Start-SilentProcess
     # Set redirected output to the repos log directory if it exists, otherwise to temp
     if (!$RedirectOutputPath)
     {
-        if ($env:RepoLogDirectory)
+        if ($global:RepoLogDirectory)
         {
-            $RedirectOutputPath = $env:RepoLogDirectory
+            $RedirectOutputPath = $global:RepoLogDirectory
         }
         else
         {
