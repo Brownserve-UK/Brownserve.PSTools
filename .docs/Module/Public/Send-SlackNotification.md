@@ -8,7 +8,7 @@ schema: 2.0.0
 # Send-SlackNotification
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Sends a notification to a given Slack webhook
 
 ## SYNTAX
 
@@ -18,21 +18,21 @@ Send-SlackNotification [-Message] <String> [-Webhook] <String> [-Colour <String>
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Sends a notification to a given Slack webhook
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook"
 ```
 
-{{ Add example description here }}
+Would send the message "This is a test" to the given Slack webhook
 
 ## PARAMETERS
 
 ### -Colour
-{{ Fill Colour Description }}
+The colour (if any) to use for the notification
 
 ```yaml
 Type: String
@@ -47,7 +47,7 @@ Accept wildcard characters: False
 ```
 
 ### -Message
-{{ Fill Message Description }}
+The message to be sent
 
 ```yaml
 Type: String
@@ -62,7 +62,7 @@ Accept wildcard characters: False
 ```
 
 ### -Push
-{{ Fill Push Description }}
+The optional push message to be displayed
 
 ```yaml
 Type: String
@@ -77,7 +77,7 @@ Accept wildcard characters: False
 ```
 
 ### -Webhook
-{{ Fill Webhook Description }}
+The webhook to send to
 
 ```yaml
 Type: String
