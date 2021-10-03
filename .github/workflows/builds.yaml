@@ -1,0 +1,57 @@
+---
+name: builds
+on: 
+  pull_request:
+    
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    # Checkout this repo
+    steps:
+      - name: checkout-module
+        uses: actions/checkout@v2
+        with: 
+          path: Brownserve.BuildTools
+    # Run the build script
+      - name: run-build-script
+        shell: pwsh
+        run: |
+            ./Brownserve.BuildTools/.build/build.ps1 -BranchName $env:GITHUB_REF -Verbose
+    # Do a Slack notification
+      - name: notify-slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,author,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          MATRIX_CONTEXT: ${{ toJson(matrix) }} # required
+        if: ${{ always() }} # Always send even if a job fails or is cancelled
+  release:
+    runs-on: windows-latest
+    # Checkout this repo
+    steps:
+      - name: checkout-module
+        uses: actions/checkout@v2
+        with: 
+          path: Brownserve.PSTools
+    # Run the build script
+      - name: run-build-script
+        shell: pwsh
+        env:
+          GitHubPAT: ${{ secrets.GITHUBPAT }}
+          NugetFeedAPIKey: 'Test'
+          PSGalleryAPIKey: '1234'
+        run: |
+            ./Brownserve.PSTools/.build/build.ps1 -BranchName $env:GITHUB_REF -Build 'release' -NugetFeedAPIKey $env:NugetFeedAPIKey -PSGalleryAPIKey $env:PSGalleryAPIKey -Verbose
+    # Do a Slack notification
+      - name: notify-slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,author,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: ${{ always() }} # Always send even if a job fails or is cancelled
+          
