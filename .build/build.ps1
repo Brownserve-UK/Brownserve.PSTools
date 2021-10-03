@@ -7,24 +7,21 @@ param
 (
     # The name of the default branch
     [Parameter(
-        Mandatory = $false,
-        Position = 1
+        Mandatory = $false
     )]
     [string]
     $DefaultBranch = 'main',
 
     # The name of the branch you are running on, this is used to work out if the release is production or pre-release
     [Parameter(
-        Mandatory = $false,
-        Position = 2
+        Mandatory = $false
     )]
     [string]
     $BranchName = 'test',
 
     # The build to run
     [Parameter(
-        Mandatory = $false,
-        Position = 3
+        Mandatory = $false
     )]
     [ValidateSet('build', 'test', 'release')]
     [string]
@@ -32,16 +29,14 @@ param
 
     # The nuget feed(s) to publish to
     [Parameter(
-        Mandatory = $false,
-        Position = 4
+        Mandatory = $false
     )]
     [array]
     $NugetFeedsToPublishTo = @('nuget'),
 
     # The GitHub organisation/account to publish the release to
     [Parameter(
-        Mandatory = $false,
-        Position = 5
+        Mandatory = $false
     )]
     [ValidateNotNullOrEmpty()]
     [string]
@@ -49,8 +44,7 @@ param
     
     # The GitHub repo to publish the release to
     [Parameter(
-        Mandatory = $false,
-        Position = 6
+        Mandatory = $false
     )]
     [ValidateNotNullOrEmpty()]
     [string]
@@ -58,8 +52,7 @@ param
     
     # The PAT for pushing to GitHub
     [Parameter(
-        Mandatory = $false,
-        Position = 7
+        Mandatory = $false
     )]
     [ValidateNotNullOrEmpty()]
     [string]
@@ -67,11 +60,17 @@ param
 
     # The API key to use when publishing to a NuGet feed, this is always needed but may not always be used
     [Parameter(
-        Mandatory = $false,
-        Position = 8
+        Mandatory = $false
     )]
     [string]
-    $NugetFeedApiKey = 'AnyStringWillDo'
+    $NugetFeedApiKey,
+
+    # The API key to use when publishing to the PSGallery
+    [Parameter(
+        Mandatory = $false
+    )]
+    [string]
+    $PSGalleryAPIKey
 )
 # Always stop on errors
 $ErrorActionPreference = 'Stop'
@@ -103,6 +102,14 @@ if ($Build -eq 'release')
     if (!$NugetFeedsToPublishTo)
     {
         throw "Must specify 'NugetFeedsToPublishTo' for a release"
+    }
+    if (!$NugetFeedApiKey)
+    {
+        throw "Must specify 'NugetFeedAPIKey' for a release"
+    }
+    if (!$PSGalleryAPIKey)
+    {
+        throw "Must specify 'PSGalleryAPIKey' for a release"
     }
     if (!$GitHubPAT)
     {
@@ -143,6 +150,10 @@ try
     else
     {
         $BuildParams.Add('Prerelease', $false)
+    }
+    if ($PSGalleryAPIKey)
+    {
+        $BuildParams.Add('PSGalleryAPIKey',$PSGalleryAPIKey)
     }
     # Add extra parameters when doing a release
     if ($Build -eq 'release')

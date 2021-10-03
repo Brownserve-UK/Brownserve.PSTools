@@ -55,7 +55,14 @@ param
     [Parameter(
         Mandatory = $False
     )]
-    [string] $NugetFeedApiKey = 'AnyStringWillDo'
+    [string] $NugetFeedApiKey,
+
+    # The API key to use when publishing to the PSGallery
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string]
+    $PSGalleryAPIKey
 )
 # Depending on how we got the branch name we may need to remove the full ref
 $BranchName = $BranchName -replace 'refs\/heads\/', ''
@@ -215,7 +222,7 @@ task Tests Pack, {
 }
 
 # Synopsis: Push the package up to the feed(s)
-task Push CheckPreviousRelease, Tests, {
+task PushNuget CheckPreviousRelease, Tests, {
     foreach ($NugetFeedToPublishTo in $NugetFeedsToPublishTo)
     {
         $NugetArguments = @(
@@ -238,9 +245,15 @@ task Push CheckPreviousRelease, Tests, {
     }
 }
 
+# Synopsis: Push the module to PSGallery too
+task PushPSGallery CheckPreviousRelease, Tests, {
+    Write-Verbose "Pushing to PSGallery"
+    Publish-Module -Name 'Brownserve.PSTools' -NuGetApiKey $PSGalleryAPIKey
+}
+
 # Synopsis: Creates a GitHub release for this version, we only do this once we've had a successful NuGet push
-task GitHubRelease Push, {
-    Write-Verbose "Creating GitHub release for v$script:NugetPackageVersion"
+task GitHubRelease PushNuget, PushPSGallery, {
+    Write-Verbose "Creating GitHub release for $script:NugetPackageVersion"
     $ReleaseParams = @{
         Name        = "v$script:NugetPackageVersion"
         Tag         = "v$script:NugetPackageVersion"

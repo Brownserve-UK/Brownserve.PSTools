@@ -270,18 +270,8 @@ Resolve-Path '$(Join-Path $Global:ModuleDirectory 'Private')' |
         throw "Failed to update Markdown code for Private functions.`n$($_.Exception.Message)"
     }
 
-    try
-    {
-        # Update our Module's help file
-        Write-Progress -Activity "Updating Brownserve.PSTools documentation" -Status "Updating module XML documentation" -PercentComplete 99
-        Update-ModuleHelp
-    }
-    catch
-    {
-        throw $_.Exception.Message
-    }
     Write-Progress -Activity "Updating Brownserve.PSTools documentation" -Completed
-    Write-Host "Markdown help has been successfully updated!`n`nPlease check and commit your diffs" -ForegroundColor Green
+    Write-Host "Markdown help has been successfully updated!" -ForegroundColor Green
 }
 
 # And another helper function for updating the modules help
