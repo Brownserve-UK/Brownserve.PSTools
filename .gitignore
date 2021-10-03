@@ -1,0 +1,15 @@
+# Ignore the log folder and any .log files
+*.log
+
+# Paket fluff
+paket.lock
+packages/
+
+# Binary directory
+.bin/
+
+# Build output
+.build_output/
+
+# We build this programatically
+nuget.config
