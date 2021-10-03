@@ -9,7 +9,7 @@ packages/
 .bin/
 
 # Build output
-.build_output/
+.build/output/
 
 # We build this programatically
 nuget.config
