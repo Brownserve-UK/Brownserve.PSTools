@@ -41,6 +41,9 @@ Downloads the given version of Vault for your OS
 ### [Get-VaultSecret](Get-VaultSecret.md)
 Returns a secret from a given vault path
 
+### [Initialize-BrownserveBuildRepo](Initialize-BrownserveBuildRepo.md)
+Prepares a repo to be able to consume and use the Brownserve.PSTools module
+
 ### [Install-ChocolateyPackage](Install-ChocolateyPackage.md)
 Helper cmdlet for installing Chocolatey packages programmatically
 
@@ -51,7 +54,7 @@ Downloads a file using the best method available depending on operating system.
 Invokes 'terraform apply' with a given set of arguments
 
 ### [Invoke-TerraformInit](Invoke-TerraformInit.md)
-Performs a 'terraform init'
+Performs a \`terraform init\`
 
 ### [Invoke-TerraformPlan](Invoke-TerraformPlan.md)
 Invokes a Terraform plan with a selection of given parameters
