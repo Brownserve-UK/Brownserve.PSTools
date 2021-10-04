@@ -37,7 +37,7 @@ function New-BrownserveInitScript
         # Import the template
         try
         {
-            $InitTemplate = Get-Content ./init.ps1.template -Raw
+            $InitTemplate = Get-Content (Join-Path $PSScriptRoot init.ps1.template) -Raw
         }
         catch
         {
@@ -51,18 +51,41 @@ function New-BrownserveInitScript
         # to it's actual location
         $PermanentPathText = ""
         $PermanentPaths | ForEach-Object {
+            # If we have a description we need to have that appear first
+            if ($_.Description)
+            {
+                $PermanentPathText = $PermanentPathText + "# $($_.Description)`n"
+            }
+            # If we've got child paths we'll have to do some really fancy interpolation
+            if ($_.ChildPaths)
+            {
+                $Path = "'$($_.Path)' " + $("'" + ($_.ChildPaths -join "','") + "'")
+            }
+            else
+            {
+                $Path = "'$($_.Path)'"
+            }
             $PermanentPathText = $PermanentPathText + @"
-`$Global:$($_.VariableName) = Join-Path `$global:RepoRootDirectory '$($_.Path)' | Convert-Path`n
+`$Global:$($_.VariableName) = Join-Path `$global:RepoRootDirectory $Path | Convert-Path`n
 "@
         }
-        $InitTemplate = $InitTemplate -replace '###PERMANENT_PATHS###', $PermanentPathText
+        $InitTemplate = $InitTemplate.Replace('###PERMANENT_PATHS###', $PermanentPathText)
 
         # For our ephemeral paths we first need to define them as standalone variables, so we can create them
         # if they don't already exist
         $EphemeralPathText = ",`n"
         $EphemeralPaths | ForEach-Object -Process {
+            # If we've got child paths we'll have to do some really fancy interpolation
+            if ($_.ChildPaths)
+            {
+                $Path = "'$($_.Path)' " + $("'" + ($_.ChildPaths -join "','") + "'")
+            }
+            else
+            {
+                $Path = "'$($_.Path)'"
+            }
             $EphemeralPathText = $EphemeralPathText + @"
-    (`$$($_.VariableName) = Join-Path `$global:RepoRootDirectory '$($_.Path)')
+    (`$$($_.VariableName) = Join-Path `$global:RepoRootDirectory $Path)
 "@
             # We are building an array in the template
             # if this is the last line of the array then we don't want to add a comma!
@@ -75,40 +98,44 @@ function New-BrownserveInitScript
                 $EphemeralPathText = $EphemeralPathText + ",`n"
             }
         }
-        $EphemeralPathText = $EphemeralPathText + ")"
-        $InitTemplate = $InitTemplate -replace '###EPHEMERAL_PATHS###', $EphemeralPathText
+        $InitTemplate = $InitTemplate.Replace('###EPHEMERAL_PATHS###', $EphemeralPathText)
 
         # Now we can create our global variables that reference their proper paths
         $EphemeralPathVariableText = "`n"
         $EphemeralPaths | ForEach-Object {
+            # If we have a description we need to have that appear first
+            if ($_.Description)
+            {
+                $EphemeralPathVariableText = $EphemeralPathVariableText + "# $($_.Description)`n"
+            }
             $EphemeralPathVariableText = $EphemeralPathVariableText + @"
 `$global:$($_.VariableName) = `$$($_.VariableName) | Convert-Path`n
 "@
         }
-        $InitTemplate = $InitTemplate -replace '###EPHEMERAL_PATH_VARIABLES###', $EphemeralPathVariableText
+        $InitTemplate = $InitTemplate.Replace('###EPHEMERAL_PATH_VARIABLES###', $EphemeralPathVariableText)
 
         # Here we set up our custom module loader for loading any Powershell modules we may have created in a given repo
         if ($IncludeModuleLoader)
         {
-            $ModuleText = @"
+            $ModuleText = @'
 
 try
 {
-    Get-ChildItem `$global:RepoModuleDirectory -Filter '*.psm1' | Foreach-Object {
-        Import-Module `$_ -Force -Verbose:`$false
+    Get-ChildItem $global:RepoCodeDirectory -Filter '*.psm1' | Foreach-Object {
+        Import-Module $_ -Force -Verbose:$false
     }
 }
 catch
 {
-    throw "Failed to import custom modules.``n`$(`$_.Exception.Message)
+    throw "Failed to import custom modules.`n$($_.Exception.Message)"
 }
 
-"@
+'@
         }
-        $InitTemplate = $InitTemplate -replace '###CUSTOM_MODULE_LOADER###', $ModuleText
+        $InitTemplate = $InitTemplate.Replace('###CUSTOM_MODULE_LOADER###', $ModuleText)
 
         # Finally we carry over any custom _init steps if the user has given them
-        $InitTemplate = $InitTemplate -replace '###CUSTOM_INIT_STEPS###', $CustomInitSteps
+        $InitTemplate = $InitTemplate.Replace('###CUSTOM_INIT_STEPS###', $CustomInitSteps)
     }   
     end
     {
