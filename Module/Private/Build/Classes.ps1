@@ -1,26 +1,27 @@
 # Some types/classes for use in our 'build' cmdlets
-class EphemeralPath
+# This class is used to give us a nice easy way to manage our paths for our init scripts
+class InitPath
 {
     [string] $VariableName
     [string] $Path
 
     # This constructor allows us to pass in pscustomobject's
-    EphemeralPath([pscustomobject]$EphemeralPath)
+    InitPath([pscustomobject]$InitPath)
     {
-        $this.Path = $EphemeralPath.path
-        $this.VariableName = $EphemeralPath.VariableName
+        $this.Path = $InitPath.path
+        $this.VariableName = $InitPath.VariableName
     }
 
     # Allow us to set the values by using 2 strings
-    EphemeralPath([string]$VariableName, [string]$Path)
+    InitPath([string]$VariableName, [string]$Path)
     {
         $this.Path = $Path
         $this.VariableName = $VariableName
     }
 
-    EphemeralPath([hashtable]$EphemeralPath)
+    InitPath([hashtable]$InitPath)
     {
-        $this.Path = $EphemeralPath.path
-        $this.VariableName = $EphemeralPath.VariableName
+        $this.Path = $InitPath.path
+        $this.VariableName = $InitPath.VariableName
     }
 }
