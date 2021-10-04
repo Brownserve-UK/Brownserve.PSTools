@@ -46,7 +46,7 @@ function Copy-VSCodeDevcontainer
     if (Test-Path $DevcontainerPath)
     {
         Write-Verbose ".devcontainer already exists."
-        break
+        Return
     }
     else
     {
