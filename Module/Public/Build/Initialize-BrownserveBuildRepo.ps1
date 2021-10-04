@@ -5,11 +5,11 @@ function Initialize-BrownserveBuildRepo
     (
         # The path to the repo that should be initialized
         [Parameter(
-            Mandatory = $false,
+            Mandatory = $true,
             Position = 0
         )]
         [string]
-        $RepoPath = $PWD, 
+        $RepoPath, 
 
         # Any custom init steps that you may want to include for this repo
         [Parameter(
