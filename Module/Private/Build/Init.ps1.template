@@ -44,7 +44,9 @@ $Global:RepoBuildDirectory = $PSScriptRoot | Convert-Path
 ###PERMANENT_PATHS###
 
 # Set-up our ephemeral paths, that is those that will be destroyed and then recreated each time this script is called
-###EPHEMERAL_PATHS###
+$EphemeralPaths = @(
+    ($RepoPackagesDirectory = Join-Path $Global:RepoRootDirectory 'packages')###EPHEMERAL_PATHS###
+)
 
 try
 {
@@ -63,7 +65,8 @@ catch
     break
 }
 
-###EPHEMERAL_PATH_VARIABLES###
+# Now that the ephemeral paths definitely exist we are free to set their global variables
+$Global:RepoPackagesDirectory = $RepoPackagesDirectory | Convert-Path ###EPHEMERAL_PATH_VARIABLES###
 
 # We use paket for managing our dependencies and we get that via dotnet
 Write-Verbose "Restoring dotnet tools"
@@ -106,8 +109,9 @@ catch
     throw "Failed to import Brownserve.PSTools.`n$($_.Exception.Message)"
 }
 ###CUSTOM_MODULE_LOADER###
+# Place any custom code below, this will be preserved whenever you update your _init script
 ### Start user defined _init steps
-    # Place any custom code here, this will be preserved whenever you update your _init script###CUSTOM_INIT_STEPS###
+###CUSTOM_INIT_STEPS###
 ### End user defined _init steps
 
 # If we're not suppressing output then we'll pipe out a list of cmdlets that are now available to the user along with

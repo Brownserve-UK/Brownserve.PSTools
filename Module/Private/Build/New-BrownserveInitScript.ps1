@@ -59,7 +59,7 @@ function New-BrownserveInitScript
 
         # For our ephemeral paths we first need to define them as standalone variables, so we can create them
         # if they don't already exist
-        $EphemeralPathText = "`$EphemeralPaths = @(`n"
+        $EphemeralPathText = ",`n"
         $EphemeralPaths | ForEach-Object -Process {
             $EphemeralPathText = $EphemeralPathText + @"
     (`$$($_.VariableName) = Join-Path `$global:RepoRootDirectory '$($_.Path)')
@@ -79,7 +79,7 @@ function New-BrownserveInitScript
         $InitTemplate = $InitTemplate -replace '###EPHEMERAL_PATHS###', $EphemeralPathText
 
         # Now we can create our global variables that reference their proper paths
-        $EphemeralPathVariableText = ""
+        $EphemeralPathVariableText = "`n"
         $EphemeralPaths | ForEach-Object {
             $EphemeralPathVariableText = $EphemeralPathVariableText + @"
 `$global:$($_.VariableName) = `$$($_.VariableName) | Convert-Path`n
@@ -91,6 +91,7 @@ function New-BrownserveInitScript
         if ($IncludeModuleLoader)
         {
             $ModuleText = @"
+
 try
 {
     Get-ChildItem `$global:RepoModuleDirectory -Filter '*.psm1' | Foreach-Object {
@@ -101,6 +102,7 @@ catch
 {
     throw "Failed to import custom modules.``n`$(`$_.Exception.Message)
 }
+
 "@
         }
         $InitTemplate = $InitTemplate -replace '###CUSTOM_MODULE_LOADER###', $ModuleText
