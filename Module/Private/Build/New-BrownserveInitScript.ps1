@@ -122,7 +122,7 @@ function New-BrownserveInitScript
 # Find and load any custom PowerShell modules we've written for this repo
 try
 {
-    Get-ChildItem $global:RepoCodeDirectory -Filter '*.psm1' | Foreach-Object {
+    Get-ChildItem $global:RepoCodeDirectory -Filter '*.psm1' -Recurse | Foreach-Object {
         Import-Module $_ -Force -Verbose:$false
     }
 }
