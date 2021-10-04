@@ -1,5 +1,5 @@
 <#
-.SYNOPSISp
+.SYNOPSIS
     Initializes this repository
 #>
 # We require 6.0+ due to using newer features of PowerShell
@@ -39,15 +39,14 @@ if ($env:CI)
 }
 
 # Set up our permanent paths
+# This directory is the root of the repo, it's handy to reference sometimes
 $Global:RepoRootDirectory = (Resolve-Path (Get-Item $PSScriptRoot -Force).PSParentPath) | Convert-Path # -Force flag is needed to find dot folders on *.nix
-$Global:RepoBuildDirectory = $PSScriptRoot | Convert-Path
 ###PERMANENT_PATHS###
 
 # Set-up our ephemeral paths, that is those that will be destroyed and then recreated each time this script is called
 $EphemeralPaths = @(
     ($RepoPackagesDirectory = Join-Path $Global:RepoRootDirectory 'packages')###EPHEMERAL_PATHS###
 )
-
 try
 {
     Write-Verbose 'Recreating ephemeral paths'
@@ -66,6 +65,7 @@ catch
 }
 
 # Now that the ephemeral paths definitely exist we are free to set their global variables
+# This is the directory that paket downloads stuff into
 $Global:RepoPackagesDirectory = $RepoPackagesDirectory | Convert-Path ###EPHEMERAL_PATH_VARIABLES###
 
 # We use paket for managing our dependencies and we get that via dotnet
@@ -85,7 +85,8 @@ if ($LASTEXITCODE -ne 0)
     throw "Failed to install paket dependencies"
 }
 
-# If Brownserve.PSTools is already loaded in this session we need to unload it
+# If Brownserve.PSTools is already loaded in this session (e.g. it's installed globally) we need to unload it
+# This ensures only the expected version is available to us
 if ((Get-Module 'Brownserve.PSTools'))
 {
     try
