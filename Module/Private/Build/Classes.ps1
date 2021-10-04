@@ -2,14 +2,53 @@
 # This class is used to give us a nice easy way to manage our paths for our init scripts
 class InitPath
 {
+    # The name of the variable to be created in the _init script
     [string] $VariableName
+    # The path to use for the variable in the _init script
     [string] $Path
+    # When forming paths that require children these are the additional values to use
+    [array] $ChildPaths
+    # The description of the variable to be set in the _init script
+    [string] $Description
+    # When using permanent paths this is the local location to the path
+    [string] $LocalPath
+    
 
-    # This constructor allows us to pass in pscustomobject's
+    # These first 2 constructors allow us to easily spin up InitPath's from objects.
     InitPath([pscustomobject]$InitPath)
     {
         $this.Path = $InitPath.path
         $this.VariableName = $InitPath.VariableName
+        if ($InitPath.ChildPaths)
+        {
+            $this.ChildPaths = $InitPath.ChildPaths
+        }
+        if ($InitPath.Description)
+        {
+            $this.Description = $InitPath.Description
+        }
+        if ($InitPath.LocalPath)
+        {
+            $this.LocalPath = $InitPath.LocalPath
+        }
+    }
+
+    InitPath([hashtable]$InitPath)
+    {
+        $this.Path = $InitPath.path
+        $this.VariableName = $InitPath.VariableName
+        if ($InitPath.ChildPaths)
+        {
+            $this.ChildPaths = $InitPath.ChildPaths
+        }
+        if ($InitPath.Description)
+        {
+            $this.Description = $InitPath.Description
+        }
+        if ($InitPath.LocalPath)
+        {
+            $this.LocalPath = $InitPath.LocalPath
+        }
     }
 
     # Allow us to set the values by using 2 strings
@@ -19,9 +58,13 @@ class InitPath
         $this.VariableName = $VariableName
     }
 
-    InitPath([hashtable]$InitPath)
+    # Allow us to set the values by 3 strings, so we can have additional child paths if we want
+    InitPath([string]$VariableName, [string]$Path, [array]$ChildPaths)
     {
-        $this.Path = $InitPath.path
-        $this.VariableName = $InitPath.VariableName
+        $this.Path = $Path
+        $this.VariableName = $VariableName
+        $this.ChildPaths = $ChildPaths
     }
+
+    
 }
