@@ -89,7 +89,7 @@ if (-not $isWindows)
 task GenerateVersionInfo {
     $script:Changelog = Read-Changelog -ChangelogPath (Join-Path $Global:RepoRootDirectory -ChildPath 'CHANGELOG.md')
     $script:Version = $Changelog.CurrentVersion
-    $script:ReleaseNotes = $Changelog.ReleaseNotes -replace '"', '\"' -replace '`', '' # Filter out characters that'll break the XML
+    $script:ReleaseNotes = $Changelog.ReleaseNotes -replace '"', '\"' -replace '`', '' -replace '*','' # Filter out characters that'll break the XML and/or just generally look horrible in NuGet
     $NugetPackageVersionParams = @{
         Version = $Version
         BranchName = $BranchName
