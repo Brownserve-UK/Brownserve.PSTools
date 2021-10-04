@@ -195,11 +195,6 @@ function global:Update-Documentation
     {
         # We'll need to set this so that we can generate help regardless of what OS we are on...
         $global:IgnoreCmdletCompatibility = $true
-        # First we need to remove any help files that already exist, this is cos platyPS will look at these to determine
-        # if the Markdown help has changed.
-        Write-Progress -Activity "Updating Brownserve.PSTools documentation" -Status "Removing any XML help" -PercentComplete 1
-        Write-Verbose "Removing XML help"
-        Get-ChildItem -Path (Join-Path $Global:ModuleDirectory -ChildPath 'en-US') -Filter '*.xml' | ForEach-Object {Remove-Item $_}
         # We now need to remove the Brownserve.BuildTools module as if the cmdlets have changed the updates 
         # won't be picked up until a re-import
         Write-Progress -Activity "Updating Brownserve.PSTools documentation" -Status "Re-importing the Brownserve.PSTools module" -PercentComplete 15
@@ -216,6 +211,8 @@ function global:Update-Documentation
         Update-MarkdownHelpModule `
             -Path (Join-Path $Global:RepoDocsDirectory 'Module' 'Public') `
             -AlphabeticParamsOrder `
+            -RefreshModulePage `
+            -UpdateInputOutput `
             -ModulePagePath (Join-Path $Global:RepoDocsDirectory 'Module' 'Brownserve.PSTools.md') `
             -ExcludeDontShow | Out-Null
     }
