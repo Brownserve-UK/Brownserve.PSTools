@@ -179,6 +179,7 @@ task GenerateNuspec GenerateVersionInfo, CopyFiles, {
     <description>A collection of common tools for use in Brownserve projects</description>
     <projectUrl>https://github.com/Brownserve-UK/Brownserve.PSTools</projectUrl>
     <releaseNotes>$script:ReleaseNotes</releaseNotes>
+    <readme>README.md</readme>
     <copyright>Copyright $(Get-Date -Format yyyy) ShoddyGuard.</copyright>
     <tags>PSMODULE CI CD</tags>
     <dependencies />
@@ -248,7 +249,14 @@ task PushNuget CheckPreviousRelease, Tests, {
 # Synopsis: Push the module to PSGallery too
 task PushPSGallery CheckPreviousRelease, Tests, {
     Write-Verbose "Pushing to PSGallery"
-    Publish-Module -Name 'Brownserve.PSTools' -NuGetApiKey $PSGalleryAPIKey
+    # For PSGallery the module needs to be in a directory named after itself... -_- (PowerShellGet is awful)
+    $PSGalleryModule = Join-Path $global:RepoBuildOutputDirectory 'PSGallery' 'Brownserve.PSTools'
+    Copy-Item $global:BuiltModuleDirectory $PSGalleryModule -Recurse
+    $PSGalleryParams = @{
+        Path = $PSGalleryModule
+        NuGetAPIKey = $PSGalleryAPIKey
+    }
+    Publish-Module @PSGalleryParams
 }
 
 # Synopsis: Creates a GitHub release for this version, we only do this once we've had a successful NuGet push
