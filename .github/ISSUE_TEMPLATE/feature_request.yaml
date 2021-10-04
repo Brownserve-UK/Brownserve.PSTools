@@ -2,7 +2,7 @@ name: 'Feature Request'
 description: 'Request a new feature or an enhancement'
 title: '[ENH]: '
 labels:
-  - 'feature_request'
+  - 'feature request'
   - 'enhancement'
 body:
   - type: markdown
