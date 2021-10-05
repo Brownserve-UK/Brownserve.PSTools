@@ -1,3 +1,4 @@
+[![release Actions Status](https://github.com/Brownserve-UK/Brownserve.PSTools/workflows/release/badge.svg?branch=main)](https://github.com/Brownserve-UK/Brownserve.PSTools/actions)
 # Brownserve.PSTools
 A collection of PowerShell tools that are used across various Brownserve projects to aid in CI/CD deployments and give an easy to maintain common codebase.  
 The tools are packaged as both a NuGet package and PSGallery PowerShell module for easy consumption across a wide variety of projects.
