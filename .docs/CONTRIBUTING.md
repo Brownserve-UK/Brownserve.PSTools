@@ -148,7 +148,7 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release 
 
-### [v0.2.0](https://github.com/red-gate/Brownserve.PSTools/tree/v0.2.0) (2021-09-16)
+### [v0.2.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.2.0) (2021-09-16)
 
 **Features**
 - Added New-Cmdlet cmdlet
@@ -159,7 +159,7 @@ None
 **Known Issues**
 None
 
-### [v0.1.0](https://github.com/red-gate/Brownserve.PSTools/tree/v0.1.0) (2021-09-16)
+### [v0.1.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.1.0) (2021-09-16)
 
 **Features**
 - First release of the module!

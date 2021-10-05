@@ -150,7 +150,7 @@ task GenerateManifest CopyFiles, {
         -Description 'A collection of tools to aid in CI/CD deployments.' `
         -PowerShellVersion '6.0' `
         -ReleaseNotes $script:ReleaseNotes `
-        -LicenseUri 'https://github.com/Brownserve-UK/Brownserve.PSTools/LICENSE' `
+        -LicenseUri 'https://github.com/Brownserve-UK/Brownserve.PSTools/blob/main/LICENSE' `
         -ProjectUri 'https://github.com/Brownserve-UK/Brownserve.PSTools' `
         -Tags @('CI', 'CD') `
         -FunctionsToExport $PublicFunctions
