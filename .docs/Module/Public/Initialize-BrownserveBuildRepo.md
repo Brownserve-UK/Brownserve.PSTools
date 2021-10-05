@@ -8,7 +8,7 @@ schema: 2.0.0
 # Initialize-BrownserveBuildRepo
 
 ## SYNOPSIS
-Prepares a repo to be able to consume and use the Brownserve.PSTools module
+Prepares a repo to be able to consume and use the Brownserve.PSTools PowerShell module
 
 ## SYNTAX
 
@@ -24,7 +24,7 @@ This cmdlet will assist in bootstrapping a repo for use with the Brownserve.PSTo
 * Configuring NuGet/paket
 * Creating and _init.ps1 script to initialize the repo during builds
 
-This cmdlet is experimental and hasn't been widely tested.
+This cmdlet is experimental and hasn't yet been extensively tested, use with care.
 
 ## EXAMPLES
 

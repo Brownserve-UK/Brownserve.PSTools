@@ -14,7 +14,7 @@ This is because it will conflict with the MAML based help that we use in this mo
 ## Update help files
 Our public cmdlets/functions **must** have help documentation, it's a requirement to build the module successfully.  
 We use [platyPS](https://github.com/PowerShell/platyPS) (the same tool Microsoft use) to help generate our help documentation.  
-This allows us to create Markdown based help files in the `.docs` directory which are much easier to read for a human and then have platyPS generate the module's XML MAML documentation from these Markdown files.
+This allows us to create Markdown based help files in the `.docs` directory which are much easier to read for us humans, then have platyPS generate the module's XML MAML documentation from these Markdown files.
 
 Our `_init.ps1` script contains some helper functions for creating/updating documentation:
 ```powershell

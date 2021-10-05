@@ -17,3 +17,19 @@ For example if your code is only compatible with macOS and Linux you would add `
 Take a look at [Install-ChocolateyPackage](Module/Public/Install-ChocolateyPackage.md) for an example of how this works.
 
 It's also a good idea to have logic in your code to bottom out if it isn't on the right platform.
+
+### Writing snippets
+We include a bunch of helper snippets to make working with Brownserve projects a little easier, from time-to-time these may need updating.  
+By far the easiest way to do this is to create a template file with your desired changes and then use the `snippet-creator` extension to convert them into snippets.  
+As it stands these extension doesn't handle PowerShell all that well so you'll need to regex replace `$` signs.
+
+The following regex statements should help with that.  
+Find with:
+```
+\$([^{])
+```
+
+Replace with:
+```
+\\\$$1
+```
