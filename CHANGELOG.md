@@ -14,4 +14,4 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 None
 
 **Known Issues**
-None
+- `Initialize-BrownserveBuildRepo` is not widely tested, here be dragons.
