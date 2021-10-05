@@ -42,7 +42,7 @@ Downloads the given version of Vault for your OS
 Returns a secret from a given vault path
 
 ### [Initialize-BrownserveBuildRepo](Initialize-BrownserveBuildRepo.md)
-Prepares a repo to be able to consume and use the Brownserve.PSTools module
+Prepares a repo to be able to consume and use the Brownserve.PSTools PowerShell module
 
 ### [Install-ChocolateyPackage](Install-ChocolateyPackage.md)
 Helper cmdlet for installing Chocolatey packages programmatically
@@ -91,6 +91,9 @@ Provides an easy way to set the Terraform log level.
 
 ### [Start-SilentProcess](Start-SilentProcess.md)
 Starts a process that redirects stdout and stderr to log files
+
+### [Test-Administrator](Test-Administrator.md)
+A simple function for testing if a user is running with administrator/root privileges or not.
 
 ### [Update-Changelog](Update-Changelog.md)
 Updates a repo's changelog according to the semver v1.0.0 spec.
