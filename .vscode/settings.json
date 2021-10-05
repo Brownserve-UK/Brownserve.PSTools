@@ -1,0 +1,27 @@
+{
+    "cSpell.language": "en,en-GB",
+    "cSpell.words": [
+        "awscli",
+        "Brownserve",
+        "Choco",
+        "Cmdlets",
+        "commitish",
+        "devcontainer",
+        "Dont",
+        "hashtable",
+        "LASTEXITCODE",
+        "MAML",
+        "notcontains",
+        "notlike",
+        "notmatch",
+        "nugetconfig",
+        "nupkg",
+        "paket",
+        "pscustomobject",
+        "PSMODULE",
+        "pstools",
+        "pwsh",
+        "teamcity",
+        "TMPDIR"
+    ]
+}

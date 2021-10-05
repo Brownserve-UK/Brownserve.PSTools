@@ -1,0 +1,14 @@
+# Ignore the log folder and any .log files
+*.log
+
+# Paket fluff
+# We ignore the paket.lock because we want to try and take the latest of everything, but if that proves too yabai we can remove it
+paket.lock
+packages/
+paket-files/
+
+# Binary directory
+.bin/
+
+# Build output
+.build/output/
