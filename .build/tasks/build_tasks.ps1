@@ -75,8 +75,9 @@ Write-Verbose @"
 $script:CurrentCommitHash = & git rev-parse HEAD
 
 
-$global:BuiltModuleDirectory = Join-Path $global:RepoBuildOutputDirectory 'Brownserve.PSTools' 'tools'
-$script:NuspecPath = Join-Path $global:BuiltModuleDirectory -ChildPath 'Brownserve.PSTools.nuspec'
+$global:BuiltModuleDirectory = Join-Path $global:RepoBuildOutputDirectory 'Brownserve.PSTools'
+$script:NugetPackageDirectory = Join-Path $global:RepoBuildOutputDirectory 'NuGetPackage'
+$script:NuspecPath = Join-Path $script:NugetPackageDirectory 'Brownserve.PSTools.nuspec'
 
 # On non-windows platforms mono is required to run NuGet 🤢
 $NugetCommand = 'nuget'
@@ -118,21 +119,14 @@ task CheckPreviousRelease GenerateVersionInfo, {
 }
 
 # Synopsis: Copies over all the necessary files to be packaged for a release
-task CopyFiles {
+task CopyModule {
     Write-Verbose "Copying files to build output directory"
     # Copy the "Module" folder over to the build output folder under 'Brownserve.PSTools'
     Copy-Item -Path $Global:ModuleDirectory -Destination $global:BuiltModuleDirectory -Recurse -Force
-    # Copy each of the necessary files over to the build output directory
-    $ItemsToCopy = @(
-        (Join-Path $Global:RepoRootDirectory 'CHANGELOG.md'),
-        (Join-Path $Global:RepoRootDirectory 'LICENSE'),
-        (Join-Path $Global:RepoRootDirectory README.md)
-    )
-    Copy-Item $ItemsToCopy -Destination $global:BuiltModuleDirectory -Force
 }
 
 # Synopsis: Generates the module manifest
-task GenerateManifest CopyFiles, {
+task GenerateModuleManifest CopyModule, {
     Write-Verbose "Creating PowerShell module manifest"
     # Get a list of Public cmdlets so we can mark them for export.
     $PublicScripts = Get-ChildItem (Join-Path $global:BuiltModuleDirectory 'Public') -Filter '*.ps1' -Recurse
@@ -163,8 +157,19 @@ task GenerateManifest CopyFiles, {
     }
 }
 
-# Synopsis: Generates the nuspec file
-task GenerateNuspec GenerateVersionInfo, CopyFiles, {
+# Synopsis: Creates our NuGet package
+task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule, {
+    # We'll copy our build module to the nuget package and rename it to 'tools'
+    Write-Verbose "Copying built module into NuGet package"
+    Copy-Item $global:BuiltModuleDirectory -Destination (Join-Path $script:NugetPackageDirectory 'tools') -Recurse
+    # Copy each of the necessary files over to the build output directory
+    $ItemsToCopy = @(
+        (Join-Path $Global:RepoRootDirectory 'CHANGELOG.md'),
+        (Join-Path $Global:RepoRootDirectory 'LICENSE'),
+        (Join-Path $Global:RepoRootDirectory README.md)
+    )
+    Copy-Item $ItemsToCopy -Destination $script:NugetPackageDirectory -Force
+    # Now we'll generate a nuspec file and pop it in the root of NuGet package
     Write-Verbose "Creating nuspec file"
     $Nuspec = @"
 <?xml version="1.0" encoding="utf-8"?>
@@ -191,7 +196,7 @@ task GenerateNuspec GenerateVersionInfo, CopyFiles, {
 }
 
 # Synopsis: Create the nuget package
-task Pack GenerateNuspec, GenerateManifest, {
+task Pack CreateNugetPackage, GenerateModuleManifest, {
     Write-Verbose "Creating NuGet package"
     exec {
         # Note: the paths must be a separate index to the switch in the array
@@ -250,10 +255,8 @@ task PushNuget CheckPreviousRelease, Tests, {
 task PushPSGallery CheckPreviousRelease, Tests, {
     Write-Verbose "Pushing to PSGallery"
     # For PSGallery the module needs to be in a directory named after itself... -_- (PowerShellGet is awful)
-    $PSGalleryModule = Join-Path $global:RepoBuildOutputDirectory 'PSGallery' 'Brownserve.PSTools'
-    Copy-Item $global:BuiltModuleDirectory $PSGalleryModule -Recurse
     $PSGalleryParams = @{
-        Path = $PSGalleryModule
+        Path = $global:BuiltModuleDirectory
         NuGetAPIKey = $PSGalleryAPIKey
     }
     Publish-Module @PSGalleryParams
