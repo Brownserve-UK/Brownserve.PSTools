@@ -5,6 +5,17 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.2.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.2.1) (2021-10-06)
+
+**Features**
+- Make Start-SilentProcess less verbose
+
+**Bugfixes**
+- Fixed [#7 [BUG]: Start-SilentProcess is too verbose](https://github.com/Brownserve-UK/Brownserve.PSTools/issues/7)
+
+**Known Issues**
+N/A
+
 ### [v0.2.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.2.0) (2021-10-06)
 
 **Features**
