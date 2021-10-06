@@ -128,7 +128,7 @@ function Start-SilentProcess
     {
         throw "$RedirectOutputPath must be a directory"
     }
-    Write-Verbose "RedirectOutputPath: $RedirectOutputPath"
+    Write-Verbose "Redirecting output to: $RedirectOutputPath"
 
     # If we don't have a redirect output prefix then create one
     if (-not $RedirectOutputPrefix)
@@ -168,9 +168,6 @@ function Start-SilentProcess
     $StdOutFilePath = Join-Path $RedirectOutputPath -ChildPath $StdOutFileName
     $StdErrFilePath = Join-Path $RedirectOutputPath -ChildPath $StdErrFileName
 
-    Write-Verbose "Redirecting StdOut to: $StdOutFilePath"
-    Write-Verbose "Redirecting StdErr to: $StdErrFilePath"
-
     # Set the default calling params
     $ProcessParams = @{
         FilePath               = $AbsoluteCommandPath
@@ -192,8 +189,12 @@ function Start-SilentProcess
     }
     
     # Run the process
-    Write-Verbose "Calling '$AbsoluteCommandPath' with arguments: '$($ArgumentList -join ' ')'"
-    Write-Verbose "Valid exit codes: $($ExitCodes -join ', ')"
+    # We've changed these writes to use the debug stream instead, 
+    # this way we can still capture this information when we want to debug a command but we avoid polluting the
+    # verbose stream which is used in a lot of our builds.
+    # This should fix #7 and stop us leaking passwords and such in our builds 😬
+    Write-Debug "Calling '$AbsoluteCommandPath' with arguments: '$($ArgumentList -join ' ')'"
+    Write-Debug "Valid exit codes: $($ExitCodes -join ', ')"
     try
     {
         $Process = Start-Process @ProcessParams
