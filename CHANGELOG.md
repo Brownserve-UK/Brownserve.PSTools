@@ -5,6 +5,17 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.3.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.3.0) (2021-10-13)
+
+**Features**
+- Added `New-TempDirectory` cmdlet
+
+**Bugfixes**
+N/A
+
+**Known Issues**
+N/A
+
 ### [v0.2.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.2.1) (2021-10-06)
 
 **Features**
