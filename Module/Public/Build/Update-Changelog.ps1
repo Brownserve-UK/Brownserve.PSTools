@@ -150,11 +150,13 @@ function Update-Changelog
                 # Create a git log search filter that will list all commits between the previous tag and the current HEAD
                 $CommitSearcher = "v$($CurrentChangelogInfo.CurrentVersion.ToString())..HEAD"
 
-                # Query the git log for all changes on this branch excluding those that came from our default branch
-                # Output only the message string (%s) and dump the result into an array
+                # Query the git log for all merge changes since the previous tag
+                # Output only the body string (%b) and dump the result into an array
+                # We use merges to try and cut down on the number of false positives, if this proves to be not verbose enough
+                # we can switch back to messages (%s)
                 $Features = (Start-SilentProcess `
                         -FilePath 'git' `
-                        -Arguments "log $CommitSearcher  --pretty=`"%s`"" `
+                        -Arguments "log --merges $CommitSearcher  --pretty=`"%b`"" `
                         -PassThru | Select-Object -ExpandProperty OutputContent) -split "`n"
                 
                 if (!$Features)
