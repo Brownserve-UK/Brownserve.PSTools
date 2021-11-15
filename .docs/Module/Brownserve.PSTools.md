@@ -74,6 +74,9 @@ Obtains a NuGet package version based on the build version number and branch nam
 ### [New-PullRequest](New-PullRequest.md)
 Creates a new pull request in GitHub
 
+### [New-TempDirectory](New-TempDirectory.md)
+Creates a new temporary directory with a random name in the systems temporary directory
+
 ### [Publish-TeamcityArtifact](Publish-TeamcityArtifact.md)
 Tells Teamcity to export a given file/folder as an artifact.
 
