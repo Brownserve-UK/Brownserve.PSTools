@@ -26,9 +26,9 @@ The first function will create/update all the Markdown help in the `.docs/Module
 See the example below for a guide on how to use these.
 
 ## Update the changelog  
-The changelog _must_ be updated for every pull request (even small changes), this is because the changelog is used to calculate the NuGet package manifest/version number.  
+The changelog _must_ be updated when making a release, this is because the changelog is used to calculate the NuGet package manifest/version number and release notes.   
 The changelog follows the [SemVer v1.0.0](https://semver.org/spec/v1.0.0.html) spec.  
-You can use the [`Update-Changelog`](.docs/Module/Public/Update-Changelog.md) cmdlet from this very module to make the changes for you, the cmdlet is fully guided and it will even offer to auto-generate the changelog entries based off of a list of commits from your branch 🙂
+You can use the [`Update-Changelog`](.docs/Module/Public/Update-Changelog.md) cmdlet from this very module to make the changes for you, the cmdlet is fully guided and it will even offer to auto-generate the changelog entries based off of a list of commits since the last release. 🪄🧙‍♂️
 
 ## Example
 Let's say we want to create a new cmdlet called `New-Cmdlet` and add it to the Brownserve.PSTools module, this cmdlet will in turn call `New-PrivateCmdlet` for some logic.  

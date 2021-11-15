@@ -6,5 +6,4 @@ Thanks for submitting a PR to Brownserve.PSTools, please fill out the informatio
 ## Checklist
 Have you:
 - [ ] [Read the contributing guide](https://github.com/Brownserve-UK/Brownserve.PSTools/blob/main/.docs/CONTRIBUTING.md)
-- [ ] [Updated the Changelog](https://github.com/Brownserve-UK/Brownserve.PSTools/blob/main/.docs/CONTRIBUTING.md#update-the-changelog)
-- [ ] [Updated help documentation](https://github.com/Brownserve-UK/Brownserve.PSTools/blob/main/.docs/CONTRIBUTING.md#update-help-files) (if updating the module)
+- [ ] [Updated help documentation](https://github.com/Brownserve-UK/Brownserve.PSTools/blob/main/.docs/CONTRIBUTING.md#update-help-files) (if creating/updating a cmdlet)
