@@ -147,19 +147,20 @@ function Update-Changelog
                     -PassThru | Select-Object -ExpandProperty OutputContent
                 Write-Verbose "CurrentBranch detected as $CurrentBranch"
 
-                # Now the default branch
-                $DefaultBranch = (Start-SilentProcess `
-                        -FilePath 'git' `
-                        -Arguments 'rev-parse --abbrev-ref origin/HEAD' `
-                        -PassThru | Select-Object -ExpandProperty OutputContent) -replace 'origin\/', ''
-                Write-Verbose "The default branch is $DefaultBranch"
+                # Create a git log search filter that will list all commits between the previous tag and the current HEAD
+                $CommitSearcher = "v$($CurrentChangelogInfo.CurrentVersion.ToString())..HEAD"
 
                 # Query the git log for all changes on this branch excluding those that came from our default branch
                 # Output only the message string (%s) and dump the result into an array
                 $Features = (Start-SilentProcess `
                         -FilePath 'git' `
-                        -Arguments "log $CurrentBranch --not $DefaultBranch  --pretty=`"%s`"" `
+                        -Arguments "log $CommitSearcher  --pretty=`"%s`"" `
                         -PassThru | Select-Object -ExpandProperty OutputContent) -split "`n"
+                
+                if (!$Features)
+                {
+                    Write-Error "Failed to automatically get a list of commits"
+                }
             }
             catch
             {
