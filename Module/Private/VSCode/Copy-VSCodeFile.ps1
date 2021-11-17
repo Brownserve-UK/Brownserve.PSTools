@@ -43,7 +43,7 @@ function Copy-VSCodeFile
     }
 
     # Make sure the file path is valid
-    $VSCodeFilePath = Join-Path $PSScriptRoot $VSCodeFilePath
+    $VSCodeFilePath = Join-Path $PSScriptRoot $VSCodeFile
     if (!(Test-Path $VSCodeFilePath))
     {
         throw "$VSCodeFilePath does not exist"
@@ -66,7 +66,7 @@ function Copy-VSCodeFile
     }
     else
     {
-        Write-Verbose "Copying settings to $VSCodePath"
+        Write-Verbose "Copying file to $VSCodePath"
         # Overwrite them if they exist...
         Copy-Item $VSCodeFilePath -Destination $VSCodePath -Force
     }
