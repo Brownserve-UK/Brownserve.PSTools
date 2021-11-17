@@ -1,17 +1,8 @@
-function Copy-VSCodeSnippets
+function Copy-VSCodeFile
 {
     [CmdletBinding()]
     param
     (
-        # The source of the snippets
-        [Parameter(
-            Mandatory = $false,
-            Position = 1
-        )]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $SnippetsSource = (Join-Path $PSScriptRoot -ChildPath 'brownserve-pstools.code-snippets'),
-        
         # The destination to the repo
         [Parameter(
             Mandatory = $true,
@@ -19,12 +10,22 @@ function Copy-VSCodeSnippets
             Position = 0
         )]
         [string]
-        $RepoPath
+        $RepoPath,
+
+        # The source file to copy
+        [Parameter(
+            Mandatory = $true,
+            Position = 1
+        )]
+        [ValidateNotNullOrEmpty()]
+        [string]
+        $VSCodeFile
     )
+    
     # Try to be clever and strip out the .vscode directory if it has been passed.
     if ($RepoPath -match "\.vscode$")
     {
-        $RepoPath = $RepoPath -replace '.vscode',''
+        $RepoPath = $RepoPath -replace '.vscode', ''
     }
     
     # Make sure our repo path is valid
@@ -40,16 +41,12 @@ function Copy-VSCodeSnippets
     {
         throw $_.Exception.Message
     }
-    
-    # Make sure the snippet path is valid
-    if (!(Test-Path $SnippetsSource))
-    {
-        throw "$SnippetSource does not exist"
-    }
 
-    if ($SnippetsSource -notmatch "\.code-snippets$")
+    # Make sure the file path is valid
+    $VSCodeFilePath = Join-Path $PSScriptRoot $VSCodeFilePath
+    if (!(Test-Path $VSCodeFilePath))
     {
-        throw "$SnippetSource does not appear to be a valid VSCode snippet file"
+        throw "$VSCodeFilePath does not exist"
     }
 
     $VSCodePath = Join-Path $RepoPath -ChildPath '.vscode'
@@ -59,8 +56,8 @@ function Copy-VSCodeSnippets
         {
             Write-Verbose "Setting up new .vscode directory at $VSCodePath"
             New-Item $VSCodePath -ItemType Directory | Out-Null
-            Write-Verbose "Copying snippets to $VSCodePath"
-            Copy-Item $SnippetsSource -Destination $VSCodePath
+            Write-Verbose "Copying settings to $VSCodePath"
+            Copy-Item $VSCodeFilePath -Destination $VSCodePath
         }
         catch
         {
@@ -69,8 +66,8 @@ function Copy-VSCodeSnippets
     }
     else
     {
-        Write-Verbose "Copying snippets to $VSCodePath"
+        Write-Verbose "Copying settings to $VSCodePath"
         # Overwrite them if they exist...
-        Copy-Item $SnippetsSource -Destination $VSCodePath -Force
+        Copy-Item $VSCodeFilePath -Destination $VSCodePath -Force
     }
 }
