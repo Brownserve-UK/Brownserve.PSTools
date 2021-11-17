@@ -1,6 +1,8 @@
 function Send-SlackNotification
 {
-    [CmdletBinding()]
+    [CmdletBinding(
+        DefaultParameterSetName = "Default"
+    )]
     Param(
         [Parameter(
             Mandatory = $true,
@@ -16,62 +18,136 @@ function Send-SlackNotification
             Position = 2
         )] 
         [string]
-        $Webhook, 
+        $Webhook,
+
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 3
+        )]
+        [string]
+        $Channel,
     
         [Parameter(
             Mandatory = $false,
-            ValueFromPipelineByPropertyName = $true
+            ValueFromPipelineByPropertyName = $true,
+            ParameterSetName = "Attachments"
         )]
         [string]
+        [Alias('color')]
         $Colour, 
     
         [Parameter(
             Mandatory = $false,
-            ValueFromPipelineByPropertyName = $true
+            ValueFromPipelineByPropertyName = $true,
+            ParameterSetName = "Attachments"
         )]
+        [Alias('Push')]
         [string]
-        $Push
+        $Title,
+
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true,
+            ParameterSetName = "Attachments"
+        )]
+        [array]
+        $SubBlocks
     )
-    # Let's initialize an empty hash table
-    $SlackBody = 
-    @{
-        attachments = 
-        @(
+
+    if ($Title.Length -gt 75)
+    {
+        throw "Title must be 75 characters or less"
+    }
+
+    # Let's initialize an empty hash table that we'll use to build up the JSON payload
+    # By default we set the "text" field to the $message variable so we always have something to send
+    $SlackBody = @{
+        text = $Message
+        attachments = @(
             @{
+                blocks = @(
+                )
             }
         )
     }
 
-    # Add any given optional parameters to the hash table.
+    if ($Channel)
+    {
+        $SlackBody.Add('channel', $Channel)
+    }
+
     if ($Colour)
     {
-        ($SlackBody.attachments)[0] += 
-        @{
-            'color' = $Colour
+        if ($Colour -notmatch '#[0-9A-Fa-f]{6}')
+        {
+            throw "Colour must match the hexidecimal colour format. (e.g #FF1234)"
         }
+        $SlackBody.attachments[0].Add('color',$Colour)
     }
 
-    if ($Push)
+    # If we've got any "attachments" then we need to make sure our message is set in the "attachments" section
+    If ($Title -or $Colour)
     {
-        ($SlackBody.attachments)[0] += 
-        @{
-            'fallback' = $Push
+        # Make sure the "text" param is blanked out otherwise it really messes things up :(
+        $SlackBody.text = ""
+
+        # Add a fallback message to the attachment - this affects things like pop-up's/toasts
+        $SlackBody.attachments[0].Add('fallback',$Title)
+
+        # Build up a message object, but add it later
+        $MessageObject = @{
+            type = 'section'
+            text = @{
+                type = 'mrkdwn'
+                text = $Message
+            }
         }
     }
 
-    ($SlackBody.attachments)[0] += 
-    @{
-        'text' = $Message
+    if ($Title)
+    {
+        # Build up the "title" object and add it to the body
+        $TitleObject = @{
+            type = 'header'
+            text = @{
+                type = 'plain_text'
+                text = $Title
+                emoji = $true
+            }
+        }
+        $SlackBody.attachments[0].blocks += $TitleObject
     }
 
-    Write-Debug ($SlackBody | ConvertTo-Json)
+    # We need to add the message object _after_ the title otherwise things look wrong 😂
+    if ($MessageObject)
+    {
+        $SlackBody.attachments[0].blocks += $MessageObject
+    }
+
+    # If we've got any sub-blocks then add them at the end of the message
+    if ($SubBlocks)
+    {
+        $SubBlocks | ForEach-Object {
+            $SlackBody.attachments[0].blocks += $_
+        }
+    }
+
+    # Convert with a reasonable depth, we have a lot of nested objects!
+    $ConvertedBody = $SlackBody | ConvertTo-Json -Depth 10
+
+    Write-Debug $ConvertedBody
 
     try
     {
-        invoke-RestMethod -Uri $Webhook -Method Post -Body (ConvertTo-Json $SlackBody) -ErrorAction Stop
+        invoke-RestMethod -Uri $Webhook -Method Post -Body $ConvertedBody -ErrorAction Stop
     }
     catch
     {
-        Write-Error "Failed to send Slack notification.$($_.Exception.Message)"
+        # We can't control what a user enters in the SubBlocks parameter, so try to warn them if they've got something wrong
+        if ($SubBlocks)
+        {
+            $AdditionalError = " You are using SubBlocks, it's possible that your SubBlocks are malformed, try removing them and running the command again."
+        }
+        Write-Error "Failed to send Slack notification$AdditionalError.`n$($_.Exception.Message)"
     }
 }

@@ -3724,7 +3724,8 @@ If used with pipeline input then this will upgrade all packages that are provide
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Sends a notification to a given Slack webhook</maml:para>
+      <maml:para>This cmdlet will send a message to a given Slack webhook, complex messages are formed using the legacy attachments (https://api.slack.com/reference/messaging/attachments)method.
+</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -3744,7 +3745,7 @@ If used with pipeline input then this will upgrade all packages that are provide
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="2" aliases="none">
           <maml:name>Webhook</maml:name>
           <maml:description>
-            <maml:para>The webhook to send to</maml:para>
+            <maml:para>The webhook to post to</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -3754,9 +3755,23 @@ If used with pipeline input then this will upgrade all packages that are provide
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+          <maml:name>Channel</maml:name>
+          <maml:description>
+            <maml:para>The ID of the channel you wish to post to (e.g. CC64VC954) you get get this from visiting Slack in a Browser and copying it from the URL.
+This parameter is completely optional, if left blank it will use the default channel assigned to the webhook.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="color">
           <maml:name>Colour</maml:name>
           <maml:description>
-            <maml:para>The colour (if any) to use for the notification</maml:para>
+            <maml:para>The colour (if any) to use for the notification, it will be displayed down the left hand side of the message.
+The colour should be in hexadecimal format.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -3766,9 +3781,22 @@ If used with pipeline input then this will upgrade all packages that are provide
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
-          <maml:name>Push</maml:name>
+          <maml:name>SubBlocks</maml:name>
           <maml:description>
-            <maml:para>The optional push message to be displayed</maml:para>
+            <maml:para>Any additional sub-blocks you would like displayed at the end of the message, these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet.
+More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
+          <dev:type>
+            <maml:name>Array</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="Push">
+          <maml:name>Title</maml:name>
+          <maml:description>
+            <maml:para>The title to display above the message (and in any pop-up/push/toast notifications), this is optional.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -3781,9 +3809,23 @@ If used with pipeline input then this will upgrade all packages that are provide
     </command:syntax>
     <command:parameters>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+        <maml:name>Channel</maml:name>
+        <maml:description>
+          <maml:para>The ID of the channel you wish to post to (e.g. CC64VC954) you get get this from visiting Slack in a Browser and copying it from the URL.
+This parameter is completely optional, if left blank it will use the default channel assigned to the webhook.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="color">
         <maml:name>Colour</maml:name>
         <maml:description>
-          <maml:para>The colour (if any) to use for the notification</maml:para>
+          <maml:para>The colour (if any) to use for the notification, it will be displayed down the left hand side of the message.
+The colour should be in hexadecimal format.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -3805,9 +3847,22 @@ If used with pipeline input then this will upgrade all packages that are provide
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
-        <maml:name>Push</maml:name>
+        <maml:name>SubBlocks</maml:name>
         <maml:description>
-          <maml:para>The optional push message to be displayed</maml:para>
+          <maml:para>Any additional sub-blocks you would like displayed at the end of the message, these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet.
+More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
+        <dev:type>
+          <maml:name>Array</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="Push">
+        <maml:name>Title</maml:name>
+        <maml:description>
+          <maml:para>The title to display above the message (and in any pop-up/push/toast notifications), this is optional.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -3819,7 +3874,7 @@ If used with pipeline input then this will upgrade all packages that are provide
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="2" aliases="none">
         <maml:name>Webhook</maml:name>
         <maml:description>
-          <maml:para>The webhook to send to</maml:para>
+          <maml:para>The webhook to post to</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -3851,19 +3906,54 @@ If used with pipeline input then this will upgrade all packages that are provide
     </command:returnValues>
     <maml:alertSet>
       <maml:alert>
-        <maml:para></maml:para>
+        <maml:para>This cmdlet currently uses the "attachments" method which has now been deprecated by Slack.
+We can't yet switch over to the block-kit method as it's lacking colour support which we make heavy use of, once that becomes available we can make the switch though some logic tweaking will be required.</maml:para>
       </maml:alert>
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook"</dev:code>
+        <maml:title>------------------ Example 1: Simple message ------------------</maml:title>
+        <dev:code>Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook"</dev:code>
         <dev:remarks>
           <maml:para>Would send the message "This is a test" to the given Slack webhook</maml:para>
         </dev:remarks>
       </command:example>
+      <command:example>
+        <maml:title>--------------- Example 2: More complex message ---------------</maml:title>
+        <dev:code>Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -Color "#FF0000" -Title "This is a title"</dev:code>
+        <dev:remarks>
+          <maml:para>This would send the message "This is a test" to the given Slack webhook, the left hand side of the message would feature a red bar and "This is a title" would be displayed in large text at the top of the message</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>------------------ Example 3: Custom sections ------------------</maml:title>
+        <dev:code>$SubBlocks = @(
+    @{                                                                                          
+        type = "section"
+        fields = @(
+            @{ 
+                type = "mrkdwn"
+                text = "Bottom Left?"
+            },
+            @{
+                type = "mrkdwn"
+                text = "Bottom Right?"
+            }
+        )
+    }
+)
+Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -Color "#FF0000" -Title "This is a title" -SubBlocks $SubBlocks</dev:code>
+        <dev:remarks>
+          <maml:para>In this example we create a set of nested objects containing some additional fields that we wish to append to the message, these are then passed in to the cmdlet with the `-SubBlocks` parameter</maml:para>
+        </dev:remarks>
+      </command:example>
     </command:examples>
-    <command:relatedLinks />
+    <command:relatedLinks>
+      <maml:navigationLink>
+        <maml:linkText>Slack messaging documentation</maml:linkText>
+        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
+      </maml:navigationLink>
+    </command:relatedLinks>
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>

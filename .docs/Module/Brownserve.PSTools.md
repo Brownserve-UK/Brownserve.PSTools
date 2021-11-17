@@ -23,6 +23,9 @@ Strips out illegal characters from Terraform resource names
 ### [Get-GitHubRelease](Get-GitHubRelease.md)
 Gets a list of releases from a given GitHub repo
 
+### [Get-GitHubTags](Get-GitHubTags.md)
+Gets a list of tags for a given GitHub repository
+
 ### [Get-OpenPullRequests](Get-OpenPullRequests.md)
 Gets the open Pull requests for a given repository
 

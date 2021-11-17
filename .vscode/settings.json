@@ -12,6 +12,7 @@
         "LASTEXITCODE",
         "MAML",
         "Mddhhmm",
+        "mrkdwn",
         "notcontains",
         "notlike",
         "notmatch",
