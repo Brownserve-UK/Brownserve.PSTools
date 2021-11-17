@@ -119,6 +119,7 @@ function Send-SlackNotification
         $SlackBody.attachments[0].Add('color',$Colour)
     }
 
+    # Convert with a reasonable depth, we have a lot of nested objects!
     $ConvertedBody = $SlackBody | ConvertTo-Json -Depth 10
 
     Write-Debug $ConvertedBody
