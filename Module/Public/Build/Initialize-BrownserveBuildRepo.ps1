@@ -311,7 +311,7 @@ function Initialize-BrownserveBuildRepo
         Write-Verbose 'Copying VSCode snippets'
         try
         {
-            Copy-VSCodeSnippets -RepoPath $RepoPath
+            Copy-VSCodeFile -RepoPath $RepoPath -VSCodeFile 'brownserve-pstools.code-snippets'
         }
         catch
         {
@@ -325,7 +325,7 @@ function Initialize-BrownserveBuildRepo
         Write-Verbose "Copying default VSCode workspace settings"
         try
         {
-            Copy-VSCodeWorkspaceSettings -RepoPath $RepoPath
+            Copy-VSCodeFile -RepoPath $RepoPath -VSCodeFile 'settings.json'
         }
         catch
         {
