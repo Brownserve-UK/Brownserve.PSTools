@@ -35,7 +35,7 @@ function Send-SlackNotification
     # Let's initialize an empty hash table
     $SlackBody = 
     @{
-        Attachments = 
+        attachments = 
         @(
             @{
             }
@@ -45,7 +45,7 @@ function Send-SlackNotification
     # Add any given optional parameters to the hash table.
     if ($Colour)
     {
-        ($SlackBody.Attachments)[0] += 
+        ($SlackBody.attachments)[0] += 
         @{
             'color' = $Colour
         }
@@ -53,16 +53,19 @@ function Send-SlackNotification
 
     if ($Push)
     {
-        ($SlackBody.Attachments)[0] += 
+        ($SlackBody.attachments)[0] += 
         @{
             'fallback' = $Push
         }
     }
 
-    ($SlackBody.Attachments)[0] += 
+    ($SlackBody.attachments)[0] += 
     @{
         'text' = $Message
     }
+
+    Write-Debug ($SlackBody | ConvertTo-Json)
+
     try
     {
         invoke-RestMethod -Uri $Webhook -Method Post -Body (ConvertTo-Json $SlackBody) -ErrorAction Stop
