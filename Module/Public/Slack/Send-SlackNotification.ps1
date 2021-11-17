@@ -7,8 +7,7 @@ function Send-SlackNotification
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
-            Position = 1,
-            ParameterSetName = "Default"
+            Position = 1
         )]
         [string]
         $Message,
@@ -16,8 +15,7 @@ function Send-SlackNotification
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
-            Position = 2,
-            ParameterSetName = "Default"
+            Position = 2
         )] 
         [string]
         $Webhook,
@@ -25,8 +23,7 @@ function Send-SlackNotification
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true,
-            Position = 3,
-            ParameterSetName = "Default"
+            Position = 3
         )]
         [string]
         $Channel,
@@ -47,7 +44,14 @@ function Send-SlackNotification
         )]
         [Alias('Push')]
         [string]
-        $Title
+        $Title,
+
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true,
+            ParameterSetName = "Attachments"
+        )]
+        [array]
+        $SubBlocks
     )
 
     if ($Title.Length -gt 75)
@@ -67,15 +71,30 @@ function Send-SlackNotification
         )
     }
 
+    if ($Channel)
+    {
+        $SlackBody.Add('channel', $Channel)
+    }
+
+    if ($Colour)
+    {
+        if ($Colour -notmatch '#[0-9A-Fa-f]{6}')
+        {
+            throw "Colour must match the hexidecimal colour format. (e.g #FF1234)"
+        }
+        $SlackBody.attachments[0].Add('color',$Colour)
+    }
+
     # If we've got any "attachments" then we need to make sure our message is set in the "attachments" section
     If ($Title -or $Colour)
     {
-        # Make sure the "text param is blanked out" otherwise it really messes things up :(
+        # Make sure the "text" param is blanked out otherwise it really messes things up :(
         $SlackBody.text = ""
 
         # Add a fallback message to the attachment - this affects things like pop-up's/toasts
         $SlackBody.attachments[0].Add('fallback',$Title)
 
+        # Build up a message object, but add it later
         $MessageObject = @{
             type = 'section'
             text = @{
@@ -87,7 +106,7 @@ function Send-SlackNotification
 
     if ($Title)
     {
-        # Build up the "title" object
+        # Build up the "title" object and add it to the body
         $TitleObject = @{
             type = 'header'
             text = @{
@@ -105,18 +124,12 @@ function Send-SlackNotification
         $SlackBody.attachments[0].blocks += $MessageObject
     }
 
-    if ($Channel)
+    # If we've got any sub-blocks then add them at the end of the message
+    if ($SubBlocks)
     {
-        $SlackBody.Add('channel', $Channel)
-    }
-
-    if ($Colour)
-    {
-        if ($Colour -notmatch '#[0-9A-Fa-f]{6}')
-        {
-            throw "Colour must match the hexidecimal colour format. (e.g #FF1234)"
+        $SubBlocks | ForEach-Object {
+            $SlackBody.attachments[0].blocks += $_
         }
-        $SlackBody.attachments[0].Add('color',$Colour)
     }
 
     # Convert with a reasonable depth, we have a lot of nested objects!
@@ -130,6 +143,11 @@ function Send-SlackNotification
     }
     catch
     {
-        Write-Error "Failed to send Slack notification.$($_.Exception.Message)"
+        # We can't control what a user enters in the SubBlocks parameter, so try to warn them if they've got something wrong
+        if ($SubBlocks)
+        {
+            $AdditionalError = " You are using SubBlocks, it's possible that your SubBlocks are malformed, try removing them and running the command again."
+        }
+        Write-Error "Failed to send Slack notification$AdditionalError.`n$($_.Exception.Message)"
     }
 }
