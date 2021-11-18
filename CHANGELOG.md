@@ -5,6 +5,17 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.5.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.5.1) (2021-11-18)
+
+**Features**
+- Fix Slack messaging when over 3000 characters
+
+**Bugfixes**
+- Fixes Send-SlackNotification failing when messages are over 3000 characters
+
+**Known Issues**
+N/A
+
 ### [v0.5.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.5.0) (2021-11-17)
 
 **Features**
