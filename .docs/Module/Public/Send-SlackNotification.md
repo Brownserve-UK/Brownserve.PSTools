@@ -14,17 +14,18 @@ Sends a notification to a given Slack webhook
 
 ### Default (Default)
 ```
-Send-SlackNotification [-Message] <String> [-Webhook] <String> [-Channel <String>] [<CommonParameters>]
+Send-SlackNotification [-Message] <String> [-Webhook] <String> [-Channel <String>] [-UpperBlocks <Array>]
+ [<CommonParameters>]
 ```
 
 ### Attachments
 ```
 Send-SlackNotification [-Message] <String> [-Webhook] <String> [-Channel <String>] [-Colour <String>]
- [-Title <String>] [-SubBlocks <Array>] [<CommonParameters>]
+ [-Title <String>] [-UpperBlocks <Array>] [-SubBlocks <Array>] [-Fields <Array>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-This cmdlet will send a message to a given Slack webhook, complex messages are formed using the legacy [attachments](https://api.slack.com/reference/messaging/attachments) method.  
+This cmdlet will send a message to a given Slack webhook, complex messages are formed using the legacy [attachments](https://api.slack.com/reference/messaging/attachments) method (though limited support for block kit is supported via the `-UpperBlocks` parameter)
 
 ## EXAMPLES
 
@@ -98,6 +99,21 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
+### -Fields
+An optional array of attachment fields to add to the message (max of 3), see https://api.slack.com/reference/messaging/attachments#field_objects for more information.
+
+```yaml
+Type: Array
+Parameter Sets: Attachments
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
 ### -Message
 The message to be sent
 
@@ -115,6 +131,9 @@ Accept wildcard characters: False
 
 ### -SubBlocks
 Any additional sub-blocks you would like displayed at the end of the message, these need to be formed as an array of hashtable's and are *not* validated in any way by the cmdlet.  
+
+If your message is over 3000 characters in length then SubBlocks cannot be used, please use the `-UpperBlocks` or `-Fields` parameters instead.  
+
 More info can be found at https://api.slack.com/reference/block-kit/blocks
 
 ```yaml
@@ -136,6 +155,23 @@ The title to display above the message (and in any pop-up/push/toast notificatio
 Type: String
 Parameter Sets: Attachments
 Aliases: Push
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -UpperBlocks
+Blocks that appear at the top of the message these need to be formed as an array of hashtable's and are *not* validated in any way by the cmdlet.  
+
+More info can be found at https://api.slack.com/reference/block-kit/blocks
+
+```yaml
+Type: Array
+Parameter Sets: (All)
+Aliases:
 
 Required: False
 Position: Named
@@ -170,7 +206,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ### System.Object
 ## NOTES
 This cmdlet currently uses the "attachments" method which has now been deprecated by Slack.  
-We can't yet switch over to the block-kit method as it's lacking colour support which we make heavy use of, once that becomes available we can make the switch though some logic tweaking will be required.
+We can't yet switch over to the full block-kit method as it's lacking colour support which we make heavy use of, once that becomes available we can make the switch though some logic tweaking will be required.
 
 ## RELATED LINKS
 

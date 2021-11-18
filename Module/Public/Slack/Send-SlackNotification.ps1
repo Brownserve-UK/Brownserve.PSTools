@@ -46,12 +46,26 @@ function Send-SlackNotification
         [string]
         $Title,
 
+        [Parameter(
+            Mandatory = $false, 
+            ValueFromPipelineByPropertyName = $true
+            )]
+        [array]
+        $UpperBlocks,
+
         [Parameter(Mandatory = $false,
             ValueFromPipelineByPropertyName = $true,
             ParameterSetName = "Attachments"
         )]
         [array]
-        $SubBlocks
+        $SubBlocks,
+
+        [Parameter(Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true,
+            ParameterSetName = "Attachments"
+        )]
+        [array]
+        $Fields
     )
 
     if ($Title.Length -gt 75)
@@ -63,10 +77,12 @@ function Send-SlackNotification
     # By default we set the "text" field to the $message variable so we always have something to send
     $SlackBody = @{
         text        = $Message
+        blocks      = @()
         attachments = @(
             @{
                 blocks = @(
                 )
+                fields = @()
             }
         )
     }
@@ -95,7 +111,20 @@ function Send-SlackNotification
         $SlackBody.attachments[0].Add('fallback', $Title)
 
         # If the message is longer than the max length we'll need to send it as raw text to the attachment instead.
-        if ($Message.Length -lt 3000)
+        try
+        {
+            $MessageLength = ($Message | ConvertTo-Json).Length
+        }
+        catch
+        {
+            # Ignore errors
+        }
+        if (!$MessageLength)
+        {
+            Write-Verbose "Failed to determine JSON length of message, falling back to legacy method"
+            $MessageLength = $Message.Length
+        }
+        if ($MessageLength -lt 3000)
         {
             # Build up a message object, but add it later
             $MessageObject = @{
@@ -146,10 +175,71 @@ function Send-SlackNotification
     # If we've got any sub-blocks then add them at the end of the message
     if ($SubBlocks)
     {
-        $SubBlocks | ForEach-Object {
-            $SlackBody.attachments[0].blocks += $_
+        if ($SlackBody.attachments[0].text)
+        {
+            Write-Warning "Cannot use SubBlocks due to length of main message, they will be ignored.`nTry using -UpperBlocks or -Fields instead"
+            $SubBlocks = $null
+        }
+        if ($SubBlocks.count -gt 100)
+        {
+            Write-Warning "Cannot use SubBlocks due to too many blocks, they will be ignored. (Maximum 100 blocks)"
+            $SubBlocks = $null
+        }
+        if ($SubBlocks.fields)
+        {
+            if ($SubBlocks.fields.count -gt 10)
+            {
+                Write-Warning "Cannot use SubBlocks with fields that contain more than 10 items, they will be ignored."
+                $SubBlocks = $null
+            }
+        }
+        if ($SubBlocks)
+        {
+            $SubBlocks | ForEach-Object {
+                $SlackBody.attachments[0].blocks += $_
+            }
         }
     }
+
+        # If we've got any upper-blocks then add them in
+        if ($UpperBlocks)
+        {
+            if ($UpperBlocks.count -gt 100)
+            {
+                Write-Warning "Cannot use SubBlocks due to too many blocks, they will be ignored. (Maximum 100 blocks)"
+                $UpperBlocks = $null
+            }
+            if ($UpperBlocks.fields)
+            {
+                if ($UpperBlocks.fields.count -gt 10)
+                {
+                    Write-Warning "Cannot use SubBlocks with fields that contain more than 10 items, they will be ignored."
+                    $UpperBlocks = $null
+                }
+            }
+            if ($UpperBlocks)
+            {
+                $UpperBlocks | ForEach-Object {
+                    $SlackBody.blocks += $_
+                }
+            }
+        }
+
+        # If we've got any fields then add them in
+        if ($Fields)
+        {
+            if ($Fields.Count -gt 3)
+            {
+                Write-Warning "Cannot use Fields with more than 3 items, they will be ignored."
+                $Fields = $null
+            }
+            if ($Fields)
+            {
+                $Fields | ForEach-Object {
+                    $SlackBody.attachments[0].fields += $_
+                }
+            }
+        }
 
     # Convert with a reasonable depth, we have a lot of nested objects!
     $ConvertedBody = $SlackBody | ConvertTo-Json -Depth 10
@@ -163,10 +253,19 @@ function Send-SlackNotification
     catch
     {
         # We can't control what a user enters in the SubBlocks parameter, so try to warn them if they've got something wrong
+        $AdditionalError = ""
         if ($SubBlocks)
         {
-            $AdditionalError = " You are using SubBlocks, it's possible that your SubBlocks are malformed, try removing them and running the command again."
+            $AdditionalError += "`nYou are using SubBlocks, it's possible that your SubBlocks are malformed, try removing them and running the command again."
         }
-        Write-Error "Failed to send Slack notification$AdditionalError.`n$($_.Exception.Message)"
+        if ($UpperBlocks)
+        {
+            $AdditionalError += "`nYou are using UpperBlocks, it's possible that your UpperBlocks are malformed, try removing them and running the command again."
+        }
+        if ($Fields)
+        {
+            $AdditionalError += "`nYou are using Fields, it's possible that your Fields are malformed, try removing them and running the command again."
+        }
+        Write-Error "Failed to send Slack notification.$AdditionalError.`n$($_.Exception.Message)"
     }
 }
