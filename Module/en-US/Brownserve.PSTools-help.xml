@@ -3724,8 +3724,7 @@ If used with pipeline input then this will upgrade all packages that are provide
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This cmdlet will send a message to a given Slack webhook, complex messages are formed using the legacy attachments (https://api.slack.com/reference/messaging/attachments)method.
-</maml:para>
+      <maml:para>This cmdlet will send a message to a given Slack webhook, complex messages are formed using the legacy attachments (https://api.slack.com/reference/messaging/attachments) method (though limited support for block kit is supported via the `-UpperBlocks` parameter)</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -3781,9 +3780,22 @@ The colour should be in hexadecimal format.</maml:para>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+          <maml:name>Fields</maml:name>
+          <maml:description>
+            <maml:para>An optional array of attachment fields to add to the message (max of 3), see https://api.slack.com/reference/messaging/attachments#field_objects for more information.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
+          <dev:type>
+            <maml:name>Array</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
           <maml:name>SubBlocks</maml:name>
           <maml:description>
             <maml:para>Any additional sub-blocks you would like displayed at the end of the message, these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet.
+If your message is over 3000 characters in length then SubBlocks cannot be used, please use the `-UpperBlocks` or `-Fields` parameters instead.
 More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
@@ -3801,6 +3813,19 @@ More info can be found at https://api.slack.com/reference/block-kit/blocks</maml
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
             <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+          <maml:name>UpperBlocks</maml:name>
+          <maml:description>
+            <maml:para>Blocks that appear at the top of the message these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet.
+More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
+          <dev:type>
+            <maml:name>Array</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
@@ -3834,6 +3859,18 @@ The colour should be in hexadecimal format.</maml:para>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+        <maml:name>Fields</maml:name>
+        <maml:description>
+          <maml:para>An optional array of attachment fields to add to the message (max of 3), see https://api.slack.com/reference/messaging/attachments#field_objects for more information.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
+        <dev:type>
+          <maml:name>Array</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
         <maml:name>Message</maml:name>
         <maml:description>
@@ -3850,6 +3887,7 @@ The colour should be in hexadecimal format.</maml:para>
         <maml:name>SubBlocks</maml:name>
         <maml:description>
           <maml:para>Any additional sub-blocks you would like displayed at the end of the message, these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet.
+If your message is over 3000 characters in length then SubBlocks cannot be used, please use the `-UpperBlocks` or `-Fields` parameters instead.
 More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
@@ -3867,6 +3905,19 @@ More info can be found at https://api.slack.com/reference/block-kit/blocks</maml
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
           <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
+        <maml:name>UpperBlocks</maml:name>
+        <maml:description>
+          <maml:para>Blocks that appear at the top of the message these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet.
+More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
+        <dev:type>
+          <maml:name>Array</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -3907,7 +3958,7 @@ More info can be found at https://api.slack.com/reference/block-kit/blocks</maml
     <maml:alertSet>
       <maml:alert>
         <maml:para>This cmdlet currently uses the "attachments" method which has now been deprecated by Slack.
-We can't yet switch over to the block-kit method as it's lacking colour support which we make heavy use of, once that becomes available we can make the switch though some logic tweaking will be required.</maml:para>
+We can't yet switch over to the full block-kit method as it's lacking colour support which we make heavy use of, once that becomes available we can make the switch though some logic tweaking will be required.</maml:para>
       </maml:alert>
     </maml:alertSet>
     <command:examples>
