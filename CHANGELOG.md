@@ -5,6 +5,18 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.5.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.5.0) (2021-11-17)
+
+**Features**
+- Refactor the Initialize-BrownserveBuildRepo cmdlet
+- Update Send-SlackNotification cmdlet to make it more versatile
+
+**Bugfixes**
+N/A
+
+**Known Issues**
+N/A
+
 ### [v0.4.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.4.1) (2021-11-17)
 
 **Features**
