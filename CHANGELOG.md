@@ -5,6 +5,17 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.5.3](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.5.3) (2021-11-18)
+
+**Features**
+- Tweak logic of Send-SlackNotification
+
+**Bugfixes**
+- Fixes Send-SlackNotification not always sending notifications due to incompatible field combinations
+
+**Known Issues**
+N/A
+
 ### [v0.5.2](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.5.2) (2021-11-18)
 
 **Features**
