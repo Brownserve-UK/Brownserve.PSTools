@@ -17,9 +17,9 @@ jobs:
       - name: run-build-script
         shell: pwsh
         env:
-          GitHubPAT: ${{ secrets.GITHUBPAT }}
-          NugetFeedAPIKey: ${{ secrets.NugetFeedAPIKey }}
-          PSGalleryAPIKey: ${{ secrets.PSGalleryAPIKey }}
+          GitHubPAT: ${{ secrets.AUTOMATED_BUILD_GITHUB_PAT }}
+          NugetFeedAPIKey: ${{ secrets.NUGET_API_KEY }}
+          PSGalleryAPIKey: ${{ secrets.PSGALLERY_API_KEY }}
         run: |
             ./Brownserve.PSTools/.build/build.ps1 -BranchName $env:GITHUB_REF -Build 'release' -NugetFeedAPIKey $env:NugetFeedAPIKey -PSGalleryAPIKey $env:PSGalleryAPIKey -Verbose
     # Do a Slack notification
