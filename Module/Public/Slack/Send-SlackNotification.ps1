@@ -73,6 +73,11 @@ function Send-SlackNotification
         throw "Title must be 75 characters or less"
     }
 
+    if ($Fields -and $SubBlocks)
+    {
+        throw "You cannot specify both -Fields and SubBlocks"
+    }
+
     # Let's initialize an empty hash table that we'll use to build up the JSON payload
     # By default we set the "text" field to the $message variable so we always have something to send
     $SlackBody = @{
@@ -82,7 +87,6 @@ function Send-SlackNotification
             @{
                 blocks = @(
                 )
-                fields = @()
             }
         )
     }
@@ -124,7 +128,7 @@ function Send-SlackNotification
             Write-Verbose "Failed to determine JSON length of message, falling back to legacy method"
             $MessageLength = $Message.Length
         }
-        if ($MessageLength -lt 3000)
+        if ($MessageLength -lt 3000 -and (!$Fields))
         {
             # Build up a message object, but add it later
             $MessageObject = @{
@@ -137,7 +141,7 @@ function Send-SlackNotification
         }
         else
         {
-            Write-Verbose "Message over 3000 characters, falling back to legacy method"
+            Write-Verbose "Message over 3000 characters or -Fields specified, falling back to legacy method"
             $SlackBody.attachments[0].Add('text', $Message)
             # We need to tell Slack that the text is a "mrkdwn" type
             $SlackBody.attachments[0].Add('mrkdwn_in', @('text'))
@@ -228,6 +232,9 @@ function Send-SlackNotification
         # If we've got any fields then add them in
         if ($Fields)
         {
+            # 'fields' and 'blocks' cannot be used together, so remove blocks if we've got them
+            $SlackBody.attachments[0].remove('blocks')
+            $SlackBody.attachments[0].Add('fields', @())
             if ($Fields.Count -gt 3)
             {
                 Write-Warning "Cannot use Fields with more than 3 items, they will be ignored."
