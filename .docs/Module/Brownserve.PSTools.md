@@ -53,6 +53,9 @@ Helper cmdlet for installing Chocolatey packages programmatically
 ### [Invoke-DownloadMethod](Invoke-DownloadMethod.md)
 Downloads a file using the best method available depending on operating system.
 
+### [Invoke-NativeCommand](Invoke-NativeCommand.md)
+Invokes a native command while gracefully handling the output and error streams.
+
 ### [Invoke-TerraformApply](Invoke-TerraformApply.md)
 Invokes 'terraform apply' with a given set of arguments
 
@@ -96,7 +99,8 @@ Sets the build number in Teamcity.
 Provides an easy way to set the Terraform log level.
 
 ### [Start-SilentProcess](Start-SilentProcess.md)
-Starts a process that redirects stdout and stderr to log files
+**This command is deprecated and will be removed in a future release, please use Invoke-NativeCommand instead.**  
+Starts a process that redirects stdout and stderr to log files.
 
 ### [Test-Administrator](Test-Administrator.md)
 A simple function for testing if a user is running with administrator/root privileges or not.

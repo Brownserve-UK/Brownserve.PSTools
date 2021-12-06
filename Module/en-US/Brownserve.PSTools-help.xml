@@ -1897,6 +1897,301 @@ If used with pipeline input then this will upgrade all packages that are provide
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Invoke-NativeCommand</command:name>
+      <command:verb>Invoke</command:verb>
+      <command:noun>NativeCommand</command:noun>
+      <maml:description>
+        <maml:para>Invokes a native command while gracefully handling the output and error streams.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>This cmdlet will call a native process (e.g `ping`) and will allow for writing the commands output to host while also returning the output after the command completes successfully if desired.
+This is useful when you want to monitor a commands output while also capturing it for processing later on.
+If you only want the output of the command and not the stream output you can pass the `-SuppressOutput` parameter.
+As many native commands can write verbose/logging information to stderr this cmdlet attempts to be clever about only returning truly terminating errors, it does so by inspecting the exit code and only raising an exception if the exit code is invalid.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Invoke-NativeCommand</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="0" aliases="PSPath">
+          <maml:name>FilePath</maml:name>
+          <maml:description>
+            <maml:para>The path to the command to be run</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="Arguments">
+          <maml:name>ArgumentList</maml:name>
+          <maml:description>
+            <maml:para>An optional list of arguments to be passed to the command</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
+          <dev:type>
+            <maml:name>Array</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+          <maml:name>WorkingDirectory</maml:name>
+          <maml:description>
+            <maml:para>If set will set the working directory for the called command, defaults to the current directory.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+          <maml:name>ExitCodes</maml:name>
+          <maml:description>
+            <maml:para>The exit codes expected from this command when it has been successful</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
+          <dev:type>
+            <maml:name>Array</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PassThru</maml:name>
+          <maml:description>
+            <maml:para>Pass this parameter if you want the cmdlet to return a PowerShell object of the native commands output stream</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>RedirectOutputPath</maml:name>
+          <maml:description>
+            <maml:para>The path to where the redirected output should be stored Defaults to the contents of the global variable 'RepoLogDirectory' if available If that isn't set then defaults to a temp directory.
+ This is only used when `-SuppressOutput` is specified</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>RedirectOutputPrefix</maml:name>
+          <maml:description>
+            <maml:para>The prefix to use on the redirected streams, defaults to the command run time</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>RedirectOutputSuffix</maml:name>
+          <maml:description>
+            <maml:para>The suffix for the redirected streams (defaults to log)</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>SuppressOutput</maml:name>
+          <maml:description>
+            <maml:para>If specified will suppress command output</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="Arguments">
+        <maml:name>ArgumentList</maml:name>
+        <maml:description>
+          <maml:para>An optional list of arguments to be passed to the command</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
+        <dev:type>
+          <maml:name>Array</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+        <maml:name>ExitCodes</maml:name>
+        <maml:description>
+          <maml:para>The exit codes expected from this command when it has been successful</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
+        <dev:type>
+          <maml:name>Array</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="0" aliases="PSPath">
+        <maml:name>FilePath</maml:name>
+        <maml:description>
+          <maml:para>The path to the command to be run</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>PassThru</maml:name>
+        <maml:description>
+          <maml:para>Pass this parameter if you want the cmdlet to return a PowerShell object of the native commands output stream</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>RedirectOutputPath</maml:name>
+        <maml:description>
+          <maml:para>The path to where the redirected output should be stored Defaults to the contents of the global variable 'RepoLogDirectory' if available If that isn't set then defaults to a temp directory.
+ This is only used when `-SuppressOutput` is specified</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>RedirectOutputPrefix</maml:name>
+        <maml:description>
+          <maml:para>The prefix to use on the redirected streams, defaults to the command run time</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>RedirectOutputSuffix</maml:name>
+        <maml:description>
+          <maml:para>The suffix for the redirected streams (defaults to log)</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>SuppressOutput</maml:name>
+        <maml:description>
+          <maml:para>If specified will suppress command output</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <maml:name>WorkingDirectory</maml:name>
+        <maml:description>
+          <maml:para>If set will set the working directory for the called command, defaults to the current directory.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Array</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>------------------ Example 1: Standard usage ------------------</maml:title>
+        <dev:code>$Ping = Invoke-NativeCommand `
+    -FilePath 'ping' `
+    -ArgumentList @('192.168.1.1') `
+    -PassThru</dev:code>
+        <dev:remarks>
+          <maml:para>In this example the `ping` command would be run with the argument `192.168.1.1`, as the `PassThru` parameter has been provided the command's output would returned and stored in the `$Ping` variable as well as being streamed to host</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>---------------- Example 2: Suppressing output ----------------</maml:title>
+        <dev:code>Invoke-NativeCommand `
+    -FilePath 'ping' `
+    -ArgumentList @('192.168.1.1') `
+    -SuppressOutput</dev:code>
+        <dev:remarks>
+          <maml:para>In this example the `ping` command would be run with the argument `192.168.1.1`, as `-SuppressOutput` has been specified no output would be written to host and as `-PassThru` has not been provided no output would be returned effectively making this command silent.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Invoke-TerraformApply</command:name>
       <command:verb>Invoke</command:verb>
       <command:noun>TerraformApply</command:noun>
@@ -4222,7 +4517,8 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
       <command:verb>Start</command:verb>
       <command:noun>SilentProcess</command:noun>
       <maml:description>
-        <maml:para>Starts a process that redirects stdout and stderr to log files</maml:para>
+        <maml:para>This command is deprecated and will be removed in a future release, please use Invoke-NativeCommand instead. 
+Starts a process that redirects stdout and stderr to log files.</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
