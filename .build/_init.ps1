@@ -53,6 +53,9 @@ $Global:RepoTestsDirectory = (Join-Path $Global:RepoBuildDirectory -ChildPath 't
 $Global:RepoDocsDirectory = (Join-Path $Global:RepoRootDirectory -ChildPath '.docs') | Convert-Path
 $Global:ModuleDirectory = (Join-Path $Global:RepoRootDirectory -ChildPath 'Module') | Convert-Path
 
+# Set the repo name
+$Global:RepoName = Split-Path $Global:RepoRootDirectory -Leaf
+
 # Set up any ephemeral directories (those that get deleted and recreated on each run)
 $EphemeralPaths = @(
     ($RepoLogDirectory = Join-Path $Global:RepoRootDirectory -ChildPath '.log'),
