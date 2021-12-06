@@ -141,7 +141,7 @@ function Update-Changelog
             try
             {
                 # First get the current branch
-                $CurrentBranch = Start-SilentProcess `
+                $CurrentBranch = Invoke-NativeCommand `
                     -FilePath 'git' `
                     -Arguments 'rev-parse --abbrev-ref HEAD' `
                     -PassThru | Select-Object -ExpandProperty OutputContent
@@ -154,7 +154,7 @@ function Update-Changelog
                 # Output only the body string (%b) and dump the result into an array
                 # We use merges to try and cut down on the number of false positives, if this proves to be not verbose enough
                 # we can switch back to messages (%s)
-                $Features = (Start-SilentProcess `
+                $Features = (Invoke-NativeCommand `
                         -FilePath 'git' `
                         -Arguments "log --merges $CommitSearcher  --pretty=`"%b`"" `
                         -PassThru | Select-Object -ExpandProperty OutputContent) -split "`n"

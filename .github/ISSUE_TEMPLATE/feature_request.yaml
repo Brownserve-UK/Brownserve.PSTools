@@ -15,6 +15,6 @@ body:
     attributes:
       label: Describe the feature/enhancement you'd like added
       description: Try to be descriptive and include example code or suggestions wherever possible.
-      placeholder: (e.g. it would be great if `Start-SilentProcess` could also return execution time, you could implement this by doing _xyz_)
+      placeholder: (e.g. it would be great if `Invoke-NativeCommand` could also return execution time, you could implement this by doing _xyz_)
     validations:
       required: true

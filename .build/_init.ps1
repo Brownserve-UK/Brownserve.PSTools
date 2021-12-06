@@ -118,7 +118,7 @@ catch
 try
 {
     Write-Verbose "Restoring dotnet tools"
-    Start-SilentProcess `
+    Invoke-NativeCommand `
         -FilePath 'dotnet' `
         -ArgumentList 'tool restore' `
         -WorkingDirectory $Global:RepoRootDirectory
@@ -132,7 +132,7 @@ catch
 try
 {
     Write-Verbose 'Installing paket dependencies'
-    Start-SilentProcess `
+    Invoke-NativeCommand `
         -FilePath 'dotnet' `
         -ArgumentList 'paket install' `
         -WorkingDirectory $Global:RepoRootDirectory
