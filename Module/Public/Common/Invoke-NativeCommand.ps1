@@ -39,6 +39,11 @@ function Invoke-NativeCommand
         )]
         [array]
         $ExitCodes = @(0),
+
+        # If passed, will return the output of the command as a PowerShell object
+        [Parameter()]
+        [switch]
+        $PassThru,
         
         # If set output will be suppressed
         [Parameter()]
@@ -76,7 +81,7 @@ function Invoke-NativeCommand
     {
         if ($RedirectOutputPath -or $RedirectOutputPrefix -or $RedirectOutputSuffix -and !$SuppressOutput)
         {
-            throw "Cannot redirect output if SuppressOutput is not set"
+            throw 'Cannot redirect output if SuppressOutput is not set'
         }
     }
     
@@ -254,26 +259,29 @@ function Invoke-NativeCommand
     
     end
     {
-        $Return = @{}
-        if ($OutputContent)
+        if ($PassThru)
         {
-            $Return.Add('OutputContent', $OutputContent)
-        }
-        if ($StdOutFilePath)
-        {
-            $Return.Add('StdOutFilePath', $StdOutFilePath)
-        }
-        if ($StdErrFilePath)
-        {
-            $Return.Add('StdErrFilePath', $StdErrFilePath)
-        }
-        if ($Return.GetEnumerator().Count -gt 0)
-        {
-            Return $Return
-        }
-        else
-        {
-            Return $null
+            $Return = @{}
+            if ($OutputContent)
+            {
+                $Return.Add('OutputContent', $OutputContent)
+            }
+            if ($StdOutFilePath)
+            {
+                $Return.Add('StdOutFilePath', $StdOutFilePath)
+            }
+            if ($StdErrFilePath)
+            {
+                $Return.Add('StdErrFilePath', $StdErrFilePath)
+            }
+            if ($Return.GetEnumerator().Count -gt 0)
+            {
+                Return $Return
+            }
+            else
+            {
+                Return $null
+            }
         }
     }
 }
