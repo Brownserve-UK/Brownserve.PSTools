@@ -99,7 +99,8 @@ Sets the build number in Teamcity.
 Provides an easy way to set the Terraform log level.
 
 ### [Start-SilentProcess](Start-SilentProcess.md)
-Starts a process that redirects stdout and stderr to log files
+**This command is deprecated and will be removed in a future release, please use Invoke-NativeCommand instead.**  
+Starts a process that redirects stdout and stderr to log files.
 
 ### [Test-Administrator](Test-Administrator.md)
 A simple function for testing if a user is running with administrator/root privileges or not.
