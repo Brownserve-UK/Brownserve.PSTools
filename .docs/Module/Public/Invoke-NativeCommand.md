@@ -14,12 +14,12 @@ Invokes a native command while gracefully handling the output and error streams.
 
 ```
 Invoke-NativeCommand [-FilePath] <String> [[-ArgumentList] <Array>] [[-WorkingDirectory] <String>]
- [[-ExitCodes] <Array>] [-SuppressOutput] [-RedirectOutputPath <String>] [-RedirectOutputPrefix <String>]
- [-RedirectOutputSuffix <String>] [<CommonParameters>]
+ [[-ExitCodes] <Array>] [-PassThru] [-SuppressOutput] [-RedirectOutputPath <String>]
+ [-RedirectOutputPrefix <String>] [-RedirectOutputSuffix <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-This cmdlet will call a native process (e.g `ping`) and will allow for writing the commands output to host while also returning the output after the command completes successfully.  
+This cmdlet will call a native process (e.g `ping`) and will allow for writing the commands output to host while also returning the output after the command completes successfully if desired.  
 This is useful when you want to monitor a commands output while also capturing it for processing later on.  
 If you only want the output of the command and not the stream output you can pass the `-SuppressOutput` parameter.  
 As many native commands can write verbose/logging information to stderr this cmdlet attempts to be clever about only returning truly terminating errors, it does so by inspecting the exit code and only raising an exception **if** the exit code is invalid.
@@ -30,20 +30,21 @@ As many native commands can write verbose/logging information to stderr this cmd
 ```powershell
 $Ping = Invoke-NativeCommand `
     -FilePath 'ping' `
-    -ArgumentList @('192.168.1.1')
+    -ArgumentList @('192.168.1.1') `
+    -PassThru
 ```
 
-In this example the `ping` command would be run with the argument `192.168.1.1`, it's output would returned and stored in the `$Ping` variable as well as being streamed to host
+In this example the `ping` command would be run with the argument `192.168.1.1`, as the `PassThru` parameter has been provided the command's output would returned and stored in the `$Ping` variable as well as being streamed to host
 
 ### Example 2: Suppressing output
 ```powershell
-$Ping = Invoke-NativeCommand `
+Invoke-NativeCommand `
     -FilePath 'ping' `
     -ArgumentList @('192.168.1.1') `
     -SuppressOutput
 ```
 
-In this example the `ping` command would be run with the argument `192.168.1.1`, it's output would returned and stored in the `$Ping` variable and as `-SuppressOutput` has been specified no output would be written to host.
+In this example the `ping` command would be run with the argument `192.168.1.1`, as `-SuppressOutput` has been specified no output would be written to host and as `-PassThru` has **not** been provided no output would be returned effectively making this command silent.
 
 ## PARAMETERS
 
@@ -89,6 +90,21 @@ Required: True
 Position: 0
 Default value: None
 Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -PassThru
+Pass this parameter if you want the cmdlet to return a PowerShell object of the native commands output stream
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

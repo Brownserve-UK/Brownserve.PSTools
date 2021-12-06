@@ -1905,7 +1905,7 @@ If used with pipeline input then this will upgrade all packages that are provide
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This cmdlet will call a native process (e.g `ping`) and will allow for writing the commands output to host while also returning the output after the command completes successfully.
+      <maml:para>This cmdlet will call a native process (e.g `ping`) and will allow for writing the commands output to host while also returning the output after the command completes successfully if desired.
 This is useful when you want to monitor a commands output while also capturing it for processing later on.
 If you only want the output of the command and not the stream output you can pass the `-SuppressOutput` parameter.
 As many native commands can write verbose/logging information to stderr this cmdlet attempts to be clever about only returning truly terminating errors, it does so by inspecting the exit code and only raising an exception if the exit code is invalid.</maml:para>
@@ -1960,6 +1960,17 @@ As many native commands can write verbose/logging information to stderr this cmd
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>PassThru</maml:name>
+          <maml:description>
+            <maml:para>Pass this parameter if you want the cmdlet to return a PowerShell object of the native commands output stream</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>RedirectOutputPath</maml:name>
@@ -2047,6 +2058,18 @@ As many native commands can write verbose/logging information to stderr this cmd
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>PassThru</maml:name>
+        <maml:description>
+          <maml:para>Pass this parameter if you want the cmdlet to return a PowerShell object of the native commands output stream</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>RedirectOutputPath</maml:name>
@@ -2148,19 +2171,20 @@ As many native commands can write verbose/logging information to stderr this cmd
         <maml:title>------------------ Example 1: Standard usage ------------------</maml:title>
         <dev:code>$Ping = Invoke-NativeCommand `
     -FilePath 'ping' `
-    -ArgumentList @('192.168.1.1')</dev:code>
+    -ArgumentList @('192.168.1.1') `
+    -PassThru</dev:code>
         <dev:remarks>
-          <maml:para>In this example the `ping` command would be run with the argument `192.168.1.1`, it's output would returned and stored in the `$Ping` variable as well as being streamed to host</maml:para>
+          <maml:para>In this example the `ping` command would be run with the argument `192.168.1.1`, as the `PassThru` parameter has been provided the command's output would returned and stored in the `$Ping` variable as well as being streamed to host</maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
         <maml:title>---------------- Example 2: Suppressing output ----------------</maml:title>
-        <dev:code>$Ping = Invoke-NativeCommand `
+        <dev:code>Invoke-NativeCommand `
     -FilePath 'ping' `
     -ArgumentList @('192.168.1.1') `
     -SuppressOutput</dev:code>
         <dev:remarks>
-          <maml:para>In this example the `ping` command would be run with the argument `192.168.1.1`, it's output would returned and stored in the `$Ping` variable and as `-SuppressOutput` has been specified no output would be written to host.</maml:para>
+          <maml:para>In this example the `ping` command would be run with the argument `192.168.1.1`, as `-SuppressOutput` has been specified no output would be written to host and as `-PassThru` has not been provided no output would be returned effectively making this command silent.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -4493,7 +4517,8 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
       <command:verb>Start</command:verb>
       <command:noun>SilentProcess</command:noun>
       <maml:description>
-        <maml:para>Starts a process that redirects stdout and stderr to log files</maml:para>
+        <maml:para>This command is deprecated and will be removed in a future release, please use Invoke-NativeCommand instead. 
+Starts a process that redirects stdout and stderr to log files.</maml:para>
       </maml:description>
     </command:details>
     <maml:description>

@@ -8,7 +8,8 @@ schema: 2.0.0
 # Start-SilentProcess
 
 ## SYNOPSIS
-Starts a process that redirects stdout and stderr to log files
+**This command is deprecated and will be removed in a future release, please use Invoke-NativeCommand instead.**  
+Starts a process that redirects stdout and stderr to log files.
 
 ## SYNTAX
 
