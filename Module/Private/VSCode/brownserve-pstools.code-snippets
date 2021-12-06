@@ -50,6 +50,8 @@
 			"# Used to store any custom code/scripts/modules",
 			"\\$Global:RepoCodeDirectory = Join-Path \\$global:RepoRootDirectory '.build' 'code' | Convert-Path",
 			"",
+			"# Get the name of the repo",
+			"$Global:RepoName = Split-Path $Global:RepoRootDirectory -Leaf",
 			"",
 			"# Set-up our ephemeral paths, that is those that will be destroyed and then recreated each time this script is called",
 			"\\$EphemeralPaths = @(",

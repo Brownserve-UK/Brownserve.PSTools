@@ -79,7 +79,7 @@ function Invoke-NativeCommand
     
     begin
     {
-        if ($RedirectOutputPath -or $RedirectOutputPrefix -or $RedirectOutputSuffix -and !$SuppressOutput)
+        if (('RedirectOutputPath' -in $PSBoundParameters.Keys) -or ('RedirectOutputPrefix' -in $PSBoundParameters.Keys) -or ('RedirectOutputSuffix' -in $PSBoundParameters.Keys) -and !$SuppressOutput)
         {
             throw 'Cannot redirect output if SuppressOutput is not set'
         }
@@ -234,6 +234,18 @@ function Invoke-NativeCommand
             # Open an array to store potential error messages (more on this later)
             $ErrorStream = @()
             $OutputContent = @()
+            if ($WorkingDirectory)
+            {
+                try
+                {
+                    Push-Location
+                    Set-Location $WorkingDirectory
+                }
+                catch
+                {
+                    throw "Failed to set working directory to '$WorkingDirectory'.`n$($_.Exception.Message)"
+                }
+            }
             # When we're not suppressing output then we want to stream output to both stdout/stderr and capture in a variable
             & { & $AbsoluteCommandPath $ArgumentList } 2>&1 | ForEach-Object {
                 if ($_ -is [System.Management.Automation.ErrorRecord])
@@ -250,6 +262,10 @@ function Invoke-NativeCommand
                     Write-Host $_ -ErrorAction 'SilentlyContinue'
                 }
             } | Tee-Object -Variable 'OutputContent' # Tee the output to a variable
+            if ($WorkingDirectory)
+            {
+                Pop-Location
+            }
             if ($LASTEXITCODE -notin $ExitCodes)
             {
                 Write-Error "Command $FilePath exited with code $LASTEXITCODE.`n$ErrorStream"

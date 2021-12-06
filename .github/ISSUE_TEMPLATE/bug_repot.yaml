@@ -13,7 +13,7 @@ body:
     attributes:
       label: Function/Cmdlet
       description: Which cmdlet/function was the bug found in?
-      placeholder: Please enter the name of the cmdlet/function (eg Start-SilentProcess)
+      placeholder: Please enter the name of the cmdlet/function (eg Invoke-NativeCommand)
     validations:
       required: true
   - type: textarea
@@ -24,7 +24,7 @@ body:
       placeholder: Describe the problem you encountered
       value: |
         Example:
-        When using Start-SilentProcess sometimes I get an error stating the system cannot find the file specified.
+        When using Invoke-NativeCommand sometimes I get an error stating the system cannot find the file specified.
         This only happens when I use PowerShell 6.1.1.
     validations:
       required: true
