@@ -5,6 +5,20 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.6.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.6.0) (2021-12-06)
+
+**Features**
+- Create a `Send-BuildNotification` cmdlet
+- Add `$Global:RepoName` variable to generated `_init.ps1` scripts
+- Port some logic over to use Invoke-NativeCommand
+- Add `Invoke-NativeCommand` cmdlet
+
+**Bugfixes**
+N/A
+
+**Known Issues**
+N/A
+
 ### [v0.5.3](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.5.3) (2021-11-18)
 
 **Features**
