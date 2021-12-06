@@ -66,7 +66,7 @@ function Update-Changelog
         $SkipOptionalPrompts
     )
 
-    Write-Verbose "Checking changelog path is valid"
+    Write-Verbose 'Checking changelog path is valid'
     if (!(Test-Path $ChangelogPath))
     {
         throw "$ChangelogPath does not appear to be a valid path to a changelog"
@@ -89,7 +89,7 @@ function Update-Changelog
     }
 
     # Start by getting mandatory information
-    Write-Verbose "Checking all required information is present"
+    Write-Verbose 'Checking all required information is present'
 
     # Find out what type of release we are doing
     # We re-cast ReleaseType to a new variable as PowerShell does something special with cmdlet parameters when they are set-up
@@ -127,24 +127,25 @@ function Update-Changelog
 
     if (!$Features)
     {
-        Write-Verbose "Prompting for features"
+        Write-Verbose 'Prompting for features'
         # Offer to auto generate a list of release features from the git commit history for this branch (if we haven't already specified it in the params above)
         if (!$AutoGenerateFeatures)
         {
             $AutoGenerateFeatures = Get-Response `
-                -Prompt "Would you like to generate a list of new features for this release from this branches commit history?" `
+                -Prompt 'Would you like to generate a list of new features for this release from this branches commit history?' `
                 -ResponseType 'bool'
         }
         if ($AutoGenerateFeatures)
         {
-            Write-Verbose "Auto-generating a list of features based off of commit history"
+            Write-Verbose 'Auto-generating a list of features based off of commit history'
             try
             {
                 # First get the current branch
                 $CurrentBranch = Invoke-NativeCommand `
                     -FilePath 'git' `
                     -Arguments 'rev-parse --abbrev-ref HEAD' `
-                    -PassThru | Select-Object -ExpandProperty OutputContent
+                    -PassThru `
+                    -SuppressOutput | Select-Object -ExpandProperty OutputContent
                 Write-Verbose "CurrentBranch detected as $CurrentBranch"
 
                 # Create a git log search filter that will list all commits between the previous tag and the current HEAD
@@ -157,11 +158,12 @@ function Update-Changelog
                 $Features = (Invoke-NativeCommand `
                         -FilePath 'git' `
                         -Arguments "log --merges $CommitSearcher  --pretty=`"%b`"" `
-                        -PassThru | Select-Object -ExpandProperty OutputContent) -split "`n"
+                        -PassThru `
+                        -SuppressOutput | Select-Object -ExpandProperty OutputContent) -split "`n"
                 
                 if (!$Features)
                 {
-                    Write-Error "Failed to automatically get a list of commits"
+                    Write-Error 'Failed to automatically get a list of commits'
                 }
             }
             catch
@@ -172,7 +174,7 @@ function Update-Changelog
         else
         {
             $Features = Get-Response `
-                -Prompt "What are the new features that this release brings?" `
+                -Prompt 'What are the new features that this release brings?' `
                 -ResponseType 'array' `
                 -Mandatory
         }
@@ -182,7 +184,7 @@ function Update-Changelog
     if (!$RepoUrl)
     {
         $RepoUrl = Get-Response `
-            -Prompt "What is the URL of the repo that the changelog belongs to?" `
+            -Prompt 'What is the URL of the repo that the changelog belongs to?' `
             -ResponseType 'string' `
             -Mandatory
     }
@@ -190,18 +192,18 @@ function Update-Changelog
     # Get any optional params
     if (-not $SkipOptionalPrompts)
     {
-        Write-Verbose "Prompting for optional information"
+        Write-Verbose 'Prompting for optional information'
         # We use '-notin $PSBoundParameters.Keys' instead of '-not' or '!' as this ensures we get the correct result each time...trust me
         if ('BugFixes' -notin $PSBoundParameters.Keys)
         {
             $Bugfixes = Get-Response `
-                -Prompt "What Bugfixes does this release bring?" `
+                -Prompt 'What Bugfixes does this release bring?' `
                 -ResponseType 'array'
         }
 
         if ('KnownIssues' -notin $PSBoundParameters.Keys)
         {
-            $KnownIssues = Get-response `
+            $KnownIssues = Get-Response `
                 -Prompt 'What known issues are present in this release?' `
                 -ResponseType 'array'
         }
@@ -222,7 +224,7 @@ function Update-Changelog
         $ChangelogBlockParams.Add('KnownIssues', $KnownIssues)
     }
 
-    Write-Verbose "Generating new changelog block"
+    Write-Verbose 'Generating new changelog block'
     try
     {
         $ChangelogBlock = New-ChangelogBlock @ChangelogBlockParams
