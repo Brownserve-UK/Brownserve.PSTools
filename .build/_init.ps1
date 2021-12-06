@@ -120,8 +120,10 @@ try
     Write-Verbose "Restoring dotnet tools"
     Invoke-NativeCommand `
         -FilePath 'dotnet' `
-        -ArgumentList 'tool restore' `
-        -WorkingDirectory $Global:RepoRootDirectory
+        -ArgumentList 'tool','restore' `
+        -WorkingDirectory $Global:RepoRootDirectory `
+        -SuppressOutput `
+        -Verbose:($PSBoundParameters['Verbose'] -eq $true)
 }
 catch
 {
@@ -134,8 +136,10 @@ try
     Write-Verbose 'Installing paket dependencies'
     Invoke-NativeCommand `
         -FilePath 'dotnet' `
-        -ArgumentList 'paket install' `
-        -WorkingDirectory $Global:RepoRootDirectory
+        -ArgumentList 'paket','install' `
+        -WorkingDirectory $Global:RepoRootDirectory `
+        -SuppressOutput `
+        -Verbose:($PSBoundParameters['Verbose'] -eq $true)
 }
 catch
 {
