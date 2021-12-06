@@ -118,10 +118,12 @@ catch
 try
 {
     Write-Verbose "Restoring dotnet tools"
-    Start-SilentProcess `
+    Invoke-NativeCommand `
         -FilePath 'dotnet' `
-        -ArgumentList 'tool restore' `
-        -WorkingDirectory $Global:RepoRootDirectory
+        -ArgumentList 'tool','restore' `
+        -WorkingDirectory $Global:RepoRootDirectory `
+        -SuppressOutput `
+        -Verbose:($PSBoundParameters['Verbose'] -eq $true)
 }
 catch
 {
@@ -132,10 +134,12 @@ catch
 try
 {
     Write-Verbose 'Installing paket dependencies'
-    Start-SilentProcess `
+    Invoke-NativeCommand `
         -FilePath 'dotnet' `
-        -ArgumentList 'paket install' `
-        -WorkingDirectory $Global:RepoRootDirectory
+        -ArgumentList 'paket','install' `
+        -WorkingDirectory $Global:RepoRootDirectory `
+        -SuppressOutput `
+        -Verbose:($PSBoundParameters['Verbose'] -eq $true)
 }
 catch
 {
