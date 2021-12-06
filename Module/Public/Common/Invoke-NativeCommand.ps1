@@ -74,7 +74,10 @@ function Invoke-NativeCommand
     
     begin
     {
-        
+        if ($RedirectOutputPath -or $RedirectOutputPrefix -or $RedirectOutputSuffix -and !$SuppressOutput)
+        {
+            throw "Cannot redirect output if SuppressOutput is not set"
+        }
     }
     
     process
