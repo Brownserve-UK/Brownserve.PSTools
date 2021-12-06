@@ -79,7 +79,7 @@ function Start-SilentProcess
         [switch]
         $PassThru
     )
-    
+    Write-Warning "This command is deprecated and will be removed in a future release, please use 'Invoke-NativeCommand' instead"
     # Start off by ensuring we can find the command and then get it's full path.
     # This is useful when using things like Set-Alias as the Start-Process command won't have access to these
     # So instead we can pass in the full path to the command
