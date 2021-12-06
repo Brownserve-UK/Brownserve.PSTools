@@ -53,6 +53,9 @@ Helper cmdlet for installing Chocolatey packages programmatically
 ### [Invoke-DownloadMethod](Invoke-DownloadMethod.md)
 Downloads a file using the best method available depending on operating system.
 
+### [Invoke-NativeCommand](Invoke-NativeCommand.md)
+Invokes a native command while gracefully handling the output and error streams.
+
 ### [Invoke-TerraformApply](Invoke-TerraformApply.md)
 Invokes 'terraform apply' with a given set of arguments
 
