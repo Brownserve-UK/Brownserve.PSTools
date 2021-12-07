@@ -16,10 +16,11 @@ function Get-VaultSecret
     try
     {
         Write-Verbose "Attempting to read $SecretPath from vault"
-        $Secret = Start-SilentProcess `
+        $Secret = Invoke-NativeCommand `
             -FilePath 'vault' `
-            -ArgumentList "read -format=json $SecretPath" `
-            -PassThru
+            -ArgumentList 'read', '-format=json', "$SecretPath" `
+            -PassThru `
+            -SuppressOutput
         # Now we've got the secret clean up the local file we've got hanging around
         Remove-Item $Secret.StdOutFilePath -Force
         $SecretJSON = $Secret | Select-Object -ExpandProperty OutputContent

@@ -37,10 +37,17 @@ function Invoke-TerraformInit
     }
     try
     {
-        Start-SilentProcess `
-            -FilePath $TerraformPath `
-            -ArgumentList $InitArgs `
-            -WorkingDirectory $TerraformConfigPath
+        $InitParams = @{
+            FilePath = $TerraformPath
+            ArgumentList = $InitArgs
+            WorkingDirectory = $TerraformConfigPath
+            SuppressOutput = $true
+        }
+        if ($VerbosePreference -eq 'Continue')
+        {
+            $InitParams.Remove('SuppressOutput')
+        }
+        Invoke-NativeCommand @InitParams
     }
     catch
     {

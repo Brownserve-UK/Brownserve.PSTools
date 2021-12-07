@@ -56,11 +56,18 @@ function Invoke-TerraformShow
     # Get the output from Terraform show
     try
     {
-        $ShowOutput = Start-SilentProcess `
-            -FilePath $TerraformPath `
-            -ArgumentList $ShowArgs `
-            -WorkingDirectory $TerraformConfigPath `
-            -PassThru | Select-Object -ExpandProperty OutputContent
+        $ShowParams = @{
+            FilePath = $TerraformPath
+            ArgumentList = $ShowArgs
+            WorkingDirectory = $TerraformConfigPath
+            PassThru = $true
+            SuppressOutput = $true
+        }
+        if ($VerbosePreference -eq 'Continue')
+        {
+            $ShowParams.Remove('SuppressOutput')
+        }
+        $ShowOutput = Invoke-NativeCommand @ShowParams | Select-Object -ExpandProperty OutputContent
     }
     catch
     {

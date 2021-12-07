@@ -77,11 +77,18 @@ function Install-ChocolateyPackage
             $OutdatedPackages = @()
             try
             {
-                Start-SilentProcess `
-                    -FilePath 'choco' `
-                    -ArgumentList 'outdated -r' `
-                    -ExitCodes $ValidExitCodes `
-                    -PassThru | Select-Object -ExpandProperty OutputContent |
+                $OutdatedArgs = @{
+                    FilePath = 'choco'
+                    ArgumentList = @('outdated','-r')
+                    ExitCodes = $ValidExitCodes
+                    PassThru = $true
+                    SuppressOut = $true
+                }
+                if ($VerbosePreference -eq 'Continue')
+                {
+                    $OutdatedArgs.Remove('SuppressOut')
+                }
+                Invoke-NativeCommand @OutdatedArgs | Select-Object -ExpandProperty OutputContent |
                     ForEach-Object {
                         # Chocolatey outputs:
                         # package_name|current_version|latest_version|pinned
@@ -120,10 +127,18 @@ function Install-ChocolateyPackage
             Write-Verbose "Checking to see if '$($ChocolateyPackage.Name)' is already installed"
             try
             {
-                $testPackage = Start-SilentProcess `
-                    -FilePath 'choco' `
-                    -ArgumentList "list $($ChocolateyPackage.name) -e -r --local-only" `
-                    -PassThru | Select-Object -ExpandProperty OutputContent
+                $ListArgs = @{
+                    FilePath = 'choco'
+                    ArgumentList = @('list', "$($ChocolateyPackage.name)", '-e', '-r', '--local-only')
+                    ExitCodes = $ValidExitCodes
+                    PassThru = $true
+                    SuppressOut = $true
+                }
+                if ($VerbosePreference -eq 'Continue')
+                {
+                    $ListArgs.Remove('SuppressOut')
+                }
+                $testPackage = Invoke-NativeCommand @ListArgs | Select-Object -ExpandProperty OutputContent
             }
             catch
             {
@@ -148,11 +163,17 @@ function Install-ChocolateyPackage
                             Write-Verbose "Package '$($ChocolateyPackage.name)' is outdated, upgrading"
                             try
                             {
-                                Start-SilentProcess `
-                                    -FilePath 'choco' `
-                                    -ArgumentList "upgrade $($ChocolateyPackage.name) -y" `
-                                    -ExitCodes $ValidExitCodes `
-                            
+                                $UpgradeArgs = @{
+                                    FilePath = 'choco'
+                                    ArgumentList = @('upgrade', "$($ChocolateyPackage.name)", '-y')
+                                    ExitCodes = $ValidExitCodes
+                                    SuppressOut = $true
+                                }
+                                if ($VerbosePreference -eq 'Continue')
+                                {
+                                    $UpgradeArgs.Remove('SuppressOut')
+                                }
+                                Invoke-NativeCommand @UpgradeArgs
                             }
                             catch
                             {
@@ -179,17 +200,24 @@ function Install-ChocolateyPackage
             else
             {
                 Write-Verbose "Attempting to install '$($ChocolateyPackage.Name)' version '$($ChocolateyPackage.Version)'"
-                $InstallArgs = "install $($ChocolateyPackage.name) -y"
+                $InstallArgs = @("install", "$($ChocolateyPackage.name)", "-y")
                 if ($ChocolateyPackage.version -notin $AcceptedVersionStrings)
                 {
                     $InstallArgs = $InstallArgs + " --version $($ChocolateyPackage.version)"
                 }
                 try
                 {
-                    Start-SilentProcess `
-                        -FilePath 'choco' `
-                        -ArgumentList $InstallArgs `
-                        -ExitCodes $ValidExitCodes
+                    $InstallArgs = @{
+                        FilePath = 'choco'
+                        ArgumentList = $InstallArgs
+                        ExitCodes = $ValidExitCodes
+                        SuppressOut = $true
+                    }
+                    if ($VerbosePreference -eq 'Continue')
+                    {
+                        $InstallArgs.Remove('SuppressOut')
+                    }
+                    Invoke-NativeCommand @InstallArgs
                 }
                 catch
                 {

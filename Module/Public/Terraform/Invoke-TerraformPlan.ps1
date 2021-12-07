@@ -107,12 +107,19 @@ function Invoke-TerraformPlan
     }
     try
     {
-        $TerraformPlan = Start-SilentProcess `
-            -FilePath $TerraformPath `
-            -ArgumentList $PlanArgs `
-            -ExitCodes $ValidExitCodes `
-            -WorkingDirectory $TerraformConfigPath `
-            -PassThru | Select-Object -ExpandProperty OutputContent # We want to extract the plan results for later consumption
+        $TerraformParams = @{
+            FilePath = $TerraformPath
+            ArgumentList = $PlanArgs
+            ExitCodes = $ValidExitCodes
+            WorkingDirectory = $TerraformConfigPath
+            PassThru = $true
+            SuppressOutput = $true
+        }
+        if ($VerbosePreference -eq 'Continue')
+        {
+            $TerraformParams.Remove('SuppressOutput')
+        }
+        $TerraformPlan = Invoke-NativeCommand @TerraformParams | Select-Object -ExpandProperty OutputContent # We want to extract the plan results for later consumption
     }
     catch
     {

@@ -36,10 +36,17 @@ function Invoke-TerraformValidate
     }
     try
     {
-        Start-SilentProcess `
-            -FilePath $TerraformPath `
-            -ArgumentList $ValidateArgs `
-            -WorkingDirectory $TerraformConfigPath
+        $ValidateParams = @{
+            FilePath = $TerraformPath
+            ArgumentList = $ValidateArgs
+            WorkingDirectory = $TerraformConfigPath
+            SuppressOutput = $true
+        }
+        if ($VerbosePreference -eq 'Continue')
+        {
+            $ValidateParams.Remove('SuppressOutput')
+        }
+        Invoke-NativeCommand @ValidateParams
     }
     catch
     {
