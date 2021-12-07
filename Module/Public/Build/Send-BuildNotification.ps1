@@ -16,17 +16,18 @@ function Send-BuildNotification
             Mandatory = $true,
             Position = 1
         )]
-        [ValidateSet('Success', 'Fail', 'Information', 'Warning')]
+        [ValidateSet('Success', 'Fail', 'Information', 'Warning', 'Failure', 'Cancelled')]
+        [Alias('Status')]
         [string]
         $BuildStatus,
 
         # The webhook URL to send the notification to.
         [Parameter(
-            Mandatory = $true,
+            Mandatory = $false,
             Position = 2
         )]
         [string]
-        $Webhook,
+        $Webhook = $env:BUILD_NOTIFICATION_WEBHOOK,
 
         # The message to send (optional).
         [Parameter(
@@ -42,12 +43,16 @@ function Send-BuildNotification
             Position = 4
         )]
         [string]
-        [alias('Push')]
+        [alias('Push','Title')]
         $PushMessage
     )
     
     begin
     {
+        if (!$Webhook)
+        {
+            throw "No webhook specified."
+        }
         if (!$BuildName)
         {
             try
@@ -83,9 +88,9 @@ function Send-BuildNotification
                 short = $false
             }
         }
-        switch ($BuildStatus)
+        switch -Regex ($BuildStatus)
         {
-            'Success'
+            '[Ss]uccess'
             {
                 $Colour = '#007C00'
                 if (!$PushMessage)
@@ -97,7 +102,7 @@ function Send-BuildNotification
                     $Message = "$BuildName has completed successfully."
                 }
             }
-            'Fail'
+            '[Ff]ail'
             {
                 $Colour = '#FF0000'
                 if (!$PushMessage)
@@ -109,7 +114,7 @@ function Send-BuildNotification
                     $Message = "$BuildName has failed."
                 }
             }
-            'Information'
+            '[Ii]nformation'
             {
                 $Colour = '#00c4ff'
                 if (!$PushMessage)
@@ -121,7 +126,7 @@ function Send-BuildNotification
                     $Message = "$BuildName has completed with information."
                 }
             }
-            'Warning'
+            '[Ww]arning'
             {
                 $Colour = '#ffc000'
                 if (!$PushMessage)
@@ -131,6 +136,18 @@ function Send-BuildNotification
                 if (!$Message)
                 {
                     $Message = "$BuildName has completed with a warning."
+                }
+            }
+            '[Cc]ancelled'
+            {
+                $Colour = '#808080'
+                if (!$PushMessage)
+                {
+                    $PushMessage = "$BuildName has been cancelled."
+                }
+                if (!$Message)
+                {
+                    $Message = "$BuildName has been cancelled."
                 }
             }
         }
