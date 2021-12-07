@@ -16,10 +16,8 @@ function Test-Administrator
             }
             'Linux|macOS'
             {
-                $WhoAmI = Start-SilentProcess `
-                    -FilePath 'whoami' `
-                    -PassThru | Select-Object -ExpandProperty 'OutputContent'
-                if ($WhoAmI -eq 'root')
+                $UID = & id -u
+                if ($UID -eq 0)
                 {
                     Return $true
                 }
