@@ -108,11 +108,18 @@ function Invoke-TerraformApply
     Write-Verbose "Running 'terraform apply $($ApplyArgs -join ' ')'"
     try
     {
-        $ApplyOutput = Start-SilentProcess `
-            -FilePath $TerraformPath `
-            -ArgumentList $ApplyArgs `
-            -WorkingDirectory $TerraformConfigPath `
-            -PassThru | Select-Object -ExpandProperty OutputContent # We'll want to return this
+        $ApplyParams = @{
+            FilePath = $TerraformPath
+            ArgumentList = $ApplyArgs
+            WorkingDirectory = $TerraformConfigPath
+            PassThru = $true
+            SuppressOutput = $true
+        }
+        if ($VerbosePreference -eq 'Continue')
+        {
+            $ApplyParams.Remove('SuppressOutput')
+        }
+        $ApplyOutput = Invoke-NativeCommand @ApplyParams | Select-Object -ExpandProperty OutputContent # We'll want to return this
     }
     catch
     {
