@@ -41,11 +41,11 @@ function Invoke-TerraformInit
             FilePath = $TerraformPath
             ArgumentList = $InitArgs
             WorkingDirectory = $TerraformConfigPath
-            $SuppressOutput = $true
+            SuppressOutput = $true
         }
         if ($VerbosePreference -eq 'Continue')
         {
-            $InitParams.Remove('$SuppressOutput')
+            $InitParams.Remove('SuppressOutput')
         }
         Invoke-NativeCommand @InitParams
     }
