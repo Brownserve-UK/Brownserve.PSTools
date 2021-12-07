@@ -89,6 +89,9 @@ Tells Teamcity to export a given file/folder as an artifact.
 ### [Read-Changelog](Read-Changelog.md)
 Retrieves version information and release notes from a CHANGELOG.md file.
 
+### [Send-BuildNotification](Send-BuildNotification.md)
+Sends a standard Brownserve build notification.
+
 ### [Send-SlackNotification](Send-SlackNotification.md)
 Sends a notification to a given Slack webhook
 
