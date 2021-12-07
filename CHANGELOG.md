@@ -5,6 +5,19 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.7.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.7.0) (2021-12-07)
+
+**Features**
+- Replace command on Test-Administrator
+- Replace `Start-SilentProcess` within this module
+- Switch our build notifications over to the new logic
+
+**Bugfixes**
+N/A
+
+**Known Issues**
+This version replaces `Start-SilentProcess` with `Invoke-NativeCommand` while these are mostly compatible there may be some teething issues, please log any issues in the bug tracker.
+
 ### [v0.6.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.6.0) (2021-12-06)
 
 **Features**
