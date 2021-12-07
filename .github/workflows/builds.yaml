@@ -25,7 +25,6 @@ jobs:
           BUILD_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           BUILD_BRANCH: ${{ github.head_ref }}
         run: |
-            Get-Module
             ./Brownserve.BuildTools/.build/_init.ps1
             Send-BuildNotification -BuildName ${{ github.job }} -BuildStatus ${{ job.status }}
           
