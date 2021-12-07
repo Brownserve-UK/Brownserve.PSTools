@@ -123,7 +123,7 @@ function Initialize-BrownserveBuildRepo
         [InitPath]@{
             VariableName = 'RepoLogDirectory'
             Path         = '.log'
-            Description  = 'Used to store build logs and output from Start-SilentProcess'
+            Description  = 'Used to store build logs and output from Invoke-NativeCommand'
         },
         [InitPath]@{
             VariableName = 'RepoBuildOutputDirectory'
@@ -207,10 +207,11 @@ function Initialize-BrownserveBuildRepo
         Write-Verbose "Creating new nuget.config"
         try
         {
-            Start-SilentProcess `
+            Invoke-NativeCommand `
                 -FilePath 'dotnet' `
-                -ArgumentList 'new nugetconfig' `
-                -WorkingDirectory $RepoPath
+                -ArgumentList 'new','nugetconfig' `
+                -WorkingDirectory $RepoPath `
+                -SuppressOutput
         }
         catch
         {
@@ -225,10 +226,11 @@ function Initialize-BrownserveBuildRepo
         Write-Verbose "Creating new dotnet tool manifest"
         try
         {
-            Start-SilentProcess `
+            Invoke-NativeCommand `
                 -FilePath 'dotnet' `
-                -ArgumentList 'new tool-manifest' `
-                -WorkingDirectory $RepoPath
+                -ArgumentList 'new', 'tool-manifest' `
+                -WorkingDirectory $RepoPath `
+                -SuppressOutput
         }
         catch
         {
@@ -254,10 +256,11 @@ function Initialize-BrownserveBuildRepo
     Write-Verbose "Will attempt to $dotnetCommand paket"
     try
     {
-        Start-SilentProcess `
+        Invoke-NativeCommand `
             -FilePath 'dotnet' `
-            -ArgumentList "tool $dotnetCommand Paket" `
-            -WorkingDirectory $RepoPath
+            -ArgumentList "tool", "$dotnetCommand", "Paket" `
+            -WorkingDirectory $RepoPath `
+            -SuppressOutput
     }
     catch
     {
