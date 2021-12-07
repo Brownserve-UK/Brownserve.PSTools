@@ -23,7 +23,8 @@ jobs:
         if: ${{ always() }}
         env:
           BUILD_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          BUILD_BRANCH: ${{ github.head_ref }}
         run: |
             ./Brownserve.BuildTools/.build/_init.ps1
-            Send-BuildNotification -BuildName ${{ github.workflow }} -BuildStatus ${{ job.status }}
+            Send-BuildNotification -BuildName ${{ job }} -BuildStatus ${{ job.status }}
           
