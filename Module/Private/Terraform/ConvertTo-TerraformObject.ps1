@@ -4,7 +4,8 @@ function ConvertTo-TerraformObject
     param
     (
         # The object to be converted
-        [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 0)]
+        # N.B - don't accept pipeline input here as it unfolds arrays!
+        [Parameter(Mandatory = $true, Position = 0)]
         $Object
     )
     
@@ -15,11 +16,12 @@ function ConvertTo-TerraformObject
     
     process
     {
-        switch -Wildcard ($Object.GetType().Name)
+        Write-Debug "$($Object.GetType().Name)"
+        switch -Regex ($Object.GetType().Name)
         {
             'String'
             {
-                Write-Verbose 'Converting to string'
+                Write-Debug 'Converting to string'
                 # If the object is a string wrap it in quotes, unless it's a variable, local or a resource (rough regex match for this)
                 if (($Object -like 'var.*') -or ($Object -like 'local.') -or ($Object -match '^(?:.*)\.(?:.*)\.(?:.*)$'))
                 {
@@ -30,11 +32,11 @@ function ConvertTo-TerraformObject
                     $Return = "`"$Object`""
                 }
             }
-            'Object[]'
+            'Object'
             {
                 try
                 {
-                    Write-Verbose 'Converting to array'
+                    Write-Debug 'Converting to array'
                     # Got through the array and convert each item within it
                     $ConvertedObjects = @()
                     $ConvertedObjects += $Object | ForEach-Object { ConvertTo-TerraformObject $_ }
@@ -47,7 +49,7 @@ function ConvertTo-TerraformObject
             }
             'Hashtable'
             {
-                Write-Verbose 'Converting to hash'
+                Write-Debug 'Converting to hash'
                 # Go through each value and convert it
                 try
                 {
@@ -74,13 +76,13 @@ function ConvertTo-TerraformObject
             }
             'Boolean'
             {
-                Write-Verbose 'Converting to boolean'
+                Write-Debug 'Converting to boolean'
                 # Convert to terraform boolean
                 $Return = $Object -eq $true ? 'true' : 'false'
             }
-            'Int*'
+            'Int'
             {
-                Write-Verbose 'Converting to int'
+                Write-Debug 'Converting to int'
                 # Convert to terraform int (just return as is)
                 $Return = $Object
             }

@@ -4,17 +4,17 @@ function New-TerraformResourceBlock
     param
     (
         # The resource type to create
-        [Parameter(Mandatory = $true, Position = 0)]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipelineByPropertyName = $true)]
         [string]
         $ResourceType,
 
         # The name of the resource
-        [Parameter(Mandatory = $true, Position = 1)]
+        [Parameter(Mandatory = $true, Position = 1, ValueFromPipelineByPropertyName = $true)]
         [string]
         $ResourceName,
 
         # The arguments for the resource
-        [Parameter(Mandatory = $true, Position = 2)]
+        [Parameter(Mandatory = $true, Position = 2, ValueFromPipelineByPropertyName = $true)]
         [pscustomobject]
         $ResourceArgs
     )
@@ -32,11 +32,11 @@ function New-TerraformResourceBlock
             $ResourceArgs.PSObject.Properties | ForEach-Object {
                 if ($_.Value -is [hashtable])
                 {
-                    $ResourceBlock += "`t$($_.Name) $($_.Value | ConvertTo-TerraformObject)`n"
+                    $ResourceBlock += "`t$($_.Name) $(ConvertTo-TerraformObject -Object $_.Value)`n"
                 }
                 else
                 {
-                    $ResourceBlock += "`t$($_.Name) = $($_.Value | ConvertTo-TerraformObject)`n"
+                    $ResourceBlock += "`t$($_.Name) = $(ConvertTo-TerraformObject -Object $_.Value)`n"
                 }
             }
             $ResourceBlock += "}`n"
