@@ -16,19 +16,21 @@ function ConvertTo-TerraformObject
     
     process
     {
-        Write-Debug "$($Object.GetType().Name)"
+        Write-Debug "Input determined to be $($Object.GetType().Name)"
         switch -Regex ($Object.GetType().Name)
         {
             'String'
             {
-                Write-Debug 'Converting to string'
-                # If the object is a string wrap it in quotes, unless it's a variable, local or a resource (rough regex match for this)
-                if (($Object -like 'var.*') -or ($Object -like 'local.') -or ($Object -match '^(?:.*)\.(?:.*)\.(?:.*)$'))
+                # If the object is a string wrap it in quotes, unless it's a variable, local, data or a resource (rough regex match for this)
+                if (($Object -match '^var\.') -or ($Object -match '^local\.') -or ($Object -match '^data\.') -or ($Object -match '^(\w*)\.(.*)\.(.*)$'))
                 {
+                    Write-Debug 'Converting to interpolated string'
+
                     $Return = $Object
                 }
                 else
                 {
+                    Write-Debug 'Converting to quoted string'
                     $Return = "`"$Object`""
                 }
             }
