@@ -23,7 +23,7 @@ function ConvertTo-TerraformObject
             {
                 Write-Debug 'Converting to string'
                 # If the object is a string wrap it in quotes, unless it's a variable, local or a resource (rough regex match for this)
-                if (($Object -like 'var.*') -or ($Object -like 'local.') -or ($Object -match '^(?:.*)\.(?:.*)\.(?:.*)$'))
+                if (($Object -match '^var.') -or ($Object -match '^local.') -or ($Object -match '^(?:.*)\.(?:.*)\.(?:.*)$'))
                 {
                     $Return = $Object
                 }
