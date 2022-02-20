@@ -15,7 +15,7 @@ function ConvertTo-TerraformObject
     
     process
     {
-        switch ($Object.GetType().Name)
+        switch -Wildcard ($Object.GetType().Name)
         {
             'String'
             {
@@ -77,6 +77,12 @@ function ConvertTo-TerraformObject
                 Write-Verbose 'Converting to boolean'
                 # Convert to terraform boolean
                 $Return = $Object -eq $true ? 'true' : 'false'
+            }
+            'Int*'
+            {
+                Write-Verbose 'Converting to int'
+                # Convert to terraform int (just return as is)
+                $Return = $Object
             }
             Default
             {
