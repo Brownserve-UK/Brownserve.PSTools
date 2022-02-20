@@ -83,6 +83,9 @@ Creates a new pull request in GitHub
 ### [New-TempDirectory](New-TempDirectory.md)
 Creates a new temporary directory with a random name in the systems temporary directory
 
+### [New-TerraformResourceBlock](New-TerraformResourceBlock.md)
+Creates a Terraform resource block that can easily be inserted into Terraform code.
+
 ### [Publish-TeamcityArtifact](Publish-TeamcityArtifact.md)
 Tells Teamcity to export a given file/folder as an artifact.
 
