@@ -5,6 +5,17 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.8.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.8.0) (2022-02-20)
+
+**Features**
+- Add [New-TerraformResourceBlock](.docs/Module/Public/New-TerraformResourceBlock.md) cmdlet
+
+**Bugfixes**
+- Fixes misnamed path in GitHub Actions Workflow
+
+**Known Issues**
+N/A
+
 ### [v0.7.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.7.0) (2021-12-07)
 
 **Features**
