@@ -55,9 +55,16 @@ function ConvertTo-TerraformObject
                     $Object.GetEnumerator() | ForEach-Object {
                         $Key = $_.Key
                         $Value = ConvertTo-TerraformObject $_.Value
-                        $ConvertedHash += "`t$Key = $Value`n"
+                        if ($_.Value -is [Hashtable])
+                        {
+                            $ConvertedHash += "`t$Key $Value`n"
+                        }
+                        else
+                        {
+                            $ConvertedHash += "`t$Key = $Value`n"
+                        }
                     }
-                    $ConvertedHash += "}"
+                    $ConvertedHash += "`t}"
                     $Return = $ConvertedHash
                 }
                 catch

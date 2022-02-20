@@ -1,4 +1,4 @@
-function New-TerraformResourceBlack
+function New-TerraformResourceBlock
 {
     [CmdletBinding()]
     param
@@ -30,7 +30,14 @@ function New-TerraformResourceBlack
         {
             $ResourceBlock = "resource `"$ResourceType`" `"$ResourceName`" {`n"
             $ResourceArgs.PSObject.Properties | ForEach-Object {
-                $ResourceBlock += "    $($_.Name) = $($_.Value | ConvertTo-TerraformObject)`n"
+                if ($_.Value -is [hashtable])
+                {
+                    $ResourceBlock += "`t$($_.Name) $($_.Value | ConvertTo-TerraformObject)`n"
+                }
+                else
+                {
+                    $ResourceBlock += "`t$($_.Name) = $($_.Value | ConvertTo-TerraformObject)`n"
+                }
             }
             $ResourceBlock += "}`n"
         }
