@@ -22,7 +22,7 @@ function ConvertTo-TerraformObject
             'String'
             {
                 # If the object is a string wrap it in quotes, unless it's a variable, local, data or a resource (rough regex match for this)
-                if (($Object -match '^var\.') -or ($Object -match '^local\.') -or ($Object -match '^data\.') -or ($Object -match '^(\w*)\.(.*)\.(.*)$'))
+                if (($Object -match '^var\.') -or ($Object -match '^local\.') -or ($Object -match '^data\.') -or ($Object -match '(?:^(?:\w)*\.(?:\w|-)*\.(?:\w)*$)'))
                 {
                     Write-Debug 'Converting to interpolated string'
 
