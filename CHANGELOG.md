@@ -5,6 +5,17 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.8.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.8.1) (2022-02-21)
+
+**Features**
+- Fixes an issue with Terraform string generation
+
+**Bugfixes**
+- Fixes an issue with Terraform string generation
+
+**Known Issues**
+N/A
+
 ### [v0.8.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.8.0) (2022-02-20)
 
 **Features**
