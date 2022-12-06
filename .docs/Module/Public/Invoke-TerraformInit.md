@@ -18,7 +18,7 @@ Invoke-TerraformInit [[-TerraformConfigPath] <String>] [-TerraformPath <String>]
 ```
 
 ## DESCRIPTION
-Performs a `terraform init` using Start-SilentProcess to suppress the output
+Performs a `terraform init` using Invoke-NativeCommand to suppress the output
 
 ## EXAMPLES
 

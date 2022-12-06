@@ -81,7 +81,7 @@
 			"# Now that the ephemeral paths definitely exist we are free to set their global variables",
 			"# This is the directory that paket downloads stuff into",
 			"\\$Global:RepoPackagesDirectory = \\$RepoPackagesDirectory | Convert-Path ",
-			"# Used to store build logs and output from Start-SilentProcess",
+			"# Used to store build logs and output from Invoke-NativeCommand",
 			"\\$global:RepoLogDirectory = \\$RepoLogDirectory | Convert-Path",
 			"# Used to store any output from builds (e.g. Terraform plans, MSBuild artifacts etc)",
 			"\\$global:RepoBuildOutputDirectory = \\$RepoBuildOutputDirectory | Convert-Path",
