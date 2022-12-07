@@ -50,6 +50,11 @@ function Invoke-NativeCommand
         [switch]
         $SuppressOutput,
 
+        # If set will instruct the output to be redirected to a file
+        [Parameter()]
+        [switch]
+        $RedirectOutput,
+
         # The path to where the redirected output should be stored
         # Defaults to the contents of the environment variable 'RepoLogDirectory' if available
         # If that isn't set then defaults to a temp directory
@@ -79,7 +84,7 @@ function Invoke-NativeCommand
     
     begin
     {
-        if (('RedirectOutputPath' -in $PSBoundParameters.Keys) -or ('RedirectOutputPrefix' -in $PSBoundParameters.Keys) -or ('RedirectOutputSuffix' -in $PSBoundParameters.Keys) -and !$SuppressOutput)
+        if (('RedirectOutput' -in $PSBoundParameters.Keys) -and !$SuppressOutput)
         {
             throw 'Cannot redirect output if SuppressOutput is not set'
         }
@@ -90,7 +95,6 @@ function Invoke-NativeCommand
         # Start off by ensuring we can find the command and then get it's full path.
         # This is useful when using things like Set-Alias as the Start-Process command won't have access to these
         # as aliases are not passed through to the child process so instead we can use the full path to the alias
-        Write-Verbose "Finding absolute path to command $FilePath"
         try
         {
             $AbsoluteCommandPath = (Get-Command $FilePath -ErrorAction Stop).Definition
@@ -102,8 +106,8 @@ function Invoke-NativeCommand
         # Note: the arguments may leak sensitive information so be wary of exposing them
         Write-Debug "Calling '$AbsoluteCommandPath' with arguments: '$($ArgumentList -join ' ')'"
         Write-Debug "Valid exit codes: $($ExitCodes -join ', ')"
-        # When we want to suppress output we need to redirect the output to a file
-        if ($SuppressOutput)
+        # When we want to suppress output AND redirect to a file we need to use the Start-Process cmdlet
+        if ($RedirectOutput)
         {
             # Set redirected output to the repos log directory if it exists, otherwise to temp
             if (!$RedirectOutputPath)
@@ -219,57 +223,83 @@ function Invoke-NativeCommand
                 Write-Error "$FilePath has returned a non-zero exit code: $($Process.ExitCode).`n$ErrorContent"
             }
 
-            # If we've requested the output from this command then return it along with the paths to our StdOut and StdErr files should we need them
-            try
+            if ($PassThru -eq $true)
             {
-                $OutputContent = Get-Content $StdOutFilePath
-            }
-            catch
-            {
-                Write-Error "Unable to get contents of $StdOutFilePath.`n$($_.Exception.Message)"
+
+                # Depending on the command there may or may not be any stderr/stdout output so don't fail if we can't grab them
+                $ErrorStream = Get-Content $StdErrFilePath -Raw -ErrorAction SilentlyContinue
+                $StdOutStream = Get-Content $StdOutFilePath -Raw -ErrorAction SilentlyContinue
+                # If we've requested the output from this command then return it along with the paths to our StdOut and StdErr files should we need them
+                try
+                {
+                    $OutputContent = $ErrorStream + $StdOutStream
+                }
+                catch
+                {
+                    Write-Error "Unable to get contents of $StdOutFilePath.`n$($_.Exception.Message)"
+                }
             }
         }
         else
         {
-            # Open an array to store potential error messages (more on this later)
+            # Open an array to store potential error/stdout messages (more on this later)
+            $StdOutStream = @()
             $ErrorStream = @()
             $OutputContent = @()
+            $OtherContent = @()
+            $AllOutput = @()
             if ($WorkingDirectory)
             {
                 try
                 {
                     Push-Location
-                    Set-Location $WorkingDirectory
+                    Set-Location $WorkingDirectory -ErrorAction 'Stop'
                 }
                 catch
                 {
                     throw "Failed to set working directory to '$WorkingDirectory'.`n$($_.Exception.Message)"
                 }
             }
-            # When we're not suppressing output then we want to stream output to both stdout/stderr and capture in a variable
+            # Call the command in a scriptblock so we can redirect the error stream and then iterate over it
             & { & $AbsoluteCommandPath $ArgumentList } 2>&1 | ForEach-Object {
+                # If this line is in the error stream then we want to take certain actions
                 if ($_ -is [System.Management.Automation.ErrorRecord])
                 {
-                    # Some commands will return info/verbose messages to stderr, we don't want to terminate on these so we store the information
-                    # so we can use it later on if we need to.
+                    <# 
+                        Some commands will return info/verbose messages to stderr, we don't want to terminate on these so we store the information in a variable
+                        that we can use later on if we need to raise an error.
+                    #>
                     $ErrorStream += $_
-                    # Try to write it out as verbose output
-                    Write-Verbose $_ -ErrorAction 'SilentlyContinue'
+                    # We also add it to the AllOutput variable so we can be sure we've captured everything from this command
+                    $AllOutput += $_
+                    if ($SuppressOutput -ne $true)
+                    {
+                        # Try to write it out as verbose output
+                        Write-Verbose $_ -ErrorAction 'SilentlyContinue'
+                    }
                 }
                 else
                 {
-                    $OutputContent += $_
-                    Write-Host $_ -ErrorAction 'SilentlyContinue'
+                    $StdOutStream += $_
+                    # Add to the AllOutput variable so we can be sure we return everything later on
+                    $AllOutput += $_
+                    if ($SuppressOutput -ne $true)
+                    {
+                        Write-Host $_ -ErrorAction 'SilentlyContinue'
+                    }
+                    
                 }
-            } | Tee-Object -Variable 'OutputContent' # Tee the output to a variable
+            } | Tee-Object -Variable 'OtherContent' # Tee the output to a variable to capture anything that may be written by any other means (e.g. Write-Output etc)
             if ($WorkingDirectory)
             {
                 Pop-Location
             }
+            # Only if the exit code is not in the expected list of exit codes do we raise an error (which can be caught by the -ErrorAction meta param)
             if ($LASTEXITCODE -notin $ExitCodes)
             {
                 Write-Error "Command $FilePath exited with code $LASTEXITCODE.`n$ErrorStream"
             }
+            $OutputContent = $OtherContent + $AllOutput
         }
     }
     
@@ -281,6 +311,14 @@ function Invoke-NativeCommand
             if ($OutputContent)
             {
                 $Return.Add('OutputContent', $OutputContent)
+            }
+            if ($StdOutStream)
+            {
+                $Return.Add('StdOut', $StdOutStream)
+            }
+            if ($ErrorStream)
+            {
+                $Return.Add('StdErr', $ErrorStream)
             }
             if ($StdOutFilePath)
             {
