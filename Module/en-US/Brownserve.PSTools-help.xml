@@ -1973,9 +1973,20 @@ As many native commands can write verbose/logging information to stderr this cmd
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>RedirectOutput</maml:name>
+          <maml:description>
+            <maml:para>If specified this will cause the output from the command to be redirect to disk, useful when you may want to inspect the output later on (e.g. during builds)</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>RedirectOutputPath</maml:name>
           <maml:description>
-            <maml:para>The path to where the redirected output should be stored Defaults to the contents of the global variable 'RepoLogDirectory' if available If that isn't set then defaults to a temp directory.
+            <maml:para>The path to where the redirected output should be stored Defaults to the contents of the global variable '$global:RepoLogDirectory' if available If that isn't set then defaults to a file in the systems temp directory.
  This is only used when `-SuppressOutput` is specified</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
@@ -2012,7 +2023,7 @@ As many native commands can write verbose/logging information to stderr this cmd
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>SuppressOutput</maml:name>
           <maml:description>
-            <maml:para>If specified will suppress command output</maml:para>
+            <maml:para>If specified will stop the command outputting to host, useful when running very verbose commands that can quickly fill up build logs etc.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -2072,9 +2083,21 @@ As many native commands can write verbose/logging information to stderr this cmd
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>RedirectOutput</maml:name>
+        <maml:description>
+          <maml:para>If specified this will cause the output from the command to be redirect to disk, useful when you may want to inspect the output later on (e.g. during builds)</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>RedirectOutputPath</maml:name>
         <maml:description>
-          <maml:para>The path to where the redirected output should be stored Defaults to the contents of the global variable 'RepoLogDirectory' if available If that isn't set then defaults to a temp directory.
+          <maml:para>The path to where the redirected output should be stored Defaults to the contents of the global variable '$global:RepoLogDirectory' if available If that isn't set then defaults to a file in the systems temp directory.
  This is only used when `-SuppressOutput` is specified</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
@@ -2111,7 +2134,7 @@ As many native commands can write verbose/logging information to stderr this cmd
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>SuppressOutput</maml:name>
         <maml:description>
-          <maml:para>If specified will suppress command output</maml:para>
+          <maml:para>If specified will stop the command outputting to host, useful when running very verbose commands that can quickly fill up build logs etc.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -2439,7 +2462,7 @@ As many native commands can write verbose/logging information to stderr this cmd
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Performs a `terraform init` using Start-SilentProcess to suppress the output</maml:para>
+      <maml:para>Performs a `terraform init` using Invoke-NativeCommand to suppress the output</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>

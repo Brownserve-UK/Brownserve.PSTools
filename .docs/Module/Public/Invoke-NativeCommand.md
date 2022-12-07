@@ -14,7 +14,7 @@ Invokes a native command while gracefully handling the output and error streams.
 
 ```
 Invoke-NativeCommand [-FilePath] <String> [[-ArgumentList] <Array>] [[-WorkingDirectory] <String>]
- [[-ExitCodes] <Array>] [-PassThru] [-SuppressOutput] [-RedirectOutputPath <String>]
+ [[-ExitCodes] <Array>] [-PassThru] [-SuppressOutput] [-RedirectOutput] [-RedirectOutputPath <String>]
  [-RedirectOutputPrefix <String>] [-RedirectOutputSuffix <String>] [<CommonParameters>]
 ```
 
@@ -108,10 +108,25 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -RedirectOutput
+If specified this will cause the output from the command to be redirect to disk, useful when you may want to inspect the output later on (e.g. during builds)
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -RedirectOutputPath
 The path to where the redirected output should be stored
-Defaults to the contents of the global variable 'RepoLogDirectory' if available
-If that isn't set then defaults to a temp directory.  
+Defaults to the contents of the global variable '$global:RepoLogDirectory' if available
+If that isn't set then defaults to a file in the systems temp directory.  
 **This is only used when `-SuppressOutput` is specified**
 
 ```yaml
@@ -157,7 +172,7 @@ Accept wildcard characters: False
 ```
 
 ### -SuppressOutput
-If specified will suppress command output
+If specified will stop the command outputting to host, useful when running very verbose commands that can quickly fill up build logs etc.
 
 ```yaml
 Type: SwitchParameter
