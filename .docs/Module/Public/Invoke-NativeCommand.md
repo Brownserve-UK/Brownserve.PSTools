@@ -14,8 +14,8 @@ Invokes a native command while gracefully handling the output and error streams.
 
 ```
 Invoke-NativeCommand [-FilePath] <String> [[-ArgumentList] <Array>] [[-WorkingDirectory] <String>]
- [[-ExitCodes] <Array>] [-PassThru] [-SuppressOutput] [-RedirectOutputPath <String>]
- [-RedirectOutputPrefix <String>] [-RedirectOutputSuffix <String>] [<CommonParameters>]
+ [[-ExitCodes] <Array>] [-PassThru] [-SuppressOutput] [-LogOutput] [-LogOutputPath <String>]
+ [-LogOutputPrefix <String>] [-LogOutputSuffix <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -93,6 +93,66 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
+### -LogOutput
+If set will log the output of the command to disk
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LogOutputPath
+The path to where the output should be logged (must be a directory)
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LogOutputPrefix
+An optional prefix to add to the log file(s), if none is set then the name of the command being run is used
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -LogOutputSuffix
+The file extension to use for the log file (defaults to .log)
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -PassThru
 Pass this parameter if you want the cmdlet to return a PowerShell object of the native commands output stream
 
@@ -108,56 +168,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -RedirectOutputPath
-The path to where the redirected output should be stored
-Defaults to the contents of the global variable 'RepoLogDirectory' if available
-If that isn't set then defaults to a temp directory.  
-**This is only used when `-SuppressOutput` is specified**
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -RedirectOutputPrefix
-The prefix to use on the redirected streams, defaults to the command run time
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -RedirectOutputSuffix
-The suffix for the redirected streams (defaults to log)
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -SuppressOutput
-If specified will suppress command output
+If specified will stop the command outputting to host, useful when running very verbose commands that can quickly fill up build logs etc.
 
 ```yaml
 Type: SwitchParameter
