@@ -59,6 +59,7 @@ $Global:RepoName = Split-Path $Global:RepoRootDirectory -Leaf
 # Set up any ephemeral directories (those that get deleted and recreated on each run)
 $EphemeralPaths = @(
     ($RepoLogDirectory = Join-Path $Global:RepoRootDirectory -ChildPath '.log'),
+    ($RepoTempDirectory = Join-Path $Global:RepoRootDirectory -ChildPath '.tmp')
     ($RepoPackagesDirectory = Join-Path $Global:RepoRootDirectory -ChildPath 'packages'),
     ($RepoBuildOutputDirectory = Join-Path $Global:RepoBuildDirectory -ChildPath 'output'),
     ($RepoBinDirectory = Join-Path $Global:RepoRootDirectory '.bin')
@@ -90,6 +91,7 @@ $Global:RepoLogDirectory = $RepoLogDirectory | Convert-Path
 $Global:RepoPackagesDirectory = $RepoPackagesDirectory | Convert-Path
 $Global:RepoBuildOutputDirectory = $RepoBuildOutputDirectory | Convert-Path
 $Global:RepoBinDirectory = $RepoBinDirectory | Convert-Path
+$Global:RepoTempDirectory = $RepoTempDirectory | Convert-Path
 
 # We use functions from the Brownserve.PSTools module to create this module (inception music intensifies) so we always import it
 # First we remove it just in case the user has a local copy installed and loaded...
