@@ -12,3 +12,6 @@ paket-files/
 
 # Build output
 .build/output/
+
+# Temp file
+.tmp/
