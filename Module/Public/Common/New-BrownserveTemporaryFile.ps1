@@ -1,6 +1,6 @@
 function New-BrownserveTemporaryFile
 {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'default')]
     param
     (
         # The name of the file to create
@@ -18,8 +18,13 @@ function New-BrownserveTemporaryFile
         [string]
         $FilePath,
 
+        # The content of the file to be created
+        [Parameter(Mandatory = $false, ParameterSetName = 'Content')]
+        [string]
+        $Content,
+
         # Skips creation of the temporary file in case some other process will do that
-        [Parameter()]
+        [Parameter(ParameterSetName = 'Skip')]
         [switch]
         $SkipCreation
     )
@@ -68,14 +73,23 @@ function New-BrownserveTemporaryFile
         $FileName | ForEach-Object {
             try
             {
-                $Name = "$($_)$($FileExtension)"
+                $Path = Join-Path $PathCheck "$($_)$($FileExtension)"
                 if ($SkipCreation -ne $true)
                 {
-                    $Return += New-Item (Join-Path $PathCheck $Name) -ItemType File -ErrorAction 'Stop' | Convert-Path
+                    $NewItemParams = @{
+                        ItemType = 'File'
+                        ErrorAction = 'Stop'
+                        Path = $Path
+                    }
+                    if ($Content)
+                    {
+                        $NewItemParams.Add('Value',$Content)
+                    }
+                    $Return += New-Item @NewItemParams | Convert-Path
                 }
                 else
                 {
-                    $Return += Join-Path $PathCheck $Name
+                    $Return += $Path
                 }
             }
             catch
