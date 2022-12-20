@@ -92,17 +92,14 @@ Next let's update the help files, to do this we'll need to run `_init_.ps1`
 
 Now we can create our Markdown help documentation for our new cmdlet's with:
 ```powershell
-Build-ModuleDocumentation
+Build-ModuleDocumentation -ModuleName 'Brownserve.PSTools' -ModulePath './Module/Brownserve.PSTools.psm1' -DocumentationPath './docs'
 ```
-Providing that worked correctly you should see the following:
+Providing that worked correctly you should see something like the following:
 ```
-Updating Brownserve.PSTools documentation…
-Updating 'Public' Markdown documentation…
-Updating 'Private' Markdown documentation...
-Markdown help has been successfully updated!
+./docs/Brownserve.PSTools/Public
 ```
 
-Once that's done we'll need to head over to the `./.docs/Module` directory and edit any data that's missing from the help files, this will be denoted by double curly braces `{{ }}`
+Once that's done we'll need to head over to the `./.docs/Brownserve.PSTools` directory and edit any data that's missing from the help files, these will be denoted by double curly braces `{{ }}`
 More info on the platyPS schema can be found [here](https://github.com/PowerShell/platyPS/blob/master/platyPS.schema.md)  
 As a quick example our `New-Cmdlet.md` file's synopsis would go from this:
 ```markdown
@@ -122,13 +119,17 @@ This cmdlet is for demonstration purposes only
 
 Once all this information is filled in you will then need to update the modules XML help, simply run the following:
 ```powershell
-Add-ModuleHelp
+Add-ModuleHelp -ModuleDirectory './Module' -DocumentationPath './docs/Brownserve.PSTools/Public'
 ```
 
-You should see the following:
+You should see something like the following:
 ```
-Generating module help from Markdown files...
-Module XML help successfully updated!
+
+    Directory: /workspaces/Brownserve.PSTools/Module/en-US
+
+UnixMode   User             Group                 LastWriteTime           Size Name
+--------   ----             -----                 -------------           ---- ----
+-rw-r--r-- vscode           vscode             12/20/2022 13:05         301180 Brownserve.PSTools-help.xml
 ```
 
 Finally we need to update the changelog file, we can do this using a cmdlet from the Brownserve.PSTools module:
