@@ -98,6 +98,7 @@ function Build-ModuleDocumentation
         # Sometimes we may want to unload the module and reload it, especially if we've been working on changes as this ensures anything new will be picked up.
         if ($ModuleLoaded -and $ReloadModule)
         {
+            Write-Verbose 'reloading module'
             try
             {
                 Remove-Module $ModuleName -Force -ErrorAction 'Stop'
@@ -237,6 +238,7 @@ Resolve-Path '$(Join-Path $ModuleParent 'Private')' |
                 finally
                 {
                     Remove-Module $PrivateModuleName -Force -ErrorAction 'SilentlyContinue'
+                    Remove-Item $TempPrivateModule -Force -ErrorAction 'SilentlyContinue'
                 }
             }
             else
