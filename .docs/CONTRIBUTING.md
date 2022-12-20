@@ -16,19 +16,19 @@ Our public cmdlets/functions **must** have help documentation, it's a requiremen
 We use [platyPS](https://github.com/PowerShell/platyPS) (the same tool Microsoft use) to help generate our help documentation.  
 This allows us to create Markdown based help files in the `.docs` directory which are much easier to read for us humans, then have platyPS generate the module's XML MAML documentation from these Markdown files.
 
-Our `_init.ps1` script contains some helper functions for creating/updating documentation:
+This module contains some helper functions for creating/updating documentation:
 ```powershell
-Update-Documentation
-Update-ModuleHelp
+Build-ModuleDocumentation
+Add-ModuleHelp
 ```
-The first function will create/update all the Markdown help in the `.docs/Module` directory and the second will update the module's XML MAML help file.
+The first function will create/update all the Markdown help in the `.docs` directory and the second will update the module's XML MAML help file.
 
 See the example below for a guide on how to use these.
 
 ## Update the changelog  
 The changelog _must_ be updated when making a release, this is because the changelog is used to calculate the NuGet package manifest/version number and release notes.   
 The changelog follows the [SemVer v1.0.0](https://semver.org/spec/v1.0.0.html) spec.  
-You can use the [`Update-Changelog`](.docs/Module/Public/Update-Changelog.md) cmdlet from this very module to make the changes for you, the cmdlet is fully guided and it will even offer to auto-generate the changelog entries based off of a list of commits since the last release. 🪄🧙‍♂️
+You can use the [`Update-Changelog`](./Brownserve.PSTools/Public/Update-Changelog.md) cmdlet from this very module to make the changes for you, the cmdlet is fully guided and it will even offer to auto-generate the changelog entries based off of a list of commits since the last release. 🪄🧙‍♂️
 
 ## Example
 Let's say we want to create a new cmdlet called `New-Cmdlet` and add it to the Brownserve.PSTools module, this cmdlet will in turn call `New-PrivateCmdlet` for some logic.  
@@ -92,7 +92,7 @@ Next let's update the help files, to do this we'll need to run `_init_.ps1`
 
 Now we can create our Markdown help documentation for our new cmdlet's with:
 ```powershell
-Update-Documentation
+Build-ModuleDocumentation
 ```
 Providing that worked correctly you should see the following:
 ```
@@ -122,7 +122,7 @@ This cmdlet is for demonstration purposes only
 
 Once all this information is filled in you will then need to update the modules XML help, simply run the following:
 ```powershell
-Update-ModuleHelp
+Add-ModuleHelp
 ```
 
 You should see the following:
