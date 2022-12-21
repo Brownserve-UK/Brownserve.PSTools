@@ -32,5 +32,8 @@ Join-Path $PSScriptRoot -ChildPath 'Public' |
 #>
 if ($Global:BrownserveCmdlets -is 'System.Array')
 {
-    $Global:BrownserveCmdlets += $PublicCmdlets
+    $Global:BrownserveCmdlets += @{
+        Module = "$($MyInvocation.MyCommand)"
+        Cmdlets = $PublicCmdlets
+    }
 }
