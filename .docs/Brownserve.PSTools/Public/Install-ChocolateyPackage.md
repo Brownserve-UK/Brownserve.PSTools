@@ -25,9 +25,7 @@ Install-ChocolateyPackage [-Upgrade] [<CommonParameters>]
 ## DESCRIPTION
 This cmdlet is intended to be used in automations to allow for easy installations of dependencies.
 It's primary use case is for cloud based build agents that may not necessarily have all the required tooling available by default, though it can also be used to bulk install chocolatey packages on your local machine if you wish.
-Given that Chocolatey is package manager for Windows this cmdlet is Windows Only.  
-
-[Compatible with: Windows]
+Given that Chocolatey is package manager for Windows this cmdlet is Windows Only.
 
 ## EXAMPLES
 
