@@ -48,9 +48,13 @@ function Install-ChocolateyPackage
     
     begin
     {
-        if (!$IsWindows)
+        try
         {
-            throw "Not a Windows system."
+            Test-OperatingSystem 'Windows'
+        }
+        catch
+        {
+            throw $_.Exception.Message
         }
         try
         {
@@ -64,7 +68,7 @@ function Install-ChocolateyPackage
         $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
         if (!$currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
         {
-            throw "Chocolatey must be run from an elevated PowerShell session."
+            throw 'Chocolatey must be run from an elevated PowerShell session.'
         }
         $AcceptedVersionStrings = @('any', 'installed', 'present') # A collection of possible package versions strings
         $ValidExitCodes = @(0, 3010, 1641) # 3010 and 1641 are success but restart pending/initiated
@@ -78,11 +82,11 @@ function Install-ChocolateyPackage
             try
             {
                 $OutdatedArgs = @{
-                    FilePath = 'choco'
-                    ArgumentList = @('outdated','-r')
-                    ExitCodes = $ValidExitCodes
-                    PassThru = $true
-                    SuppressOut = $true
+                    FilePath     = 'choco'
+                    ArgumentList = @('outdated', '-r')
+                    ExitCodes    = $ValidExitCodes
+                    PassThru     = $true
+                    SuppressOut  = $true
                 }
                 if ($VerbosePreference -eq 'Continue')
                 {
@@ -128,11 +132,11 @@ function Install-ChocolateyPackage
             try
             {
                 $ListArgs = @{
-                    FilePath = 'choco'
+                    FilePath     = 'choco'
                     ArgumentList = @('list', "$($ChocolateyPackage.name)", '-e', '-r', '--local-only')
-                    ExitCodes = $ValidExitCodes
-                    PassThru = $true
-                    SuppressOut = $true
+                    ExitCodes    = $ValidExitCodes
+                    PassThru     = $true
+                    SuppressOut  = $true
                 }
                 if ($VerbosePreference -eq 'Continue')
                 {
@@ -150,7 +154,7 @@ function Install-ChocolateyPackage
                 Write-Verbose "$testPackage is already installed, checking version number"
                 # Remove the package name from the output string that  Chocolatey gave us, 
                 # which _should_ just leave us with the version string.
-                $CurrentVersion = $testPackage -replace "$($ChocolateyPackage.name)\|", ""
+                $CurrentVersion = $testPackage -replace "$($ChocolateyPackage.name)\|", ''
                 
                 # If we've not requested a specific version of a package then see if we're going to upgrade it
                 if ($ChocolateyPackage.version -in $AcceptedVersionStrings)
@@ -164,10 +168,10 @@ function Install-ChocolateyPackage
                             try
                             {
                                 $UpgradeArgs = @{
-                                    FilePath = 'choco'
+                                    FilePath     = 'choco'
                                     ArgumentList = @('upgrade', "$($ChocolateyPackage.name)", '-y')
-                                    ExitCodes = $ValidExitCodes
-                                    SuppressOut = $true
+                                    ExitCodes    = $ValidExitCodes
+                                    SuppressOut  = $true
                                 }
                                 if ($VerbosePreference -eq 'Continue')
                                 {
@@ -200,7 +204,7 @@ function Install-ChocolateyPackage
             else
             {
                 Write-Verbose "Attempting to install '$($ChocolateyPackage.Name)' version '$($ChocolateyPackage.Version)'"
-                $InstallArgs = @("install", "$($ChocolateyPackage.name)", "-y")
+                $InstallArgs = @('install', "$($ChocolateyPackage.name)", '-y')
                 if ($ChocolateyPackage.version -notin $AcceptedVersionStrings)
                 {
                     $InstallArgs = $InstallArgs + " --version $($ChocolateyPackage.version)"
@@ -208,10 +212,10 @@ function Install-ChocolateyPackage
                 try
                 {
                     $InstallArgs = @{
-                        FilePath = 'choco'
+                        FilePath     = 'choco'
                         ArgumentList = $InstallArgs
-                        ExitCodes = $ValidExitCodes
-                        SuppressOut = $true
+                        ExitCodes    = $ValidExitCodes
+                        SuppressOut  = $true
                     }
                     if ($VerbosePreference -eq 'Continue')
                     {
