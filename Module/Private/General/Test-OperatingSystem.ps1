@@ -4,7 +4,7 @@ function Test-OperatingSystem
     param
     (
         # The operating system(s) that should be supported
-        [Parameter(Mandatory = $false)]
+        [Parameter(Mandatory = $false, Position = 0, ValueFromPipelineByPropertyName = $true)]
         [OperatingSystemKernel[]]
         $SupportedOS = @('Windows', 'Linux', 'macOS')
     )
