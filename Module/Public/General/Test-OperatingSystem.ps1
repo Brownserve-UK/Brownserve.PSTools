@@ -22,6 +22,7 @@ function Test-OperatingSystem
             {
                 throw 'This cmdlet is not supported on Windows'
             }
+            $OS = 'Windows'
         }
         if ($IsLinux)
         {
@@ -29,6 +30,7 @@ function Test-OperatingSystem
             {
                 throw 'This cmdlet is not supported on Linux'
             }
+            $OS = 'Linux'
         }
         if ($IsMacOS)
         {
@@ -36,7 +38,9 @@ function Test-OperatingSystem
             {
                 throw 'This cmdlet is not supported on macOS'
             }
+            $OS = 'macOS'
         }
+        Write-Verbose "This cmdlet is supported on $OS"
     }
     
     end
