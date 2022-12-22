@@ -120,9 +120,13 @@ if (!$SuppressOutput)
 {
     if ($Global:BrownserveCmdlets)
     {
-        Write-Host 'The following cmdlets are now available:'
+        Write-Host "The following modules have been loaded and their functions are now available:`n"
         $Global:BrownserveCmdlets | ForEach-Object {
-            Write-Host "    $($_.Name) " -ForegroundColor Magenta -NoNewline; Write-Host "|  $($_.Synopsis)" -ForegroundColor Blue
+            Write-Host "$($_.Module):" -ForegroundColor Yellow
+            $_.Cmdlets | ForEach-Object {
+                Write-Host "    $($_.Name) " -ForegroundColor Magenta -NoNewline; Write-Host "|  $($_.Synopsis)" -ForegroundColor Blue
+            }
+            ''
         }
         Write-Host "For more information please use the 'Get-Help <command-name>' command`n"
     }
