@@ -20,12 +20,8 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host 'Initialising repository, please wait...'
 
-# We use this well-known global variable across a variety of projects for determining if given scripts/functions/cmdlets
-# are compatible with the users operating system.
-$Global:BrownserveCmdlets = @{
-    CompatibleCmdlets   = @()
-    IncompatibleCmdlets = @()
-}
+# Store cmdlet information here so we can dump it to screen later on
+$Global:BrownserveCmdlets = @()
 
 # If we're on Teamcity set the well-known $Global:CI variable, this is set on most other CI/CD providers but not Teamcity :(
 if ($env:TEAMCITY_VERSION)
@@ -200,20 +196,16 @@ Write-Host "Repo initialised successfully!" -ForegroundColor Green
 # Their synopsis. 
 if (!$SuppressOutput)
 {
-    if ($Global:BrownserveCmdlets.CompatibleCmdlets)
+    if ($Global:BrownserveCmdlets)
     {
-        Write-Host 'The following cmdlets are now available:'
-        $Global:BrownserveCmdlets.CompatibleCmdlets | ForEach-Object {
-            Write-Host "    $($_.Name) " -ForegroundColor Magenta -NoNewline; Write-Host "|  $($_.Synopsis)" -ForegroundColor Blue
+        Write-Host "The following modules have been loaded and their functions are now available:`n"
+        $Global:BrownserveCmdlets | ForEach-Object {
+            Write-Host "$($_.Module):" -ForegroundColor Yellow
+            $_.Cmdlets | ForEach-Object {
+                Write-Host "    $($_.Name) " -ForegroundColor Magenta -NoNewline; Write-Host "|  $($_.Synopsis)" -ForegroundColor Blue
+            }
+            ''
         }
         Write-Host "For more information please use the 'Get-Help <command-name>' command`n"
-    }
-    if ($Global:BrownserveCmdlets.IncompatibleCmdlets)
-    {
-        Write-Warning 'The following cmdlets are not compatible with your operating system and have been disabled:'
-        $Global:BrownserveCmdlets.IncompatibleCmdlets | ForEach-Object {
-            Write-Host "  $($_.Name)" -ForegroundColor Yellow
-        }
-        '' # Blank line to break output out a little
     }
 }

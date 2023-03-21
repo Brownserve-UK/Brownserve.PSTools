@@ -135,6 +135,11 @@ function Initialize-BrownserveBuildRepo
             VariableName = 'RepoBinDirectory'
             Path         = '.bin'
             Description  = 'Used to store any downloaded binaries required for builds, cmdlets like Get-Vault make use of this variable'
+        },
+        [InitPath]@{
+            VariableName = 'RepoTempDirectory'
+            Path = '.tmp'
+            Description = 'Used to store temporary files created for builds/tests'
         }
     )
 
@@ -160,7 +165,8 @@ function Initialize-BrownserveBuildRepo
     $GitIgnoreItems = @(
         'paket.lock',
         'packages/',
-        'paket-files/'
+        'paket-files/',
+        '.tmp/'
     )
     $EphemeralPaths | ForEach-Object {
         if ($_.ChildPaths)

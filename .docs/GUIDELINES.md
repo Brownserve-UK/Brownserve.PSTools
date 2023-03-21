@@ -11,12 +11,19 @@ Don't form paths by passing in separators (e.g. `C:\`, `/usr/`), use the tools P
 By using these you give your code a much higher chance of working across different operating systems. 😊
 
 ### OS specific cmdlets
-By default we treat all cmdlets as cross-platform but there may be instances where your code will only work on certain operating systems, in these cases you need to mark them using the `[Compatible with:]` tag in the help description to list all the operating systems that your code is compatible with.  
-
-For example if your code is only compatible with macOS and Linux you would add `[Compatible with: macOS, Linux]`, if it's only compatible with Windows you would add `[Compatible with: Windows]`.
-Take a look at [Install-ChocolateyPackage](Brownserve.PSTools/Public/Install-ChocolateyPackage.md) for an example of how this works.
-
-It's also a good idea to have logic in your code to bottom out if it isn't on the right platform.
+By default we treat all cmdlets as cross-platform but there may be instances where your code will only work on certain operating systems, in these cases you should call `Test-OperatingSystem` at the beginning of your cmdlet with the supported OSes as the first (and only) parameter.  
+If the running OS isn't in the supported list then an exception will be raised.
+Example:
+```powershell
+> $isLinux
+> $True
+> Test-OperatingSystem 'Linux' -Verbose
+> VERBOSE: This cmdlet is supported on Linux
+> Test-OperatingSystem 'Linux','macOS' -Verbose
+> VERBOSE: This cmdlet is supported on Linux
+> Test-OperatingSystem 'Linux','Windows' -Verbose
+> Exception: This cmdlet is not compatible with Windows
+```
 
 ### Writing snippets
 We include a bunch of helper snippets to make working with Brownserve projects a little easier, from time-to-time these may need updating.  
