@@ -41,11 +41,6 @@ function Build-ModuleDocumentation
         [bool]
         $ReloadModule = $true,
 
-        # Whether or not to ignore cmdlet compatibility when generating docs
-        [Parameter(Mandatory = $false)]
-        [bool]
-        $IgnoreCmdletCompatibility = $true,
-
         # Whether or not to ignore parameters marked as 'DontShow'
         [Parameter(Mandatory = $false)]
         [bool]
@@ -108,17 +103,6 @@ function Build-ModuleDocumentation
                 throw "Unable to unload module '$ModuleName'.`n$($_.Exception.Message)"
             }
         }
-        <# 
-            Some of the modules we write contain cmdlets that are OS specific (e.g. Install-Chocolatey package on Windows) and we have logic that prevents these from being loaded
-            on incompatible operating systems.
-            This results in PlatyPS failing to generate documentation for these cmdlets, so we set our super secret special flag that will ensure all cmdlets get loaded even if they
-            are not compatible with our OS.
-        #>
-        if ($IgnoreCmdletCompatibility)
-        {
-            $CurrentIgnoreState = $global:IgnoreCmdletCompatibility
-            $global:IgnoreCmdletCompatibility = $true
-        }
         if (!$ModuleLoaded -or $ReloadModule)
         {
             try
@@ -128,10 +112,6 @@ function Build-ModuleDocumentation
             catch
             {
                 throw "Failed to import module '$ModuleName' from $ModulePath.`n$($_.Exception.Message)"
-            }
-            finally
-            {
-                $global:IgnoreCmdletCompatibility = $CurrentIgnoreState
             }
         }
         # Check that the destination exists and if not create it
