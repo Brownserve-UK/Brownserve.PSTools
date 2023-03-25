@@ -9,7 +9,7 @@ function Get-Terraform
             Position = 0
         )]
         [version]
-        $TerraformVersion = "$(if ($Global:RepoTerraformVersion){"$Global:RepoTerraformVersion"}else{'1.0.8'})",
+        $TerraformVersion = "1.4.2",
 
         # The path to download the binary to
         [Parameter(
