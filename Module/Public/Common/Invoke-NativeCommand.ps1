@@ -100,31 +100,16 @@ function Invoke-NativeCommand
         {
             throw "Could not find command $FilePath.`n$($_.Exception.Message)"
         }
-        # Note: the arguments may leak sensitive information so be wary of exposing them
+        # Note: we use debug here as the ArgumentList may contain sensitive information (password etc)
         Write-Debug "Calling '$AbsoluteCommandPath' with arguments: '$($ArgumentList -join ' ')'"
         Write-Debug "Valid exit codes: $($ExitCodes -join ', ')"
-        # When we want to suppress output AND redirect to a file we need to use the Start-Process cmdlet
+
         if ($LogOutput)
         {
-            # Set redirected output to the repos log directory if it exists, otherwise to temp
+            # When no output path has been specified then use the temp drive
             if (!$LogOutputPath)
             {
-                if ($global:RepoLogDirectory)
-                {
-                    $LogOutputPath = $global:RepoLogDirectory
-                }
-                else
-                {
-                    # Determine our temp directory depending on flavour of PowerShell
-                    if ($PSVersionTable.PSEdition -eq 'Desktop')
-                    {
-                        $LogOutputPath = $env:TEMP
-                    }
-                    else
-                    {
-                        $LogOutputPath = (Get-PSDrive Temp).Root
-                    }
-                }
+                $LogOutputPath = $script:BrownserveTempLocation
             }
 
             # Check the redirect stream path is valid
