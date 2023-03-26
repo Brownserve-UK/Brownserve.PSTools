@@ -46,5 +46,13 @@ if ($Global:BrownserveCmdlets -is 'System.Array')
 $script:BrownserveTempLocation = (Get-PSDrive Temp).Root
 if ($Global:BrownserveRepoTempDirectory)
 {
-    $script:BrownserveTempLocation = $Global:BrownserveRepoTempDirectory
+    # Only set the path if it's valid, we don't want to set a duff path!
+    if ((Test-Path $Global:BrownserveRepoTempDirectory))
+    {
+        $script:BrownserveTempLocation = $Global:BrownserveRepoTempDirectory
+    }
+    else
+    {
+        Write-Warning "The `$global:sBrownserveRepoTempDirectory path '$($global:BrownserveRepoTempDirectory)' does not appear to be a valid path and therefore will be ignored."
+    }
 }
