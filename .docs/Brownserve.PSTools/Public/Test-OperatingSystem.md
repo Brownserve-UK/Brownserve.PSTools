@@ -13,7 +13,7 @@ Quick way of terminating scripts when they are running on an incompatible OS.
 ## SYNTAX
 
 ```
-Test-OperatingSystem [[-SupportedOS] <OperatingSystemKernel[]>] [<CommonParameters>]
+Test-OperatingSystem [-SupportedOS] <OperatingSystemKernel[]> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -40,7 +40,7 @@ Parameter Sets: (All)
 Aliases:
 Accepted values: Windows, Linux, macOS
 
-Required: False
+Required: True
 Position: 0
 Default value: None
 Accept pipeline input: True (ByPropertyName)

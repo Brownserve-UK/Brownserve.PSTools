@@ -116,6 +116,9 @@ Provides an easy way to set the Terraform log level.
 ### [Test-Administrator](./Public/Test-Administrator.md)
 A simple function for testing if a user is running with administrator/root privileges or not.
 
+### [Test-OperatingSystem](./Public/Test-OperatingSystem.md)
+Quick way of terminating scripts when they are running on an incompatible OS.
+
 ### [Update-Changelog](./Public/Update-Changelog.md)
 Updates a repo's changelog according to the semver v1.0.0 spec.
 
