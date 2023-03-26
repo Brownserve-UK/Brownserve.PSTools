@@ -75,8 +75,8 @@ Write-Verbose @"
 $script:CurrentCommitHash = & git rev-parse HEAD
 
 
-$global:BuiltModuleDirectory = Join-Path $global:RepoBuildOutputDirectory 'Brownserve.PSTools'
-$script:NugetPackageDirectory = Join-Path $global:RepoBuildOutputDirectory 'NuGetPackage'
+$global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'Brownserve.PSTools'
+$script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'NuGetPackage'
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory 'Brownserve.PSTools.nuspec'
 
 # On non-windows platforms mono is required to run NuGet 🤢
@@ -88,7 +88,7 @@ if (-not $isWindows)
 
 # Synopsis: Generate version info from the changelog and branch name.
 task GenerateVersionInfo {
-    $script:Changelog = Read-Changelog -ChangelogPath (Join-Path $Global:RepoRootDirectory -ChildPath 'CHANGELOG.md')
+    $script:Changelog = Read-Changelog -ChangelogPath (Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'CHANGELOG.md')
     $script:Version = $Changelog.CurrentVersion
     $script:ReleaseNotes = $Changelog.ReleaseNotes -replace '"', '\"' -replace '`', '' -replace '\*','' # Filter out characters that'll break the XML and/or just generally look horrible in NuGet
     $NugetPackageVersionParams = @{
@@ -122,20 +122,20 @@ task CheckPreviousRelease GenerateVersionInfo, {
 task CopyModule {
     Write-Verbose "Copying files to build output directory"
     # Copy the "Module" folder over to the build output folder under 'Brownserve.PSTools'
-    Copy-Item -Path $Global:ModuleDirectory -Destination $global:BuiltModuleDirectory -Recurse -Force
+    Copy-Item -Path $Global:BrownserveModuleDirectory -Destination $global:BrownserveBuiltModuleDirectory -Recurse -Force
 }
 
 # Synopsis: Generates the module manifest
 task GenerateModuleManifest CopyModule, {
     Write-Verbose "Creating PowerShell module manifest"
     # Get a list of Public cmdlets so we can mark them for export.
-    $PublicScripts = Get-ChildItem (Join-Path $global:BuiltModuleDirectory 'Public') -Filter '*.ps1' -Recurse
+    $PublicScripts = Get-ChildItem (Join-Path $global:BrownserveBuiltModuleDirectory 'Public') -Filter '*.ps1' -Recurse
     $PublicFunctions = $PublicScripts | ForEach-Object {
         $_.Name -replace '.ps1', ''
     }
     New-ModuleManifest `
-        -Path (Join-Path $global:BuiltModuleDirectory -ChildPath 'Brownserve.PSTools.psd1') `
-        -Guid $Global:ModuleGUID `
+        -Path (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath 'Brownserve.PSTools.psd1') `
+        -Guid $Global:BrownserveModuleGUID `
         -Author 'ShoddyGuard' `
         -Copyright "$(Get-Date -Format yyyy) ShoddyGuard" `
         -CompanyName 'Brownserve UK' `
@@ -152,7 +152,7 @@ task GenerateModuleManifest CopyModule, {
     if ($PreRelease)
     {
         Update-ModuleManifest `
-            -Path (Join-Path $global:BuiltModuleDirectory -ChildPath 'Brownserve.PSTools.psd1') `
+            -Path (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath 'Brownserve.PSTools.psd1') `
             -Prerelease ($BranchName -replace '[^0-9A-Za-z]', '')
     }
 }
@@ -161,12 +161,12 @@ task GenerateModuleManifest CopyModule, {
 task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule, {
     # We'll copy our build module to the nuget package and rename it to 'tools'
     Write-Verbose "Copying built module into NuGet package"
-    Copy-Item $global:BuiltModuleDirectory -Destination (Join-Path $script:NugetPackageDirectory 'tools') -Recurse
+    Copy-Item $global:BrownserveBuiltModuleDirectory -Destination (Join-Path $script:NugetPackageDirectory 'tools') -Recurse
     # Copy each of the necessary files over to the build output directory
     $ItemsToCopy = @(
-        (Join-Path $Global:RepoRootDirectory 'CHANGELOG.md'),
-        (Join-Path $Global:RepoRootDirectory 'LICENSE'),
-        (Join-Path $Global:RepoRootDirectory README.md)
+        (Join-Path $Global:BrownserveRepoRootDirectory 'CHANGELOG.md'),
+        (Join-Path $Global:BrownserveRepoRootDirectory 'LICENSE'),
+        (Join-Path $Global:BrownserveRepoRootDirectory README.md)
     )
     Copy-Item $ItemsToCopy -Destination $script:NugetPackageDirectory -Force
     # Now we'll generate a nuspec file and pop it in the root of NuGet package
@@ -207,23 +207,23 @@ task Pack CreateNugetPackage, GenerateModuleManifest, {
             "-Version",
             "$NugetPackageVersion",
             "-OutputDirectory",
-            "$Global:RepoBuildOutputDirectory"
+            "$Global:BrownserveRepoBuildOutputDirectory"
         )
         # On *nix we need to use mono to invoke nuget, so fudge the arguments a bit
         if (-not $isWindows)
         {
             # Mono won't have access to our NuGet PowerShell alias, so set the path using our env var
-            $NugetArguments = @($Global:NugetPath) + $NugetArguments
+            $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
         }
         & $NugetCommand $NugetArguments
     }
-    $script:nupkgPath = Join-Path $Global:RepoBuildOutputDirectory "Brownserve.PSTools.$script:NugetPackageVersion.nupkg" | Convert-Path
+    $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "Brownserve.PSTools.$script:NugetPackageVersion.nupkg" | Convert-Path
 }
 
 # Synopsis: Performs some tests to make sure everything works as intended
 task Tests Pack, {
     Write-Verbose "Performing unit testing, this may take a while..."
-    $Results = Invoke-Pester -Path $Global:RepoTestsDirectory -PassThru
+    $Results = Invoke-Pester -Path $Global:BrownserveRepoTestsDirectory -PassThru
     assert ($results.FailedCount -eq 0) "$($results.FailedCount) test(s) failed."
 }
 
@@ -241,7 +241,7 @@ task PushNuget CheckPreviousRelease, Tests, {
         )
         if (-not $isWindows)
         {
-            $NugetArguments = @($Global:NugetPath) + $NugetArguments
+            $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
         }
         Write-Verbose "Pushing to $NugetFeedToPublishTo"
         # Be careful - Invoke-BuildExec requires curly braces to be on the same line!
@@ -256,7 +256,7 @@ task PushPSGallery CheckPreviousRelease, Tests, {
     Write-Verbose "Pushing to PSGallery"
     # For PSGallery the module needs to be in a directory named after itself... -_- (PowerShellGet is awful)
     $PSGalleryParams = @{
-        Path = $global:BuiltModuleDirectory
+        Path = $global:BrownserveBuiltModuleDirectory
         NuGetAPIKey = $PSGalleryAPIKey
     }
     Publish-Module @PSGalleryParams

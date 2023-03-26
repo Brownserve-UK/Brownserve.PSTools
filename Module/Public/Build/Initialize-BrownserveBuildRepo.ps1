@@ -103,13 +103,13 @@ function Initialize-BrownserveBuildRepo
 
     $PermanentPaths = @(
         [InitPath]@{
-            VariableName = 'RepoBuildDirectory'
+            VariableName = 'BrownserveRepoBuildDirectory'
             Path         = '.build'
             Description  = 'Holds all build related configuration along with this _init script'
             LocalPath    = (Join-Path $RepoPath '.build')
         },
         [InitPath]@{
-            VariableName = 'RepoCodeDirectory'
+            VariableName = 'BrownserveRepoCodeDirectory'
             Path         = '.build'
             ChildPaths   = 'code'
             Description  = 'Used to store any custom code/scripts/modules'
@@ -121,25 +121,27 @@ function Initialize-BrownserveBuildRepo
 
     $EphemeralPaths = @(
         [InitPath]@{
-            VariableName = 'RepoLogDirectory'
-            Path         = '.log'
+            VariableName = 'BrownserveRepoTempDirectory'
+            Path = '.tmp'
+            Description = 'Used to store temporary files created for builds/tests'
+        }
+        [InitPath]@{
+            VariableName = 'BrownserveRepoLogDirectory'
+            Path         = '.tmp'
+            ChildPaths   = 'logs'
             Description  = 'Used to store build logs and output from Invoke-NativeCommand'
         },
         [InitPath]@{
-            VariableName = 'RepoBuildOutputDirectory'
-            Path         = '.build'
+            VariableName = 'BrownserveRepoBuildOutputDirectory'
+            Path         = '.tmp'
             ChildPaths   = 'output'
             Description  = 'Used to store any output from builds (e.g. Terraform plans, MSBuild artifacts etc)'
         },
         [InitPath]@{
-            VariableName = 'RepoBinDirectory'
-            Path         = '.bin'
+            VariableName = 'BrownserveRepoBinaryDirectory'
+            Path         = '.tmp'
+            ChildPaths   = 'bin'
             Description  = 'Used to store any downloaded binaries required for builds, cmdlets like Get-Vault make use of this variable'
-        },
-        [InitPath]@{
-            VariableName = 'RepoTempDirectory'
-            Path = '.tmp'
-            Description = 'Used to store temporary files created for builds/tests'
         }
     )
 

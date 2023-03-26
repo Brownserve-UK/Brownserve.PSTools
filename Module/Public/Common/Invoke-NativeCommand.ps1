@@ -56,14 +56,13 @@ function Invoke-NativeCommand
         $LogOutput,
 
         # The path to where the output should be stored
-        # Defaults to the contents of the environment variable 'RepoLogDirectory' if available
-        # If that isn't set then defaults to a temp directory
+        # Defaults to a temp directory (will use repo based temp directory if it exists)
         [Parameter(
             Mandatory = $false
         )]
         [ValidateNotNullOrEmpty()]
         [string]
-        $LogOutputPath,
+        $LogOutputPath = $script:BrownserveTempLocation,
 
         # The prefix to use on the logged output file, defaults to the command run time
         [Parameter(
@@ -106,12 +105,6 @@ function Invoke-NativeCommand
 
         if ($LogOutput)
         {
-            # When no output path has been specified then use the temp drive
-            if (!$LogOutputPath)
-            {
-                $LogOutputPath = $script:BrownserveTempLocation
-            }
-
             # Check the redirect stream path is valid
             try
             {

@@ -66,7 +66,7 @@ function New-BrownserveInitScript
                 $Path = "'$($_.Path)'"
             }
             $PermanentPathText = $PermanentPathText + @"
-`$Global:$($_.VariableName) = Join-Path `$global:RepoRootDirectory $Path | Convert-Path`n
+`$Global:$($_.VariableName) = Join-Path `$global:BrownserveRepoRootDirectory $Path | Convert-Path`n
 "@
         }
         $InitTemplate = $InitTemplate.Replace('###PERMANENT_PATHS###', $PermanentPathText)
@@ -85,7 +85,7 @@ function New-BrownserveInitScript
                 $Path = "'$($_.Path)'"
             }
             $EphemeralPathText = $EphemeralPathText + @"
-    (`$$($_.VariableName) = Join-Path `$global:RepoRootDirectory $Path)
+    (`$$($_.VariableName) = Join-Path `$global:BrownserveRepoRootDirectory $Path)
 "@
             # We are building an array in the template
             # if this is the last line of the array then we don't want to add a comma!
@@ -122,7 +122,7 @@ function New-BrownserveInitScript
 # Find and load any custom PowerShell modules we've written for this repo
 try
 {
-    Get-ChildItem $global:RepoCodeDirectory -Filter '*.psm1' -Recurse | Foreach-Object {
+    Get-ChildItem $global:BrownserveRepoCodeDirectory -Filter '*.psm1' -Recurse | Foreach-Object {
         Import-Module $_ -Force -Verbose:$false
     }
 }
