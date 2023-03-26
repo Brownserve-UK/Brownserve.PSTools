@@ -13,8 +13,9 @@ Sends a standard Brownserve build notification.
 ## SYNTAX
 
 ```
-Send-BuildNotification [[-BuildName] <String>] [-BuildStatus] <String> [[-Webhook] <String>]
- [[-Message] <String>] [[-PushMessage] <String>] [<CommonParameters>]
+Send-BuildNotification [[-BuildName] <String>] [-BuildStatus] <String> [-RepoName <String>]
+ [-RepoBranch <String>] [-Webhook] <String> [[-Message] <String>] [[-PushMessage] <String>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -95,6 +96,36 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -RepoBranch
+An optional branch that the build is currently running against
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -RepoName
+An optional repo name the build is currently running against
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Webhook
 The webhook to send the notification to, at present only Slack webhooks are supported
 
@@ -103,7 +134,7 @@ Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 2
 Default value: None
 Accept pipeline input: False
