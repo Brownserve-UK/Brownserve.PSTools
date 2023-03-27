@@ -5,6 +5,22 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.9.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.9.0) (2023-03-27)
+
+**Features**
+- "Fix Update-Changelog git commands"
+- "Remove uses of global variables"
+- "Add logic for checking OS compatibility"
+- "Add cmdlets for generating PowerShell Module documentation/help"
+- "Add New-BrownserveTemporaryFile cmdlet"
+- "Refactor and rework the Invoke-NativeCommand cmdlet"
+
+**Bugfixes**
+- Fixes bug when using git to auto-generate updates using `Update-Changelog`
+
+**Known Issues**
+N/A
+
 ### [v0.8.2](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.8.2) (2022-02-21)
 
 **Features**
