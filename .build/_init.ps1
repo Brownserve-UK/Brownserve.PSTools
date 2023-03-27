@@ -81,7 +81,7 @@ try
     $EphemeralPaths | ForEach-Object {
         if ((Test-Path $_))
         {
-            Remove-Item $_ -Recurse -Force | Out-Null
+            Remove-Item $_ -Recurse -Force -Confirm:$false | Out-Null
         }
         New-Item $_ -ItemType Directory -Force | Out-Null
     }
