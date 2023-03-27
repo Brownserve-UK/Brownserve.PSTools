@@ -19,7 +19,7 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 - Fixes bug when using git to auto-generate updates using `Update-Changelog`
 
 **Known Issues**
-N/A
+- The `Start-SilentProcess` cmdlet has now been removed, please use `Invoke-NativeCommand` instead
 
 ### [v0.8.2](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.8.2) (2022-02-21)
 
