@@ -143,7 +143,7 @@ function Update-Changelog
                 # First get the current branch
                 $CurrentBranch = Invoke-NativeCommand `
                     -FilePath 'git' `
-                    -Arguments 'rev-parse --abbrev-ref HEAD' `
+                    -Arguments @('rev-parse', '--abbrev-ref', 'HEAD') `
                     -PassThru `
                     -SuppressOutput | Select-Object -ExpandProperty OutputContent
                 Write-Verbose "CurrentBranch detected as $CurrentBranch"
@@ -157,7 +157,7 @@ function Update-Changelog
                 # we can switch back to messages (%s)
                 $Features = (Invoke-NativeCommand `
                         -FilePath 'git' `
-                        -Arguments "log --merges $CommitSearcher  --pretty=`"%b`"" `
+                        -Arguments @('log', '--merges', "$CommitSearcher",  "--pretty=`"%b`"") `
                         -PassThru `
                         -SuppressOutput | Select-Object -ExpandProperty OutputContent) -split "`n"
                 
