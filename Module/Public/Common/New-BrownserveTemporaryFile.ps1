@@ -31,17 +31,10 @@ function New-BrownserveTemporaryFile
     
     begin
     {
-        # If the path hasn't been provided then we can work it out based on whether or not our special variable is set
+        # If the path hasn't been provided then we use whatever temp location we want
         if (!$FilePath)
         {
-            if ($global:RepoTempDirectory)
-            {
-                $FilePath = $global:RepoTempDirectory
-            }
-            else
-            {
-                $FilePath = (Get-PSDrive Temp).Root
-            }
+            $FilePath = $script:BrownserveTempLocation
         }
         if ($FileExtension -notmatch '^\.')
         {
@@ -77,13 +70,13 @@ function New-BrownserveTemporaryFile
                 if ($SkipCreation -ne $true)
                 {
                     $NewItemParams = @{
-                        ItemType = 'File'
+                        ItemType    = 'File'
                         ErrorAction = 'Stop'
-                        Path = $Path
+                        Path        = $Path
                     }
                     if ($Content)
                     {
-                        $NewItemParams.Add('Value',$Content)
+                        $NewItemParams.Add('Value', $Content)
                     }
                     $Return += New-Item @NewItemParams | Convert-Path
                 }

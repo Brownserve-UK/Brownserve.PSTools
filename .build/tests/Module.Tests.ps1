@@ -8,7 +8,7 @@ BeforeAll {
 Describe 'ModuleImport' {
     Context 'When Brownserve.PSTools is imported' {
         It 'should not throw any exception' {
-            { Join-Path $global:BuiltModuleDirectory -ChildPath "Brownserve.PSTools.psd1" | Import-Module -Force -Verbose:$false } | Should -not -Throw 
+            { Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "Brownserve.PSTools.psd1" | Import-Module -Force -Verbose:$false } | Should -not -Throw 
         }
         It 'should have cmdlets on the path' -TestCases @(
             @{Filter = 'Get-OpenPullRequests'; Expected = 'Get-OpenPullRequests' },

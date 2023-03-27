@@ -14,13 +14,13 @@ function New-TempDirectory
         try
         {
             $TempDirName = ( -join ((0x30..0x39) + ( 0x41..0x5A) + ( 0x61..0x7A) | Get-Random -Count 8 | ForEach-Object { [char]$_ }))
-            $TempDirPath = Join-Path (Get-PSDrive Temp).Root $TempDirName
+            $TempDirPath = Join-Path $script:BrownserveTempLocation $TempDirName
             while ((Test-Path $TempDirPath) -and $Count -lt 10) 
             {
                 Write-Verbose "Temp directory $TempDirPath already exists, choosing another name."
                 $Count = $Count + 1
                 $TempDirName = ( -join ((0x30..0x39) + ( 0x41..0x5A) + ( 0x61..0x7A) | Get-Random -Count 8 | ForEach-Object { [char]$_ }))
-                $TempDirPath = Join-Path (Get-PSDrive Temp).Root $TempDirName
+                $TempDirPath = Join-Path $script:BrownserveTempLocation $TempDirName
             }
             if ($Count -ge 10)
             {

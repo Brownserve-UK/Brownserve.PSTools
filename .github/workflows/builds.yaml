@@ -10,7 +10,7 @@ jobs:
     # Checkout this repo
     steps:
       - name: checkout-module
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with: 
           path: Brownserve.PSTools
     # Run the build script
@@ -26,5 +26,10 @@ jobs:
           BUILD_BRANCH: ${{ github.head_ref }}
         run: |
             ./Brownserve.PSTools/.build/_init.ps1
-            Send-BuildNotification -BuildName ${{ github.job }} -BuildStatus ${{ job.status }}
+            Send-BuildNotification `
+              -BuildName ${{ github.job }} `
+              -BuildStatus ${{ job.status }} `
+              -Webhook $env:BUILD_NOTIFICATION_WEBHOOK `
+              -RepoBranch $env:BUILD_BRANCH `
+              -RepoName $global:BrownserveRepoName
           

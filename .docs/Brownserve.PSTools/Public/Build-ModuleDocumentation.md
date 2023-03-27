@@ -14,8 +14,8 @@ This will build markdown PowerShell module documentation using PlatyPS
 
 ```
 Build-ModuleDocumentation [-ModuleName] <String> [-ModulePath] <String> [-DocumentationPath] <String>
- [[-IncludePrivate] <Boolean>] [[-ReloadModule] <Boolean>] [[-IgnoreCmdletCompatibility] <Boolean>]
- [[-IgnoreDontShow] <Boolean>] [[-ModuleGUID] <Guid>] [<CommonParameters>]
+ [[-IncludePrivate] <Boolean>] [[-ReloadModule] <Boolean>] [[-IgnoreDontShow] <Boolean>] [[-ModuleGUID] <Guid>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -49,22 +49,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -IgnoreCmdletCompatibility
-Some modules contain cmdlets that are only compatible with certain operating systems and when importing them on an incompatible OS they won't be loaded. This results in PlatyPS being unable to generate documentation for them.  
-This parameter allows us to force them to be loaded to ensure that all documentation can be generated.
-
-```yaml
-Type: Boolean
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 6
-Default value: True
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -IgnoreDontShow
 Whether or not to ignore parameters marked as 'DontShow'
 
@@ -74,7 +58,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 6
 Default value: True
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -104,7 +88,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 8
+Position: 7
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

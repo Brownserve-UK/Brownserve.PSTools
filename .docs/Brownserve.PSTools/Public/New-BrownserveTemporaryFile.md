@@ -108,7 +108,7 @@ Accept wildcard characters: False
 
 ### -FilePath
 The path to where the temporary file should be stored.  
-If none is provided then the cmdlet will look for the presence of the `$global:RepoTempDirectory` variable, if present this value will be used otherwise the value of `(Get-PSDrive Temp).Root` will be used.
+If none is provided then the cmdlet will use the `$BrownserveTempLocation` directory which varies depending on the OS and the location this module was imported
 
 ```yaml
 Type: String

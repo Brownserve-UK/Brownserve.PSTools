@@ -21,8 +21,6 @@ This cmdlet downloads the specified version of Terraform to the a given director
 This allows us to use different versions of Terraform across different repositories easily (though the cmdlet could be used to download Terraform to your system if desired).  
 This cmdlet should work across Windows, macOS and Linux.  
 
-When using this with a repository you can set the `$global:RepoTerraformVersion` variable in your `_init` script or similar to save having to pass the `-TerraformVersion` parameter in every build step.
-
 The command `terraform` is replaced by an alias to the downloaded binary and the `$env:TerraformPath` variable is set pointing to the downloaded version of Terraform, this only affects your current PowerShell session.
 
 ## EXAMPLES
@@ -41,15 +39,6 @@ Get-Terraform -TerraformVersion '1.0.0' -DownloadPath 'C:\tools'
 ```
 
 Will download Terraform v1.0.0 to C:\tools  
-An Alias for the `terraform` command would be created and the `$env:TerraformPath` variable would be set pointing to this version for your current PowerShell session.
-
-### Example 3: Use the global variable
-```powershell
-$global:RepoTerraformVersion = '0.14.7'
-Get-Terraform -DownloadPath 'C:\tools'
-```
-
-This would download Terraform v0.14.7 to C:\tools.  
 An Alias for the `terraform` command would be created and the `$env:TerraformPath` variable would be set pointing to this version for your current PowerShell session.
 
 ## PARAMETERS
@@ -71,7 +60,6 @@ Accept wildcard characters: False
 
 ### -TerraformVersion
 The version of Terraform to download
-Defaults to `$global:TerraformVersion` but if that is not set then a default version of 1.0.8 is used
 
 ```yaml
 Type: Version

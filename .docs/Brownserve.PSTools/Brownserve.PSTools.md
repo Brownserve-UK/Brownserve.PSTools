@@ -14,8 +14,14 @@ A collection of PowerShell tools used in various projects.
 ### [Add-ChangelogEntry](./Public/Add-ChangelogEntry.md)
 Inserts a new changelog entry into a given changelog file
 
+### [Add-ModuleHelp](./Public/Add-ModuleHelp.md)
+Creates XML MALM help for a PowerShell module
+
 ### [Add-PullRequestComment](./Public/Add-PullRequestComment.md)
 Adds a comment to a given pull request
+
+### [Build-ModuleDocumentation](./Public/Build-ModuleDocumentation.md)
+This will build markdown PowerShell module documentation using PlatyPS
 
 ### [Format-TerraformResourceName](./Public/Format-TerraformResourceName.md)
 Strips out illegal characters from Terraform resource names
@@ -47,6 +53,9 @@ Returns a secret from a given vault path
 ### [Initialize-BrownserveBuildRepo](./Public/Initialize-BrownserveBuildRepo.md)
 Prepares a repo to be able to consume and use the Brownserve.PSTools PowerShell module
 
+### [Install-ChocolateyPackage](./Public/Install-ChocolateyPackage.md)
+Helper cmdlet for installing Chocolatey packages programmatically
+
 ### [Invoke-DownloadMethod](./Public/Invoke-DownloadMethod.md)
 Downloads a file using the best method available depending on operating system.
 
@@ -67,6 +76,9 @@ Runs the `terraform show` command and converts the output into a PowerShell obje
 
 ### [Invoke-TerraformValidate](./Public/Invoke-TerraformValidate.md)
 Performs a 'terraform validate'
+
+### [New-BrownserveTemporaryFile](./Public/New-BrownserveTemporaryFile.md)
+Creates a temporary file in a known good location.
 
 ### [New-GitHubRelease](./Public/New-GitHubRelease.md)
 Creates a release on GitHub
@@ -101,12 +113,11 @@ Sets the build number in Teamcity.
 ### [Set-TerraformLogLevel](./Public/Set-TerraformLogLevel.md)
 Provides an easy way to set the Terraform log level.
 
-### [Start-SilentProcess](./Public/Start-SilentProcess.md)
-**This command is deprecated and will be removed in a future release, please use Invoke-NativeCommand instead.**  
-Starts a process that redirects stdout and stderr to log files.
-
 ### [Test-Administrator](./Public/Test-Administrator.md)
 A simple function for testing if a user is running with administrator/root privileges or not.
+
+### [Test-OperatingSystem](./Public/Test-OperatingSystem.md)
+Quick way of terminating scripts when they are running on an incompatible OS.
 
 ### [Update-Changelog](./Public/Update-Changelog.md)
 Updates a repo's changelog according to the semver v1.0.0 spec.

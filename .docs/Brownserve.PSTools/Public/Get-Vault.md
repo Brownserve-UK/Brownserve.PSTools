@@ -22,8 +22,6 @@ An alias is created that replaces the path to the `vault` command and the enviro
 
 This allows us to lock vault to different versions across projects if we need to.
 
-You can set the environment variable `$global:RepoVaultVersion` for a given project to save having to specify the `-VaultVersion` parameter.
-
 ## EXAMPLES
 
 ### EXAMPLE 1: Using the default version
@@ -39,15 +37,6 @@ Get-Vault -VaultVersion '1.7.3' -DownloadPath 'C:\Tools'
 ```
 
 Will download v.1.7.3 to C:\Tools
-
-### Example 3: Using the environment variable
-```powershell
-$global:RepoVaultVersion = '1.0.0'
-Get-Vault -DownloadPath 'C:\Tools'
-```
-
-This would download v1.0.0 of vault to the C:\Tools folder.
-The command `vault` would be pointed to this download and the `$env:VaultPath` variable would be set for the duration of your shell
 
 ## PARAMETERS
 
@@ -68,7 +57,6 @@ Accept wildcard characters: False
 
 ### -VaultVersion
 The version of Vault to use  
-If the `$global:RepoVaultVersion` variable is set then it will default to this otherwise defaults to 1.8.2
 
 ```yaml
 Type: Version

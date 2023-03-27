@@ -10,7 +10,7 @@ function Get-Vault
         )]
         [ValidateNotNullOrEmpty()]
         [version]
-        $VaultVersion = "$(if($global:RepoVaultVersion){"$global:RepoVaultVersion"}else{'1.8.2'})",
+        $VaultVersion = "1.13.0",
 
         # The path to download the binary to
         [Parameter(

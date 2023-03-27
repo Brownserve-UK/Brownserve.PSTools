@@ -21,18 +21,34 @@ function Send-BuildNotification
         [string]
         $BuildStatus,
 
-        # The webhook URL to send the notification to.
+        # The name of the repo this build belongs to.
         [Parameter(
             Mandatory = $false,
             Position = 2
+            )]
+        [string]
+        $RepoName,
+
+        # An optional branch that the build is running against
+        [Parameter(
+            Mandatory = $false,
+            Position = 3
         )]
         [string]
-        $Webhook = $env:BUILD_NOTIFICATION_WEBHOOK,
+        $RepoBranch,
+
+        # The webhook URL to send the notification to.
+        [Parameter(
+            Mandatory = $true,
+            Position = 3
+        )]
+        [string]
+        $Webhook,
 
         # The message to send (optional).
         [Parameter(
             Mandatory = $false, 
-            Position = 3
+            Position = 4
         )]
         [string]
         $Message,
@@ -40,10 +56,10 @@ function Send-BuildNotification
         # The push message to send (optional).
         [Parameter(
             Mandatory = $false,
-            Position = 4
+            Position = 5
         )]
         [string]
-        [alias('Push','Title')]
+        [alias('Push', 'Title')]
         $PushMessage
     )
     
@@ -51,7 +67,7 @@ function Send-BuildNotification
     {
         if (!$Webhook)
         {
-            throw "No webhook specified."
+            throw 'No webhook specified.'
         }
         if (!$BuildName)
         {
@@ -61,36 +77,42 @@ function Send-BuildNotification
             }
             catch
             {
-                throw "Failed to get the name of the build programmatically."
+                throw 'Failed to get the name of the build programmatically.'
             }
         }
     }
     
     process
     {
-        $Fields = @(
-            @{
+        $Fields = @()
+        if ($RepoName)
+        {
+            $Fields += @{
                 title = 'Repo:'
-                value = $global:RepoName
+                value = "$RepoName"
                 short = $true
-            },
-            @{
+            }
+        }
+        if ($BuildName)
+        {
+            
+            $Fields += @{
                 title = 'Build:'
                 value = "$BuildName"
                 short = $true
             }
-        )
-        if ($env:BUILD_BRANCH)
+        }
+        if ($RepoBranch)
         {
             $Fields += @{
                 title = 'Branch:'
-                value = $env:BUILD_BRANCH
+                value = $RepoBranch
                 short = $false
             }
         }
-        switch -Regex ($BuildStatus)
+        switch -Regex ($BuildStatus.ToLower())
         {
-            '[Ss]uccess'
+            'success'
             {
                 $Colour = '#007C00'
                 if (!$PushMessage)
@@ -102,7 +124,7 @@ function Send-BuildNotification
                     $Message = "$BuildName has completed successfully."
                 }
             }
-            '[Ff]ail'
+            'fail'
             {
                 $Colour = '#FF0000'
                 if (!$PushMessage)
@@ -114,7 +136,7 @@ function Send-BuildNotification
                     $Message = "$BuildName has failed."
                 }
             }
-            '[Ii]nformation'
+            'information'
             {
                 $Colour = '#00c4ff'
                 if (!$PushMessage)
@@ -126,7 +148,7 @@ function Send-BuildNotification
                     $Message = "$BuildName has completed with information."
                 }
             }
-            '[Ww]arning'
+            'warning'
             {
                 $Colour = '#ffc000'
                 if (!$PushMessage)
@@ -138,7 +160,7 @@ function Send-BuildNotification
                     $Message = "$BuildName has completed with a warning."
                 }
             }
-            '[Cc]ancelled'
+            'cancelled'
             {
                 $Colour = '#808080'
                 if (!$PushMessage)

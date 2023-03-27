@@ -504,19 +504,6 @@ We also have a handful of modules that we post to NuGet/AzDo and it's very impor
           <dev:defaultValue>True</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
-          <maml:name>IgnoreCmdletCompatibility</maml:name>
-          <maml:description>
-            <maml:para>Some modules contain cmdlets that are only compatible with certain operating systems and when importing them on an incompatible OS they won't be loaded. This results in PlatyPS being unable to generate documentation for them.
-This parameter allows us to force them to be loaded to ensure that all documentation can be generated.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
-          <dev:type>
-            <maml:name>Boolean</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>True</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="7" aliases="none">
           <maml:name>IgnoreDontShow</maml:name>
           <maml:description>
             <maml:para>Whether or not to ignore parameters marked as 'DontShow'</maml:para>
@@ -528,7 +515,7 @@ This parameter allows us to force them to be loaded to ensure that all documenta
           </dev:type>
           <dev:defaultValue>True</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="8" aliases="none">
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="7" aliases="none">
           <maml:name>ModuleGUID</maml:name>
           <maml:description>
             <maml:para>The GUID of the module (if desired)</maml:para>
@@ -556,19 +543,6 @@ This parameter allows us to force them to be loaded to ensure that all documenta
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
-        <maml:name>IgnoreCmdletCompatibility</maml:name>
-        <maml:description>
-          <maml:para>Some modules contain cmdlets that are only compatible with certain operating systems and when importing them on an incompatible OS they won't be loaded. This results in PlatyPS being unable to generate documentation for them.
-This parameter allows us to force them to be loaded to ensure that all documentation can be generated.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
-        <dev:type>
-          <maml:name>Boolean</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>True</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="7" aliases="none">
         <maml:name>IgnoreDontShow</maml:name>
         <maml:description>
           <maml:para>Whether or not to ignore parameters marked as 'DontShow'</maml:para>
@@ -592,7 +566,7 @@ This parameter allows us to force them to be loaded to ensure that all documenta
         </dev:type>
         <dev:defaultValue>True</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="8" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="7" aliases="none">
         <maml:name>ModuleGUID</maml:name>
         <maml:description>
           <maml:para>The GUID of the module (if desired)</maml:para>
@@ -1320,8 +1294,7 @@ This parameter allows us to force them to be loaded to ensure that all documenta
       <maml:para>This cmdlet downloads the specified version of Terraform to the a given directory.
 This allows us to use different versions of Terraform across different repositories easily (though the cmdlet could be used to download Terraform to your system if desired).
 This cmdlet should work across Windows, macOS and Linux.
-When using this with a repository you can set the `$global:RepoTerraformVersion` variable in your `_init` script or similar to save having to pass the `-TerraformVersion` parameter in every build step.</maml:para>
-      <maml:para>The command `terraform` is replaced by an alias to the downloaded binary and the `$env:TerraformPath` variable is set pointing to the downloaded version of Terraform, this only affects your current PowerShell session.</maml:para>
+The command `terraform` is replaced by an alias to the downloaded binary and the `$env:TerraformPath` variable is set pointing to the downloaded version of Terraform, this only affects your current PowerShell session.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1329,7 +1302,7 @@ When using this with a repository you can set the `$global:RepoTerraformVersion`
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>TerraformVersion</maml:name>
           <maml:description>
-            <maml:para>The version of Terraform to download Defaults to `$global:TerraformVersion` but if that is not set then a default version of 1.0.8 is used</maml:para>
+            <maml:para>The version of Terraform to download</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Version</command:parameterValue>
           <dev:type>
@@ -1368,7 +1341,7 @@ When using this with a repository you can set the `$global:RepoTerraformVersion`
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
         <maml:name>TerraformVersion</maml:name>
         <maml:description>
-          <maml:para>The version of Terraform to download Defaults to `$global:TerraformVersion` but if that is not set then a default version of 1.0.8 is used</maml:para>
+          <maml:para>The version of Terraform to download</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">Version</command:parameterValue>
         <dev:type>
@@ -1417,15 +1390,6 @@ An Alias for the `terraform` command would be created and the `$env:TerraformPat
         <dev:code>Get-Terraform -TerraformVersion '1.0.0' -DownloadPath 'C:\tools'</dev:code>
         <dev:remarks>
           <maml:para>Will download Terraform v1.0.0 to C:\tools
-An Alias for the `terraform` command would be created and the `$env:TerraformPath` variable would be set pointing to this version for your current PowerShell session.</maml:para>
-        </dev:remarks>
-      </command:example>
-      <command:example>
-        <maml:title>-------------- Example 3: Use the global variable --------------</maml:title>
-        <dev:code>$global:RepoTerraformVersion = '0.14.7'
-Get-Terraform -DownloadPath 'C:\tools'</dev:code>
-        <dev:remarks>
-          <maml:para>This would download Terraform v0.14.7 to C:\tools.
 An Alias for the `terraform` command would be created and the `$env:TerraformPath` variable would be set pointing to this version for your current PowerShell session.</maml:para>
         </dev:remarks>
       </command:example>
@@ -1576,7 +1540,6 @@ Can be a file or a directory.</maml:para>
       <maml:para>This cmdlet will download the specified version of Vault to the given directory.
 An alias is created that replaces the path to the `vault` command and the environment variable `$env:VaultPath` is set to point to this downloaded version, this only affects your current PowerShell session.</maml:para>
       <maml:para>This allows us to lock vault to different versions across projects if we need to.</maml:para>
-      <maml:para>You can set the environment variable `$global:RepoVaultVersion` for a given project to save having to specify the `-VaultVersion` parameter.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1585,7 +1548,7 @@ An alias is created that replaces the path to the `vault` command and the enviro
           <maml:name>VaultVersion</maml:name>
           <maml:description>
             <maml:para>The version of Vault to use
-If the `$global:RepoVaultVersion` variable is set then it will default to this otherwise defaults to 1.8.2</maml:para>
+</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Version</command:parameterValue>
           <dev:type>
@@ -1625,7 +1588,7 @@ If the `$global:RepoVaultVersion` variable is set then it will default to this o
         <maml:name>VaultVersion</maml:name>
         <maml:description>
           <maml:para>The version of Vault to use
-If the `$global:RepoVaultVersion` variable is set then it will default to this otherwise defaults to 1.8.2</maml:para>
+</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">Version</command:parameterValue>
         <dev:type>
@@ -1673,14 +1636,6 @@ If the `$global:RepoVaultVersion` variable is set then it will default to this o
         <dev:code>Get-Vault -VaultVersion '1.7.3' -DownloadPath 'C:\Tools'</dev:code>
         <dev:remarks>
           <maml:para>Will download v.1.7.3 to C:\Tools</maml:para>
-        </dev:remarks>
-      </command:example>
-      <command:example>
-        <maml:title>---------- Example 3: Using the environment variable ----------</maml:title>
-        <dev:code>$global:RepoVaultVersion = '1.0.0'
-Get-Vault -DownloadPath 'C:\Tools'</dev:code>
-        <dev:remarks>
-          <maml:para>This would download v1.0.0 of vault to the C:\Tools folder. The command `vault` would be pointed to this download and the `$env:VaultPath` variable would be set for the duration of your shell</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1983,6 +1938,172 @@ Get-Vault -DownloadPath 'C:\Tools'</dev:code>
         <dev:code>PS C:\&gt; Initialize-BrownserveBuildRepo -RepoPath C:\myRepo</dev:code>
         <dev:remarks>
           <maml:para>This would prepare the repo at 'C:\myRepo' for use with Brownserve.BuildTools</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Install-ChocolateyPackage</command:name>
+      <command:verb>Install</command:verb>
+      <command:noun>ChocolateyPackage</command:noun>
+      <maml:description>
+        <maml:para>Helper cmdlet for installing Chocolatey packages programmatically</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>This cmdlet is intended to be used in automations to allow for easy installations of dependencies. It's primary use case is for cloud based build agents that may not necessarily have all the required tooling available by default, though it can also be used to bulk install chocolatey packages on your local machine if you wish. Given that Chocolatey is package manager for Windows this cmdlet is Windows Only.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Install-ChocolateyPackage</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="0" aliases="none">
+          <maml:name>PackageName</maml:name>
+          <maml:description>
+            <maml:para>The name of the chocolatey package to be installed</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+          <maml:name>PackageVersion</maml:name>
+          <maml:description>
+            <maml:para>The version of the package to be installed, defaults to `any`</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Upgrade</maml:name>
+          <maml:description>
+            <maml:para>If set will upgrade the package to the latest available version, providing a specific version has not been provided already.
+If used with pipeline input then this will upgrade all packages that are provided through the pipeline that do not have a specific version set.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="0" aliases="none">
+        <maml:name>PackageName</maml:name>
+        <maml:description>
+          <maml:para>The name of the chocolatey package to be installed</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+        <maml:name>PackageVersion</maml:name>
+        <maml:description>
+          <maml:para>The version of the package to be installed, defaults to `any`</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Upgrade</maml:name>
+        <maml:description>
+          <maml:para>If set will upgrade the package to the latest available version, providing a specific version has not been provided already.
+If used with pipeline input then this will upgrade all packages that are provided through the pipeline that do not have a specific version set.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>ChocolateyPackage[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------- Example 1: Install a given package --------------</maml:title>
+        <dev:code>PS C:\&gt; Install-ChocolateyPackage -PackageName 'awscli'</dev:code>
+        <dev:remarks>
+          <maml:para>This would install the latest version of the `awscli` on the local system</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>---- Example 2: Upgrade a package if it's already installed ----</maml:title>
+        <dev:code>PS C:\&gt; Install-ChocolateyPackage -PackageName 'awscli' -Upgrade</dev:code>
+        <dev:remarks>
+          <maml:para>This would install the latest version of the `awscli` on the local system if it is not already installed, if it is installed but is not the latest version it will be updated</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>--------------- Example 3: Bulk install packages ---------------</maml:title>
+        <dev:code>PS C:\&gt; @(
+    [PSCustomObject]@{
+        name = 'awscli'
+        version = 'any'
+    }],
+    [PSCustomObject]@{
+        Name = 'git'
+        version = '1.0.0'
+    }]
+) | Install-ChocolateyPackages</dev:code>
+        <dev:remarks>
+          <maml:para>This would install the latest version of the `awscli` on the local system and version `1.0.0` of git if they do not already exist</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>--------------- Example 4: Passing in from a CSV ---------------</maml:title>
+        <dev:code>PS C:\packages\&gt; Import-CSV 'choco_packages.csv' | Install-ChocolateyPackages</dev:code>
+        <dev:remarks>
+          <maml:para>Providing the csv file was structured correctly this would bulk install any packages from the CSV file.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -3371,7 +3492,7 @@ This can only be used when `-SkipCreation` is not used.</maml:para>
           <maml:name>FilePath</maml:name>
           <maml:description>
             <maml:para>The path to where the temporary file should be stored.
-If none is provided then the cmdlet will look for the presence of the `$global:RepoTempDirectory` variable, if present this value will be used otherwise the value of `(Get-PSDrive Temp).Root` will be used.</maml:para>
+If none is provided then the cmdlet will use the `$BrownserveTempLocation` directory which varies depending on the OS and the location this module was imported</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -3411,7 +3532,7 @@ If none is provided then the cmdlet will look for the presence of the `$global:R
           <maml:name>FilePath</maml:name>
           <maml:description>
             <maml:para>The path to where the temporary file should be stored.
-If none is provided then the cmdlet will look for the presence of the `$global:RepoTempDirectory` variable, if present this value will be used otherwise the value of `(Get-PSDrive Temp).Root` will be used.</maml:para>
+If none is provided then the cmdlet will use the `$BrownserveTempLocation` directory which varies depending on the OS and the location this module was imported</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -3475,7 +3596,7 @@ This can only be used when `-SkipCreation` is not used.</maml:para>
         <maml:name>FilePath</maml:name>
         <maml:description>
           <maml:para>The path to where the temporary file should be stored.
-If none is provided then the cmdlet will look for the presence of the `$global:RepoTempDirectory` variable, if present this value will be used otherwise the value of `(Get-PSDrive Temp).Root` will be used.</maml:para>
+If none is provided then the cmdlet will use the `$BrownserveTempLocation` directory which varies depending on the OS and the location this module was imported</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -4713,7 +4834,7 @@ This cmdlet is largely useless outside of Brownserve workflows</maml:para>
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Webhook</maml:name>
           <maml:description>
             <maml:para>The webhook to send the notification to, at present only Slack webhooks are supported</maml:para>
@@ -4741,6 +4862,30 @@ This cmdlet is largely useless outside of Brownserve workflows</maml:para>
           <maml:name>PushMessage</maml:name>
           <maml:description>
             <maml:para>The title of the notification, if none is specified a generic one will be used depending on the outcome of the build</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>RepoBranch</maml:name>
+          <maml:description>
+            <maml:para>An optional branch that the build is currently running against</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>RepoName</maml:name>
+          <maml:description>
+            <maml:para>An optional repo name the build is currently running against</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -4800,7 +4945,31 @@ This cmdlet is largely useless outside of Brownserve workflows</maml:para>
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>RepoBranch</maml:name>
+        <maml:description>
+          <maml:para>An optional branch that the build is currently running against</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>RepoName</maml:name>
+        <maml:description>
+          <maml:para>An optional repo name the build is currently running against</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>Webhook</maml:name>
         <maml:description>
           <maml:para>The webhook to send the notification to, at present only Slack webhooks are supported</maml:para>
@@ -5355,309 +5524,6 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Start-SilentProcess</command:name>
-      <command:verb>Start</command:verb>
-      <command:noun>SilentProcess</command:noun>
-      <maml:description>
-        <maml:para>This command is deprecated and will be removed in a future release, please use Invoke-NativeCommand instead. 
-Starts a process that redirects stdout and stderr to log files.</maml:para>
-      </maml:description>
-    </command:details>
-    <maml:description>
-      <maml:para>Starts a process that redirects stdout and stderr to log files which is useful for a number of reasons. Firstly it allows programs to be run silently which is very handy in CI/CD deployments when you may often want to cut down on noise.</maml:para>
-      <maml:para>It also allows for easy extraction of error messages from the process as they will be stored in ".log" files. Finally it also helps to get around this little bug: https://stackoverflow.com/a/66726535/10843454 when programs write verbose data to stderr.</maml:para>
-      <maml:para>By redirecting to a file it never touches PowerShell's error stream, meaning you can be very selective about what errors are actually thrown.</maml:para>
-    </maml:description>
-    <command:syntax>
-      <command:syntaxItem>
-        <maml:name>Start-SilentProcess</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="PSPath">
-          <maml:name>FilePath</maml:name>
-          <maml:description>
-            <maml:para>The path to the command to be run</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="1" aliases="Arguments">
-          <maml:name>ArgumentList</maml:name>
-          <maml:description>
-            <maml:para>An optional list of arguments to be passed to it</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
-          <dev:type>
-            <maml:name>Array</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="2" aliases="none">
-          <maml:name>WorkingDirectory</maml:name>
-          <maml:description>
-            <maml:para>If set will set the working directory for the called command, defaults to the current directory.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>ExitCodes</maml:name>
-          <maml:description>
-            <maml:para>The exit codes expected from this process when it has been successful</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
-          <dev:type>
-            <maml:name>Array</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>PassThru</maml:name>
-          <maml:description>
-            <maml:para>By default this cmdlet won't return any output from the invoked command, however if the PassThru parameter is set then the result of stdout is returned as an object at the end along with the locations of the stdout and stderr files.</maml:para>
-            <maml:para>This can be useful if you need the output from the command or when debugging.</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>RedirectOutputPath</maml:name>
-          <maml:description>
-            <maml:para>The path to where the redirected output should be stored Defaults to the contents of the global variable 'RepoLogDirectory' if available If that isn't set then defaults to a temp directory</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>RedirectOutputPrefix</maml:name>
-          <maml:description>
-            <maml:para>The prefix to use on the redirected streams, defaults to the command run time</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>RedirectOutputSuffix</maml:name>
-          <maml:description>
-            <maml:para>The suffix for the redirected streams (defaults to log)</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>Log</dev:defaultValue>
-        </command:parameter>
-      </command:syntaxItem>
-    </command:syntax>
-    <command:parameters>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="1" aliases="Arguments">
-        <maml:name>ArgumentList</maml:name>
-        <maml:description>
-          <maml:para>An optional list of arguments to be passed to it</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
-        <dev:type>
-          <maml:name>Array</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>ExitCodes</maml:name>
-        <maml:description>
-          <maml:para>The exit codes expected from this process when it has been successful</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
-        <dev:type>
-          <maml:name>Array</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="PSPath">
-        <maml:name>FilePath</maml:name>
-        <maml:description>
-          <maml:para>The path to the command to be run</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>PassThru</maml:name>
-        <maml:description>
-          <maml:para>By default this cmdlet won't return any output from the invoked command, however if the PassThru parameter is set then the result of stdout is returned as an object at the end along with the locations of the stdout and stderr files.</maml:para>
-          <maml:para>This can be useful if you need the output from the command or when debugging.</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>RedirectOutputPath</maml:name>
-        <maml:description>
-          <maml:para>The path to where the redirected output should be stored Defaults to the contents of the global variable 'RepoLogDirectory' if available If that isn't set then defaults to a temp directory</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>RedirectOutputPrefix</maml:name>
-        <maml:description>
-          <maml:para>The prefix to use on the redirected streams, defaults to the command run time</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>RedirectOutputSuffix</maml:name>
-        <maml:description>
-          <maml:para>The suffix for the redirected streams (defaults to log)</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>Log</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="2" aliases="none">
-        <maml:name>WorkingDirectory</maml:name>
-        <maml:description>
-          <maml:para>If set will set the working directory for the called command, defaults to the current directory.</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-        <dev:type>
-          <maml:name>String</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
-      </command:parameter>
-    </command:parameters>
-    <command:inputTypes>
-      <command:inputType>
-        <dev:type>
-          <maml:name>System.String</maml:name>
-        </dev:type>
-        <maml:description>
-          <maml:para></maml:para>
-        </maml:description>
-      </command:inputType>
-      <command:inputType>
-        <dev:type>
-          <maml:name>System.Array</maml:name>
-        </dev:type>
-        <maml:description>
-          <maml:para></maml:para>
-        </maml:description>
-      </command:inputType>
-    </command:inputTypes>
-    <command:returnValues>
-      <command:returnValue>
-        <dev:type>
-          <maml:name>System.Object</maml:name>
-        </dev:type>
-        <maml:description>
-          <maml:para></maml:para>
-        </maml:description>
-      </command:returnValue>
-    </command:returnValues>
-    <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
-    </maml:alertSet>
-    <command:examples>
-      <command:example>
-        <maml:title>------------ EXAMPLE 1: Call a program and argument ------------</maml:title>
-        <dev:code>Start-SilentProcess `
-    -FilePath 'terraform' `
-    -ArgumentList 'plan'</dev:code>
-        <dev:remarks>
-          <maml:para>This would call "terraform plan", output streams are redirected to terraform_DateTime_SteamName.log files in the systems temp directory, if the app returns a non-zero exit code an exception would be thrown</maml:para>
-        </dev:remarks>
-      </command:example>
-      <command:example>
-        <maml:title>EXAMPLE 2: Call a program with arguments and set the accepted exit codes</maml:title>
-        <dev:code>Start-SilentProcess `
-    -FilePath 'terraform' `
-    -ArgumentList 'plan'
-    -ExitCodes = @(0,123)</dev:code>
-        <dev:remarks>
-          <maml:para>This would call "terraform plan", output streams are redirected to terraform_DateTime_SteamName.log files in the present working directory, if the app returns an exit code other than '0' or '123' an exception would be thrown</maml:para>
-        </dev:remarks>
-      </command:example>
-      <command:example>
-        <maml:title>EXAMPLE 3: Call a program with arguments and redirect the output to a folder</maml:title>
-        <dev:code>Start-SilentProcess `
-    -FilePath 'terraform' `
-    -ArgumentList 'plan' `
-    -RedirectOutPutPath 'C:\logs'</dev:code>
-        <dev:remarks>
-          <maml:para>This would call "terraform plan", output streams are redirected to terraform_DateTime_SteamName.log files in the C:\logs folder, if the app returns a non-zero exit code an exception would be thrown</maml:para>
-        </dev:remarks>
-      </command:example>
-      <command:example>
-        <maml:title>- EXAMPLE 4: Set the redirect output folder and prefix/suffix -</maml:title>
-        <dev:code>Start-SilentProcess `
-    -FilePath 'terraform' `
-    -ArgumentList 'plan' `
-    -RedirectOutputPrefix 'i_love_cats' `
-    -RedirectOutputSuffix 'txt' `
-    -RedirectOutPutPath 'C:\logs'</dev:code>
-        <dev:remarks>
-          <maml:para>This would call "terraform plan", output streams are redirected to i_love_cats_DateTime_SteamName.txt in the C:\logs folder If the app returns a non-zero exit code an exception would be thrown</maml:para>
-        </dev:remarks>
-      </command:example>
-      <command:example>
-        <maml:title>-------- EXAMPLE 5: Return stdout on command completion --------</maml:title>
-        <dev:code>Start-SilentProcess `
-    -FilePath 'terraform' `
-    -ArgumentList 'plan' `
-    -PassThru</dev:code>
-        <dev:remarks>
-          <maml:para>This would call "terraform plan", output streams are redirected to dated log files in the systems temp directory If the app returns a non-zero exit code an exception would be thrown Upon successful completion of the command it's output and locations to the stdout and stderr files would be returned as a PowerShell object</maml:para>
-        </dev:remarks>
-      </command:example>
-    </command:examples>
-    <command:relatedLinks />
-  </command:command>
-  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
-    <command:details>
       <command:name>Test-Administrator</command:name>
       <command:verb>Test</command:verb>
       <command:noun>Administrator</command:noun>
@@ -5705,6 +5571,91 @@ Starts a process that redirects stdout and stderr to log files.</maml:para>
         <dev:code>PS C:\&gt; Test-Administrator</dev:code>
         <dev:remarks>
           <maml:para>Would return `$true` if the user is running as an administrator and `$false` if not.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Test-OperatingSystem</command:name>
+      <command:verb>Test</command:verb>
+      <command:noun>OperatingSystem</command:noun>
+      <maml:description>
+        <maml:para>Quick way of terminating scripts when they are running on an incompatible OS.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>This cmdlet will test the current operating system and compare it against the list provided to the `-SupportedOS` parameter, if the current OS is not in the supported list a terminating error is thrown.
+This is useful for cases where you want to quickly terminate a PowerShell run when running on an unsupported OS</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Test-OperatingSystem</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="0" aliases="none">
+          <maml:name>SupportedOS</maml:name>
+          <maml:description>
+            <maml:para>The operating systems that your cmdlet/script is compatible with.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">Windows</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Linux</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">macOS</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">OperatingSystemKernel[]</command:parameterValue>
+          <dev:type>
+            <maml:name>OperatingSystemKernel[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="0" aliases="none">
+        <maml:name>SupportedOS</maml:name>
+        <maml:description>
+          <maml:para>The operating systems that your cmdlet/script is compatible with.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">OperatingSystemKernel[]</command:parameterValue>
+        <dev:type>
+          <maml:name>OperatingSystemKernel[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>OperatingSystemKernel[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>Test-OperatingSystem -SupportedOS 'linux','macos'</dev:code>
+        <dev:remarks>
+          <maml:para>Will test the current OS and if it is Windows then a terminating error will be thrown. If it is macOS or Linux then no error will be raised.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>

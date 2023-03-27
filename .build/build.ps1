@@ -119,7 +119,7 @@ if ($Build -eq 'release')
         {
             try
             {
-                Get-Vault -Path $global:RepoBinDirectory
+                Get-Vault -Path $global:BrownserveRepoBinaryDirectory
                 $GitHubPAT = (Get-VaultSecret -Path 'credentials/live/builds/brownserve_pstools').GitHubPAT
             }
             catch
@@ -138,7 +138,7 @@ if ($Build -eq 'release')
 try
 {
     $BuildParams = @{
-        File            = (Join-Path -Path $global:RepoBuildTasksDirectory -ChildPath 'build_tasks.ps1' | Convert-Path)
+        File            = (Join-Path -Path $global:BrownserveRepoBuildTasksDirectory -ChildPath 'build_tasks.ps1' | Convert-Path)
         Task            = $Build
         BranchName      = $BranchName
         NugetFeedApiKey = $NugetFeedApiKey

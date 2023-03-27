@@ -6,29 +6,22 @@ function Test-Administrator
     begin {}
     process
     {
-        switch -regex ($global:OS)
+        if ($IsWindows)
         {
-            'Windows'
+            $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+            $Return = $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+            Return $Return
+        }
+        else
+        {
+            $UID = & id -u
+            if ($UID -eq 0)
             {
-                $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-                $Return = $currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-                Return $Return
+                Return $true
             }
-            'Linux|macOS'
+            else
             {
-                $UID = & id -u
-                if ($UID -eq 0)
-                {
-                    Return $true
-                }
-                else
-                {
-                    Return $false
-                }
-            }
-            Default
-            {
-                throw "Cannot test administrator on $global:OS"
+                Return $false
             }
         }
     }
