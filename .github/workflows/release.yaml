@@ -31,4 +31,9 @@ jobs:
           BUILD_BRANCH: ${{ github.ref }}
         run: |
             ./Brownserve.PSTools/.build/_init.ps1
-            Send-BuildNotification -BuildName ${{ github.job }} -BuildStatus ${{ job.status }} -Webhook $env:BUILD_NOTIFICATION_WEBHOOK
+            Send-BuildNotification `
+              -BuildName ${{ github.job }} `
+              -BuildStatus ${{ job.status }} `
+              -Webhook $env:BUILD_NOTIFICATION_WEBHOOK `
+              -RepoBranch $env:BuildBranch `
+              -RepoName $global:BrownserveRepoName
