@@ -78,7 +78,12 @@ function Invoke-NativeCommand
         )]
         [ValidateNotNullOrEmpty()]
         [string]
-        $LogOutputSuffix = 'log'
+        $LogOutputSuffix = 'log',
+
+        # Special parameter for using the Start-Process method
+        [Parameter(Mandatory = $false, DontShow)]
+        [switch]
+        $UseStartProcess
     )
     
     begin
