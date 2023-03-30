@@ -20,6 +20,9 @@ Creates XML MALM help for a PowerShell module
 ### [Add-PullRequestComment](./Public/Add-PullRequestComment.md)
 Adds a comment to a given pull request
 
+### [Assert-Directory](./Public/Assert-Directory.md)
+Ensures that a directory is valid
+
 ### [Build-ModuleDocumentation](./Public/Build-ModuleDocumentation.md)
 This will build markdown PowerShell module documentation using PlatyPS
 
@@ -121,6 +124,9 @@ A simple function for testing if a user is running with administrator/root privi
 
 ### [Test-OperatingSystem](./Public/Test-OperatingSystem.md)
 Quick way of terminating scripts when they are running on an incompatible OS.
+
+### [Update-BrownservePowerShellModule](./Public/Update-BrownservePowerShellModule.md)
+Updates a given Brownserve PowerShell module to use the latest template.
 
 ### [Update-Changelog](./Public/Update-Changelog.md)
 Updates a repo's changelog according to the semver v1.0.0 spec.

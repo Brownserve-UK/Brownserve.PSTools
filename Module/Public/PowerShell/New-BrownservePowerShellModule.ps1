@@ -88,7 +88,24 @@ function New-BrownservePowerShellModule
             throw "Failed to create new module.`n$($_.Exception.Message)"
         }
 
-        # Do we want to create the Public/Private paths?
+        try
+        {
+            # NEVER try to overwrite the directories if they exist
+            $PublicPath = (Join-Path $Path 'Public')
+            if (!(Test-Path $PublicPath))
+            {
+                New-Item $PublicPath -ItemType Directory -ErrorAction 'Stop' -Force:$Force
+            }
+            $PrivatePath = (Join-Path $Path 'Private')
+            if (!(Test-Path $PrivatePath))
+            {
+                New-Item $PrivatePath -ItemType Directory -ErrorAction 'Stop' -Force:$Force
+            }
+        }
+        catch
+        {
+            throw "Failed to created module public/private directories.`n$($_.Exception.Message)"
+        }
     }
     
     end

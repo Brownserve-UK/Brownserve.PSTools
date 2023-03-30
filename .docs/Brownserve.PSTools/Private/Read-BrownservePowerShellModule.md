@@ -1,46 +1,37 @@
 ---
-external help file: Brownserve.PSTools-help.xml
-Module Name: Brownserve.PSTools
+external help file: Brownserve.PSToolsPrivate-help.xml
+Module Name: Brownserve.PSToolsPrivate
 online version:
 schema: 2.0.0
 ---
 
-# Assert-Directory
+# Read-BrownservePowerShellModule
 
 ## SYNOPSIS
-Ensures that a directory is valid
+Extracts content from a given PowerShell module 
 
 ## SYNTAX
 
 ```
-Assert-Directory [-Path] <String> [<CommonParameters>]
+Read-BrownservePowerShellModule [-ModulePath] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Checks the given path to ensure it both exists and is a valid directory
+We use a standard format for our PowerShell modules and this cmdlet will scan those modules to extract the relevant bits of data
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-New-Item -Path C:\temp\TestDir -ItemType Directory
-Assert-Directory -Path C:\temp\TestDir
+Read-BrownservePowerShellModule -ModulePath C:\Brownserve.PSTools\Brownserve.PSTools.psm1
 ```
 
-Would return no error
-
-### Example 2
-```powershell
-New-Item -Path C:\temp\TestDir.txt -ItemType File
-Assert-Directory -Path C:\temp\TestDir.txt
-```
-
-Would return an error as the file is not a directory
+Would extract PowerShell module information from the Brownserve.PSTools module
 
 ## PARAMETERS
 
-### -Path
-The path to be checked
+### -ModulePath
+The path to the module
 
 ```yaml
 Type: String
@@ -50,7 +41,7 @@ Aliases:
 Required: True
 Position: 0
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
@@ -59,7 +50,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
+### System.String
+
 ## OUTPUTS
 
 ### System.Object
