@@ -40,7 +40,7 @@ function New-BrownservePowerShellModule
         try
         {
             $ModulePath = Join-Path $Path $ModuleName
-            Test-Directory -Path $Path -ErrorAction 'Stop'
+            Assert-Directory -Path $Path -ErrorAction 'Stop'
             if (Test-Path $ModulePath)
             {
                 if (!$Force)

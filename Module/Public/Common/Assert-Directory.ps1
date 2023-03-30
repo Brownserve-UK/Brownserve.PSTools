@@ -1,4 +1,4 @@
-function Test-Directory
+function Assert-Directory
 {
     [CmdletBinding()]
     param
