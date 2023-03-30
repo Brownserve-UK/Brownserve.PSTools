@@ -20,6 +20,9 @@ Creates XML MALM help for a PowerShell module
 ### [Add-PullRequestComment](./Public/Add-PullRequestComment.md)
 Adds a comment to a given pull request
 
+### [Assert-Directory](./Public/Assert-Directory.md)
+Ensures that a directory is valid
+
 ### [Build-ModuleDocumentation](./Public/Build-ModuleDocumentation.md)
 This will build markdown PowerShell module documentation using PlatyPS
 

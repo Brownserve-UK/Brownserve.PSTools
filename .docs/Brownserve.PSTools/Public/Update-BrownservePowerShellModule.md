@@ -5,58 +5,39 @@ online version:
 schema: 2.0.0
 ---
 
-# New-BrownservePowerShellModule
+# Update-BrownservePowerShellModule
 
 ## SYNOPSIS
-Creates a new PowerShell module using the standard Brownserve format
+Updates a given Brownserve PowerShell module to use the latest template.
 
 ## SYNTAX
 
 ```
-New-BrownservePowerShellModule [-Path] <String> [-ModuleName] <String> [[-Description] <String>]
- [[-Customisations] <String>] [-Force] [<CommonParameters>]
+Update-BrownservePowerShellModule [-Path] <String> [[-Description] <String>] [[-Customisations] <String>]
+ [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-This cmdlet creates a new custom PowerShell module using the standard format we use across our repos.
+This cmdlet will update a given PowerShell module that uses our standard Brownserve format to use the latest template while attempting to maintain any customisations the user has made.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> New-BrownservePowerShellModule `
-    -Path c:\temp\TestModule `
-    -Name 'TestModule' `
-    -Description 'My amazing module' `
-    -Customisations '$foo = "bar"'
+PS C:\> Update-BrownservePowerShellModule -Path C:\Brownserve.PSTools.psm1
 ```
 
-This would create a new module in the C:\temp\TestModule folder called `TestModule.psm1` with the supplied description and custom code.
+This would update the module at the given path.
 
 ## PARAMETERS
 
 ### -Customisations
-Any custom code you want to provide to the module, of course this can always be added later.
+A string containing any custom code you want to add to the module, if the existing module already contains customisations an error will be raised.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases: Customizations
-
-Required: False
-Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Description
-The description of the module, used to fill out the synopsis heading.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
 
 Required: False
 Position: 2
@@ -65,8 +46,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -Description
+An option synopsis for the module, if one is already present in the module an error will be raised.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Force
-If the module already exists then this will forcefully overwrite the module.
+Forcefully overwrite any customisations or description that already exist in the module.
 
 ```yaml
 Type: SwitchParameter
@@ -80,23 +76,8 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ModuleName
-The name of the module to be created.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases: name
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Path
-The path to where the module will be saved (must be a directory)
+The path to the module.
 
 ```yaml
 Type: String
@@ -116,6 +97,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
