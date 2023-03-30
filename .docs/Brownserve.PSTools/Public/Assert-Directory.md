@@ -1,37 +1,46 @@
 ---
-external help file: Brownserve.PSToolsPrivate-help.xml
-Module Name: Brownserve.PSToolsPrivate
+external help file: Brownserve.PSTools-help.xml
+Module Name: Brownserve.PSTools
 online version:
 schema: 2.0.0
 ---
 
-# Copy-VSCodeFile
+# Assert-Directory
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Ensures that a directory is valid
 
 ## SYNTAX
 
 ```
-Copy-VSCodeFile [-RepoPath] <String> [-VSCodeFile] <String> [<CommonParameters>]
+Assert-Directory [-Path] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Checks the given path to ensure it both exists and is a valid directory
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+New-Item -Path C:\temp\TestDir -ItemType Directory
+Assert-Directory -Path C:\temp\TestDir
 ```
 
-{{ Add example description here }}
+Would return no error
+
+### Example 2
+```powershell
+New-Item -Path C:\temp\TestDir.txt -ItemType File
+Assert-Directory -Path C:\temp\TestDir.txt
+```
+
+Would return an error as the file is not a directory
 
 ## PARAMETERS
 
-### -RepoPath
-{{ Fill RepoPath Description }}
+### -Path
+The path to be checked
 
 ```yaml
 Type: String
@@ -40,21 +49,6 @@ Aliases:
 
 Required: True
 Position: 0
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -VSCodeFile
-{{ Fill VSCodeFile Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -65,7 +59,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.String
+### None
 
 ## OUTPUTS
 

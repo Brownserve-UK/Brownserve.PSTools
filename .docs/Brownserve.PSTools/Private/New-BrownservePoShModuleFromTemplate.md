@@ -5,56 +5,57 @@ online version:
 schema: 2.0.0
 ---
 
-# Copy-VSCodeFile
+# New-BrownservePoShModuleFromTemplate
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Creates a custom PowerShell module from a template file.
 
 ## SYNTAX
 
 ```
-Copy-VSCodeFile [-RepoPath] <String> [-VSCodeFile] <String> [<CommonParameters>]
+New-BrownservePoShModuleFromTemplate [[-Description] <String>] [[-Customisations] <String>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Creates a custom PowerShell module from a template file.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+New-BrownservePoShModuleFromTemplate -Description 'Test module' -Customisations '$foo = "bar"'
 ```
 
-{{ Add example description here }}
+Would create a module with the above details.
 
 ## PARAMETERS
 
-### -RepoPath
-{{ Fill RepoPath Description }}
+### -Customisations
+Any customisations to be provided to the module
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: Customizations
 
-Required: True
-Position: 0
+Required: False
+Position: 1
 Default value: None
-Accept pipeline input: True (ByPropertyName)
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -VSCodeFile
-{{ Fill VSCodeFile Description }}
+### -Description
+The description of the module
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: 1
+Required: False
+Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -65,7 +66,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.String
+### None
 
 ## OUTPUTS
 
