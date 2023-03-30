@@ -77,6 +77,9 @@ Runs the `terraform show` command and converts the output into a PowerShell obje
 ### [Invoke-TerraformValidate](./Public/Invoke-TerraformValidate.md)
 Performs a 'terraform validate'
 
+### [New-BrownservePowerShellModule](./Public/New-BrownservePowerShellModule.md)
+Creates a new PowerShell module using the standard Brownserve format
+
 ### [New-BrownserveTemporaryFile](./Public/New-BrownserveTemporaryFile.md)
 Creates a temporary file in a known good location.
 
