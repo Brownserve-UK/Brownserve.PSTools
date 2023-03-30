@@ -33,10 +33,10 @@ function New-BrownservePoShModuleFromTemplate
         if ($Description)
         {
             $DescriptionHeader = @"
-            <#
-            .SYNOPSIS
-                $Description
-            #>`n
+<#
+.SYNOPSIS
+    $Description
+#>`n
 "@
             $ModuleContent = $DescriptionHeader + $ModuleTemplate
         }
