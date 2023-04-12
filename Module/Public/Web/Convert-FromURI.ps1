@@ -10,7 +10,12 @@ function ConvertFrom-URI
             ValueFromPipeline = $true, 
             ValueFromPipelineByPropertyName = $true)]
         [string]
-        $InputObject    
+        $InputObject,
+
+        # Returns the object as a Hashtable instead of a custom object
+        [Parameter(Mandatory = $false)]
+        [switch]
+        $AsHashtable
     )
     
     begin
@@ -29,11 +34,18 @@ function ConvertFrom-URI
         {
             $Hashtable = $Matches
             # Remove the key '0' which includes the entire regex match, and instead create a key called URI
-            $Hashtable.Add('URI',$InputObject)
+            $Hashtable.Add('URI', $InputObject)
             $Hashtable.Remove(0)
 
-            # Cast to a custom object
-            $Return = [pscustomobject]$Hashtable
+            if ($AsHashtable)
+            {
+                $Return = $AsHashtable
+            }
+            else
+            {
+                # Cast to a custom object
+                $Return = [pscustomobject]$Hashtable
+            }
         }
     }
     
