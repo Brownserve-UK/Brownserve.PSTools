@@ -24,7 +24,7 @@ function ConvertFrom-URI
             Yay, regex!
             I've been quite loose with the protocol so we can convert things like FTP/SMTP etc.
         #>
-        $RegEx = '(?:(?<Protocol>\w*):\/\/)?(?:(?<Subdomain>[\w\.]+)?\.)?(?<Hostname>\w+)\.(?<Domain>\w+)\:?(?<Port>\d+)?(?:\/)(?<Path>.*)?'
+        $RegEx = '(?:(?<Protocol>\w*):\/\/)?(?:(?<Subdomain>[\w\.]+)?\.)?(?<Hostname>\w+)\.(?<Domain>\w+)\:?(?<Port>\d+)?(?:\/)?(?<Path>.*)?'
         $Return = $null
     }
     
@@ -36,6 +36,11 @@ function ConvertFrom-URI
             # Remove the key '0' which includes the entire regex match, and instead create a key called URI
             $Hashtable.Add('URI', $InputObject)
             $Hashtable.Remove(0)
+            # Somehow we're getting an empty string returned from the path regex, not sure how but for now just filter it out
+            if ('' -eq $Hashtable.Path)
+            {
+                $Hashtable.Remove('Path')
+            }
 
             if ($AsHashtable)
             {
