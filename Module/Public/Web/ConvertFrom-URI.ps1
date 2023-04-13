@@ -35,7 +35,7 @@ function ConvertFrom-URI
             {
                 $Hashtable = $Matches
                 # Remove the key '0' which includes the entire regex match, and instead create a key called URI
-                $Hashtable.Add('URI', $InputObject)
+                $Hashtable.Add('URI', $_)
                 $Hashtable.Remove(0)
                 # Somehow we're getting an empty string returned from the path regex, not sure how but for now just filter it out
                 if ('' -eq $Hashtable.Path)
@@ -45,7 +45,7 @@ function ConvertFrom-URI
 
                 if ($AsHashtable)
                 {
-                    $Return += $AsHashtable
+                    $Return += $Hashtable
                 }
                 else
                 {
