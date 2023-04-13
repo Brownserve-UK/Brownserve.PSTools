@@ -5,6 +5,18 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.10.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.10.0) (2023-04-13)
+
+**Features**
+- "Create Update-BrownservePowerShellModule cmdlet"
+- "Add cmdlets for creating PowerShell modules"
+
+**Bugfixes**
+N/A
+
+**Known Issues**
+N/A
+
 ### [v0.9.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.9.0) (2023-03-27)
 
 **Features**
