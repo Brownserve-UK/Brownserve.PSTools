@@ -13,7 +13,7 @@ Converts a given URI into a PowerShell object
 ## SYNTAX
 
 ```
-ConvertFrom-URI [-InputObject] <String> [-AsHashtable] [<CommonParameters>]
+ConvertFrom-URI [-InputObject] <String[]> [-AsHashtable] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -93,7 +93,7 @@ Accept wildcard characters: False
 The URI to be converted
 
 ```yaml
-Type: String
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
@@ -109,7 +109,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.String
+### System.String[]
 
 ## OUTPUTS
 

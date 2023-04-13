@@ -26,6 +26,9 @@ Ensures that a directory is valid
 ### [Build-ModuleDocumentation](./Public/Build-ModuleDocumentation.md)
 This will build markdown PowerShell module documentation using PlatyPS
 
+### [ConvertFrom-URI](./Public/ConvertFrom-URI.md)
+Converts a given URI into a PowerShell object
+
 ### [Format-TerraformResourceName](./Public/Format-TerraformResourceName.md)
 Strips out illegal characters from Terraform resource names
 
