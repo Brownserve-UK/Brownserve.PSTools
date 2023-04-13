@@ -728,6 +728,150 @@ We also have a handful of modules that we post to NuGet/AzDo and it's very impor
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>ConvertFrom-URI</command:name>
+      <command:verb>ConvertFrom</command:verb>
+      <command:noun>URI</command:noun>
+      <maml:description>
+        <maml:para>Converts a given URI into a PowerShell object</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Converts a given URI into a PowerShell object, splitting out things like the subdomain, hostname and path.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>ConvertFrom-URI</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+          <maml:name>InputObject</maml:name>
+          <maml:description>
+            <maml:para>The URI to be converted</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AsHashtable</maml:name>
+          <maml:description>
+            <maml:para>Returns a hashtable instead of a custom object.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>AsHashtable</maml:name>
+        <maml:description>
+          <maml:para>Returns a hashtable instead of a custom object.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+        <maml:name>InputObject</maml:name>
+        <maml:description>
+          <maml:para>The URI to be converted</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+        <dev:type>
+          <maml:name>String[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------- Example 1: Single URL --------------------</maml:title>
+        <dev:code>ConvertFrom-URI -InputObject 'https://www.example.com/'
+
+Hostname  : example
+Subdomain : www
+Domain    : com
+Protocol  : https
+URI       : https://www.example.com/</dev:code>
+        <dev:remarks>
+          <maml:para>This would extract all the relevant paths from the URI into an object</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>------------------ Example 2: Multiple URL's ------------------</maml:title>
+        <dev:code>@('https://www.example.com/','https://www.example.com:8080/myApp') | ConvertFrom-URI
+
+Hostname  : example
+Subdomain : www
+Domain    : com
+Protocol  : https
+URI       : https://www.example.com/
+
+Hostname  : example
+Subdomain : www
+Domain    : com
+Path      : myApp
+Protocol  : https
+Port      : 8080
+URI       : https://www.example.com:8080/myApp</dev:code>
+        <dev:remarks>
+          <maml:para>This examples shows piping in an array of URI's and converting them. The Second URI has a path and protocol so those get set too.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------- Example 2: AsHashtable --------------------</maml:title>
+        <dev:code>'https://www.example.com/' | ConvertFrom-URI -AsHashtable
+
+Name                           Value
+----                           -----
+Hostname                       example
+Subdomain                      www
+Domain                         com
+Protocol                       https
+URI                            https://www.example.com/</dev:code>
+        <dev:remarks>
+          <maml:para>This examples shows piping in a URI and converting them using the `-AsHashtable` parameter. This results in a hashtable being returned instead of a PowerShell object.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Format-TerraformResourceName</command:name>
       <command:verb>Format</command:verb>
       <command:noun>TerraformResourceName</command:noun>
