@@ -44,6 +44,9 @@ Gets the open Pull requests for a given repository
 ### [Get-Response](./Public/Get-Response.md)
 Prompts a user for a response.
 
+### [Get-SPDXLicenseIDs](./Public/Get-SPDXLicenseIDs.md)
+Attempts to get the latest SPDX license short ID list.
+
 ### [Get-Terraform](./Public/Get-Terraform.md)
 Downloads the given version of Terraform for your OS
 

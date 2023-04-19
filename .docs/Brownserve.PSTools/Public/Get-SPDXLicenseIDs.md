@@ -1,61 +1,46 @@
 ---
-external help file: Brownserve.PSToolsPrivate-help.xml
-Module Name: Brownserve.PSToolsPrivate
+external help file: Brownserve.PSTools-help.xml
+Module Name: Brownserve.PSTools
 online version:
 schema: 2.0.0
 ---
 
-# Copy-VSCodeFile
+# Get-SPDXLicenseIDs
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Attempts to get the latest SPDX license short ID list.
 
 ## SYNTAX
 
 ```
-Copy-VSCodeFile [-RepoPath] <String> [-VSCodeFile] <String> [<CommonParameters>]
+Get-SPDXLicenseIDs [[-Uri] <Uri>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+This cmdlet will attempt to get the latest available list of the SPDX license short ID's from GitHub.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> Get-SPDXLicenseIDs
 ```
 
-{{ Add example description here }}
+Would return a list of all the currently available SPDX license short ID's.
 
 ## PARAMETERS
 
-### -RepoPath
-{{ Fill RepoPath Description }}
+### -Uri
+The URI to use to get the list from, expects JSON.
 
 ```yaml
-Type: String
+Type: Uri
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 0
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -VSCodeFile
-{{ Fill VSCodeFile Description }}
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
+Default value: (https://raw.githubusercontent.com/spdx/license-list-data/main/json/licenses.json)
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -65,7 +50,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.String
+### None
 ## OUTPUTS
 
 ### System.Object
