@@ -1,0 +1,384 @@
+<#
+.SYNOPSIS
+    This contains the build tasks for Invoke-Build to use
+#>
+[CmdletBinding()]
+param
+(
+    # The name of the PowerShell module being built
+    [Parameter(
+        Mandatory = $true
+    )]
+    [string]
+    $ModuleName,
+
+    # The GUID of the module
+    [Parameter(
+        Mandatory = $true
+    )]
+    [guid]
+    $ModuleGUID,
+
+    # The description of the module
+    [Parameter(
+        Mandatory = $true
+    )]
+    [string]
+    $ModuleDescription,
+
+    # The author of the module
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string]
+    $ModuleAuthor = 'Brownserve UK',
+
+    # Any tags to add to the module
+    [Parameter(Mandatory = $false)]
+    [string[]]
+    $ModuleTags = 'brownserve-UK',
+
+    # If set to true this will denote a pre-production release
+    [Parameter(
+        Mandatory = $False
+    )]
+    [bool]
+    $PreRelease = $true,
+
+    # The branch this is being built from
+    [Parameter(
+        Mandatory = $true
+    )]
+    [string]
+    $BranchName,
+
+    # The Nuget feeds to publish to
+    [Parameter(
+        Mandatory = $False
+    )]
+    [ValidateNotNullOrEmpty()]
+    [ValidateSet('nuget', 'PSGallery', 'GitHub')]
+    [string[]]
+    $PublishTo,
+
+    # The GitHub organisation/account to publish the release to
+    [Parameter(
+        Mandatory = $False
+    )]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $GitHubOrg,
+
+    # The GitHub repo to publish the release to and used to fill in release details for Nuget/PSGallery
+    [Parameter(
+        Mandatory = $true
+    )]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $GitHubRepo,
+
+    # The PAT for pushing to GitHub
+    [Parameter(
+        Mandatory = $False
+    )]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $GitHubPAT,
+
+    # The API key to use when publishing to a NuGet feed
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string] $NugetFeedApiKey,
+
+    # The API key to use when publishing to the PSGallery
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string]
+    $PSGalleryAPIKey
+)
+# Depending on how we got the branch name we may need to remove the full ref
+$BranchName = $BranchName -replace 'refs\/heads\/', ''
+Write-Verbose @"
+`nBuild parameters:
+    PreRelease = $PreRelease
+    BranchName = $BranchName
+    PublishTo = $($PublishTo -join ', ')
+"@
+$script:CurrentCommitHash = & git rev-parse HEAD
+
+
+$global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory $ModuleName
+$script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'NuGetPackage'
+$script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
+
+# On non-windows platforms mono is required to run NuGet 🤢
+$NugetCommand = 'nuget'
+if (-not $isWindows)
+{
+    $NugetCommand = 'mono'
+}
+
+if ('PSGallery' -in $PublishTo)
+{
+    if (!$PSGalleryAPIKey)
+    {
+        throw 'PSGalleryAPIKey not provided'
+    }
+}
+
+if ('nuget' -in $PublishTo)
+{
+    if (!$NugetFeedApiKey)
+    {
+        throw 'NugetFeedApiKey not provided'
+    }
+}
+
+if ('GitHub' -in $PublishTo)
+{
+    if (!$GitHubOrg)
+    {
+        throw 'GitHubOrg not provided'
+    }
+    if (!$GitHubRepo)
+    {
+        throw 'GitHubRepo not provided'
+    }
+    if (!$GitHubPAT)
+    {
+        throw 'GitHub PAT not provided'
+    }
+}
+
+# Synopsis: Generate version info from the changelog and branch name.
+task GenerateVersionInfo {
+    $script:Changelog = Read-Changelog -ChangelogPath (Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'CHANGELOG.md')
+    $script:Version = $Changelog.CurrentVersion
+    $script:ReleaseNotes = $Changelog.ReleaseNotes -replace '"', '\"' -replace '`', '' -replace '\*', '' # Filter out characters that'll break the XML and/or just generally look horrible in NuGet
+    $NugetPackageVersionParams = @{
+        Version    = $Version
+        BranchName = $BranchName
+    }
+    if ($PreRelease)
+    {
+        $NugetPackageVersionParams.Add('PreRelease', $true)
+    }
+    $script:NugetPackageVersion = New-NuGetPackageVersion @NugetPackageVersionParams
+    Write-Verbose "Version: $script:Version"
+    Write-Verbose "Nuget package version: $script:NugetPackageVersion"
+    Write-Verbose "Release notes:`n$script:ReleaseNotes"
+}
+
+# Synopsis: Checks to make sure we don't already have this release in GitHub
+task CheckPreviousRelease GenerateVersionInfo, {
+    if ('GitHub' -in $PublishTo)
+    {
+        Write-Verbose 'Checking for previous releases'
+        $CurrentReleases = Get-GitHubRelease `
+            -GitHubToken $GitHubPAT `
+            -RepoName $GitHubRepo `
+            -GitHubOrg $GitHubOrg
+        if ($CurrentReleases.tag_name -contains "v$script:NugetPackageVersion")
+        {
+            throw "There already appears to be a v$script:NugetPackageVersion release!`nDid you forget to update the changelog?"
+        }
+    }
+}
+
+# Synopsis: Copies over all the necessary files to be packaged for a release
+task CopyModule {
+    Write-Verbose 'Copying files to build output directory'
+    # Copy the "Module" directory over to the build output directory
+    Copy-Item -Path $Global:BrownserveModuleDirectory -Destination $global:BrownserveBuiltModuleDirectory -Recurse -Force
+}
+
+# Synopsis: Generates the module manifest
+task GenerateModuleManifest CopyModule, {
+    Write-Verbose 'Creating PowerShell module manifest'
+    # Get a list of Public cmdlets so we can mark them for export.
+    $PublicScripts = Get-ChildItem (Join-Path $global:BrownserveBuiltModuleDirectory 'Public') -Filter '*.ps1' -Recurse
+    $PublicFunctions = $PublicScripts | ForEach-Object {
+        $_.Name -replace '.ps1', ''
+    }
+    New-ModuleManifest `
+        -Path (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1") `
+        -Guid $ModuleGUID `
+        -Author $ModuleAuthor `
+        -Copyright "$(Get-Date -Format yyyy) $ModuleAuthor" `
+        -CompanyName 'Brownserve UK' `
+        -RootModule "$ModuleName.psm1" `
+        -ModuleVersion "$script:Version" `
+        -Description $ModuleDescription `
+        -PowerShellVersion '6.0' `
+        -ReleaseNotes $script:ReleaseNotes `
+        -LicenseUri "$GitHubRepo/blob/main/LICENSE" `
+        -ProjectUri "$GitHubRepo" `
+        -FunctionsToExport $PublicFunctions
+    # If this is not a production release then update the fields accordingly
+    if ($PreRelease)
+    {
+        Update-ModuleManifest `
+            -Path (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1") `
+            -Prerelease ($BranchName -replace '[^0-9A-Za-z]', '')
+    }
+    if ($ModuleTags)
+    {
+        Update-ModuleManifest `
+            -Path (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1") `
+            -Tags $ModuleTags
+    }
+}
+
+# Synopsis: Creates our NuGet package
+task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule, {
+    # We'll copy our build module to the nuget package and rename it to 'tools'
+    Write-Verbose 'Copying built module into NuGet package'
+    Copy-Item $global:BrownserveBuiltModuleDirectory -Destination (Join-Path $script:NugetPackageDirectory 'tools') -Recurse
+    # Copy each of the necessary files over to the build output directory
+    $ItemsToCopy = @(
+        (Join-Path $Global:BrownserveRepoRootDirectory 'CHANGELOG.md'),
+        (Join-Path $Global:BrownserveRepoRootDirectory 'LICENSE'),
+        (Join-Path $Global:BrownserveRepoRootDirectory README.md)
+    )
+    Copy-Item $ItemsToCopy -Destination $script:NugetPackageDirectory -Force
+    # Now we'll generate a nuspec file and pop it in the root of NuGet package
+    Write-Verbose 'Creating nuspec file'
+    $Nuspec = @"
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>$ModuleName</id>
+    <version>$script:Version</version>
+    <authors>$ModuleAuthor</authors>
+    <owners>Brownserve UK</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>$ModuleDescription</summary>
+    <description>$ModuleDescription</description>
+    <projectUrl>$GitHubRepo</projectUrl>
+    <releaseNotes>$script:ReleaseNotes</releaseNotes>
+    <readme>README.md</readme>
+    <copyright>Copyright $(Get-Date -Format yyyy) Brownserve UK.</copyright>
+    <tags>$($ModuleTags -join ' ')</tags>
+    <dependencies />
+  </metadata>
+</package>
+"@
+    New-Item $script:NuspecPath -Value $Nuspec -Force | Out-Null
+    $script:NuspecPath = $script:NuspecPath | Convert-Path
+}
+
+# Synopsis: Create the nuget package
+task Pack CreateNugetPackage, GenerateModuleManifest, {
+    Write-Verbose 'Creating NuGet package'
+    exec {
+        # Note: the paths must be a separate index to the switch in the array
+        $NugetArguments = @(
+            'pack',
+            "$script:NuspecPath",
+            '-NoPackageAnalysis',
+            '-Version',
+            "$NugetPackageVersion",
+            '-OutputDirectory',
+            "$Global:BrownserveRepoBuildOutputDirectory"
+        )
+        # On *nix we need to use mono to invoke nuget, so fudge the arguments a bit
+        if (-not $isWindows)
+        {
+            # Mono won't have access to our NuGet PowerShell alias, so set the path using our env var
+            $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
+        }
+        & $NugetCommand $NugetArguments
+    }
+    $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$script:NugetPackageVersion.nupkg" | Convert-Path
+}
+
+# Synopsis: Performs some tests to make sure everything works as intended
+task Tests Pack, {
+    Write-Verbose 'Performing unit testing, this may take a while...'
+    $Results = Invoke-Pester -Path $Global:BrownserveRepoTestsDirectory -PassThru
+    assert ($results.FailedCount -eq 0) "$($results.FailedCount) test(s) failed."
+}
+
+# Synopsis: Push the package up to nuget
+task PushNuget CheckPreviousRelease, Tests, {
+    # Only push to nuget if we want to
+    if ('nuget' -in $PublishTo)
+    {
+        $NugetArguments = @(
+            'push',
+            $script:nupkgPath,
+            '-Source',
+            'nuget',
+            '-ApiKey',
+            $NugetFeedApiKey
+        )
+        if (-not $isWindows)
+        {
+            $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
+        }
+        Write-Verbose 'Pushing to nuget'
+        # Be careful - Invoke-BuildExec requires curly braces to be on the same line!
+        exec {
+            & $NugetCommand $NugetArguments
+        }
+    }
+    else
+    {
+        Write-Verbose 'nuget not targetted, skipping...'
+    }
+}
+
+# Synopsis: Push the module to PSGallery too
+task PushPSGallery CheckPreviousRelease, Tests, {
+    if ('PSGallery' -in $PublishTo)
+    {
+        Write-Verbose 'Pushing to PSGallery'
+        # For PSGallery the module needs to be in a directory named after itself... -_- (PowerShellGet is awful)
+        $PSGalleryParams = @{
+            Path        = $global:BrownserveBuiltModuleDirectory
+            NuGetAPIKey = $PSGalleryAPIKey
+        }
+        Publish-Module @PSGalleryParams
+    }
+    else
+    {
+        Write-Verbose 'PSGallery not targeted, skipping...'
+    }
+}
+
+# Synopsis: Creates a GitHub release for this version, we only do this once we've had a successful NuGet push
+task GitHubRelease PushNuget, PushPSGallery, {
+    if ('GitHub' -in $PublishTo)
+    {
+        Write-Verbose "Creating GitHub release for $script:NugetPackageVersion"
+        $ReleaseParams = @{
+            Name        = "v$script:NugetPackageVersion"
+            Tag         = "v$script:NugetPackageVersion"
+            Description = $script:ReleaseNotes
+            GitHubToken = $GitHubPAT
+            RepoName    = $GitHubRepo
+            GitHubOrg   = $GitHubOrg
+        }
+        if ($PreRelease)
+        {
+            $ReleaseParams.Add('Prerelease', $true)
+            $ReleaseParams.Add('TargetCommit', $script:CurrentCommitHash)
+        }
+        New-GitHubRelease @ReleaseParams | Out-Null
+    }
+    else
+    {
+        Write-Verbose 'GitHub not targetted, skipping...'
+    }
+}
+
+# Synopsis: wrapper task to build the nupkg
+task Build Pack, {}
+
+# Synopsis: wrapper task to build then test the nupkg
+task Test Tests, {}
+
+# Synopsis: wrapper task to build, test then release the nupkg
+task Release GitHubRelease, {}
