@@ -112,6 +112,7 @@ $script:CurrentCommitHash = & git rev-parse HEAD
 $global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory $ModuleName
 $script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'NuGetPackage'
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
+$script:GitHubRepoURI = "https://github.com/Brownserve-UK/$GitHubRepo"
 
 # On non-windows platforms mono is required to run NuGet 🤢
 $NugetCommand = 'nuget'
@@ -213,8 +214,8 @@ task GenerateModuleManifest CopyModule, {
         -Description $ModuleDescription `
         -PowerShellVersion '6.0' `
         -ReleaseNotes $script:ReleaseNotes `
-        -LicenseUri "$GitHubRepo/blob/main/LICENSE" `
-        -ProjectUri "$GitHubRepo" `
+        -LicenseUri "$script:GitHubRepoURI/blob/main/LICENSE" `
+        -ProjectUri "$script:GitHubRepoURI" `
         -FunctionsToExport $PublicFunctions
     # If this is not a production release then update the fields accordingly
     if ($PreRelease)
@@ -256,7 +257,7 @@ task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule,
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>$ModuleDescription</summary>
     <description>$ModuleDescription</description>
-    <projectUrl>$GitHubRepo</projectUrl>
+    <projectUrl>$script:GitHubRepoURI</projectUrl>
     <releaseNotes>$script:ReleaseNotes</releaseNotes>
     <readme>README.md</readme>
     <copyright>Copyright $(Get-Date -Format yyyy) Brownserve UK.</copyright>
