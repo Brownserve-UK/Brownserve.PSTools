@@ -63,11 +63,11 @@ param
 
     # The GitHub organisation/account to publish the release to
     [Parameter(
-        Mandatory = $False
+        Mandatory = $true
     )]
     [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubOrg,
+    $GitHubOrg = $true,
 
     # The GitHub repo to publish the release to and used to fill in release details for Nuget/PSGallery
     [Parameter(
@@ -112,7 +112,7 @@ $script:CurrentCommitHash = & git rev-parse HEAD
 $global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory $ModuleName
 $script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'NuGetPackage'
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
-$script:GitHubRepoURI = "https://github.com/Brownserve-UK/$GitHubRepo"
+$script:GitHubRepoURI = "https://github.com/$GitHubOrg/$GitHubRepo"
 
 # On non-windows platforms mono is required to run NuGet 🤢
 $NugetCommand = 'nuget'
