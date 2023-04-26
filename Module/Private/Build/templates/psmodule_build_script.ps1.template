@@ -19,6 +19,14 @@ param
     [string]
     $ModuleDescription,
 
+    # The GUID for the module being created
+    [Parameter(
+        Mandatory = $true
+    )]
+    [ValidateNotNullOrEmpty()]
+    [guid]
+    $ModuleGuid,
+
     # The author of the module
     [Parameter(
         Mandatory = $False
@@ -147,6 +155,14 @@ try
     {
         $BuildParams.Add('Prerelease', $false)
     }
+    if ($GitHubOrg)
+    {
+        $BuildParams.Add('GitHubOrg', $GitHubOrg)
+    }
+    if ($GitHubRepo)
+    {
+        $BuildParams.Add('GitHubRepo', $GitHubRepo)
+    }
     # Add extra parameters when doing a release
     if ($Build -eq 'release')
     {
@@ -162,12 +178,7 @@ try
         {
             $BuildParams.Add('GitHubPAT', $GitHubPAT)
         }
-        if ($GitHubOrg)
-        {
-            $BuildParams.Add('GitHubOrg', $GitHubOrg)
-        }
         $BuildParams.Add('PublishTo', $PublishTo)
-        $BuildParams.Add('GitHubRepo', $GitHubRepo)
     }
     Write-Verbose "Invoking build: $Build"
     Invoke-Build @BuildParams -Verbose:($PSBoundParameters['Verbose'] -eq $true)
