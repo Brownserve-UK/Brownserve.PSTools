@@ -1,10 +1,44 @@
 <#
 .SYNOPSIS
-    Invokes our build tasks depending on configured options
+    Builds, tests and releases the PowerShell module via Invoke-Build.
 #>
 [CmdletBinding()]
 param
 (
+    # The name of the Module being built
+    [Parameter(
+        Mandatory = $true
+    )]
+    [string]
+    $ModuleName,
+
+    # The description of the module
+    [Parameter(
+        Mandatory = $true
+    )]
+    [string]
+    $ModuleDescription,
+
+    # The GUID for the module being created
+    [Parameter(
+        Mandatory = $true
+    )]
+    [ValidateNotNullOrEmpty()]
+    [guid]
+    $ModuleGuid,
+
+    # The author of the module
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string]
+    $ModuleAuthor = 'Brownserve UK',
+
+    # Any tags to add to the module
+    [Parameter(Mandatory = $false)]
+    [string[]]
+    $ModuleTags = 'brownserve-UK',
+
     # The name of the default branch
     [Parameter(
         Mandatory = $false
@@ -17,9 +51,9 @@ param
         Mandatory = $false
     )]
     [string]
-    $BranchName = 'test',
+    $BranchName = 'dev',
 
-    # The build to run
+    # The build to run, defaults to test whereby the module is built and tests are performed against it
     [Parameter(
         Mandatory = $false
     )]
@@ -27,14 +61,14 @@ param
     [string]
     $Build = 'test',
 
-    # The nuget feed(s) to publish to
+    # Where the module should be published to
     [Parameter(
         Mandatory = $false
     )]
-    [array]
-    $NugetFeedsToPublishTo = @('nuget'),
+    [string[]]
+    $PublishTo = @('nuget', 'PSGallery', 'GitHub'),
 
-    # The GitHub organisation/account to publish the release to
+    # The GitHub organisation/account that owns this module
     [Parameter(
         Mandatory = $false
     )]
@@ -42,13 +76,13 @@ param
     [string]
     $GitHubOrg = 'Brownserve-UK',
     
-    # The GitHub repo to publish the release to
+    # The GitHub repo that contains this module
     [Parameter(
         Mandatory = $false
     )]
     [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubRepo = 'Brownserve.PSTools',
+    $GitHubRepo,
     
     # The PAT for pushing to GitHub
     [Parameter(
@@ -77,7 +111,7 @@ $ErrorActionPreference = 'Stop'
 # Depending on how we got the branch name we may need to remove the full ref
 $BranchName = $BranchName -replace 'refs\/heads\/', ''
 
-# Work out if this is a production release
+# Work out if this is a production release depending on the branch we're building from
 $PreRelease = $true
 if ($DefaultBranch -eq $BranchName)
 {
@@ -87,7 +121,7 @@ if ($DefaultBranch -eq $BranchName)
 # Run the init script
 try
 {
-    Write-Verbose "Initialising repo"
+    Write-Verbose 'Initialising repo'
     $initScriptPath = Join-Path $PSScriptRoot -ChildPath '_init.ps1' | Convert-Path
     . $initScriptPath
 }
@@ -99,49 +133,20 @@ catch
 # Ensure we have everything needed to perform a release
 if ($Build -eq 'release')
 {
-    if (!$NugetFeedsToPublishTo)
-    {
-        throw "Must specify 'NugetFeedsToPublishTo' for a release"
-    }
-    if (!$NugetFeedApiKey)
-    {
-        throw "Must specify 'NugetFeedAPIKey' for a release"
-    }
-    if (!$PSGalleryAPIKey)
-    {
-        throw "Must specify 'PSGalleryAPIKey' for a release"
-    }
-    if (!$GitHubPAT)
-    {
-        # In cloud deployments we can pass this in as a script parameter but if it's missing we can try to pull it from vault
-        # This will obviously only work on-prem
-        if ($env:CI)
-        {
-            try
-            {
-                Get-Vault -Path $global:BrownserveRepoBinaryDirectory
-                $GitHubPAT = (Get-VaultSecret -Path 'credentials/live/builds/brownserve_pstools').GitHubPAT
-            }
-            catch
-            {
-                Write-Error $_.Exception.Message
-            }
-        }
-        else
-        {
-            throw "Must specify 'GitHubPAT' for a release"
-        }
-    }
+    <# Add any steps here that are required for a release #>
 }
 
 # Invoke our build task
 try
 {
     $BuildParams = @{
-        File            = (Join-Path -Path $global:BrownserveRepoBuildTasksDirectory -ChildPath 'build_tasks.ps1' | Convert-Path)
-        Task            = $Build
-        BranchName      = $BranchName
-        NugetFeedApiKey = $NugetFeedApiKey
+        File              = (Join-Path -Path $global:BrownserveRepoBuildTasksDirectory -ChildPath 'build_tasks.ps1' | Convert-Path)
+        Task              = $Build
+        BranchName        = $BranchName
+        ModuleName        = $ModuleName
+        ModuleDescription = $ModuleDescription
+        ModuleAuthor      = $ModuleAuthor
+        ModuleGuid        = $ModuleGuid
     }
     if ($PreRelease)
     {
@@ -151,17 +156,30 @@ try
     {
         $BuildParams.Add('Prerelease', $false)
     }
-    if ($PSGalleryAPIKey)
+    if ($GitHubOrg)
     {
-        $BuildParams.Add('PSGalleryAPIKey',$PSGalleryAPIKey)
+        $BuildParams.Add('GitHubOrg', $GitHubOrg)
+    }
+    if ($GitHubRepo)
+    {
+        $BuildParams.Add('GitHubRepo', $GitHubRepo)
     }
     # Add extra parameters when doing a release
     if ($Build -eq 'release')
     {
-        $BuildParams.Add('NugetFeedsToPublishTo', $NugetFeedsToPublishTo)
-        $BuildParams.Add('GitHubOrg', $GitHubOrg)
-        $BuildParams.Add('GitHubRepo', $GitHubRepo)
-        $BuildParams.Add('GitHubPAT', $GitHubPAT)
+        if ($NugetFeedApiKey)
+        {
+            $BuildParams.Add('NugetFeedApiKey', $NugetFeedApiKey)
+        }
+        if ($PSGalleryAPIKey)
+        {
+            $BuildParams.Add('PSGalleryAPIKey', $PSGalleryAPIKey)
+        }
+        if ($GitHubPAT)
+        {
+            $BuildParams.Add('GitHubPAT', $GitHubPAT)
+        }
+        $BuildParams.Add('PublishTo', $PublishTo)
     }
     Write-Verbose "Invoking build: $Build"
     Invoke-Build @BuildParams -Verbose:($PSBoundParameters['Verbose'] -eq $true)

@@ -17,7 +17,14 @@ jobs:
       - name: run-build-script
         shell: pwsh
         run: |
-            ./Brownserve.PSTools/.build/build.ps1 -BranchName $env:GITHUB_REF -Verbose
+            ./Brownserve.PSTools/.build/build.ps1 `
+              -ModuleName 'Brownserve.PSTools' `
+              -ModuleDescription 'A collection of common tools for use in Brownserve projects' `
+              -ModuleGUID '44b45ef7-6e06-4d07-901a-210b8df05b96' `
+              -GitHubRepo 'Brownserve.PSTools' `
+              -BranchName $env:GITHUB_REF `
+              -ModuleTags @('CI','CD','Brownserve-UK') `
+              -Verbose
       - name: notify-slack
         shell: pwsh
         if: ${{ always() }}
