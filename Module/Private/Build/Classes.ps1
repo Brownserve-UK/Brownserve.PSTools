@@ -81,7 +81,7 @@ class GitHubActionsJob
 {
     [string]$JobTitle
     [string]$RunsOn
-    [hashtable[]]$Steps
+    [hashtable[]]$Steps # Can't used ordered here, https://github.com/PowerShell/vscode-powershell/issues/1969#issuecomment-651874245
 
     GitHubActionsJob([hashtable]$Hash)
     {
