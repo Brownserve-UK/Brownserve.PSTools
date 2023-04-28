@@ -68,3 +68,34 @@ class InitPath
 
     
 }
+
+enum BrownserveCICD
+{
+    GitHubActions
+    TeamCity
+}
+<#
+    This class is used to create GitHub Actions workflow jobs
+#>
+class GitHubActionsJob
+{
+    [string]$JobTitle
+    [string]$RunsOn
+    [ordered[]]$Steps
+
+    GitHubActionsJob([hashtable]$Hash)
+    {
+        $RequiredKeys = @('JobTitle', 'RunsOn', 'Steps')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Hash.$Key)
+            {
+                throw "Hashtable missing key '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Hash.$Key
+            }
+        }
+    }
+}
