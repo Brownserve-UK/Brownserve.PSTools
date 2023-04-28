@@ -5,27 +5,11 @@
 [CmdletBinding()]
 param
 (
-    # The name of the Module being built
-    [Parameter(
-        Mandatory = $true
-    )]
-    [string]
-    $ModuleName,
-
-    # The description of the module
-    [Parameter(
-        Mandatory = $true
-    )]
-    [string]
-    $ModuleDescription,
-
-    # The GUID for the module being created
-    [Parameter(
-        Mandatory = $true
-    )]
+    # The PowerShell module information to use
+    [Parameter(Mandatory = $false)]
     [ValidateNotNullOrEmpty()]
-    [guid]
-    $ModuleGuid,
+    [psobject]
+    $ModuleInfo,
 
     # The author of the module
     [Parameter(
@@ -33,11 +17,6 @@ param
     )]
     [string]
     $ModuleAuthor = 'Brownserve UK',
-
-    # Any tags to add to the module
-    [Parameter(Mandatory = $false)]
-    [string[]]
-    $ModuleTags = 'brownserve-UK',
 
     # The name of the default branch
     [Parameter(
@@ -50,8 +29,9 @@ param
     [Parameter(
         Mandatory = $false
     )]
+    [ValidateNotNullOrEmpty()]
     [string]
-    $BranchName = 'dev',
+    $BranchName,
 
     # The build to run, defaults to test whereby the module is built and tests are performed against it
     [Parameter(
@@ -76,13 +56,13 @@ param
     [string]
     $GitHubOrg = 'Brownserve-UK',
     
-    # The GitHub repo that contains this module
+    # The GitHub repo that contains this module, it's needed to build up documentation URI's
     [Parameter(
-        Mandatory = $false
+        Mandatory = $true
     )]
     [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubRepo,
+    $GitHubRepoName,
     
     # The PAT for pushing to GitHub
     [Parameter(
@@ -108,6 +88,16 @@ param
 )
 # Always stop on errors
 $ErrorActionPreference = 'Stop'
+# If we don't have a branch name then try to work it out automatically
+if (!$BranchName)
+{
+    $BranchName = & git rev-parse --abbrev-ref HEAD
+}
+# If we still don't have a branch name then set it to something sensible
+if (!$BranchName)
+{
+    $BranchName = 'preview'
+}
 # Depending on how we got the branch name we may need to remove the full ref
 $BranchName = $BranchName -replace 'refs\/heads\/', ''
 
@@ -118,10 +108,25 @@ if ($DefaultBranch -eq $BranchName)
     $PreRelease = $false
 }
 
+# If we're not passing in the module information via the parameter try to load it from our well-known file.
+if (!$ModuleInfo)
+{
+    try
+    {
+        $ModuleInfo = Get-Content (Join-Path $PSScriptRoot 'ModuleInfo.json') -Raw | ConvertFrom-Json
+    
+    }
+    catch
+    {
+        throw 'Failed to load module information.'
+    }
+    Write-Verbose "Loaded module information from ModuleInfo.json:`n$($ModuleInfo | Out-String)"
+}
+
 # Run the init script
 try
 {
-    Write-Verbose 'Initialising repo'
+    Write-Verbose 'Starting build script'
     $initScriptPath = Join-Path $PSScriptRoot -ChildPath '_init.ps1' | Convert-Path
     . $initScriptPath
 }
@@ -143,10 +148,11 @@ try
         File              = (Join-Path -Path $global:BrownserveRepoBuildTasksDirectory -ChildPath 'build_tasks.ps1' | Convert-Path)
         Task              = $Build
         BranchName        = $BranchName
-        ModuleName        = $ModuleName
-        ModuleDescription = $ModuleDescription
+        ModuleName        = $ModuleInfo.Name
+        ModuleDescription = $ModuleInfo.Description
         ModuleAuthor      = $ModuleAuthor
-        ModuleGuid        = $ModuleGuid
+        ModuleGuid        = $ModuleInfo.GUID
+        ModuleTags        = $ModuleInfo.Tags
     }
     if ($PreRelease)
     {
@@ -160,9 +166,9 @@ try
     {
         $BuildParams.Add('GitHubOrg', $GitHubOrg)
     }
-    if ($GitHubRepo)
+    if ($GitHubRepoName)
     {
-        $BuildParams.Add('GitHubRepo', $GitHubRepo)
+        $BuildParams.Add('GitHubRepoName', $GitHubRepoName)
     }
     # Add extra parameters when doing a release
     if ($Build -eq 'release')
