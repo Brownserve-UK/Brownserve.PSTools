@@ -36,9 +36,6 @@ if ($env:CI)
     $SuppressOutput = $true
 }
 
-# We store our Powershell modules GUID in a global variable - it means it's much easier to use across builds
-$Global:BrownserveModuleGUID = '44b45ef7-6e06-4d07-901a-210b8df05b96'
-
 # Set up the paths that are needed by this repo for builds etc.
 # These are formed using the various 'Path' cmdlets (e.g. Join-Path) 
 # rather than manually forming paths to ensure we are cross compatible
@@ -179,7 +176,7 @@ catch
 try
 {
     Write-Verbose 'Downloading platyPS module'
-    Save-Module 'platyPS' -Repository PSGallery -Path $Global:BrownserveRepoNugetPackagesDirectory
+    #Save-Module 'platyPS' -Repository PSGallery -Path $Global:BrownserveRepoNugetPackagesDirectory
 }
 catch
 {
@@ -192,8 +189,8 @@ try
     Write-Verbose 'Importing external modules'
     @(
         (Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Invoke-Build' -AdditionalChildPath 'tools', 'InvokeBuild.psd1'),
-        (Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Pester' -AdditionalChildPath 'tools', 'Pester.psd1'),
-        (Get-ChildItem (Join-Path $Global:BrownserveRepoNugetPackagesDirectory -ChildPath 'platyPS') -Filter 'platyPS.psd1' -Recurse)
+        (Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Pester' -AdditionalChildPath 'tools', 'Pester.psd1')
+        #(Get-ChildItem (Join-Path $Global:BrownserveRepoNugetPackagesDirectory -ChildPath 'platyPS') -Filter 'platyPS.psd1' -Recurse)
     ) | ForEach-Object {
         Import-Module $_ -Force -Verbose:$false
     }
