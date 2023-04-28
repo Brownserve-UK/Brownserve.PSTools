@@ -117,9 +117,9 @@ Write-Verbose 'Importing Brownserve.PSTools module'
 try
 {
     Write-Verbose "Module path: $(Join-Path $Global:BrownserveModuleDirectory -ChildPath 'Brownserve.PSTools.psm1')"
-    # Import-Module (Join-Path $Global:BrownserveModuleDirectory -ChildPath 'Brownserve.PSTools.psm1') `
-    #     -Verbose:$false `
-    #     -Force
+    Import-Module (Join-Path $Global:BrownserveModuleDirectory -ChildPath 'Brownserve.PSTools.psm1') `
+        -Verbose:$false `
+        -Force
 }
 catch
 {
