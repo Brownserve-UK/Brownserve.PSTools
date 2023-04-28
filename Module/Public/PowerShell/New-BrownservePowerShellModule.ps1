@@ -14,8 +14,18 @@ function New-BrownservePowerShellModule
         [string]
         $ModuleName,
 
-        # An optional description for the module
+        # The GUID for the module
         [Parameter(Mandatory = $false)]
+        [guid]
+        $ModuleGUID = (New-Guid),
+
+        # The tags for this module
+        [Parameter(Mandatory = $false)]
+        [string[]]
+        $ModuleTags = @('Brownserve-UK'),
+
+        # A description for the module
+        [Parameter(Mandatory = $true)]
         [string]
         $Description,
 
@@ -33,13 +43,14 @@ function New-BrownservePowerShellModule
     
     begin
     {
-        if ($ModuleName -notmatch '\.psm1$')
+        if ($ModuleName -match '\.psm1$')
         {
-            $ModuleName = $ModuleName + '.psm1'
+            $ModuleName = $ModuleName -replace '\.psm1',''
         }
         try
         {
-            $ModulePath = Join-Path $Path $ModuleName
+            $ModulePath = Join-Path $Path "$ModuleName.psm1"
+            $ModuleInfoPath = Join-Path $Path 'ModuleInfo.json'
             Assert-Directory -Path $Path -ErrorAction 'Stop'
             if (Test-Path $ModulePath)
             {
@@ -61,6 +72,13 @@ function New-BrownservePowerShellModule
     
     process
     {
+        # Create the JSON we'll use to store the module info
+        $ModuleInfo = [ordered]@{
+            name = $ModuleName
+            description = $Description
+            guid = $ModuleGUID
+            tags = $ModuleTags
+        } | ConvertTo-Json
         $Params = @{}
         if ($Description)
         {
@@ -87,19 +105,27 @@ function New-BrownservePowerShellModule
         {
             throw "Failed to create new module.`n$($_.Exception.Message)"
         }
+        try
+        {
+            New-Item $ModuleInfoPath -Value $ModuleInfo -ItemType File -ErrorAction 'Stop' -Force:$Force
+        }
+        catch
+        {
+            throw "Failed to create the ModuleInfo file.`n$($_.Exception.Message)"
+        }
 
         try
         {
-            # NEVER try to overwrite the directories if they exist
+            # NEVER try to overwrite the public/private directories if they exist, they may have cmdlets in them
             $PublicPath = (Join-Path $Path 'Public')
             if (!(Test-Path $PublicPath))
             {
-                New-Item $PublicPath -ItemType Directory -ErrorAction 'Stop' -Force:$Force
+                New-Item $PublicPath -ItemType Directory -ErrorAction 'Stop'
             }
             $PrivatePath = (Join-Path $Path 'Private')
             if (!(Test-Path $PrivatePath))
             {
-                New-Item $PrivatePath -ItemType Directory -ErrorAction 'Stop' -Force:$Force
+                New-Item $PrivatePath -ItemType Directory -ErrorAction 'Stop'
             }
         }
         catch
@@ -110,6 +136,11 @@ function New-BrownservePowerShellModule
     
     end
     {
-        
+        return [BrownservePowerShellModule]@{
+            Name = $ModuleName
+            Description = $Description
+            GUID = $ModuleGUID
+            Tags = $ModuleTags
+        }
     }
 }
