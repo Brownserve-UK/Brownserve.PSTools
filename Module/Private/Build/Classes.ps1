@@ -81,7 +81,7 @@ class GitHubActionsJob
 {
     [string]$JobTitle
     [string]$RunsOn
-    [ordered[]]$Steps
+    [hashtable[]]$Steps
 
     GitHubActionsJob([hashtable]$Hash)
     {
