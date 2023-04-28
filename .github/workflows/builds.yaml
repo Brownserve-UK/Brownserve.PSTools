@@ -19,7 +19,7 @@ jobs:
         run: |
             ./Brownserve.PSTools/.build/build.ps1 `
               -GitHubRepoName 'Brownserve.PSTools' `
-              -BranchName 'dev' `
+              -BranchName $env:GITHUB_REF `
               -Verbose
       - name: notify-slack
         shell: pwsh
