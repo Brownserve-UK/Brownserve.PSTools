@@ -75,7 +75,7 @@ param
     )]
     [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubRepo,
+    $GitHubRepoName,
 
     # The PAT for pushing to GitHub
     [Parameter(
@@ -112,12 +112,13 @@ $script:CurrentCommitHash = & git rev-parse HEAD
 $global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory $ModuleName
 $script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'NuGetPackage'
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
-$script:GitHubRepoURI = "https://github.com/$GitHubOrg/$GitHubRepo"
+$script:GitHubRepoURI = "https://github.com/$GitHubOrg/$GitHubRepoName"
 
 # On non-windows platforms mono is required to run NuGet 🤢
 $NugetCommand = 'nuget'
 if (-not $isWindows)
 {
+    Write-Verbose "Running on linux, will use mono when running nuget"
     $NugetCommand = 'mono'
 }
 
@@ -143,9 +144,9 @@ if ('GitHub' -in $PublishTo)
     {
         throw 'GitHubOrg not provided'
     }
-    if (!$GitHubRepo)
+    if (!$GitHubRepoName)
     {
-        throw 'GitHubRepo not provided'
+        throw 'GitHubRepoName not provided'
     }
     if (!$GitHubPAT)
     {
@@ -162,7 +163,7 @@ task GenerateVersionInfo {
         Version    = $Version
         BranchName = $BranchName
     }
-    if ($PreRelease)
+    if ($PreRelease -eq $true)
     {
         $NugetPackageVersionParams.Add('PreRelease', $true)
     }
@@ -179,7 +180,7 @@ task CheckPreviousRelease GenerateVersionInfo, {
         Write-Verbose 'Checking for previous releases'
         $CurrentReleases = Get-GitHubRelease `
             -GitHubToken $GitHubPAT `
-            -RepoName $GitHubRepo `
+            -RepoName $GitHubRepoName `
             -GitHubOrg $GitHubOrg
         if ($CurrentReleases.tag_name -contains "v$script:NugetPackageVersion")
         {
@@ -203,33 +204,31 @@ task GenerateModuleManifest CopyModule, {
     $PublicFunctions = $PublicScripts | ForEach-Object {
         $_.Name -replace '.ps1', ''
     }
-    New-ModuleManifest `
-        -Path (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1") `
-        -Guid $ModuleGUID `
-        -Author $ModuleAuthor `
-        -Copyright "$(Get-Date -Format yyyy) $ModuleAuthor" `
-        -CompanyName 'Brownserve UK' `
-        -RootModule "$ModuleName.psm1" `
-        -ModuleVersion "$script:Version" `
-        -Description $ModuleDescription `
-        -PowerShellVersion '6.0' `
-        -ReleaseNotes $script:ReleaseNotes `
-        -LicenseUri "$script:GitHubRepoURI/blob/main/LICENSE" `
-        -ProjectUri "$script:GitHubRepoURI" `
-        -FunctionsToExport $PublicFunctions
-    # If this is not a production release then update the fields accordingly
-    if ($PreRelease)
-    {
-        Update-ModuleManifest `
-            -Path (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1") `
-            -Prerelease ($BranchName -replace '[^0-9A-Za-z]', '')
+    $ModuleManifest = @{
+        Path              = (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1")
+        Guid              = $ModuleGUID
+        Author            = $ModuleAuthor
+        Copyright         = "$(Get-Date -Format yyyy) $ModuleAuthor"
+        CompanyName       = 'Brownserve UK'
+        RootModule        = "$ModuleName.psm1"
+        ModuleVersion     = "$script:Version"
+        Description       = $ModuleDescription
+        PowerShellVersion = '6.0'
+        ReleaseNotes      = $script:ReleaseNotes
+        LicenseUri        = "$script:GitHubRepoURI/blob/main/LICENSE"
+        ProjectUri        = "$script:GitHubRepoURI"
+        FunctionsToExport = $PublicFunctions
     }
     if ($ModuleTags)
     {
-        Update-ModuleManifest `
-            -Path (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1") `
-            -Tags $ModuleTags
+        $ModuleManifest.add('Tags', $ModuleTags)
     }
+    # If this is not a production release then update the fields accordingly
+    if ($PreRelease -eq $true)
+    {
+        $ModuleManifest.add('Prerelease',($BranchName -replace '[^a-zA-Z0-9]',''))
+    }
+    New-ModuleManifest @ModuleManifest -ErrorAction 'Stop'
 }
 
 # Synopsis: Creates our NuGet package
@@ -251,7 +250,7 @@ task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule,
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>$ModuleName</id>
-    <version>$script:Version</version>
+    <version>$script:NugetPackageVersion</version>
     <authors>$ModuleAuthor</authors>
     <owners>Brownserve UK</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -289,6 +288,7 @@ task Pack CreateNugetPackage, GenerateModuleManifest, {
         {
             # Mono won't have access to our NuGet PowerShell alias, so set the path using our env var
             $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
+            Write-Verbose "Calling Nuget with:`n$NugetArguments"
         }
         & $NugetCommand $NugetArguments
     }
@@ -359,10 +359,10 @@ task GitHubRelease PushNuget, PushPSGallery, {
             Tag         = "v$script:NugetPackageVersion"
             Description = $script:ReleaseNotes
             GitHubToken = $GitHubPAT
-            RepoName    = $GitHubRepo
+            RepoName    = $GitHubRepoName
             GitHubOrg   = $GitHubOrg
         }
-        if ($PreRelease)
+        if ($PreRelease -eq $true)
         {
             $ReleaseParams.Add('Prerelease', $true)
             $ReleaseParams.Add('TargetCommit', $script:CurrentCommitHash)
