@@ -74,6 +74,12 @@ enum BrownserveCICD
     GitHubActions
     TeamCity
 }
+
+enum BrownserveRepoBuildType
+{
+    PowerShellModule
+    Generic
+}
 <#
     This class is used to create GitHub Actions workflow jobs
 #>
@@ -96,6 +102,65 @@ class GitHubActionsJob
             {
                 $this.$Key = $Hash.$Key
             }
+        }
+    }
+}
+
+class PaketDependencyRule
+{
+    [string]$Source
+    [string]$PackageName
+
+    PaketDependencyRule([hashtable]$Hashtable)
+    {
+        $RequiredKeys = @('Source', 'PackageName')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Hashtable.$Key)
+            {
+                throw "Hashtable missing key '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Hashtable.$Key
+            }
+        }
+    }
+}
+
+class PaketDependency
+{
+    [PaketDependencyRule[]]$Rule
+    [string]$Comment
+
+    PaketDependency([hashtable]$Hashtable)
+    {
+        if (!$Hashtable.Rule)
+        {
+            throw "Hashtable missing key 'Rule'"
+        }
+            
+        $this.Rule = $Hashtable.Rule
+        if ($Hashtable.Comment)
+        {
+            # Try to ensure every line starts with the pound symbol
+            $LocalComment = $Hashtable.Comment -split "`n"
+            $SanitizedComment = ''
+            $LocalComment | ForEach-Object {
+                if ($_ -notmatch '^\#')
+                {
+                    $SanitizedComment += "# $_"
+                }
+                else
+                {
+                    $SanitizedComment += $_
+                }
+                if ($_ -notmatch $LocalComment[-1])
+                {
+                    $SanitizedComment += "`n"
+                }
+            }
+            $this.Comment = $SanitizedComment
         }
     }
 }
