@@ -31,7 +31,7 @@ function New-GitIgnoresFile
                     $IgnoresTemplate += "$($_.Comment)`n"
                 }
                 $_.Item | ForEach-Object {
-                    $IgnoresTemplate += "$($_.Item)`n"
+                    $IgnoresTemplate += "$($_)`n"
                 }
                 $IgnoresTemplate += "`n"
             }

@@ -21,9 +21,9 @@ function New-PaketDependenciesFile
     
     process
     {
-        $PaketDependenciesTemplate = "# This file is managed by a tool, manual changes will be lost unless added to the designated section below`n`n"
+        $PaketDependenciesTemplate = "# This file is managed by a tool, manual changes will be lost unless added to the designated section below`n"
         # Add the main nuget source
-        $PaketDependencies += 'source https://api.nuget.org/v3/index.json'
+        $PaketDependenciesTemplate += "source https://api.nuget.org/v3/index.json`n`n"
         if ($PaketDependencies)
         {
             $PaketDependenciesTemplate += "## Auto generated dependencies: ##`n"
@@ -32,8 +32,8 @@ function New-PaketDependenciesFile
                 {
                     $PaketDependenciesTemplate += "$($_.Comment)`n"
                 }
-                $_.Item | ForEach-Object {
-                    $PaketDependenciesTemplate += "$($_.Rule.Source) $($_.Rule.PackageName)`n"
+                $_.Rule | ForEach-Object {
+                    $PaketDependenciesTemplate += "$($_.Source) $($_.PackageName)`n"
                 }
                 $PaketDependenciesTemplate += "`n"
             }

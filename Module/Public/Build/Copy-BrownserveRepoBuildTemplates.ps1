@@ -32,7 +32,7 @@ function Copy-BrownserveRepoBuildTemplates
             foreach ($Tool in $RequiredTools)
             {
                 $Check = $null
-                $Check = Get-Command $Tool
+                $Check = Get-Command $Tool -ErrorAction 'SilentlyContinue'
                 if (!$Check)
                 {
                     Write-Error "'$Tool' is not available on your path. This is required to configure a Brownserve repo"
@@ -51,9 +51,11 @@ function Copy-BrownserveRepoBuildTemplates
         Assert-Directory $RepoPath -ErrorAction 'Stop'
 
         # The below paths will always need to exist and we should check for them to avoid causing any mishaps even if we are going to do this on a branch
+        $BuildDirectory = Join-Path $RepoPath '.build'
         $InitPath = Join-Path $BuildDirectory '_init.ps1'
         $PaketDependenciesPath = Join-Path $RepoPath 'paket.dependencies'
-        $dotnetToolsPath = Join-Path $RepoPath '.config' 'dotnet-tools.json'
+        $dotnetToolsConfigPath = Join-Path $RepoPath '.config'
+        $dotnetToolsPath = Join-Path $dotnetToolsConfigPath 'dotnet-tools.json'
         $NugetConfigPath = Join-Path $RepoPath 'nuget.config'
         $GitIgnorePath = Join-Path $RepoPath '.gitignore'
 
@@ -68,7 +70,7 @@ function Copy-BrownserveRepoBuildTemplates
         # Ensure we have a directory where we can create some staging files before writing them to the repo
         try
         {
-            $TempDir = New-BrownserveTempDirectory
+            $TempDir = New-BrownserveTemporaryDirectory
         }
         catch
         {
@@ -80,7 +82,7 @@ function Copy-BrownserveRepoBuildTemplates
                 VariableName = 'BrownserveRepoBuildDirectory'
                 Path         = '.build'
                 Description  = 'Holds all build related configuration along with this _init script'
-                LocalPath    = (Join-Path $RepoPath '.build')
+                LocalPath    = $BuildDirectory
             })
 
         # And our list of ephemeral paths that are gitignored and recreated between init's
@@ -152,13 +154,19 @@ function Copy-BrownserveRepoBuildTemplates
         # Make sure we're running on a branch
         if ($CurrentBranch -ne 'brownserve_repo_init')
         {
+            Write-Verbose "Current branch is: $CurrentBranch. Creating 'brownserve_repo_init'"
             try
             {
                 Invoke-NativeCommand `
                     -FilePath 'git' `
                     -ArgumentList @('branch', 'brownserve_repo_init') `
                     -WorkingDirectory $RepoPath `
-                    -PassThru `
+                    -SuppressOutput `
+                    -ErrorAction 'Stop'
+                Invoke-NativeCommand `
+                    -FilePath 'git' `
+                    -ArgumentList @('checkout', 'brownserve_repo_init') `
+                    -WorkingDirectory $RepoPath `
                     -SuppressOutput `
                     -ErrorAction 'Stop'
             }
@@ -244,6 +252,13 @@ function Copy-BrownserveRepoBuildTemplates
                             Source      = 'github'
                             PackageName = 'PowerShell/platyPS:v2'
                         }
+                    },
+                    @{
+                        Comment = 'We use the standalone version of Nuget for packaging up the module'
+                        Rule    = @{
+                            PackageName = 'NuGet.CommandLine'
+                            Source      = 'nuget'
+                        }
                     }
                 )
 
@@ -298,7 +313,8 @@ function Copy-BrownserveRepoBuildTemplates
         # As will the dotnet tools manifest
         try
         {
-            $dotnetToolsTempPath = Join-Path $TempDir '.config' 'dotnet-tools.json'
+            $dotnetToolsConfigTempPath = Join-Path $TempDir '.config'
+            $dotnetToolsTempPath = Join-Path $dotnetToolsConfigTempPath 'dotnet-tools.json'
             Invoke-NativeCommand `
                 -FilePath 'dotnet' `
                 -ArgumentList 'new', 'tool-manifest' `
@@ -332,10 +348,22 @@ function Copy-BrownserveRepoBuildTemplates
             }
         }
 
+        # Create all our permanent paths first, other things may need to live under them
+        try
+        {
+            $PermanentPaths.GetEnumerator() | ForEach-Object {
+                New-Item $_.LocalPath -ItemType 'Directory' -Force:$Force | Out-Null # I think these should _always_ be directories, but we may need to rethink this if not!
+            }
+        }
+        catch
+        {
+            throw "Failed to create permanent paths.`n$($_.Exception.Message)"
+        }
+
         # Now we have everything we need then we can start creating files on disk!
         try
         {
-            Move-Item $NugetConfigTempPath -Destination $NugetConfigPath -Force:$Force
+            Move-Item $NugetConfigTempPath -Destination $NugetConfigPath -Force:$Force | Out-Null
         }
         catch
         {
@@ -343,7 +371,7 @@ function Copy-BrownserveRepoBuildTemplates
         }
         try
         {
-            Move-Item $dotnetToolsTempPath -Destination $dotnetToolsPath -Force:$Force
+            Move-Item $dotnetToolsConfigTempPath -Destination $RepoPath -Force:$Force | Out-Null
         }
         catch
         {
@@ -352,7 +380,7 @@ function Copy-BrownserveRepoBuildTemplates
 
         try
         {
-            New-Item $InitPath -Value $InitScriptContent -ItemType File -Force:$Force
+            New-Item $InitPath -Value $InitScriptContent -ItemType File -Force:$Force | Out-Null
         }
         catch
         {
@@ -361,7 +389,7 @@ function Copy-BrownserveRepoBuildTemplates
 
         try
         {
-            New-Item $GitIgnorePath -ItemType File -Value $GitIgnoresContent -Force:$Force
+            New-Item $GitIgnorePath -ItemType File -Value $GitIgnoresContent -Force:$Force | Out-Null
         }
         catch
         {
@@ -372,23 +400,12 @@ function Copy-BrownserveRepoBuildTemplates
         {
             try
             {
-                New-Item -Value $PaketDependenciesPath -ItemType File -Value $PaketDependenciesContent -Force:$Force
+                New-Item -Path $PaketDependenciesPath -ItemType File -Value $PaketDependenciesContent -Force:$Force | Out-Null
             }
             catch
             {
                 throw "Failed to write '$PaketDependenciesPath'.`n$($_.Exception.Message)"
             }
-        }
-
-        try
-        {
-            $PermanentPaths.GetEnumerator() | ForEach-Object {
-                New-Item $_.LocalPath -ItemType 'Directory' -Force:$Force # I think these should _always_ be directories, but we may need to rethink this if not!
-            }
-        }
-        catch
-        {
-            throw "Failed to create permanent paths.`n$($_.Exception.Message)"
         }
     }
     

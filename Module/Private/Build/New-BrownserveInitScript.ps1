@@ -109,12 +109,12 @@ function New-BrownserveInitScript
                 }
                 else
                 {
-                    $Path = "-Path '$($_.Path)' -ChildPath $($_.ChildPaths[0])'"
+                    $Path = "-Path '$($_.Path)' -ChildPath '$($_.ChildPaths[0])'"
                 }
             }
             else
             {
-                $Path = "'$($_.Path)'"
+                $Path = "-Path '$($_.Path)'"
             }
             $EphemeralPathText = $EphemeralPathText + @"
     (`$$($_.VariableName) = Join-Path `$global:BrownserveRepoRootDirectory $Path)
