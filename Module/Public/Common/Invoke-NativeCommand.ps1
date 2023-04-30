@@ -209,7 +209,7 @@ function Invoke-NativeCommand
                 # If we get a failure at this stage we won't have any stderr to grab so just return our exception
                 throw $_.Exception.Message
             }
-
+            $ExitCode = $Process.ExitCode
             # Check the exit code is expected, if not grab the contents of stderr (if we can) and return it
             if ($Process.ExitCode -notin $ExitCodes)
             {
@@ -308,6 +308,7 @@ function Invoke-NativeCommand
                     Write-Warning "Failed to tee StdErr to $StdErrStream.`n$($_.Exception.Message)"
                 }
             }
+            $ExitCode = $LASTEXITCODE
             # Only if the exit code is not in the expected list of exit codes do we raise an error (which can be caught by the -ErrorAction meta param)
             if ($LASTEXITCODE -notin $ExitCodes)
             {
@@ -342,6 +343,10 @@ function Invoke-NativeCommand
             if ($StdErrFilePath)
             {
                 $Return.Add('StdErrFilePath', $StdErrFilePath)
+            }
+            if ($ExitCode)
+            {
+                $Return.Add('ExitCode', $ExitCode)
             }
             if ($Return.GetEnumerator().Count -gt 0)
             {
