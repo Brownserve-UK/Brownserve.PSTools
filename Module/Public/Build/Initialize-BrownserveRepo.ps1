@@ -61,6 +61,9 @@ function Initialize-BrownserveRepo
         $VSCodePath = Join-Path $RepoPath '.vscode'
         $VSCodeExtensionsFilePath = Join-Path $VSCodePath 'extensions.json'
         $VSCodeWorkspaceSettingsFilePath = Join-Path $VSCodePath 'settings.json'
+        $DevcontainerDirectoryPath = Join-Path $RepoPath '.devcontainer'
+        $DevcontainerPath = Join-Path $DevcontainerDirectoryPath 'devcontainer.json'
+        $DockerfilePath = Join-Path $DevcontainerDirectoryPath 'Dockerfile'
 
         $PathsToTest = @($InitPath, $PaketDependenciesPath, $dotnetToolsPath, $NugetConfigPath)
         if (!$Force)
@@ -457,6 +460,14 @@ function Initialize-BrownserveRepo
         if ($DevcontainerParams)
         {
             $DevcontainerParams.RequiredExtensions = $VSCodeRecommendedExtensions
+            try
+            {
+                $DevcontainerConfig = New-VSCodeDevContainer @DevcontainerParams -ErrorAction 'Stop'
+            }
+            catch
+            {
+                throw "Failed to create devcontainer.`n$($_.Exception.Message)"
+            }
         }
 
         ## Only start creating paths/files if we've been successful up to this point
@@ -550,6 +561,36 @@ function Initialize-BrownserveRepo
             catch
             {
                 throw "Failed to write '$PaketDependenciesPath'.`n$($_.Exception.Message)"
+            }
+        }
+
+        if ($DevcontainerConfig)
+        {
+            try
+            {
+                New-Item $DevcontainerDirectoryPath -ItemType Directory -Force:$Force -ErrorAction 'Stop' | Out-Null
+            }
+            catch
+            {
+                throw "Failed to create '$DevcontainerDirectoryPath'"
+            }
+
+            try
+            {
+                New-Item $DevcontainerPath -ItemType File -Value $DevcontainerConfig.Devcontainer -ErrorAction 'Stop' -Force:$Force | Out-Null
+            }
+            catch
+            {
+                throw "Failed to create '$DevcontainerPath'.`n$($_.Exception.Message)"
+            }
+
+            try
+            {
+                New-Item $DockerfilePath -ItemType File -Value $DevcontainerConfig.Dockerfile -ErrorAction 'Stop' -Force:$Force | Out-Null
+            }
+            catch
+            {
+                throw "Failed to create '$DockerfilePath'.`n$($_.Exception.Message)"
             }
         }
     }
