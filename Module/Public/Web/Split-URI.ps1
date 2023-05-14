@@ -1,4 +1,4 @@
-function ConvertFrom-URI
+function Split-URI
 {
     [CmdletBinding()]
     param
