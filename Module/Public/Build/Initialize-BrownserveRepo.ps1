@@ -350,23 +350,26 @@ function Initialize-BrownserveRepo
             }
             # Add the extension ID's to the list of recommended extensions (we'll clean it up later)
             $VSCodeRecommendedExtensions += $RequiredExtensionDetails.ExtensionID
-
             # Go through each of the settings and make sure they don't already exist
-            $RequiredExtensionDetails.Settings.GetEnumerator() | ForEach-Object {
-                if ($VSCodeWorkspaceSettings.Keys -contains $_.Key)
-                {
-                    if ($Force)
+            $RequiredExtensionDetails.Settings | ForEach-Object {
+                $_.GetEnumerator() | ForEach-Object {
+                    if ($VSCodeWorkspaceSettings.Keys -contains $_.Key)
                     {
-                        $VSCodeWorkspaceSettings.$_.Key = $_.Value
+                        if ($Force)
+                        {
+                            Write-Debug "Overwriting key: $($_.Key) with value: $($_.Value)"
+                            $VSCodeWorkspaceSettings.$_.Key = $_.Value
+                        }
+                        else
+                        {
+                            throw "This repo's VSCode settings already contains configuration for '$($_.Key)' to overwrite use -Force."
+                        }
                     }
                     else
                     {
-                        throw "This repo's VSCode settings already contains configuration for '$($_.Key)' to overwrite use -Force."
+                        Write-Debug "Adding key: $($_.Key) with value: $($_.Value)"
+                        $VSCodeWorkspaceSettings.Add($_.Key, $_.Value)
                     }
-                }
-                else
-                {
-                    $VSCodeWorkspaceSettings.Add($_.Key, $_.Value)
                 }
             }
         }
@@ -519,7 +522,7 @@ function Initialize-BrownserveRepo
 
         try
         {
-            $VSCodeRecommendedExtensionsJSON = ConvertTo-Json $VSCodeRecommendedExtensions -ErrorAction 'Stop'
+            $VSCodeRecommendedExtensionsJSON = ConvertTo-Json @{ Recommendations = $VSCodeRecommendedExtensions } -ErrorAction 'Stop'
             New-Item $VSCodeExtensionsFilePath -ItemType File -Value $VSCodeRecommendedExtensionsJSON -Force:$Force | Out-Null
         }
         catch
