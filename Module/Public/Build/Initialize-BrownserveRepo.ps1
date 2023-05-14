@@ -163,7 +163,7 @@ function Initialize-BrownserveRepo
         catch [BrownserveFileNotFound]
         {
             # Repo probably doesn't have a settings file yet, so we'll create a blank one
-            $VSCodeWorkspaceSettings = @{}
+            $VSCodeWorkspaceSettings = [ordered]@{}
         }
         catch
         {
@@ -358,7 +358,7 @@ function Initialize-BrownserveRepo
                         if ($Force)
                         {
                             Write-Debug "Overwriting key: $($_.Key) with value: $($_.Value)"
-                            $VSCodeWorkspaceSettings.$_.Key = $_.Value
+                            $VSCodeWorkspaceSettings.($_.Key) = $_.Value
                         }
                         else
                         {
@@ -483,7 +483,8 @@ function Initialize-BrownserveRepo
         }
         try
         {
-            Move-Item $dotnetToolsConfigTempPath -Destination $RepoPath -Force:$Force | Out-Null
+            New-Item $dotnetToolsConfigPath -ItemType Directory -Force:$Force | Out-Null
+            Move-Item $dotnetToolsTempPath -Destination $dotnetToolsPath -Force:$Force | Out-Null
         }
         catch
         {
@@ -522,7 +523,7 @@ function Initialize-BrownserveRepo
 
         try
         {
-            $VSCodeRecommendedExtensionsJSON = ConvertTo-Json @{ Recommendations = $VSCodeRecommendedExtensions } -ErrorAction 'Stop'
+            $VSCodeRecommendedExtensionsJSON = ConvertTo-Json @{ recommendations = $VSCodeRecommendedExtensions } -ErrorAction 'Stop'
             New-Item $VSCodeExtensionsFilePath -ItemType File -Value $VSCodeRecommendedExtensionsJSON -Force:$Force | Out-Null
         }
         catch
