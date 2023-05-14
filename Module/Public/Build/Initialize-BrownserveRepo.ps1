@@ -1,4 +1,4 @@
-function Copy-BrownserveRepoBuildTemplates
+function Initialize-BrownserveRepo
 {
     [CmdletBinding()]
     param
@@ -60,11 +60,19 @@ function Copy-BrownserveRepoBuildTemplates
         $GitIgnorePath = Join-Path $RepoPath '.gitignore'
 
         $PathsToTest = @($InitPath, $PaketDependenciesPath, $dotnetToolsPath, $NugetConfigPath)
-        $PathsToTest | ForEach-Object {
-            if ((Test-Path $_))
-            {
-                throw "It looks like this project has already been at least partially initialized as the path '$_' already exists.`nPlease use '' to update the project or the '-Force' parameter to forcefully overwrite the files."
+        if (!$Force)
+        {
+            $PathsToTest | ForEach-Object {
+                if ((Test-Path $_))
+                {
+                    throw "It looks like this project has already been at least partially initialized as the path '$_' already exists.`nPlease use '' to update the project or the '-Force' parameter to forcefully overwrite the files."
+                }
             }
+        }
+        else
+        {
+            # TODO: Confirm?
+            Write-Warning 'Forcing overwrite.'
         }
 
         # Ensure we have a directory where we can create some staging files before writing them to the repo
@@ -126,6 +134,38 @@ function Copy-BrownserveRepoBuildTemplates
                 Description  = 'We deliberately regenerate this every time because we live on the edge and always take the latest versions of our packages. 🤠'
             }
         )
+
+        <#
+            There may be various recommended extensions and/or VSCode settings we want to include. There may already
+            be some settings in the repo as well, we should try and preserve those as best we can.
+        #>
+        try
+        {
+            $VSCodeRecommendedExtensions = Get-VSCodeRecommendedExtensions -WorkspacePath $RepoPath -ErrorAction 'Stop'
+        }
+        catch [BrownserveFileNotFound]
+        {
+            # Repo probably doesn't have a recommended extensions file yet, so we'll create a blank one
+            $VSCodeRecommendedExtensions = @()
+        }
+        catch
+        {
+            throw "Failed to get existing recommended extensions.`n$($_.Exception.Message)"
+        }
+
+        try
+        {
+            $VSCodeWorkspaceSettings = Get-VSCodeWorkspaceSettings -WorkspacePath $RepoPath -ErrorAction 'Stop'
+        }
+        catch [BrownserveFileNotFound]
+        {
+            # Repo probably doesn't have a settings file yet, so we'll create a blank one
+            $VSCodeWorkspaceSettings = @{}
+        }
+        catch
+        {
+            throw "Failed to get existing VSCode settings.`n$($_.Exception.Message)"
+        }
 
         # Check what branch we are on
         try
@@ -212,6 +252,15 @@ function Copy-BrownserveRepoBuildTemplates
         {
             'PowerShellModule'
             {
+                
+                # We'll want a devcontainer for developing PowerShell modules
+                $DevcontainerParams = @{
+                    Dockerfile         = 'Dockerfile_PowerShell'
+                    RequiredExtensions = @()
+                }
+
+                $RequiredExtensions = @('SpellCheck','PowerShell','Markdown')
+
                 $PermanentPaths += @(@{
                         VariableName = 'BrownserveModuleDirectory'
                         Path         = 'Module'
@@ -269,6 +318,54 @@ function Copy-BrownserveRepoBuildTemplates
             }
             Default
             {}
+        }
+
+        #
+        if ($RequiredExtensions)
+        {
+            $RequiredExtensionDetails = @()
+            $RequiredExtensions | ForEach-Object {
+                switch ($_)
+                {
+                    'PowerShell'
+                    { 
+                        $RequiredExtensionDetails += New-VSCodePowerShellExtensionConfig
+                    }
+                    'Markdown'
+                    {
+                        $RequiredExtensionDetails += New-VSCodeMarkdownExtensionConfig
+                    }
+                    'SpellCheck'
+                    {
+                        $RequiredExtensionDetails += New-VSCodeSpellingsExtensionConfig
+                    }
+                    Default
+                    {
+                        throw "Unhandled VSCode extension '$_'"
+                    }
+                }
+            }
+            # Add the extension ID's to the list of recommended extensions (we'll clean it up later)
+            $VSCodeRecommendedExtensions += $RequiredExtensionDetails.ExtensionID
+
+            # Go through each of the settings and make sure they don't already exist
+            $RequiredExtensionDetails.Settings.GetEnumerator() | ForEach-Object {
+                if ($VSCodeWorkspaceSettings.Keys -contains $_.Key)
+                {
+                    if ($Force)
+                    {
+                        $VSCodeWorkspaceSettings.$_.Key = $_.Value
+                    }
+                    else
+                    {
+                        throw "This repo's VSCode settings already contains configuration for '$($_.Key)' to overwrite use -Force."
+                    }
+                }
+                else
+                {
+                    $VSCodeWorkspaceSettings.Add($_.Key,$_.Value)
+                }
+            }
         }
 
         # Create the _init script as that will always be required
