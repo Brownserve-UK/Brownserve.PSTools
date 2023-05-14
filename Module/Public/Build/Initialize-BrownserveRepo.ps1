@@ -58,6 +58,9 @@ function Initialize-BrownserveRepo
         $dotnetToolsPath = Join-Path $dotnetToolsConfigPath 'dotnet-tools.json'
         $NugetConfigPath = Join-Path $RepoPath 'nuget.config'
         $GitIgnorePath = Join-Path $RepoPath '.gitignore'
+        $VSCodePath = Join-Path $RepoPath '.vscode'
+        $VSCodeExtensionsFilePath = Join-Path $VSCodePath 'extensions.json'
+        $VSCodeWorkspaceSettingsFilePath = Join-Path $VSCodePath 'settings.json'
 
         $PathsToTest = @($InitPath, $PaketDependenciesPath, $dotnetToolsPath, $NugetConfigPath)
         if (!$Force)
@@ -259,7 +262,7 @@ function Initialize-BrownserveRepo
                     RequiredExtensions = @()
                 }
 
-                $RequiredExtensions = @('SpellCheck','PowerShell','Markdown')
+                $RequiredExtensions = @('SpellCheck', 'PowerShell', 'Markdown')
 
                 $PermanentPaths += @(@{
                         VariableName = 'BrownserveModuleDirectory'
@@ -363,10 +366,13 @@ function Initialize-BrownserveRepo
                 }
                 else
                 {
-                    $VSCodeWorkspaceSettings.Add($_.Key,$_.Value)
+                    $VSCodeWorkspaceSettings.Add($_.Key, $_.Value)
                 }
             }
         }
+
+        # Filter out any duplicate extensions
+        $VSCodeRecommendedExtensions = $VSCodeRecommendedExtensions | Select-Object -Unique
 
         # Create the _init script as that will always be required
         try
@@ -445,6 +451,12 @@ function Initialize-BrownserveRepo
             }
         }
 
+        if ($DevcontainerParams)
+        {
+            $DevcontainerParams.RequiredExtensions = $VSCodeRecommendedExtensions
+        }
+
+        ## Only start creating paths/files if we've been successful up to this point
         # Create all our permanent paths first, other things may need to live under them
         try
         {
@@ -491,6 +503,38 @@ function Initialize-BrownserveRepo
         catch
         {
             throw "Failed to write '$GitIgnorePath'.`n$($_.Exception.Message)"
+        }
+
+        if (!(Test-Path $VSCodePath))
+        {
+            try
+            {
+                New-Item $VSCodePath -ItemType Directory -ErrorAction 'Stop' | Out-Null
+            }
+            catch
+            {
+                throw "Failed to create VSCode directory.`n$($_.Exception.Message)"
+            }
+        }
+
+        try
+        {
+            $VSCodeRecommendedExtensionsJSON = ConvertTo-Json $VSCodeRecommendedExtensions -ErrorAction 'Stop'
+            New-Item $VSCodeExtensionsFilePath -ItemType File -Value $VSCodeRecommendedExtensionsJSON -Force:$Force | Out-Null
+        }
+        catch
+        {
+            throw "Failed to create '$VSCodeExtensionsFilePath'.`n$($_.Exception.Message)"
+        }
+
+        try
+        {
+            $VSCodeWorkspaceSettingsJSON = ConvertTo-Json $VSCodeWorkspaceSettings -ErrorAction 'Stop'
+            New-Item $VSCodeWorkspaceSettingsFilePath -ItemType File -Value $VSCodeWorkspaceSettingsJSON -Force:$Force | Out-Null
+        }
+        catch
+        {
+            throw "Failed to create '$VSCodeWorkspaceSettingsFilePath'.`n$($_.Exception.Message)"
         }
 
         if ($PaketDependenciesContent)
