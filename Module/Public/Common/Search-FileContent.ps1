@@ -117,7 +117,7 @@ function Search-FileContent
         {
             if ($AsString)
             {
-                return [String] $TextToReturn
+                return [String]$TextToReturn
             }
             else
             {
