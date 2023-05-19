@@ -1,4 +1,4 @@
-function Initialize-BrownserveRepo
+function Initialize-BrownserveRepository
 {
     [CmdletBinding()]
     param
@@ -35,7 +35,7 @@ function Initialize-BrownserveRepo
                 $Check = Get-Command $Tool -ErrorAction 'SilentlyContinue'
                 if (!$Check)
                 {
-                    Write-Error "'$Tool' is not available on your path. This is required to configure a Brownserve repo"
+                    Write-Error "'$Tool' is not available on your path. This is required to configure a Brownserve repository"
                 }
             }
     
@@ -71,7 +71,7 @@ function Initialize-BrownserveRepo
             $PathsToTest | ForEach-Object {
                 if ((Test-Path $_))
                 {
-                    throw "It looks like this project has already been at least partially initialized as the path '$_' already exists.`nPlease use '' to update the project or the '-Force' parameter to forcefully overwrite the files."
+                    throw "It looks like this project has already been at least partially initialized as the path '$_' already exists.`nPlease use 'Update-BrownserveRepository' to update the project or the '-Force' parameter to forcefully overwrite the files."
                 }
             }
         }
