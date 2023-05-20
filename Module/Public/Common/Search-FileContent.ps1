@@ -40,6 +40,7 @@ function Search-FileContent
             throw "Failed to read file '$FilePath'.`n$($_.Exception.Message)"
         }
 
+        $TextToReturn = $null
         $LineCount = 0
         $StartStringLine = $null
         $StopStringLine = $null
@@ -81,6 +82,7 @@ function Search-FileContent
             $LineCount++
         }
 
+        # We make the concious decision to fail if the string is not found, this is because anything calling this cmdlet is expecting to find something
         if (-not $StartStringLine)
         {
             throw "Failed to find '$StartStringPattern' in file at '$FilePath'."
@@ -99,10 +101,14 @@ function Search-FileContent
 
         try
         {
-            $TextToReturn = $FileContentArray[$TextBlockStartLine..$TextBlockStopLine]
-            if (!$TextToReturn)
+            # There may be cases where there's no text between the start and end so they'll be on the same line
+            if ($TextBlockStartLine -ne $TextBlockStopLine)
             {
-                Write-Error 'Failed to get text to return.'
+                $TextToReturn = $FileContentArray[$TextBlockStartLine..$TextBlockStopLine]
+                if (!$TextToReturn)
+                {
+                    Write-Error 'Failed to get text to return.'
+                }
             }
         }
         catch
@@ -123,6 +129,10 @@ function Search-FileContent
             {
                 return $TextToReturn
             }
+        }
+        else
+        {
+            return $null
         }
     }
 }
