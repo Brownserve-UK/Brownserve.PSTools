@@ -1,0 +1,36 @@
+{
+    "defaults":
+    [
+        {
+            "comment": "Invoke-Build is used to run our builds",
+            "rule": {
+                "source": "nuget",
+                "PackageName": "Invoke-Build"
+            }
+        }
+    ],
+    "PowerShell Module":
+    [
+        {
+            "comment": "Pester is used to perform testing on the PowerShell module",
+            "rule": {
+                "source": "nuget",
+                "PackageName": "Pester"
+            }
+        },
+        {
+            "comment": "PlatyPS is used to build and maintain the module documentation.`nCurrently we have to build it from source to get some fixes that are not yet in the PSGallery release so we download it from GitHub.",
+            "rule": {
+                "source": "github",
+                "PackageName": "PowerShell/platyPS:v2"
+            }
+        },
+        {
+            "comment": "To push the module up to nuget.org we use the standalone version of Nuget.",
+            "rule": {
+                "source": "nuget",
+                "PackageName": "'NuGet.CommandLine"
+            }
+        }
+    ]
+}
