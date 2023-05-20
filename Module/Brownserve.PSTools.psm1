@@ -10,7 +10,8 @@ $ErrorActionPreference = 'Stop'
 $PublicCmdlets = @()
 
 # Dot source our private functions so they are available for our public functions to use
-Join-Path $PSScriptRoot -ChildPath 'Private' |
+$PrivatePath = Join-Path $PSScriptRoot -ChildPath 'Private'
+$PrivatePath |
     Resolve-Path |
         Get-ChildItem -Filter *.ps1 -Recurse |
             ForEach-Object {
@@ -56,3 +57,8 @@ if ($Global:BrownserveRepoTempDirectory)
         Write-Warning "The `$global:sBrownserveRepoTempDirectory path '$($global:BrownserveRepoTempDirectory)' does not appear to be a valid path and therefore will be ignored."
     }
 }
+
+<#
+    The config directory is used to store various default configurations for our cmdlets to reference
+#>
+$Script:BrownservePSToolsConfigDirectory = Join-Path $PrivatePath '.config'
