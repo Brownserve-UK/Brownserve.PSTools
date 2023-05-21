@@ -27,7 +27,12 @@ function Initialize-BrownserveRepository
         # The config file to use for setting our .gitignore content
         [Parameter(Mandatory = $false, DontShow)]
         [string]
-        $PaketDependenciesConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'paket_dependencies_config.json')
+        $PaketDependenciesConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'paket_dependencies_config.json'),
+
+        # The config file to use for setting our .gitignore content
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $RepositoryPathsConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'repository_paths_config.json')
 
         #TODO: Create a changelog and licence automagically?
     )
@@ -58,8 +63,9 @@ function Initialize-BrownserveRepository
         # Ensure the config files are valid
         try
         {
-            $GitIgnoreConfig = Get-Content $GitIgnoreConfigFile -Raw | ConvertFrom-Json -AsHashtable
-            $PaketDependenciesConfig = Get-Content $PaketDependenciesConfigFile -Raw | ConvertFrom-Json -AsHashtable
+            $GitIgnoreConfig = Get-Content $GitIgnoreConfigFile -Raw | ConvertFrom-Json
+            $PaketDependenciesConfig = Get-Content $PaketDependenciesConfigFile -Raw | ConvertFrom-Json
+            $RepositoryPathsConfig = Get-Content $RepositoryPathsConfigFile -Raw | ConvertFrom-Json
         }
         catch
         {
@@ -113,54 +119,10 @@ function Initialize-BrownserveRepository
         }
 
         # Create our list of permanent paths that should be sync'd to git and not deleted between init's
-        $PermanentPaths = @(@{
-                VariableName = 'BrownserveRepoBuildDirectory'
-                Path         = '.build'
-                Description  = 'Holds all build related configuration along with this _init script'
-                LocalPath    = $BuildDirectory
-            })
+        $DefaultPermanentPaths = $RepositoryPathsConfig.Defaults.PermanentPaths
 
         # And our list of ephemeral paths that are gitignored and recreated between init's
-        $EphemeralPaths = @(
-            @{
-                VariableName = 'BrownserveRepoTempDirectory'
-                Path         = '.tmp'
-                Description  = 'Used to store temporary files created for builds/tests'
-            },
-            @{
-                VariableName = 'BrownserveRepoLogDirectory'
-                Path         = '.tmp'
-                ChildPaths   = 'logs'
-                Description  = 'Used to store build logs, output from Invoke-NativeCommand and the like'
-            },
-            @{
-                VariableName = 'BrownserveRepoBuildOutputDirectory'
-                Path         = '.tmp'
-                ChildPaths   = 'output'
-                Description  = 'Used to store any output from builds (e.g. Terraform plans, MSBuild artifacts etc)'
-            },
-            @{
-                VariableName = 'BrownserveRepoBinaryDirectory'
-                Path         = '.tmp'
-                ChildPaths   = 'bin'
-                Description  = 'Used to store any downloaded/copied binaries required for builds, cmdlets like Get-Vault make use of this variable'
-            },
-            @{
-                VariableName = 'BrownserveRepoNugetPackagesDirectory'
-                Path         = 'Packages'
-                Description  = 'Paket/nuget will restore their dependencies to this directory'
-            },
-            @{
-                VariableName = 'BrownserveRepoPaketFilesDirectory'
-                Path         = 'paket-files'
-                Description  = 'Paket will restore certain types of dependencies to this directory'
-            },
-            @{
-                VariableName = 'BrownservePaketLockFile'
-                Path         = 'paket.lock'
-                Description  = 'We deliberately regenerate this every time because we live on the edge and always take the latest versions of our packages. 🤠'
-            }
-        )
+        $DefaultEphemeralPaths = $RepositoryPathsConfig.Defaults.EphemeralPaths
 
         <#
             There may be various recommended extensions and/or VSCode settings we want to include. There may already
@@ -243,7 +205,7 @@ function Initialize-BrownserveRepository
             }
         }
         
-        # Build up our default list of git-ignores that we always want to use
+        # Build up our default list of gitignore's that we always want to use
         # TODO: Do we want to make ignoring paket.lock optional?
         $DefaultGitIgnores = $GitIgnoreConfig.Defaults
 
@@ -263,12 +225,25 @@ function Initialize-BrownserveRepository
 
                 $RequiredExtensions = @('SpellCheck', 'PowerShell', 'Markdown')
 
-                $PermanentPaths += @(@{
-                        VariableName = 'BrownserveModuleDirectory'
-                        Path         = 'Module'
-                        Description  = 'Stores our module'
-                        LocalPath    = (Join-Path $RepoPath 'Module')
-                    })
+                $ExtraPermanentPaths = $RepositoryPathsConfig.PowerShellModule.PermanentPaths
+                $ExtraEphemeralPaths = $RepositoryPathsConfig.PowerShellModule.EphemeralPaths
+
+                if ($ExtraPermanentPaths)
+                {
+                    $FinalPermanentPaths = $DefaultPermanentPaths + $ExtraPermanentPaths
+                }
+                else
+                {
+                    $FinalPermanentPaths = $DefaultPermanentPaths
+                }
+                if ($ExtraEphemeralPaths)
+                {
+                    $FinalEphemeralPaths = $DefaultEphemeralPaths + $ExtraEphemeralPaths
+                }
+                else
+                {
+                    $FinalEphemeralPaths = $DefaultEphemeralPaths
+                }
                 <# 
                     For a repo that houses a PowerShell module we'll want to include:
                         - The logic for loading the module as part of the _init script
@@ -277,8 +252,8 @@ function Initialize-BrownserveRepository
                         - Invoke-Build/Pester for building and testing the module
                 #>
                 $InitParams = @{
-                    PermanentPaths        = $PermanentPaths
-                    EphemeralPaths        = $EphemeralPaths
+                    PermanentPaths        = $FinalPermanentPaths
+                    EphemeralPaths        = $FinalEphemeralPaths
                     IncludeModuleLoader   = $true
                     IncludePowerShellYaml = $true
                     IncludePlatyPS        = $true
@@ -448,8 +423,30 @@ function Initialize-BrownserveRepository
         # Create all our permanent paths first, other things may need to live under them
         try
         {
-            $PermanentPaths.GetEnumerator() | ForEach-Object {
-                New-Item $_.LocalPath -ItemType 'Directory' -Force:$Force | Out-Null # I think these should _always_ be directories, but we may need to rethink this if not!
+            $FinalPermanentPaths.GetEnumerator() | ForEach-Object {
+                <#
+                    All paths should be relative to the repository root.
+                    The entry may contain child paths, hopefully the user has defined them in the correct order so the parent always gets created first!
+                #>
+                if ($_.ChildPaths)
+                {
+                    $JoinPathParams = @{
+                        Path = $RepoPath
+                        ChildPath = $_.Path
+                        AdditionalChildPath = $_.ChildPaths
+                    }
+                }
+                else
+                {
+                    $JoinPathParams = @{
+                        Path = $RepoPath
+                        ChildPath = $_.Path
+                    }
+                }
+                New-Item `
+                    -Path @JoinPathParams `
+                    -ItemType 'Directory' `
+                    -Force:$Force | Out-Null # I think these should _always_ be directories, but we may need to rethink this if not!
             }
         }
         catch
