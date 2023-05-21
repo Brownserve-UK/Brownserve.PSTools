@@ -159,44 +159,24 @@ function Initialize-BrownserveRepository
         # Check what branch we are on
         try
         {
-            $CurrentBranch = Invoke-NativeCommand `
-                -FilePath 'git' `
-                -ArgumentList @('rev-parse', '--abbrev-ref', 'HEAD') `
-                -WorkingDirectory $RepoPath `
-                -PassThru `
-                -SuppressOutput `
-                -ErrorAction 'Stop'
-            $CurrentBranch = $CurrentBranch | Select-Object -ExpandProperty 'OutputContent'
+            $CurrentBranch = Get-GitCurrentBranch -RepositoryPath $RepoPath
         }
         catch
         {
-            if ($CurrentBranch.ExitCode -eq 128)
-            {
-                throw "Repository at '$RepoPath' does not appear to have been configured in git yet."
-            }
-            else
-            {
-                throw $_.Exception.Message
-            }
+            throw $_.Exception.Message
         }
 
         # Make sure we're running on a branch
-        if ($CurrentBranch -ne 'brownserve_repo_init')
+        $TempBranchName = 'brownserve_repo_init'
+        if ($CurrentBranch -ne $TempBranchName)
         {
-            Write-Verbose "Current branch is: $CurrentBranch. Creating 'brownserve_repo_init'"
+            Write-Verbose "Current branch is: $CurrentBranch. Creating $TempBranchName"
             try
             {
-                Invoke-NativeCommand `
-                    -FilePath 'git' `
-                    -ArgumentList @('branch', 'brownserve_repo_init') `
-                    -WorkingDirectory $RepoPath `
-                    -SuppressOutput `
-                    -ErrorAction 'Stop'
-                Invoke-NativeCommand `
-                    -FilePath 'git' `
-                    -ArgumentList @('checkout', 'brownserve_repo_init') `
-                    -WorkingDirectory $RepoPath `
-                    -SuppressOutput `
+                New-GitBranch `
+                    -RepositoryPath $RepoPath `
+                    -BranchName $TempBranchName `
+                    -Checkout $true `
                     -ErrorAction 'Stop'
             }
             catch
