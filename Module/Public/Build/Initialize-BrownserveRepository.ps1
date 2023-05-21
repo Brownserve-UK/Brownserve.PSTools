@@ -17,7 +17,17 @@ function Initialize-BrownserveRepository
         # Forces the recreation of files even if they already exist
         [Parameter(Mandatory = $false)]
         [switch]
-        $Force
+        $Force,
+
+        # The config file to use for setting our .gitignore content
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $GitIgnoreConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'gitignore_config.json'),
+
+        # The config file to use for setting our .gitignore content
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $PaketDependenciesConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'paket_dependencies_config.json')
 
         #TODO: Create a changelog and licence automagically?
     )
@@ -43,6 +53,17 @@ function Initialize-BrownserveRepository
         catch
         {
             throw $_.Exception.Message
+        }
+
+        # Ensure the config files are valid
+        try
+        {
+            $GitIgnoreConfig = Get-Content $GitIgnoreConfigFile -Raw | ConvertFrom-Json -AsHashtable
+            $PaketDependenciesConfig = Get-Content $PaketDependenciesConfigFile -Raw | ConvertFrom-Json -AsHashtable
+        }
+        catch
+        {
+            throw "Failed to import configuration data.`n$($_.Exception.Message)"
         }
     }
     
@@ -224,35 +245,10 @@ function Initialize-BrownserveRepository
         
         # Build up our default list of git-ignores that we always want to use
         # TODO: Do we want to make ignoring paket.lock optional?
-        $GitIgnores = @(
-            @{
-                Item    = @(
-                    'paket.lock',
-                    'packages/',
-                    'paket-files/'
-                )
-                Comment = "Ignore paket related things,`nWe deliberately ignore the 'paket.lock' file in the hopes of always taking the latest packages"
-            },
-            @{
-                Item    = '.tmp/'
-                Comment = "Ignore our temporary directory that's used for storing build output and such"
-            },
-            @{
-                Item    = '*.log'
-                Comment = 'Ignore any log files that get created by things like "Invoke-NativeCommand"'
-            }
-        )
+        $DefaultGitIgnores = $GitIgnoreConfig.Defaults
 
         # Set-up the paket dependency that are common to all our projects
-        $PaketDependencies = @(
-            @{
-                Comment = 'We use Invoke-Build to run our builds'
-                Rule    = @{
-                    Source      = 'nuget'
-                    PackageName = 'Invoke-Build'
-                }
-            }
-        )
+        $DefaultPaketDependencies = $PaketDependenciesConfig.Defaults
 
         switch ($BuildType)
         {
@@ -290,35 +286,13 @@ function Initialize-BrownserveRepository
                 }
                 # We shouldn't need any special git ignores
                 $GitIgnoreParams = @{
-                    GitIgnores = $GitIgnores
+                    GitIgnores = $DefaultGitIgnores
                 }
 
-                $ExtraPaketDeps = @(
-                    @{
-                        Comment = 'We use Pester for unit testing our module'
-                        Rule    = @{
-                            PackageName = 'Pester'
-                            Source      = 'nuget'
-                        }
-                    },
-                    @{
-                        Comment = 'We currently have to build PlatyPS from source so download that from GitHub'
-                        Rule    = @{
-                            Source      = 'github'
-                            PackageName = 'PowerShell/platyPS:v2'
-                        }
-                    },
-                    @{
-                        Comment = 'We use the standalone version of Nuget for packaging up the module'
-                        Rule    = @{
-                            PackageName = 'NuGet.CommandLine'
-                            Source      = 'nuget'
-                        }
-                    }
-                )
+                $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
 
                 $PaketParams = @{
-                    PaketDependencies = ($PaketDependencies + $ExtraPaketDeps)
+                    PaketDependencies = ($DefaultPaketDependencies + $ExtraPaketDeps)
                 }
 
             }
