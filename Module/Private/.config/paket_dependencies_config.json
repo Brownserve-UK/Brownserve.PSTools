@@ -9,7 +9,7 @@
             }
         }
     ],
-    "PowerShell Module":
+    "PowerShellModule":
     [
         {
             "comment": "Pester is used to perform testing on the PowerShell module",
