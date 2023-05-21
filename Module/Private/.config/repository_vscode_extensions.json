@@ -1,0 +1,31 @@
+{
+    "PowerShellModule": [
+        {
+            "ExtensionID": "ms-vscode.powershell",
+            "CustomSettings": {
+                "powershell.helpCompletion": "Disabled",
+                "powershell.codeFormatting.trimWhitespaceAroundPipe": true,
+                "powershell.codeFormatting.useConstantStrings": true,
+                "powershell.codeFormatting.autoCorrectAliases": true,
+                "powershell.codeFormatting.pipelineIndentationStyle": "IncreaseIndentationAfterEveryPipeline",
+                "powershell.codeFormatting.preset": "Allman",
+                "powershell.codeFormatting.useCorrectCasing": true
+            }
+        },
+        {
+            "ExtensionID": "streetsidesoftware.code-spell-checker",
+            "CustomSettings": {
+                "cSpell.language": "en,en-GB"
+            }
+        },
+        {
+            "ExtensionID": "yzhang.markdown-all-in-one",
+            "CustomSettings": {
+                "markdown.extension.toc.omittedFromToc": {
+                    "README.md": ["# Overview"] 
+                },
+                "markdown.extension.toc.updateOnSave": false
+            }
+        }
+    ]
+}
