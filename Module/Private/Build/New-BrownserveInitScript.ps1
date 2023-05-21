@@ -83,11 +83,11 @@ function New-BrownserveInitScript
             # If we've got child paths we'll have to do some really fancy interpolation
             if ($_.ChildPaths)
             {
-                $Path = "'$($_.Path)' " + $("'" + ($_.ChildPaths -join "','") + "'")
+                $Path = "-ChildPath '$($_.Path)' -AdditionalChildPath '$($_.ChildPaths | Join-String -Separator "','")'" 
             }
             else
             {
-                $Path = "'$($_.Path)'"
+                $Path = "-ChildPath '$($_.Path)'"
             }
             $PermanentPathText = $PermanentPathText + @"
 `$Global:$($_.VariableName) = Join-Path `$global:BrownserveRepoRootDirectory $Path | Convert-Path`n
@@ -102,22 +102,14 @@ function New-BrownserveInitScript
             # If we've got child paths we'll have to do some really fancy interpolation
             if ($_.ChildPaths)
             {
-                # If there's more than one child path we need to change up the command
-                if ($_.ChildPaths.Count -gt 1)
-                {
-                    $Path = "-Path '$($_.Path)' -ChildPath '$($_.ChildPaths[0])' -AdditionalChildPath '$($_.ChildPaths | Select-Object -Skip 1 | Join-String -Separator "','")'" 
-                }
-                else
-                {
-                    $Path = "-Path '$($_.Path)' -ChildPath '$($_.ChildPaths[0])'"
-                }
+                $Path = "-ChildPath '$($_.Path)' -AdditionalChildPath '$($_.ChildPaths | Join-String -Separator "','")'" 
             }
             else
             {
-                $Path = "-Path '$($_.Path)'"
+                $Path = "-ChildPath '$($_.Path)'"
             }
             $EphemeralPathText = $EphemeralPathText + @"
-    (`$$($_.VariableName) = Join-Path `$global:BrownserveRepoRootDirectory $Path)
+    (`$$($_.VariableName) = Join-Path -Path `$global:BrownserveRepoRootDirectory $Path)
 "@
             # We are building an array in the template
             # if this is the last line of the array then we don't want to add a comma!
