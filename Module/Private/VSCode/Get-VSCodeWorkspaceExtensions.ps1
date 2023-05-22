@@ -1,4 +1,4 @@
-function Get-VSCodeRecommendedExtensions
+function Get-VSCodeWorkspaceExtensions
 {
     [CmdletBinding()]
     param
