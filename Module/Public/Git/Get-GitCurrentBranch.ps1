@@ -17,13 +17,13 @@ function Get-GitCurrentBranch
     process
     {
         $RepositoryPath | ForEach-Object {
-            Assert-Directory $RepositoryPath -ErrorAction 'Stop'
+            Assert-Directory $_ -ErrorAction 'Stop'
             try
             {
                 $CurrentBranch = Invoke-NativeCommand `
                     -FilePath 'git' `
                     -ArgumentList @('rev-parse', '--abbrev-ref', 'HEAD') `
-                    -WorkingDirectory $RepoPath `
+                    -WorkingDirectory $_ `
                     -SuppressOutput `
                     -PassThru `
                     -ErrorAction 'Stop'
