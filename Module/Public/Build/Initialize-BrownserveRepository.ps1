@@ -29,10 +29,20 @@ function Initialize-BrownserveRepository
         [string]
         $PaketDependenciesConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'paket_dependencies_config.json'),
 
-        # The config file to use for setting our .gitignore content
+        # The config file to use that stores our permanent/ephemeral path configuration
         [Parameter(Mandatory = $false, DontShow)]
         [string]
-        $RepositoryPathsConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'repository_paths_config.json')
+        $RepositoryPathsConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'repository_paths_config.json'),
+
+        # The config file that stores devcontainer configurations
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $DevcontainerConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'devcontainer_config.json'),
+
+        # The config file that stores VS Code extension configuration
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $VSCodeExtensionsConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'repository_vscode_extensions.json')
 
         #TODO: Create a changelog and licence automagically?
     )
@@ -44,28 +54,21 @@ function Initialize-BrownserveRepository
         {
             $RequiredTools = @('git', 'dotnet')
             Write-Verbose 'Checking for required tooling'
-            foreach ($Tool in $RequiredTools)
-            {
-                $Check = $null
-                $Check = Get-Command $Tool -ErrorAction 'SilentlyContinue'
-                if (!$Check)
-                {
-                    Write-Error "'$Tool' is not available on your path. This is required to configure a Brownserve repository"
-                }
-            }
-    
+            Assert-Command $RequiredTools
         }
         catch
         {
-            throw $_.Exception.Message
+            throw "$($_.Exception.Message)`nThese tools are required to configure a Brownserve repository."
         }
 
         # Ensure the config files are valid
         try
         {
-            $GitIgnoreConfig = Get-Content $GitIgnoreConfigFile -Raw | ConvertFrom-Json
-            $PaketDependenciesConfig = Get-Content $PaketDependenciesConfigFile -Raw | ConvertFrom-Json
-            $RepositoryPathsConfig = Get-Content $RepositoryPathsConfigFile -Raw | ConvertFrom-Json
+            $GitIgnoreConfig = Read-ConfigurationFromFile $GitIgnoreConfigFile
+            $PaketDependenciesConfig = Read-ConfigurationFromFile $PaketDependenciesConfigFile
+            $RepositoryPathsConfig = Read-ConfigurationFromFile $RepositoryPathsConfigFile
+            $DevcontainerConfig = Read-ConfigurationFromFile $DevcontainerConfigFile
+            $VSCodeExtensionsConfig = Read-ConfigurationFromFile $VSCodeExtensionsConfigFile
         }
         catch
         {
@@ -125,17 +128,17 @@ function Initialize-BrownserveRepository
         $DefaultEphemeralPaths = $RepositoryPathsConfig.Defaults.EphemeralPaths
 
         <#
-            There may be various recommended extensions and/or VSCode settings we want to include. There may already
+            We often recommend the use of various VS Code extensions with our projects. There may already
             be some settings in the repo as well, we should try and preserve those as best we can.
         #>
         try
         {
-            $VSCodeRecommendedExtensions = Get-VSCodeRecommendedExtensions -WorkspacePath $RepoPath -ErrorAction 'Stop'
+            $VSCodeWorkspaceExtensionIDs = Get-VSCodeWorkspaceExtensions -WorkspacePath $RepoPath -ErrorAction 'Stop'
         }
         catch [BrownserveFileNotFound]
         {
-            # Repo probably doesn't have a recommended extensions file yet, so we'll create a blank one
-            $VSCodeRecommendedExtensions = @()
+            # Repo probably doesn't have the extensions.json file yet, so we'll create an empty array for storing the extension ID's we need
+            $VSCodeWorkspaceExtensionIDs = @()
         }
         catch
         {
@@ -148,7 +151,7 @@ function Initialize-BrownserveRepository
         }
         catch [BrownserveFileNotFound]
         {
-            # Repo probably doesn't have a settings file yet, so we'll create a blank one
+            # Repo probably doesn't have the settings.json file yet, so we'll create an empty hashtable
             $VSCodeWorkspaceSettings = [ordered]@{}
         }
         catch
@@ -170,18 +173,49 @@ function Initialize-BrownserveRepository
         $TempBranchName = 'brownserve_repo_init'
         if ($CurrentBranch -ne $TempBranchName)
         {
-            Write-Verbose "Current branch is: $CurrentBranch. Creating $TempBranchName"
+            Write-Debug "Current branch: $CurrentBranch"
+            # Check to see if we've already got the branch available to use
             try
             {
-                New-GitBranch `
+                $LocalBranches = Get-GitBranches `
                     -RepositoryPath $RepoPath `
-                    -BranchName $TempBranchName `
-                    -Checkout $true `
                     -ErrorAction 'Stop'
             }
             catch
             {
-                throw "Failed to create working branch.`n$($_.Exception.Message)"
+                # Let this silently fail and just try and create the branch anyways
+                Write-Debug "Get-GitBranches has failed with $($_.Exception.Message).`nIgnoring"
+            }
+            if ($LocalBranches -contains $TempBranchName)
+            {
+                Write-Verbose "'$TempBranchName' already exists, attempting to checkout"
+                try
+                {
+                    Switch-GitBranch `
+                        -RepositoryPath $RepoPath `
+                        -BranchName $TempBranchName `
+                        -ErrorAction 'Stop'
+                }
+                catch
+                {
+                    throw "The branch '$TempBranchName' already exists but git was unable to checkout this branch.`n$($_.Exception.Message)"
+                }
+            }
+            else
+            {
+                Write-Verbose "Creating new branch '$TempBranchName'"
+                try
+                {
+                    New-GitBranch `
+                        -RepositoryPath $RepoPath `
+                        -BranchName $TempBranchName `
+                        -Checkout $true `
+                        -ErrorAction 'Stop'
+                }
+                catch
+                {
+                    throw "Failed to create working branch.`n$($_.Exception.Message)"
+                }
             }
         }
         
@@ -196,17 +230,22 @@ function Initialize-BrownserveRepository
         {
             'PowerShellModule'
             {
-                
-                # We'll want a devcontainer for developing PowerShell modules
-                $DevcontainerParams = @{
-                    Dockerfile         = 'Dockerfile_PowerShell'
-                    RequiredExtensions = @()
-                }
-
-                $RequiredExtensions = @('SpellCheck', 'PowerShell', 'Markdown')
-
+                Write-Debug 'PowerShell Module selected'
+                # Check our configuration files for any special logic when working with PowerShell module repos
+                $DockerfileName = $DevcontainerConfig.PowerShellModule.Dockerfile
                 $ExtraPermanentPaths = $RepositoryPathsConfig.PowerShellModule.PermanentPaths
                 $ExtraEphemeralPaths = $RepositoryPathsConfig.PowerShellModule.EphemeralPaths
+                $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
+                $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
+                $VSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
+
+                if ($DockerfileName)
+                {
+                    $DevcontainerParams = @{
+                        Dockerfile         = $DockerfileName
+                        RequiredExtensions = @()
+                    }
+                }                
 
                 if ($ExtraPermanentPaths)
                 {
@@ -240,14 +279,30 @@ function Initialize-BrownserveRepository
                     IncludeBuildTestTools = $true
                 }
                 # We shouldn't need any special git ignores
-                $GitIgnoreParams = @{
-                    GitIgnores = $DefaultGitIgnores
+                if ($ExtraGitIgnores)
+                {
+                    $GitIgnoreParams = @{
+                        GitIgnores = ($DefaultGitIgnores + $ExtraGitIgnores)
+                    }
+                }
+                else
+                {
+                    $GitIgnoreParams = @{
+                        GitIgnores = $DefaultGitIgnores
+                    }
                 }
 
-                $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
-
-                $PaketParams = @{
-                    PaketDependencies = ($DefaultPaketDependencies + $ExtraPaketDeps)
+                if ($ExtraPaketDeps)
+                {
+                    $PaketParams = @{
+                        PaketDependencies = ($DefaultPaketDependencies + $ExtraPaketDeps)
+                    }
+                }
+                else
+                {
+                    $PaketParams = @{
+                        PaketDependencies = $DefaultPaketDependencies
+                    }
                 }
 
             }
@@ -255,59 +310,48 @@ function Initialize-BrownserveRepository
             {}
         }
 
-        #
-        if ($RequiredExtensions)
+        
+        if ($VSCodeExtensions)
         {
-            $RequiredExtensionDetails = @()
-            $RequiredExtensions | ForEach-Object {
-                switch ($_)
+            # Extract the list of extension ID's we want to install in this repo and clean up any duplicates
+            $VSCodeWorkspaceExtensionIDs += $VSCodeExtensions.ExtensionID
+            $VSCodeWorkspaceExtensionIDs = $VSCodeWorkspaceExtensionIDs | Select-Object -Unique
+ 
+            <#
+                Check to see if the repository already has any VS Code settings - it affects the order of the hash merge
+                Our Merge-Hashtable cmdlet will overwrite the keys of the base object with the input object if there is a clash
+                if -Force has been passed then the user is happy to overwrite any settings that already exist in the repo.
+                If not we should try and preserve them by using the repo settings as the input object
+            #>
+            if ($VSCodeWorkspaceSettings.Count -gt 0)
+            {
+                $MergeParams = @{
+                    BaseObject  = $VSCodeWorkspaceSettings
+                    InputObject = $VSCodeExtensions.CustomSettings
+                }
+                if (!$Force)
                 {
-                    'PowerShell'
-                    { 
-                        $RequiredExtensionDetails += New-VSCodePowerShellExtensionConfig
+                    $MergeParams = @{
+                        BaseObject  = $VSCodeExtensions.CustomSettings
+                        InputObject = $VSCodeWorkspaceSettings
                     }
-                    'Markdown'
-                    {
-                        $RequiredExtensionDetails += New-VSCodeMarkdownExtensionConfig
-                    }
-                    'SpellCheck'
-                    {
-                        $RequiredExtensionDetails += New-VSCodeSpellingsExtensionConfig
-                    }
-                    Default
-                    {
-                        throw "Unhandled VSCode extension '$_'"
-                    }
+                }
+                try
+                {
+                    $VSCodeWorkspaceSettings = Merge-Hashtable @MergeParams -ErrorAction 'Stop'
+                }
+                catch
+                {
+                    throw "Failed to merge repository VS code settings.`n$($_.Exception.Message)"
                 }
             }
-            # Add the extension ID's to the list of recommended extensions (we'll clean it up later)
-            $VSCodeRecommendedExtensions += $RequiredExtensionDetails.ExtensionID
-            # Go through each of the settings and make sure they don't already exist
-            $RequiredExtensionDetails.Settings | ForEach-Object {
-                $_.GetEnumerator() | ForEach-Object {
-                    if ($VSCodeWorkspaceSettings.Keys -contains $_.Key)
-                    {
-                        if ($Force)
-                        {
-                            Write-Debug "Overwriting key: $($_.Key) with value: $($_.Value)"
-                            $VSCodeWorkspaceSettings.($_.Key) = $_.Value
-                        }
-                        else
-                        {
-                            throw "This repo's VSCode settings already contains configuration for '$($_.Key)' to overwrite use -Force."
-                        }
-                    }
-                    else
-                    {
-                        Write-Debug "Adding key: $($_.Key) with value: $($_.Value)"
-                        $VSCodeWorkspaceSettings.Add($_.Key, $_.Value)
-                    }
-                }
+            else
+            {
+                $VSCodeWorkspaceSettings = $VSCodeExtensions.CustomSettings
             }
         }
 
-        # Filter out any duplicate extensions
-        $VSCodeRecommendedExtensions = $VSCodeRecommendedExtensions | Select-Object -Unique
+        
 
         # Create the _init script as that will always be required
         try
@@ -388,10 +432,10 @@ function Initialize-BrownserveRepository
 
         if ($DevcontainerParams)
         {
-            $DevcontainerParams.RequiredExtensions = $VSCodeRecommendedExtensions
+            $DevcontainerParams.RequiredExtensions = $VSCodeWorkspaceExtensionIDs
             try
             {
-                $DevcontainerConfig = New-VSCodeDevContainer @DevcontainerParams -ErrorAction 'Stop'
+                $Devcontainer = New-VSCodeDevContainer @DevcontainerParams -ErrorAction 'Stop'
             }
             catch
             {
@@ -411,20 +455,20 @@ function Initialize-BrownserveRepository
                 if ($_.ChildPaths)
                 {
                     $JoinPathParams = @{
-                        Path = $RepoPath
-                        ChildPath = $_.Path
+                        Path                = $RepoPath
+                        ChildPath           = $_.Path
                         AdditionalChildPath = $_.ChildPaths
                     }
                 }
                 else
                 {
                     $JoinPathParams = @{
-                        Path = $RepoPath
+                        Path      = $RepoPath
                         ChildPath = $_.Path
                     }
                 }
                 New-Item `
-                    -Path @JoinPathParams `
+                    -Path (Join-Path @JoinPathParams) `
                     -ItemType 'Directory' `
                     -Force:$Force | Out-Null # I think these should _always_ be directories, but we may need to rethink this if not!
             }
@@ -455,7 +499,11 @@ function Initialize-BrownserveRepository
 
         try
         {
-            New-Item $InitPath -Value $InitScriptContent -ItemType File -Force:$Force | Out-Null
+            New-Item `
+                -Path $InitPath `
+                -Value $InitScriptContent `
+                -ItemType File `
+                -Force:$Force | Out-Null
         }
         catch
         {
@@ -464,7 +512,11 @@ function Initialize-BrownserveRepository
 
         try
         {
-            New-Item $GitIgnorePath -ItemType File -Value $GitIgnoresContent -Force:$Force | Out-Null
+            New-Item `
+                -Path $GitIgnorePath `
+                -ItemType File `
+                -Value $GitIgnoresContent `
+                -Force:$Force | Out-Null
         }
         catch
         {
@@ -475,7 +527,10 @@ function Initialize-BrownserveRepository
         {
             try
             {
-                New-Item $VSCodePath -ItemType Directory -ErrorAction 'Stop' | Out-Null
+                New-Item `
+                    -Path $VSCodePath `
+                    -ItemType Directory `
+                    -ErrorAction 'Stop' | Out-Null
             }
             catch
             {
@@ -485,8 +540,15 @@ function Initialize-BrownserveRepository
 
         try
         {
-            $VSCodeRecommendedExtensionsJSON = ConvertTo-Json @{ recommendations = $VSCodeRecommendedExtensions } -ErrorAction 'Stop'
-            New-Item $VSCodeExtensionsFilePath -ItemType File -Value $VSCodeRecommendedExtensionsJSON -Force:$Force | Out-Null
+            $VSCodeWorkspaceExtensionIDsJSON = ConvertTo-Json `
+                -InputObject @{ recommendations = $VSCodeWorkspaceExtensionIDs } `
+                -Depth 100 `
+                -ErrorAction 'Stop'
+            New-Item `
+                -Path $VSCodeExtensionsFilePath `
+                -ItemType File `
+                -Value $VSCodeWorkspaceExtensionIDsJSON `
+                -Force:$Force | Out-Null
         }
         catch
         {
@@ -495,8 +557,15 @@ function Initialize-BrownserveRepository
 
         try
         {
-            $VSCodeWorkspaceSettingsJSON = ConvertTo-Json $VSCodeWorkspaceSettings -ErrorAction 'Stop'
-            New-Item $VSCodeWorkspaceSettingsFilePath -ItemType File -Value $VSCodeWorkspaceSettingsJSON -Force:$Force | Out-Null
+            $VSCodeWorkspaceSettingsJSON = ConvertTo-Json `
+                -InputObject $VSCodeWorkspaceSettings `
+                -Depth 100 `
+                -ErrorAction 'Stop'
+            New-Item `
+                -Path $VSCodeWorkspaceSettingsFilePath `
+                -ItemType File `
+                -Value $VSCodeWorkspaceSettingsJSON `
+                -Force:$Force | Out-Null
         }
         catch
         {
@@ -507,7 +576,11 @@ function Initialize-BrownserveRepository
         {
             try
             {
-                New-Item -Path $PaketDependenciesPath -ItemType File -Value $PaketDependenciesContent -Force:$Force | Out-Null
+                New-Item `
+                    -Path $PaketDependenciesPath `
+                    -ItemType File `
+                    -Value $PaketDependenciesContent `
+                    -Force:$Force | Out-Null
             }
             catch
             {
@@ -515,11 +588,15 @@ function Initialize-BrownserveRepository
             }
         }
 
-        if ($DevcontainerConfig)
+        if ($Devcontainer)
         {
             try
             {
-                New-Item $DevcontainerDirectoryPath -ItemType Directory -Force:$Force -ErrorAction 'Stop' | Out-Null
+                New-Item `
+                    -Path $DevcontainerDirectoryPath `
+                    -ItemType Directory `
+                    -Force:$Force `
+                    -ErrorAction 'Stop' | Out-Null
             }
             catch
             {
@@ -528,7 +605,12 @@ function Initialize-BrownserveRepository
 
             try
             {
-                New-Item $DevcontainerPath -ItemType File -Value $DevcontainerConfig.Devcontainer -ErrorAction 'Stop' -Force:$Force | Out-Null
+                New-Item `
+                    -Path $DevcontainerPath `
+                    -ItemType File `
+                    -Value $Devcontainer.Devcontainer `
+                    -ErrorAction 'Stop' `
+                    -Force:$Force | Out-Null
             }
             catch
             {
@@ -537,7 +619,12 @@ function Initialize-BrownserveRepository
 
             try
             {
-                New-Item $DockerfilePath -ItemType File -Value $DevcontainerConfig.Dockerfile -ErrorAction 'Stop' -Force:$Force | Out-Null
+                New-Item `
+                    -Path $DockerfilePath `
+                    -ItemType File `
+                    -Value $Devcontainer.Dockerfile `
+                    -ErrorAction 'Stop' `
+                    -Force:$Force | Out-Null
             }
             catch
             {
