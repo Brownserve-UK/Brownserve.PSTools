@@ -68,7 +68,7 @@ function Initialize-BrownserveRepository
             $PaketDependenciesConfig = Read-ConfigurationFromFile $PaketDependenciesConfigFile
             $RepositoryPathsConfig = Read-ConfigurationFromFile $RepositoryPathsConfigFile
             $DevcontainerConfig = Read-ConfigurationFromFile $DevcontainerConfigFile
-            $VSCodeExtensionsConfig = Read-ConfigurationFromFile $VSCodeExtensionsConfigFile
+            $VSCodeExtensionsConfig = Read-ConfigurationFromFile $VSCodeExtensionsConfigFile -AsHashtable
         }
         catch
         {
@@ -151,6 +151,7 @@ function Initialize-BrownserveRepository
         }
         catch [BrownserveFileNotFound]
         {
+            Write-Verbose 'No VS Code settings.json file found, creating an empty list'
             # Repo probably doesn't have the settings.json file yet, so we'll create an empty hashtable
             $VSCodeWorkspaceSettings = [ordered]@{}
         }
@@ -316,7 +317,24 @@ function Initialize-BrownserveRepository
             # Extract the list of extension ID's we want to install in this repo and clean up any duplicates
             $VSCodeWorkspaceExtensionIDs += $VSCodeExtensions.ExtensionID
             $VSCodeWorkspaceExtensionIDs = $VSCodeWorkspaceExtensionIDs | Select-Object -Unique
- 
+
+            <#
+                Due to the way we store the VS Code settings in our config file, they end up clumping together in an array
+                when we expand the object property.
+                We need a single hash to be able to create the settings.json file correctly.
+                By far the easiest method is to pass our array of Hashtable's to the Merge-Hashtable cmdlet with a blank hashtable
+            #>
+            try
+            {
+                $VSCodeExtensionSettings = Merge-Hashtable `
+                    -BaseObject @{} `
+                    -InputObject $VSCodeExtensions.CustomSettings `
+                    -ErrorAction 'Stop'
+            }
+            catch
+            {
+                throw "Failed to convert VS Code extension settings to hashtable.`n$($_.Exception.Message)"
+            } 
             <#
                 Check to see if the repository already has any VS Code settings - it affects the order of the hash merge
                 Our Merge-Hashtable cmdlet will overwrite the keys of the base object with the input object if there is a clash
@@ -327,12 +345,12 @@ function Initialize-BrownserveRepository
             {
                 $MergeParams = @{
                     BaseObject  = $VSCodeWorkspaceSettings
-                    InputObject = $VSCodeExtensions.CustomSettings
+                    InputObject = $VSCodeExtensionSettings
                 }
                 if (!$Force)
                 {
                     $MergeParams = @{
-                        BaseObject  = $VSCodeExtensions.CustomSettings
+                        BaseObject  = $VSCodeExtensionSettings
                         InputObject = $VSCodeWorkspaceSettings
                     }
                 }
@@ -347,7 +365,7 @@ function Initialize-BrownserveRepository
             }
             else
             {
-                $VSCodeWorkspaceSettings = $VSCodeExtensions.CustomSettings
+                $VSCodeWorkspaceSettings = $VSCodeExtensionSettings
             }
         }
 
