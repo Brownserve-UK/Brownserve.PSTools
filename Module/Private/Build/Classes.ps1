@@ -126,6 +126,22 @@ class PaketDependencyRule
             }
         }
     }
+
+    PaketDependencyRule([pscustomobject]$Object)
+    {
+        $RequiredKeys = @('Source', 'PackageName')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Object.$Key)
+            {
+                throw "Object missing property '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Object.$Key
+            }
+        }
+    }
 }
 
 class PaketDependency
@@ -145,6 +161,37 @@ class PaketDependency
         {
             # Try to ensure every line starts with the pound symbol
             $LocalComment = $Hashtable.Comment -split "`n"
+            $SanitizedComment = ''
+            $LocalComment | ForEach-Object {
+                if ($_ -notmatch '^\#')
+                {
+                    $SanitizedComment += "# $_"
+                }
+                else
+                {
+                    $SanitizedComment += $_
+                }
+                if ($_ -notmatch $LocalComment[-1])
+                {
+                    $SanitizedComment += "`n"
+                }
+            }
+            $this.Comment = $SanitizedComment
+        }
+    }
+
+    PaketDependency([pscustomobject]$Object)
+    {
+        if (!$Object.Rule)
+        {
+            throw "Hashtable missing key 'Rule'"
+        }
+            
+        $this.Rule = $Object.Rule
+        if ($Object.Comment)
+        {
+            # Try to ensure every line starts with the pound symbol
+            $LocalComment = $Object.Comment -split "`n"
             $SanitizedComment = ''
             $LocalComment | ForEach-Object {
                 if ($_ -notmatch '^\#')
