@@ -227,6 +227,9 @@ function Initialize-BrownserveRepository
         # Set-up the paket dependency that are common to all our projects
         $DefaultPaketDependencies = $PaketDependenciesConfig.Defaults
 
+        # Careful -AsHashtable makes key names case sensitive when converted from JSON! (defaults != Defaults)
+        $DefaultVSCodeExtensions = $VSCodeExtensionsConfig.Defaults
+
         switch ($BuildType)
         {
             'PowerShellModule'
@@ -238,7 +241,7 @@ function Initialize-BrownserveRepository
                 $ExtraEphemeralPaths = $RepositoryPathsConfig.PowerShellModule.EphemeralPaths
                 $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
                 $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
-                $VSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
+                $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
 
                 if ($DockerfileName)
                 {
@@ -306,13 +309,22 @@ function Initialize-BrownserveRepository
                     }
                 }
 
+                if ($ExtraVSCodeExtensions)
+                {
+                    $VSCodeExtensions = $DefaultVSCodeExtensions + $ExtraVSCodeExtensions
+                }
+                else
+                {
+                    $VSCodeExtensions = $DefaultVSCodeExtensions
+                }
+
             }
             Default
             {}
         }
 
         
-        if ($VSCodeExtensions)
+        if ($VSCodeExtensions.Count -gt 0)
         {
             # Extract the list of extension ID's we want to install in this repo and clean up any duplicates
             $VSCodeWorkspaceExtensionIDs += $VSCodeExtensions.ExtensionID
@@ -323,12 +335,14 @@ function Initialize-BrownserveRepository
                 when we expand the object property.
                 We need a single hash to be able to create the settings.json file correctly.
                 By far the easiest method is to pass our array of Hashtable's to the Merge-Hashtable cmdlet with a blank hashtable
+                We specify -Deep as we can specify the same extension settings multiple times (e.g. spellings)
             #>
             try
             {
                 $VSCodeExtensionSettings = Merge-Hashtable `
                     -BaseObject @{} `
                     -InputObject $VSCodeExtensions.CustomSettings `
+                    -Deep `
                     -ErrorAction 'Stop'
             }
             catch
@@ -356,7 +370,10 @@ function Initialize-BrownserveRepository
                 }
                 try
                 {
-                    $VSCodeWorkspaceSettings = Merge-Hashtable @MergeParams -ErrorAction 'Stop'
+                    $VSCodeWorkspaceSettings = Merge-Hashtable `
+                        @MergeParams `
+                        -Deep `
+                        -ErrorAction 'Stop'
                 }
                 catch
                 {
