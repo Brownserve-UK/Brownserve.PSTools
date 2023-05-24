@@ -33,69 +33,68 @@ function Merge-Hashtable
         {
             $InputObject | ForEach-Object {
                 $_.GetEnumerator() | ForEach-Object {
+                    # Because things can get confusing when using $_ notation I'm splitting things into variables to make tracking them easier
+                    $InputObjectKeyName = $_.Key
+                    $InputObjectValue = $_.Value
                     # First check if the key already exists in the base object
-                    if ($Return.Keys -contains $_.Key)
+                    if ($Return.Keys -contains $InputObjectKeyName)
                     {
-                        Write-Debug "BaseObject already contains key of '$($_.Key)'"
+                        $BaseObjectValue = $Return.($InputObjectKeyName)
+                        Write-Debug "BaseObject already contains key of '$($InputObjectKeyName)'"
                         # If the key does already exist and we're doing a deep merge we need to see what content
                         # we are working with
                         if ($Deep)
                         {
-                            # Because we're using a switch statement which will overwrite our $_ object we need to set a few variable first
-                            $BaseObjectValue = $Return.($_.Key)
-                            $InputObjectKey = $_.Key
-                            $InputObjectValue = $_.Value
                             if ($BaseObjectValue -is [array])
                             {
-                                Write-Debug "Key '$InputObjectKey' is an array"
+                                Write-Debug "Key '$InputObjectKeyName' is an array"
                                 # Validate that the value we're bringing in is also an array
                                 if ($InputObjectValue -is [array])
                                 {
                                     # We make the concious choice to remove duplicate entries when merging arrays, I'm not sure
                                     # if this is standard behaviour when merging objects but we can could make this a parameter if we need to
-                                    Write-Debug "Merging array: $InputObjectKey with values:$($BaseObjectValue -join "`n")`n$($InputObjectValue -join "`n")"
+                                    Write-Debug "Merging array: $InputObjectKeyName with values:$($BaseObjectValue -join "`n")`n$($InputObjectValue -join "`n")"
                                     $MergedArray = $BaseObjectValue + $InputObjectValue
                                     Write-Debug "$MergedArray"
-                                    $Return.($InputObjectKey) = ($MergedArray | Select-Object -Unique)
+                                    $Return.($InputObjectKeyName) = ($MergedArray | Select-Object -Unique)
                                 }
                                 else
                                 {
-                                    throw "Keys are of different type.`nBaseObject key is: '$($Return.($InputObjectKey).GetType().Name)'`nInputObject key is: '$($InputObjectKey.GetType().Name)'"
+                                    throw "Keys are of different type.`nBaseObject key is: '$($Return.($InputObjectKeyName).GetType().Name)'`nInputObject key is: '$($InputObjectKeyName.GetType().Name)'"
                                 }
                             }
                             elseif ($BaseObjectValue -is [hashtable])
                             {
                                 if ($InputObjectValue -is [hashtable])
                                 {
-                                    Write-Debug "Merging hashtable: $($InputObjectKey)"
-                                    $Return.($InputObjectKey) = Merge-Hashtable `
-                                        -BaseObject $Return.($InputObjectKey) `
+                                    Write-Debug "Merging hashtable: $($InputObjectKeyName)"
+                                    $Return.($InputObjectKeyName) = Merge-Hashtable `
+                                        -BaseObject $Return.($InputObjectKeyName) `
                                         -InputObject $InputObjectValue `
                                         -Deep:$Deep `
                                         -ErrorAction 'Stop'
                                 }
                                 else
                                 {
-                                    throw "Keys are of different type.`nBaseObject key is: '$($Return.($InputObjectKey).GetType().Name)'`nInputObject key is: '$($InputObjectKey.GetType().Name)'"
+                                    throw "Keys are of different type.`nBaseObject key is: '$($Return.($InputObjectKeyName).GetType().Name)'`nInputObject key is: '$($InputObjectKeyName.GetType().Name)'"
                                 }
                             }
                             else
                             {
-                                Write-Debug "$InputObjectKey is $($_.GetType().Name)"
-                                Write-Debug "Overwriting key: $($InputObjectKey) with value: $($InputObjectValue)"
-                                $Return.($InputObjectKey) = $InputObjectValue
+                                Write-Debug "Overwriting key: $($InputObjectKeyName) with value: $($InputObjectValue)"
+                                $Return.($InputObjectKeyName) = $InputObjectValue
                             }
                         }
                         else
                         {
-                            Write-Debug "Overwriting key: $($_.Key) with value: $($_.Value)"
-                            $Return.($_.Key) = $_.Value
+                            Write-Debug "Overwriting key: $($InputObjectKeyName) with value: $($InputObjectValue)"
+                            $Return.($InputObjectKeyName) = $InputObjectValue
                         }
                     }
                     else
                     {
-                        Write-Debug "Adding new key: $($_.Key) with value: $($_.Value)"
-                        $Return.Add($_.Key, $_.Value)
+                        Write-Debug "Adding new key: $($InputObjectKeyName) with value: $($InputObjectValue)"
+                        $Return.Add($InputObjectKeyName, $InputObjectValue)
                     }
                 }
             }
