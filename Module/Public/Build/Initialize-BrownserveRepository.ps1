@@ -384,6 +384,8 @@ function Initialize-BrownserveRepository
             {
                 $VSCodeWorkspaceSettings = $VSCodeExtensionSettings
             }
+            # Order the resulting settings hashtable, it makes it easier to find settings if they are grouped together.
+            $VSCodeWorkspaceSettings = ConvertTo-SortedHashtable $VSCodeWorkspaceSettings
         }
 
         
