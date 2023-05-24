@@ -1,4 +1,24 @@
 {
+    "default": [
+        {
+            "ExtensionID": "streetsidesoftware.code-spell-checker",
+            "CustomSettings": {
+                "cSpell.language": "en,en-GB",
+                "cSpell.words": [
+                    "Brownserve",
+                    "paket",
+                    "Teamcity",
+                    "TMPDIR",
+                    "Choco",
+                    "CICD",
+                    "devcontainer",
+                    "mrkdwn",
+                    "nugetconfig",
+                    "nupkg"
+                ]
+            }
+        }
+    ],
     "PowerShellModule": [
         {
             "ExtensionID": "ms-vscode.powershell",
@@ -15,14 +35,34 @@
         {
             "ExtensionID": "streetsidesoftware.code-spell-checker",
             "CustomSettings": {
-                "cSpell.language": "en,en-GB"
+                "cSpell.words": [
+                    "Allman",
+                    "Cmdlets",
+                    "Dont",
+                    "hashtable",
+                    "hashtables",
+                    "LASTEXITCODE",
+                    "MAML",
+                    "Mddhhmm",
+                    "notcontains",
+                    "notlike",
+                    "notmatch",
+                    "pscustomobject",
+                    "PSGALLERY",
+                    "PSMODULE",
+                    "psobject",
+                    "pstools",
+                    "pwsh"
+                ]
             }
         },
         {
             "ExtensionID": "yzhang.markdown-all-in-one",
             "CustomSettings": {
                 "markdown.extension.toc.omittedFromToc": {
-                    "README.md": ["# Overview"] 
+                    "README.md": [
+                        "# Overview"
+                    ]
                 },
                 "markdown.extension.toc.updateOnSave": false
             }
