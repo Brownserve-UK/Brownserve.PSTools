@@ -1,5 +1,5 @@
 {
-    "defaults": {
+    "Defaults": {
         "PermanentPaths": [
             {
                 "VariableName": "BrownserveRepoBuildDirectory",

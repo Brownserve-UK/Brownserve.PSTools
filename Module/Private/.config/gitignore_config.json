@@ -1,5 +1,5 @@
 {
-    "defaults": [
+    "Defaults": [
         {
             "comment": "Paket is used to restore various dependencies (including the Brownserve.PSTools PowerShell module).`nWe deliberately ignore the 'paket.lock' file as our projects are usually not precious about taking the latest versions of packages.",
             "item": [

@@ -1,5 +1,5 @@
 {
-    "defaults":
+    "Defaults":
     [
         {
             "comment": "Invoke-Build is used to run our builds",
