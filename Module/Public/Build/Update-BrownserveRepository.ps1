@@ -105,6 +105,69 @@ function Update-BrownserveRepository
         # And our list of ephemeral paths that are gitignored and recreated between init's
         $DefaultEphemeralPaths = $RepositoryPathsConfig.Defaults.EphemeralPaths
 
+        <# 
+            We preform updates on a branch so we can avoid causing havoc, we do that now so we can ensure when 
+            we read from the various files in the repository we know what branch we are on!
+        #>
+        try
+        {
+            $CurrentBranch = Get-GitCurrentBranch -RepositoryPath $RepoPath
+        }
+        catch
+        {
+            throw $_.Exception.Message
+        }
+
+        # Make sure we're running on a branch
+        $TempBranchName = 'brownserve_repo_update'
+        if ($CurrentBranch -ne $TempBranchName)
+        {
+            Write-Debug "Current branch: $CurrentBranch"
+            # Check to see if we've already got the branch available to use
+            try
+            {
+                $LocalBranches = Get-GitBranches `
+                    -RepositoryPath $RepoPath `
+                    -ErrorAction 'Stop'
+            }
+            catch
+            {
+                # Let this silently fail and just try and create the branch anyways
+                Write-Debug "Get-GitBranches has failed with $($_.Exception.Message).`nIgnoring"
+            }
+            if ($LocalBranches -contains $TempBranchName)
+            {
+                Write-Verbose "'$TempBranchName' already exists, attempting to checkout"
+                try
+                {
+                    Switch-GitBranch `
+                        -RepositoryPath $RepoPath `
+                        -BranchName $TempBranchName `
+                        -ErrorAction 'Stop'
+                }
+                catch
+                {
+                    throw "The branch '$TempBranchName' already exists but git was unable to checkout this branch.`n$($_.Exception.Message)"
+                }
+            }
+            else
+            {
+                Write-Verbose "Creating new branch '$TempBranchName'"
+                try
+                {
+                    New-GitBranch `
+                        -RepositoryPath $RepoPath `
+                        -BranchName $TempBranchName `
+                        -Checkout $true `
+                        -ErrorAction 'Stop'
+                }
+                catch
+                {
+                    throw "Failed to create working branch.`n$($_.Exception.Message)"
+                }
+            }
+        }
+
         <#
             We have various VS Code extensions that we recommend the user install, these are stored per project in the .vscode directory.
             The user may have added some of their own so we import the list of extensions.
@@ -183,66 +246,6 @@ function Update-BrownserveRepository
         catch
         {
             throw "Failed to search '$InitPath' for custom init steps.`n$($_.Exception.Message)"
-        }
-
-        # We preform updates on a branch so we can avoid causing havoc
-        try
-        {
-            $CurrentBranch = Get-GitCurrentBranch -RepositoryPath $RepoPath
-        }
-        catch
-        {
-            throw $_.Exception.Message
-        }
-
-        # Make sure we're running on a branch
-        $TempBranchName = 'brownserve_repo_update'
-        if ($CurrentBranch -ne $TempBranchName)
-        {
-            Write-Debug "Current branch: $CurrentBranch"
-            # Check to see if we've already got the branch available to use
-            try
-            {
-                $LocalBranches = Get-GitBranches `
-                    -RepositoryPath $RepoPath `
-                    -ErrorAction 'Stop'
-            }
-            catch
-            {
-                # Let this silently fail and just try and create the branch anyways
-                Write-Debug "Get-GitBranches has failed with $($_.Exception.Message).`nIgnoring"
-            }
-            if ($LocalBranches -contains $TempBranchName)
-            {
-                Write-Verbose "'$TempBranchName' already exists, attempting to checkout"
-                try
-                {
-                    Switch-GitBranch `
-                        -RepositoryPath $RepoPath `
-                        -BranchName $TempBranchName `
-                        -ErrorAction 'Stop'
-                }
-                catch
-                {
-                    throw "The branch '$TempBranchName' already exists but git was unable to checkout this branch.`n$($_.Exception.Message)"
-                }
-            }
-            else
-            {
-                Write-Verbose "Creating new branch '$TempBranchName'"
-                try
-                {
-                    New-GitBranch `
-                        -RepositoryPath $RepoPath `
-                        -BranchName $TempBranchName `
-                        -Checkout $true `
-                        -ErrorAction 'Stop'
-                }
-                catch
-                {
-                    throw "Failed to create working branch.`n$($_.Exception.Message)"
-                }
-            }
         }
         
         # Build up our default list of gitignore's that we always want to use
@@ -333,7 +336,7 @@ function Update-BrownserveRepository
         }
         if ($ManualGitIgnores)
         {
-            $GitIgnoreParams.Add('ManualGitIgnores',$ManualGitIgnores)
+            $GitIgnoreParams.Add('ManualGitIgnores', $ManualGitIgnores)
         }
 
         if ($ExtraPaketDeps)
@@ -349,12 +352,12 @@ function Update-BrownserveRepository
         }
         if ($ManualPaketEntries)
         {
-            $PaketParams.Add('ManualDependencies',$ManualPaketEntries)
+            $PaketParams.Add('ManualDependencies', $ManualPaketEntries)
         }
 
         if ($CustomInitSteps)
         {
-            $InitParams.Add('CustomInitSteps',$CustomInitSteps)
+            $InitParams.Add('CustomInitSteps', $CustomInitSteps)
         }
 
         if ($ExtraVSCodeExtensions)
@@ -469,8 +472,8 @@ function Update-BrownserveRepository
             }
         }
 
-        ## Only start creating paths/files if we've been successful up to this point
-        # Create all our permanent paths first, other things may need to live under them
+        ## Only start updating files on disk if we're sure we've got everything we need
+        # Start by ensuring the permanent paths exist, these are often needed for the bits that come after
         try
         {
             $FinalPermanentPaths.GetEnumerator() | ForEach-Object {
@@ -493,10 +496,14 @@ function Update-BrownserveRepository
                         ChildPath = $_.Path
                     }
                 }
-                New-Item `
-                    -Path (Join-Path @JoinPathParams) `
-                    -ItemType 'Directory' `
-                    -Force:$Force | Out-Null # I think these should _always_ be directories, but we may need to rethink this if not!
+                $CurrentPath = (Join-Path @JoinPathParams)
+                if (!(Test-Path $CurrentPath))
+                {
+                    # I think these should _always_ be directories, but we may need to rethink this if not!
+                    New-Item `
+                        -Path  `
+                        -ItemType 'Directory' | Out-Null
+                }
             }
         }
         catch
@@ -504,49 +511,54 @@ function Update-BrownserveRepository
             throw "Failed to create permanent paths.`n$($_.Exception.Message)"
         }
 
-        # Now we have everything we need then we can start creating files on disk!
         try
         {
-            Move-Item $NugetConfigTempPath -Destination $NugetConfigPath -Force:$Force | Out-Null
+            if (Test-Path $InitPath)
+            {
+                $Verb = 'update'
+                Set-Content `
+                    -Path $InitPath `
+                    -Value $InitScriptContent `
+                    -ErrorAction 'Stop'
+            }
+            else
+            {
+                $Verb = 'create'
+                New-Item `
+                    -Path $InitPath `
+                    -Value $InitScriptContent `
+                    -ItemType File `
+                    -Force:$Force | Out-Null
+            }
         }
         catch
         {
-            throw "Failed to write '$NugetConfigPath'.`n$($_.Exception.Message)"
-        }
-        try
-        {
-            New-Item $dotnetToolsConfigPath -ItemType Directory -Force:$Force | Out-Null
-            Move-Item $dotnetToolsTempPath -Destination $dotnetToolsPath -Force:$Force | Out-Null
-        }
-        catch
-        {
-            throw "Failed to write '$dotnetToolsPath'.`n$($_.Exception.Message)"
+            throw "Failed to $Verb '$InitPath'.`n$($_.Exception.Message)"
         }
 
         try
         {
-            New-Item `
-                -Path $InitPath `
-                -Value $InitScriptContent `
-                -ItemType File `
-                -Force:$Force | Out-Null
+            if (Test-Path $GitIgnorePath)
+            {
+                $Verb = 'update'
+                Set-Content `
+                    -Path $GitIgnorePath `
+                    -Value $GitIgnoresContent `
+                    -ErrorAction 'Stop'
+            }
+            else
+            {
+                $Verb = 'create'
+                New-Item `
+                    -Path $GitIgnorePath `
+                    -ItemType File `
+                    -Value $GitIgnoresContent `
+                    -Force:$Force | Out-Null
+            }
         }
         catch
         {
-            throw "Failed to write '$InitPath'.`n$($_.Exception.Message)"
-        }
-
-        try
-        {
-            New-Item `
-                -Path $GitIgnorePath `
-                -ItemType File `
-                -Value $GitIgnoresContent `
-                -Force:$Force | Out-Null
-        }
-        catch
-        {
-            throw "Failed to write '$GitIgnorePath'.`n$($_.Exception.Message)"
+            throw "Failed to $Verb '$GitIgnorePath'.`n$($_.Exception.Message)"
         }
 
         if (!(Test-Path $VSCodePath))
@@ -564,98 +576,174 @@ function Update-BrownserveRepository
             }
         }
 
-        try
+        if ($VSCodeWorkspaceSettings.Count -gt 0)
         {
-            $VSCodeWorkspaceExtensionIDsJSON = ConvertTo-Json `
-                -InputObject @{ recommendations = $VSCodeWorkspaceExtensionIDs } `
-                -Depth 100 `
-                -ErrorAction 'Stop'
-            New-Item `
-                -Path $VSCodeExtensionsFilePath `
-                -ItemType File `
-                -Value $VSCodeWorkspaceExtensionIDsJSON `
-                -Force:$Force | Out-Null
-        }
-        catch
-        {
-            throw "Failed to create '$VSCodeExtensionsFilePath'.`n$($_.Exception.Message)"
-        }
+            try
+            {
+                $File = 'extensions.json'
+                $VSCodeWorkspaceExtensionIDsJSON = ConvertTo-Json `
+                    -InputObject @{ recommendations = $VSCodeWorkspaceExtensionIDs } `
+                    -Depth 100 `
+                    -ErrorAction 'Stop'
+                $File = 'settings.json'
+                $VSCodeWorkspaceSettingsJSON = ConvertTo-Json `
+                    -InputObject $VSCodeWorkspaceSettings `
+                    -Depth 100 `
+                    -ErrorAction 'Stop'
+            }
+            catch
+            {
+                throw "Failed to convert JSON for $File.`n$($_.Exception.Message)"
+            }
 
-        try
-        {
-            $VSCodeWorkspaceSettingsJSON = ConvertTo-Json `
-                -InputObject $VSCodeWorkspaceSettings `
-                -Depth 100 `
-                -ErrorAction 'Stop'
-            New-Item `
-                -Path $VSCodeWorkspaceSettingsFilePath `
-                -ItemType File `
-                -Value $VSCodeWorkspaceSettingsJSON `
-                -Force:$Force | Out-Null
-        }
-        catch
-        {
-            throw "Failed to create '$VSCodeWorkspaceSettingsFilePath'.`n$($_.Exception.Message)"
+            
+            try
+            {
+                if (!(Test-Path $VSCodeExtensionsFilePath))
+                {
+                    $Verb = 'create'
+                    New-Item `
+                        -Path $VSCodeExtensionsFilePath `
+                        -ItemType File `
+                        -Value $VSCodeWorkspaceExtensionIDsJSON `
+                        -Force:$Force | Out-Null
+                }
+                else
+                {
+                    $Verb = 'update'
+                    Set-Content `
+                        -Path $VSCodeExtensionsFilePath `
+                        -Value $VSCodeWorkspaceExtensionIDsJSON `
+                        -ErrorAction 'Stop' | Out-Null
+                }
+            }
+            catch
+            {
+                throw "Failed to $Verb '$VSCodeExtensionsFilePath'.`n$($_.Exception.Message)"
+            }
+            try
+            {
+                if (!(Test-Path $VSCodeWorkspaceSettingsFilePath))
+                {
+                    $Verb = 'create'
+                    New-Item `
+                        -Path $VSCodeWorkspaceSettingsFilePath `
+                        -ItemType File `
+                        -Value $VSCodeWorkspaceSettingsJSON `
+                        -Force:$Force | Out-Null
+                }
+                else
+                {
+                    $Verb = 'update'
+                    Set-Content `
+                        -Path $VSCodeWorkspaceSettingsFilePath `
+                        -Value $VSCodeWorkspaceSettingsJSON `
+                        -ErrorAction 'Stop' | Out-Null
+                }
+            }
+            catch
+            {
+                throw "Failed to $Verb '$VSCodeWorkspaceSettingsFilePath'.`n$($_.Exception.Message)"
+            }
         }
 
         if ($PaketDependenciesContent)
         {
+            
             try
             {
-                New-Item `
-                    -Path $PaketDependenciesPath `
-                    -ItemType File `
-                    -Value $PaketDependenciesContent `
-                    -Force:$Force | Out-Null
+                if (!(Test-Path $PaketDependenciesPath))
+                {
+                    $Verb = 'create'
+                    New-Item `
+                        -Path $PaketDependenciesPath `
+                        -ItemType File `
+                        -Value $PaketDependenciesContent `
+                        -Force:$Force | Out-Null
+                }
+                else
+                {
+                    $Verb = 'update'
+                    Set-Content `
+                        -Path $PaketDependenciesPath `
+                        -Value $PaketDependenciesContent `
+                        -ErrorAction 'Stop' | Out-Null
+                }
             }
             catch
             {
-                throw "Failed to write '$PaketDependenciesPath'.`n$($_.Exception.Message)"
+                throw "Failed to $Verb '$PaketDependenciesPath'.`n$($_.Exception.Message)"
             }
         }
 
         if ($Devcontainer)
         {
-            try
+            if (!(Test-Path $DevcontainerDirectoryPath))
             {
-                New-Item `
-                    -Path $DevcontainerDirectoryPath `
-                    -ItemType Directory `
-                    -Force:$Force `
-                    -ErrorAction 'Stop' | Out-Null
+                try
+                {
+                    New-Item `
+                        -Path $DevcontainerDirectoryPath `
+                        -ItemType Directory `
+                        -Force:$Force `
+                        -ErrorAction 'Stop' | Out-Null
+                }
+                catch
+                {
+                    throw "Failed to create '$DevcontainerDirectoryPath'"
+                }
+                try
+                {
+                    New-Item `
+                        -Path $DevcontainerPath `
+                        -ItemType File `
+                        -Value $Devcontainer.Devcontainer `
+                        -ErrorAction 'Stop' | Out-Null
+                }
+                catch
+                {
+                    throw "Failed to create '$DevcontainerPath'.`n$($_.Exception.Message)"
+                }
+                try
+                {
+                    New-Item `
+                        -Path $DockerfilePath `
+                        -ItemType File `
+                        -Value $Devcontainer.Dockerfile `
+                        -ErrorAction 'Stop' | Out-Null
+                }
+                catch
+                {
+                    throw "Failed to create '$DockerfilePath'.`n$($_.Exception.Message)"
+                }
             }
-            catch
+            else
             {
-                throw "Failed to create '$DevcontainerDirectoryPath'"
+                try
+                {
+                    Set-Content `
+                        -Path $DevcontainerPath `
+                        -Value $Devcontainer.Devcontainer `
+                        -ErrorAction 'Stop' | Out-Null
+                }
+                catch
+                {
+                    throw "Failed to update '$DevcontainerPath'.`n$($_.Exception.Message)"
+                }
+                try
+                {
+                    Set-Content `
+                        -Path $DockerfilePath `
+                        -Value $Devcontainer.Dockerfile `
+                        -ErrorAction 'Stop' | Out-Null
+                }
+                catch
+                {
+                    throw "Failed to update '$DockerfilePath'.`n$($_.Exception.Message)"
+                }
             }
 
-            try
-            {
-                New-Item `
-                    -Path $DevcontainerPath `
-                    -ItemType File `
-                    -Value $Devcontainer.Devcontainer `
-                    -ErrorAction 'Stop' `
-                    -Force:$Force | Out-Null
-            }
-            catch
-            {
-                throw "Failed to create '$DevcontainerPath'.`n$($_.Exception.Message)"
-            }
-
-            try
-            {
-                New-Item `
-                    -Path $DockerfilePath `
-                    -ItemType File `
-                    -Value $Devcontainer.Dockerfile `
-                    -ErrorAction 'Stop' `
-                    -Force:$Force | Out-Null
-            }
-            catch
-            {
-                throw "Failed to create '$DockerfilePath'.`n$($_.Exception.Message)"
-            }
+            
         }
 
         # Update the version of Paket we are using
