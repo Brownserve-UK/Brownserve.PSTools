@@ -27,7 +27,7 @@ Describe 'Common cmdlets' {
                     nested_hash_arr1 = @('a', 'b', 'd')
                 }
             }
-            $MergedHashes = Merge-Hashtable -BaseObject $ComplexHash2 -InputObject $ComplexHash -Deep
+            $MergedHashes = Merge-Hashtable -BaseObject $ComplexHash -InputObject $ComplexHash2 -Deep
             $MergedHashes.Key1 | Should -Be 'val3'
             $MergedHashes.Key2 | Should -Be 'val4'
             $MergedHashes.arr1 | Should -Be @('a','b','c','d')
