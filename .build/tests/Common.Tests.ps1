@@ -4,7 +4,7 @@
 Describe 'Common cmdlets' {
     Context 'Merge-Hashtable' {
         It 'should merge simple hashes' {
-            { Merge-Hashtable -BaseObject @{key1 = 'val1' } -InputObject @{key1 = 'val2' } | Select-Object -ExpandProperty Values } | Should -Be 'val2'
+            Merge-Hashtable -BaseObject @{key1 = 'val1' } -InputObject @{key1 = 'val2' } | Select-Object -ExpandProperty Values | Should -Be 'val2'
         }
         It 'should perform deep merges' {
             {
@@ -42,7 +42,7 @@ Describe 'Common cmdlets' {
                     key1 = 'val1'
                     arr1 = @{'test' = $true }
                 }
-                Merge-Hashtable -BaseObject $Hash1 -InputObject $Hash2
+                Merge-Hashtable -BaseObject $Hash1 -InputObject $Hash2 -ErrorAction 'stop'
             } | Should -Throw
         }
     }
