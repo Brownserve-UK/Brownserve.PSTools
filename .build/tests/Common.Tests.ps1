@@ -29,7 +29,7 @@ Describe 'Common cmdlets' {
                         nested_hash_arr1 = @('a', 'b', 'd')
                     }
                 }
-                Merge-Hashtable -BaseObject $ComplexHash -InputObject $ComplexHash2
+                Merge-Hashtable -BaseObject $ComplexHash -InputObject $ComplexHash2 -Deep
             } | Should -not -Throw
         }
         It 'should fail to deep merge inconsistent keys' {
@@ -42,7 +42,7 @@ Describe 'Common cmdlets' {
                     key1 = 'val1'
                     arr1 = @{'test' = $true }
                 }
-                Merge-Hashtable -BaseObject $Hash1 -InputObject $Hash2 -ErrorAction 'stop'
+                Merge-Hashtable -BaseObject $Hash1 -InputObject $Hash2 -ErrorAction 'stop' -Deep
             } | Should -Throw
         }
     }
