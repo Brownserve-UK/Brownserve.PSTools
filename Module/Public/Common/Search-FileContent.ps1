@@ -57,7 +57,8 @@ function Search-FileContent
         $FileContentArray | ForEach-Object {
             $Line = $_.Trim()
             $LineMatch = $null
-            Write-Debug "Line: $LineCount`nContents:$Line"
+            # Have disabled the below debugging, it's very very verbose 😬
+            # Write-Debug "Line: $LineCount`nContents:$Line"
             if (-not $StartStringLine)
             {
                 $LineMatch = [regex]::Match($Line, $StartStringPattern)
