@@ -39,8 +39,9 @@ function New-GitIgnoresFile
         $IgnoresTemplate += @"
 ## Manually defined ignores: ##`n
 "@
-        if ($ManualGitIgnores)
+        if (($ManualGitIgnores) -and (!''))
         {
+            Write-Debug "Adding the following manual .gitignore items:`n$ManualGitIgnores"
             $IgnoresTemplate += $ManualGitIgnores
         }
     }
