@@ -8,3 +8,6 @@ nuget Pester
 
 # We'll need nuget to package things
 nuget NuGet.CommandLine
+
+# try grabbing platyPS via GitHub
+github PowerShell/platyPS:v2

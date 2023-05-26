@@ -68,3 +68,146 @@ class InitPath
 
     
 }
+
+enum BrownserveCICD
+{
+    GitHubActions
+    TeamCity
+}
+
+enum BrownserveRepoBuildType
+{
+    PowerShellModule
+    Generic
+}
+<#
+    This class is used to create GitHub Actions workflow jobs
+#>
+class GitHubActionsJob
+{
+    [string]$JobTitle
+    [string]$RunsOn
+    [hashtable[]]$Steps # Can't used ordered here, https://github.com/PowerShell/vscode-powershell/issues/1969#issuecomment-651874245
+
+    GitHubActionsJob([hashtable]$Hash)
+    {
+        $RequiredKeys = @('JobTitle', 'RunsOn', 'Steps')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Hash.$Key)
+            {
+                throw "Hashtable missing key '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Hash.$Key
+            }
+        }
+    }
+}
+
+class PaketDependencyRule
+{
+    [string]$Source
+    [string]$PackageName
+
+    PaketDependencyRule([hashtable]$Hashtable)
+    {
+        $RequiredKeys = @('Source', 'PackageName')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Hashtable.$Key)
+            {
+                throw "Hashtable missing key '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Hashtable.$Key
+            }
+        }
+    }
+
+    PaketDependencyRule([pscustomobject]$Object)
+    {
+        $RequiredKeys = @('Source', 'PackageName')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Object.$Key)
+            {
+                throw "Object missing property '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Object.$Key
+            }
+        }
+    }
+}
+
+class PaketDependency
+{
+    [PaketDependencyRule[]]$Rule
+    [string]$Comment
+
+    PaketDependency([hashtable]$Hashtable)
+    {
+        if (!$Hashtable.Rule)
+        {
+            throw "Hashtable missing key 'Rule'"
+        }
+            
+        $this.Rule = $Hashtable.Rule
+        if ($Hashtable.Comment)
+        {
+            # Try to ensure every line starts with the pound symbol
+            $LocalComment = $Hashtable.Comment -split "`n"
+            $SanitizedComment = ''
+            $LocalComment | ForEach-Object {
+                if ($_ -notmatch '^\#')
+                {
+                    $SanitizedComment += "# $_"
+                }
+                else
+                {
+                    $SanitizedComment += $_
+                }
+                if ($_ -notmatch $LocalComment[-1])
+                {
+                    $SanitizedComment += "`n"
+                }
+            }
+            $this.Comment = $SanitizedComment
+        }
+    }
+
+    PaketDependency([pscustomobject]$Object)
+    {
+        if (!$Object.Rule)
+        {
+            throw "Hashtable missing key 'Rule'"
+        }
+            
+        $this.Rule = $Object.Rule
+        if ($Object.Comment)
+        {
+            # Try to ensure every line starts with the pound symbol
+            $LocalComment = $Object.Comment -split "`n"
+            $SanitizedComment = ''
+            $LocalComment | ForEach-Object {
+                if ($_ -notmatch '^\#')
+                {
+                    $SanitizedComment += "# $_"
+                }
+                else
+                {
+                    $SanitizedComment += $_
+                }
+                if ($_ -notmatch $LocalComment[-1])
+                {
+                    $SanitizedComment += "`n"
+                }
+            }
+            $this.Comment = $SanitizedComment
+        }
+    }
+}
