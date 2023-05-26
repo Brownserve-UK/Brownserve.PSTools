@@ -300,7 +300,7 @@ function Update-BrownserveRepository
                 Dockerfile         = $DockerfileName
                 RequiredExtensions = @()
             }
-        }                
+        }
 
         if ($ExtraPermanentPaths)
         {
@@ -322,7 +322,6 @@ function Update-BrownserveRepository
         $InitParams.Add('PermanentPaths', $FinalPermanentPaths)
         $InitParams.Add('EphemeralPaths', $FinalEphemeralPaths)
         
-        # We shouldn't need any special git ignores
         if ($ExtraGitIgnores)
         {
             $FinalGitIgnores = $DefaultGitIgnores + $ExtraGitIgnores
@@ -519,6 +518,7 @@ function Update-BrownserveRepository
                 Set-Content `
                     -Path $InitPath `
                     -Value $InitScriptContent `
+                    -NoNewline `
                     -ErrorAction 'Stop'
             }
             else
@@ -544,6 +544,7 @@ function Update-BrownserveRepository
                 Set-Content `
                     -Path $GitIgnorePath `
                     -Value $GitIgnoresContent `
+                    -NoNewline `
                     -ErrorAction 'Stop'
             }
             else
@@ -667,6 +668,7 @@ function Update-BrownserveRepository
                     Set-Content `
                         -Path $PaketDependenciesPath `
                         -Value $PaketDependenciesContent `
+                        -NoNewline `
                         -ErrorAction 'Stop' | Out-Null
                 }
             }
@@ -724,6 +726,7 @@ function Update-BrownserveRepository
                     Set-Content `
                         -Path $DevcontainerPath `
                         -Value $Devcontainer.Devcontainer `
+                        -NoNewline `
                         -ErrorAction 'Stop' | Out-Null
                 }
                 catch
@@ -735,6 +738,7 @@ function Update-BrownserveRepository
                     Set-Content `
                         -Path $DockerfilePath `
                         -Value $Devcontainer.Dockerfile `
+                        -NoNewline `
                         -ErrorAction 'Stop' | Out-Null
                 }
                 catch
