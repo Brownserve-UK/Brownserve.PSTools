@@ -95,20 +95,93 @@ function Initialize-BrownserveRepository
         $DevcontainerPath = Join-Path $DevcontainerDirectoryPath 'devcontainer.json'
         $DockerfilePath = Join-Path $DevcontainerDirectoryPath 'Dockerfile'
 
-        $PathsToTest = @($InitPath, $PaketDependenciesPath, $dotnetToolsPath, $NugetConfigPath)
+        # 
+        $PathsToTest = @($InitPath, $GitIgnorePath, $PaketDependenciesPath, $dotnetToolsPath, $NugetConfigPath)
         if (!$Force)
         {
+            $FailedPaths = @()
             $PathsToTest | ForEach-Object {
                 if ((Test-Path $_))
                 {
-                    throw "It looks like this project has already been at least partially initialized as the path '$_' already exists.`nPlease use 'Update-BrownserveRepository' to update the project or the '-Force' parameter to forcefully overwrite the files."
+                    $FailedPaths += $_
                 }
+            }
+            if ($FailedPaths.Count -gt 0)
+            {
+                $ErrorMessage = @"
+The following files have been detected within the repository:
+ * $($FailedPaths -join "`n * ")
+This may mean that the repository has previously been initialized by this cmdlet, if so please use 'Update-BrownserveRepository' to update the project.
+If this is not the case and these files have been created manually or by some other means then please use the '-Force' parameter to continue initializing this project.
+However please note this will overwrite the files listed above!
+"@
+                Write-Error $ErrorMessage -ErrorAction 'Stop'
             }
         }
         else
         {
             # TODO: Confirm?
             Write-Warning 'Forcing overwrite.'
+        }
+
+        # Check what branch we are on
+        try
+        {
+            $CurrentBranch = Get-GitCurrentBranch -RepositoryPath $RepoPath
+        }
+        catch
+        {
+            throw $_.Exception.Message
+        }
+
+        # Make sure we're running on a branch and do that before looking at or touching any files on disk
+        $TempBranchName = 'brownserve_repo_init'
+        if ($CurrentBranch -ne $TempBranchName)
+        {
+            Write-Debug "Current branch: $CurrentBranch"
+            # Check to see if we've already got the branch available to use
+            try
+            {
+                $LocalBranches = Get-GitBranches `
+                    -RepositoryPath $RepoPath `
+                    -ErrorAction 'Stop'
+            }
+            catch
+            {
+                # Let this silently fail and just try and create the branch anyways
+                Write-Debug "Get-GitBranches has failed with $($_.Exception.Message).`nIgnoring"
+            }
+            if ($LocalBranches -contains $TempBranchName)
+            {
+                Write-Verbose "'$TempBranchName' already exists, attempting to checkout"
+                try
+                {
+                    Switch-GitBranch `
+                        -RepositoryPath $RepoPath `
+                        -BranchName $TempBranchName `
+                        -ErrorAction 'Stop'
+                }
+                catch
+                {
+                    throw "The branch '$TempBranchName' already exists but git was unable to checkout this branch.`n$($_.Exception.Message)"
+                }
+            }
+            else
+            {
+                Write-Verbose "Creating new branch '$TempBranchName'"
+                try
+                {
+                    New-GitBranch `
+                        -RepositoryPath $RepoPath `
+                        -BranchName $TempBranchName `
+                        -Checkout $true `
+                        -ErrorAction 'Stop'
+                }
+                catch
+                {
+                    throw "Failed to create working branch.`n$($_.Exception.Message)"
+                }
+            }
         }
 
         # Ensure we have a directory where we can create some staging files before writing them to the repo
@@ -160,63 +233,58 @@ function Initialize-BrownserveRepository
             throw "Failed to get existing VSCode settings.`n$($_.Exception.Message)"
         }
 
-        # Check what branch we are on
-        try
+        <# 
+            We may already have a .gitignore in the repo it's unlikely to be in the format we expect it to be in.
+            We'll try to read it anyways and just in case.
+        #>
+        if (Test-Path $GitIgnorePath)
         {
-            $CurrentBranch = Get-GitCurrentBranch -RepositoryPath $RepoPath
-        }
-        catch
-        {
-            throw $_.Exception.Message
-        }
-
-        # Make sure we're running on a branch
-        $TempBranchName = 'brownserve_repo_init'
-        if ($CurrentBranch -ne $TempBranchName)
-        {
-            Write-Debug "Current branch: $CurrentBranch"
-            # Check to see if we've already got the branch available to use
             try
             {
-                $LocalBranches = Get-GitBranches `
-                    -RepositoryPath $RepoPath `
+                $ManualGitIgnores = Search-FileContent `
+                    -FilePath $GitIgnorePath `
+                    -StartStringPattern '\#\# Manually defined ignores\: \#\#' `
+                    -AsString `
                     -ErrorAction 'Stop'
             }
             catch
             {
-                # Let this silently fail and just try and create the branch anyways
-                Write-Debug "Get-GitBranches has failed with $($_.Exception.Message).`nIgnoring"
+                throw "Failed to search '$GitIgnorePath' for manual entries.`n$($_.Exception.Message)"
             }
-            if ($LocalBranches -contains $TempBranchName)
+        }
+        
+        # Similarly for paket packages
+        if (Test-Path $PaketDependenciesPath)
+        {
+            try
             {
-                Write-Verbose "'$TempBranchName' already exists, attempting to checkout"
-                try
-                {
-                    Switch-GitBranch `
-                        -RepositoryPath $RepoPath `
-                        -BranchName $TempBranchName `
-                        -ErrorAction 'Stop'
-                }
-                catch
-                {
-                    throw "The branch '$TempBranchName' already exists but git was unable to checkout this branch.`n$($_.Exception.Message)"
-                }
+                $ManualPaketEntries = Search-FileContent `
+                    -FilePath $PaketDependenciesPath `
+                    -StartStringPattern '\#\# Manually defined dependencies\: \#\#' `
+                    -AsString `
+                    -ErrorAction 'Stop'
             }
-            else
+            catch
             {
-                Write-Verbose "Creating new branch '$TempBranchName'"
-                try
-                {
-                    New-GitBranch `
-                        -RepositoryPath $RepoPath `
-                        -BranchName $TempBranchName `
-                        -Checkout $true `
-                        -ErrorAction 'Stop'
-                }
-                catch
-                {
-                    throw "Failed to create working branch.`n$($_.Exception.Message)"
-                }
+                throw "Failed to search '$PaketDependenciesPath' for manual entries.`n$($_.Exception.Message)"
+            }
+        }
+        
+        # And for any custom _init.ps1 steps
+        if (Test-Path $InitPath)
+        {
+            try
+            {
+                $CustomInitSteps = Search-FileContent `
+                    -FilePath $InitPath `
+                    -StartStringPattern '\#\#\# Start user defined _init steps' `
+                    -StopStringPattern '\#\#\# End user defined _init steps' `
+                    -AsString `
+                    -ErrorAction 'Stop'
+            }
+            catch
+            {
+                throw "Failed to search '$InitPath' for custom init steps.`n$($_.Exception.Message)"
             }
         }
         
@@ -242,31 +310,6 @@ function Initialize-BrownserveRepository
                 $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
                 $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
-
-                if ($DockerfileName)
-                {
-                    $DevcontainerParams = @{
-                        Dockerfile         = $DockerfileName
-                        RequiredExtensions = @()
-                    }
-                }                
-
-                if ($ExtraPermanentPaths)
-                {
-                    $FinalPermanentPaths = $DefaultPermanentPaths + $ExtraPermanentPaths
-                }
-                else
-                {
-                    $FinalPermanentPaths = $DefaultPermanentPaths
-                }
-                if ($ExtraEphemeralPaths)
-                {
-                    $FinalEphemeralPaths = $DefaultEphemeralPaths + $ExtraEphemeralPaths
-                }
-                else
-                {
-                    $FinalEphemeralPaths = $DefaultEphemeralPaths
-                }
                 <# 
                     For a repo that houses a PowerShell module we'll want to include:
                         - The logic for loading the module as part of the _init script
@@ -275,54 +318,90 @@ function Initialize-BrownserveRepository
                         - Invoke-Build/Pester for building and testing the module
                 #>
                 $InitParams = @{
-                    PermanentPaths        = $FinalPermanentPaths
-                    EphemeralPaths        = $FinalEphemeralPaths
                     IncludeModuleLoader   = $true
                     IncludePowerShellYaml = $true
                     IncludePlatyPS        = $true
                     IncludeBuildTestTools = $true
                 }
-                # We shouldn't need any special git ignores
-                if ($ExtraGitIgnores)
-                {
-                    $GitIgnoreParams = @{
-                        GitIgnores = ($DefaultGitIgnores + $ExtraGitIgnores)
-                    }
-                }
-                else
-                {
-                    $GitIgnoreParams = @{
-                        GitIgnores = $DefaultGitIgnores
-                    }
-                }
-
-                if ($ExtraPaketDeps)
-                {
-                    $PaketParams = @{
-                        PaketDependencies = ($DefaultPaketDependencies + $ExtraPaketDeps)
-                    }
-                }
-                else
-                {
-                    $PaketParams = @{
-                        PaketDependencies = $DefaultPaketDependencies
-                    }
-                }
-
-                if ($ExtraVSCodeExtensions)
-                {
-                    $VSCodeExtensions = $DefaultVSCodeExtensions + $ExtraVSCodeExtensions
-                }
-                else
-                {
-                    $VSCodeExtensions = $DefaultVSCodeExtensions
-                }
-
             }
             Default
             {}
         }
 
+        if ($DockerfileName)
+        {
+            $DevcontainerParams = @{
+                Dockerfile         = $DockerfileName
+                RequiredExtensions = @()
+            }
+        }
+
+        if ($ExtraPermanentPaths)
+        {
+            $FinalPermanentPaths = $DefaultPermanentPaths + $ExtraPermanentPaths
+        }
+        else
+        {
+            $FinalPermanentPaths = $DefaultPermanentPaths
+        }
+        if ($ExtraEphemeralPaths)
+        {
+            $FinalEphemeralPaths = $DefaultEphemeralPaths + $ExtraEphemeralPaths
+        }
+        else
+        {
+            $FinalEphemeralPaths = $DefaultEphemeralPaths
+        }
+
+        $InitParams.Add('PermanentPaths', $FinalPermanentPaths)
+        $InitParams.Add('EphemeralPaths', $FinalEphemeralPaths)
+
+        if ($ExtraGitIgnores)
+        {
+            $FinalGitIgnores = $DefaultGitIgnores + $ExtraGitIgnores
+        }
+        else
+        {
+            $FinalGitIgnores = $DefaultGitIgnores
+        }
+
+        $GitIgnoreParams = @{
+            GitIgnores = $FinalGitIgnores
+        }
+        if ($ManualGitIgnores)
+        {
+            $GitIgnoreParams.Add('ManualGitIgnores', $ManualGitIgnores)
+        }
+
+        if ($ExtraPaketDeps)
+        {
+            $FinalPaketDependencies = $DefaultPaketDependencies + $ExtraPaketDeps
+        }
+        else
+        {
+            $FinalPaketDependencies = $DefaultPaketDependencies
+        }
+        $PaketParams = @{
+            PaketDependencies = $FinalPaketDependencies
+        }
+        if ($ManualPaketEntries)
+        {
+            $PaketParams.Add('ManualDependencies', $ManualPaketEntries)
+        }
+
+        if ($CustomInitSteps)
+        {
+            $InitParams.Add('CustomInitSteps', $CustomInitSteps)
+        }
+
+        if ($ExtraVSCodeExtensions)
+        {
+            $VSCodeExtensions = $DefaultVSCodeExtensions + $ExtraVSCodeExtensions
+        }
+        else
+        {
+            $VSCodeExtensions = $DefaultVSCodeExtensions
+        }
         
         if ($VSCodeExtensions.Count -gt 0)
         {
