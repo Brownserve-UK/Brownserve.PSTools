@@ -191,49 +191,57 @@ catch
         $InitTemplate = $InitTemplate.Replace('###MODULE_LOADER###', $ModuleText)
 
         $CustomExternalTooling = ''
-        if ($IncludePowerShellYaml)
-        {
-            $CustomExternalTooling += @"
-# Some cmdlets make use of the powershell-yaml module so ensure it is available
-try
-{
-    Write-Verbose 'Downloading powershell-yaml module'
-    Save-Module 'powershell-yaml' -Repository PSGallery -Path `$Global:BrownserveRepoNugetPackagesDirectory
-    Get-ChildItem (Join-Path `$Global:BrownserveRepoNugetPackagesDirectory -ChildPath 'powershell-yaml') -Filter 'powershell-yaml.psd1' -Recurse | Import-Module -Force
-}
-catch
-{
-    throw "Failed to import the powershell-yaml module.``n`$(`$_.Exception.Message)"
-}`n`n
-"@
-        }
 
         if ($IncludePlatyPS)
         {
             $CustomExternalTooling += @"
-# Some cmdlets make use of the platPS module so ensure it is available
-# Unfortunately we have to build it from scratch as it currently cannot be loaded alongside powershell-yaml
-# Once a new preview build is pushed we can revert this
+<#
+    Some cmdlets make use of the platyPS module so ensure it is available
+    Unfortunately due to https://github.com/PowerShell/platyPS/issues/592 we cannot load this at the same time as powershell-yaml.
+    This should be fixed in a later v2 release but v2 is incredibly buggy at the moment and often fails with unhelpful errors.
+    So we download the module and set a special variable to its path.
+#>
 try
 {
-    Write-Verbose 'Building platyPS module'
+    Write-Verbose 'Downloading platyPS module'
+    Save-Module 'platyPS' -Repository PSGallery -Path `$Global:BrownserveRepoNugetPackagesDirectory -ErrorAction 'Stop'
     `$PlatyPSLocation = Join Path `$Global:BrownserveRepoPaketFilesDirectory -ChildPath PowerShell -AdditionalChildPath platyPS
-    # Build it using Invoke-NativeCommand, cos their script is super noisy and uses Write-Verbose -Verbose everywhere! 😡 
-    `$BuildPlatyPS = Invoke-NativeCommand ``
-        -FilePath pwsh ``
-        -ArgumentList @('-File', "`$(Join-Path `$PlatyPSLocation 'build.ps1')") ``
-        -SuppressOutput ``
-        -PassThru ``
-        -ErrorAction 'Stop'
-    Write-Verbose 'Importing platyPS module'
-    Get-ChildItem (Join-Path `$Global:PlatyPSLocation -ChildPath 'out') -Filter 'platyPS.psd1' -Recurse | Import-Module -Force
+    # DON'T import the module, set a well known variable that we can use later on.
+    `$Global:BrownserveRepoPlatyPSPath = Get-ChildItem (Join-Path `$Global:BrownserveRepoNugetPackagesDirectory -ChildPath 'platyPS') -Filter 'platyPS.psd1' -Recurse
+    if (!`$Global:BrownserveRepoPlatyPSPath)
+    {
+        throw 'Failed to find downloaded PlatyPS'
+    }
 }
 catch
 {
-    throw "Failed to import the platyPS module.``n`$(`$_.Exception.Message)"
+    throw "Failed to download the platyPS module.``n`$(`$_.Exception.Message)"
 }`n`n
 "@
         }
+
+        if ($IncludePowerShellYaml)
+        {
+            $CustomExternalTooling += @"
+# Some cmdlets make use of the powershell-yaml module so ensure it is available, we don't auto-load it to avoid clashing with platyPS
+try
+{
+    Write-Verbose 'Downloading powershell-yaml module'
+    Save-Module 'powershell-yaml' -Repository PSGallery -Path `$Global:BrownserveRepoNugetPackagesDirectory -ErrorAction 'stop'
+    `$Global:BrownserveRepoPowerShellYAMLPath = Get-ChildItem (Join-Path `$Global:BrownserveRepoNugetPackagesDirectory -ChildPath 'powershell-yaml') -Filter 'powershell-yaml.psd1' -Recurse
+    if (!`$Global:BrownserveRepoPowerShellYAMLPath)
+    {
+        throw 'Failed to find powershell-yaml module after download'
+    }
+}
+catch
+{
+    throw "Failed to download the powershell-yaml module.``n`$(`$_.Exception.Message)"
+}`n`n
+"@
+        }
+
+        
 
         if ($IncludeBuildTestTools)
         {
