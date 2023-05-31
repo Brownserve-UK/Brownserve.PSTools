@@ -249,7 +249,16 @@ However please note this will overwrite the files listed above!
             }
             catch
             {
-                throw "Failed to search '$GitIgnorePath' for manual entries.`n$($_.Exception.Message)"
+                $ErrorMessage = "Failed to search '$GitIgnorePath' for manual entries.`n$($_.Exception.Message)"
+                if (!$Force)
+                {
+                    throw $ErrorMessage
+                }
+                else
+                {
+                    # Do nothing, we'll overwrite
+                    # Write-Warning $ErrorMessage
+                }
             }
         }
         
@@ -266,7 +275,17 @@ However please note this will overwrite the files listed above!
             }
             catch
             {
-                throw "Failed to search '$PaketDependenciesPath' for manual entries.`n$($_.Exception.Message)"
+                $ErrorMessage = "Failed to search '$PaketDependenciesPath' for manual entries.`n$($_.Exception.Message)"
+                if (!$Force)
+                {
+                    throw $ErrorMessage
+                }
+                else
+                {
+                    # Do noting
+                    # Write-Warning $ErrorMessage
+                }
+                 
             }
         }
         
@@ -284,7 +303,16 @@ However please note this will overwrite the files listed above!
             }
             catch
             {
-                throw "Failed to search '$InitPath' for custom init steps.`n$($_.Exception.Message)"
+                $ErrorMessage = "Failed to search '$InitPath' for custom init steps.`n$($_.Exception.Message)"
+                if (!$Force)
+                {
+                throw $ErrorMessage
+                }
+                else
+                {
+                    # Do nothing
+                    # Write-Warning $ErrorMessage
+                }
             }
         }
         
