@@ -1,17 +1,13 @@
-# Ignore the log folder and any .log files
-*.log
+# This file is created by a tool, manual changes will be lost unless added to the designated section below.
 
-# Paket fluff
-# We ignore the paket.lock because we want to try and take the latest of everything, but if that proves too yabai we can remove it
+## Auto generated ignores: ##
+# Paket is used to restore various dependencies (including the Brownserve.PSTools PowerShell module).`nWe deliberately ignore the 'paket.lock' file as our projects are usually not precious about taking the latest versions of packages.
+
 paket.lock
 packages/
 paket-files/
 
-# Binary directory
-.bin/
-
-# Build output
-.build/output/
-
-# Temp file
+# The temporary directory is used to store build output, log files, redirected output etc. It is recreated by the _init.ps1 script.
 .tmp/
+
+## Manually defined ignores: ##
