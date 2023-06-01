@@ -11,9 +11,6 @@ nuget Invoke-Build
 # Pester is used to perform testing on the PowerShell module
 nuget Pester
 
-# PlatyPS is used to build and maintain the module documentation.`nCurrently we have to build it from source to get some fixes that are not yet in the PSGallery release so we download it from GitHub.
-github PowerShell/platyPS:v2
-
 # To push the module up to nuget.org we use the standalone version of Nuget.
 nuget NuGet.CommandLine
 
