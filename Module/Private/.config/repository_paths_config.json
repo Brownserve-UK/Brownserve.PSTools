@@ -45,14 +45,14 @@
             },
             {
                 "VariableName": "BrownserveRepoNugetPackagesDirectory",
-                "Path": "Packages",
-                "Description": "Paket/nuget will restore their dependencies to this directory",
+                "Path": "packages",
+                "Description": "Paket/nuget will restore their dependencies to this directory, case sensitive on Linux",
                 "PathType": "Directory"
             },
             {
                 "VariableName": "BrownserveRepoPaketFilesDirectory",
                 "Path": "paket-files",
-                "Description": "Paket will restore certain types of dependencies to this directory",
+                "Description": "Paket will restore certain types of dependencies to this directory, case sensitive on Linux",
                 "PathType": "Directory"
             },
             {
@@ -74,7 +74,7 @@
             {
                 "VariableName": "BrownserveRepoTestsDirectory",
                 "Path": ".build",
-                "ChildPaths": "tasks",
+                "ChildPaths": "tests",
                 "Description": "Stores any tests that we pass to Pester",
                 "PathType": "Directory"
             }

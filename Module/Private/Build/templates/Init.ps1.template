@@ -86,10 +86,13 @@ catch
 ###EPHEMERAL_PATH_VARIABLES###
 
 # We use paket for managing our dependencies and we get that via dotnet
+Push-Location
+Set-Location $Global:BrownserveRepoRootDirectory
 Write-Verbose "Restoring dotnet tools"
 $DotnetOutput = & dotnet tool restore
 if ($LASTEXITCODE -ne 0)
 {
+    Pop-Location
     $DotnetOutput
     throw "dotnet tool restore failed"
 }
@@ -98,9 +101,11 @@ Write-Verbose "Installing paket dependencies"
 $PaketOutput = & dotnet paket install
 if ($LASTEXITCODE -ne 0)
 {
+    Pop-Location
     $PaketOutput
     throw "Failed to install paket dependencies"
 }
+Pop-Location
 
 # If Brownserve.PSTools is already loaded in this session (e.g. it's installed globally) we need to unload it
 # This ensures only the expected version is available to us
@@ -110,7 +115,7 @@ if ((Get-Module 'Brownserve.PSTools'))
     {
         Write-Warning "The Brownserve.PSTools module is already loaded in this PSSession, this will be unloaded to Ensure the correct version for this repository is used"
         Write-Verbose "Unloading Brownserve.PSTools"
-        Remove-Module 'Brownserve.PSTools' -Force -Confirm:$false
+        Remove-Module 'Brownserve.PSTools' -Force -Confirm:$false -Verbose:$False
     }
     catch
     {
@@ -127,7 +132,7 @@ catch
 {
     throw "Failed to import Brownserve.PSTools.`n$($_.Exception.Message)"
 }
-###MODULE_LOADER######EXTERNAL_TOOLING###
+###MODULE_LOADER######EXTERNAL_TOOLING######PACKAGE_ALIASES###
 # Place any custom code below, this will be preserved whenever you update your _init script
 ### Start user defined _init steps
 ###CUSTOM_INIT_STEPS###

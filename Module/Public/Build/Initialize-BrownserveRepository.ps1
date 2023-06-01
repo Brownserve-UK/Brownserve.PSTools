@@ -42,7 +42,12 @@ function Initialize-BrownserveRepository
         # The config file that stores VS Code extension configuration
         [Parameter(Mandatory = $false, DontShow)]
         [string]
-        $VSCodeExtensionsConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'repository_vscode_extensions.json')
+        $VSCodeExtensionsConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'repository_vscode_extensions.json'),
+
+        # The config file that stores any package aliases we'd like to create
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $PackageAliasConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'package_aliases_config.json')
 
         #TODO: Create a changelog and licence automagically?
     )
@@ -68,6 +73,7 @@ function Initialize-BrownserveRepository
             $PaketDependenciesConfig = Read-ConfigurationFromFile $PaketDependenciesConfigFile
             $RepositoryPathsConfig = Read-ConfigurationFromFile $RepositoryPathsConfigFile
             $DevcontainerConfig = Read-ConfigurationFromFile $DevcontainerConfigFile
+            $PackageAliasConfig = Read-ConfigurationFromFile $PackageAliasConfigFile
             $VSCodeExtensionsConfig = Read-ConfigurationFromFile $VSCodeExtensionsConfigFile -AsHashtable
         }
         catch
@@ -285,7 +291,6 @@ However please note this will overwrite the files listed above!
                     # Do noting
                     # Write-Warning $ErrorMessage
                 }
-                 
             }
         }
         
@@ -326,6 +331,8 @@ However please note this will overwrite the files listed above!
         # Careful -AsHashtable makes key names case sensitive when converted from JSON! (defaults != Defaults)
         $DefaultVSCodeExtensions = $VSCodeExtensionsConfig.Defaults
 
+        $DefaultPackageAliases = $PackageAliasConfig.Defaults
+
         switch ($BuildType)
         {
             <# 
@@ -345,6 +352,7 @@ However please note this will overwrite the files listed above!
                 $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
                 $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
+                $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
                 
                 $InitParams = @{
                     IncludeModuleLoader   = $true
@@ -368,6 +376,7 @@ However please note this will overwrite the files listed above!
                 $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
                 $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
+                $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
                 
                 $InitParams = @{
                     IncludeModuleLoader   = $false # With the exception that we don't load the module locally (as it will conflict)
@@ -416,6 +425,13 @@ However please note this will overwrite the files listed above!
         else
         {
             $FinalGitIgnores = $DefaultGitIgnores
+        }
+
+        $FinalPackageAliases = $DefaultPackageAliases + $ExtraPackageAliases
+        if ($FinalPackageAliases)
+        {
+            Write-Host "Final Pack: $($FinalPackageAliases | Out-String)`nCount: $($FinalPackageAliases.Count)"
+            $InitParams.Add('PackageAliases',$FinalPackageAliases)
         }
 
         $GitIgnoreParams = @{

@@ -48,6 +48,11 @@ function New-BrownserveInitScript
         [switch]
         $IncludeBuildTestTools,
 
+        # We restoring packages from Nuget/Paket we may want to set aliases to them to use the local version instead of using the system provided version
+        [Parameter(Mandatory = $false)]
+        [PackageAlias[]]
+        $PackageAliases,
+
         # Any custom init steps
         [Parameter(
             Mandatory = $false
@@ -279,9 +284,9 @@ try
 {
     # Both modules should have been grabbed from nuget by paket, we simply need to import them
     Write-Verbose 'Importing Invoke-Build'
-    Join-Path `$Global:BrownserveRepoNugetPackagesDirectory 'Invoke-Build' -AdditionalChildPath 'tools', 'InvokeBuild.psd1' | Import-Module -Force
+    Join-Path `$Global:BrownserveRepoNugetPackagesDirectory 'Invoke-Build' -AdditionalChildPath 'tools', 'InvokeBuild.psd1' | Import-Module -Force -Verbose:`$false
     Write-Verbose 'Importing Pester'
-    Join-Path `$Global:BrownserveRepoNugetPackagesDirectory 'Pester' -AdditionalChildPath 'tools', 'Pester.psd1' | Import-Module -Force
+    Join-Path `$Global:BrownserveRepoNugetPackagesDirectory 'Pester' -AdditionalChildPath 'tools', 'Pester.psd1' | Import-Module -Force -Verbose:`$False
 }
 catch
 {
@@ -292,6 +297,50 @@ catch
 
         # Add in any external tooling we may be using
         $InitTemplate = $InitTemplate.Replace('###EXTERNAL_TOOLING###', $CustomExternalTooling)
+
+        $PackageAliasText = ''
+        if ($PackageAliases)
+        {
+            $PackageAliasText += @"
+<# 
+    Sometimes packages we install from Paket/NuGet may already exist on the system, so we set aliases to ensure we only use the local versions
+    However aliases are only recognised by _this_ PowerShell session, so if we start another process or call a native command then it won't work.
+    Therefore we can choose to set a Global variable that we can use to pass to child processes
+#>
+try
+{
+"@
+            $PackageAliases | ForEach-Object {
+                $PackageAliasText += @"
+    `$Path = Get-ChildItem `$global:BrownserveRepoNugetPackagesDirectory -Recurse -Filter '$($_.FileName)'
+    if (!`$Path)
+    {
+        throw "Failed to find local path to '$($_.FileName)'"
+    }
+    if (`$Path.Count -gt 1)
+    {
+        throw "Too many paths returned for '$($_.FileName)' expected 1, got `$(`$Path.Count)"
+    }
+    Set-Alias -Name '$($_.Alias)' -Value `$Path -Scope Global`n
+"@
+                if ($_.VariableName)
+                {
+                    $PackageAliasText += "    `$Global:$($_.VariableName) = (Get-Command '$($_.Alias)').Definition`n"
+                }
+                else
+                {
+                    $PackageAliasText += "`n"
+                }
+            }
+            $PackageAliasText += @"
+}
+catch
+{
+    throw "Failed to set aliases.``n`$(`$_.Exception.Message)"
+}`n`n
+"@
+        }
+        $InitTemplate = $InitTemplate.Replace('###PACKAGE_ALIASES###', $PackageAliasText)
         # Finally we carry over any custom _init steps if the user has given them
         $InitTemplate = $InitTemplate.Replace('###CUSTOM_INIT_STEPS###', $CustomInitSteps)
     }   

@@ -207,3 +207,53 @@ class PaketDependency
         }
     }
 }
+
+class PackageAlias
+{
+    # The alias that should be set
+    [string] $Alias
+    # The name of the binary/executable/file to have the alias set
+    [string] $FileName
+    # If specified will create a global variable that also points to the same file (for external apps that can't see PowerShell aliases)
+    [string] $VariableName
+
+    PackageAlias([hashtable]$Hash)
+    {
+        $RequiredKeys = @('Alias','FileName')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Hash.$Key)
+            {
+                throw "Hashtable missing key '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Hash.$Key
+            }
+        }
+        if ($Hash.VariableName)
+        {
+            $this.VariableName = $Hash.VariableName
+        }
+    }
+
+    PackageAlias([pscustomobject]$Obj)
+    {
+        $RequiredProps = @('Alias','FileName')
+        foreach ($Prop in $RequiredProps)
+        {
+            if (!$Obj.$Prop)
+            {
+                throw "Object missing property '$Prop'"
+            }
+            else
+            {
+                $this.$Prop = $Obj.$Prop
+            }
+        }
+        if ($Obj.VariableName)
+        {
+            $this.VariableName = $Obj.VariableName
+        }
+    }
+}
