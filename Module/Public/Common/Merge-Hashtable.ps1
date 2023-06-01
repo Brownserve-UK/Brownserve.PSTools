@@ -55,7 +55,13 @@ function Merge-Hashtable
                                     Write-Verbose "Key '$InputObjectKeyName' is an array, performing merge."
                                     Write-Debug "BaseObject values:`n$($BaseObjectValue -join "`n")`nInputObject values:`n$($InputObjectValue -join "`n")"
                                     $MergedArray = $BaseObjectValue + $InputObjectValue
-                                    $Return.($InputObjectKeyName) = ($MergedArray | Select-Object -Unique)
+                                    $DedupeArray = $MergedArray | Select-Object -Unique
+                                    # We've seen issues when there's just one item that results in a string being returned instead of an array
+                                    if ($DedupeArray -is [string])
+                                    {
+                                        $DedupeArray = @($DedupeArray)
+                                    }
+                                    $Return.($InputObjectKeyName) = $DedupeArray
                                 }
                                 else
                                 {
