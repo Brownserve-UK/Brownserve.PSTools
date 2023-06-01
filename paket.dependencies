@@ -2,6 +2,9 @@
 source https://api.nuget.org/v3/index.json
 
 ## Auto generated dependencies: ##
+# Brownserve.PSTools is our special PowerShell module that we use to aid us in our builds/workflows
+nuget Brownserve.PSTools
+
 # Invoke-Build is used to run our builds
 nuget Invoke-Build
 
@@ -12,6 +15,6 @@ nuget Pester
 github PowerShell/platyPS:v2
 
 # To push the module up to nuget.org we use the standalone version of Nuget.
-nuget 'NuGet.CommandLine
+nuget NuGet.CommandLine
 
 ## Manually defined dependencies: ##
