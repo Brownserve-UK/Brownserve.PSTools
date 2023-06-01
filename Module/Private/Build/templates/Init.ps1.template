@@ -79,8 +79,7 @@ try
 }
 catch
 {
-    Write-Error $_.Exception.Message
-    break
+    throw "Failed to process ephemeral paths.`n$($_.Exception.Message)"
 }
 
 # Now that the ephemeral paths definitely exist we are free to set their global variables

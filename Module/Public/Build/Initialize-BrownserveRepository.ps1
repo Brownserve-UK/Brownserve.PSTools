@@ -328,6 +328,13 @@ However please note this will overwrite the files listed above!
 
         switch ($BuildType)
         {
+            <# 
+                    For a repo that houses a PowerShell module we'll want to include:
+                        - The logic for loading the module as part of the _init script
+                        - PlatyPS for building module documentation
+                        - powershell-yaml for working with CI/CD files
+                        - Invoke-Build/Pester for building and testing the module
+            #>
             'PowerShellModule'
             {
                 Write-Debug 'PowerShell Module selected'
@@ -338,15 +345,32 @@ However please note this will overwrite the files listed above!
                 $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
                 $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
-                <# 
-                    For a repo that houses a PowerShell module we'll want to include:
-                        - The logic for loading the module as part of the _init script
-                        - PlatyPS for building module documentation
-                        - powershell-yaml for working with CI/CD files
-                        - Invoke-Build/Pester for building and testing the module
-                #>
+                
                 $InitParams = @{
                     IncludeModuleLoader   = $true
+                    IncludePowerShellYaml = $true
+                    IncludePlatyPS        = $true
+                    IncludeBuildTestTools = $true
+                }
+            }
+            <#
+                For the repo that houses this very PowerShell module we want to do things a little differently.
+                We avoid loading the Brownserve.PSTools module locally in _init.ps1 and use nuget as normal to get a stable version (this ensures that we can still get notified of failed builds)
+                We can use our build to load the local version of the module.
+            #>
+            'BrownservePSTools'
+            {
+                Write-Debug 'BrownservePSTools selected'
+                # For now we use the same basic config as all our other PowerShell modules
+                $DockerfileName = $DevcontainerConfig.PowerShellModule.Dockerfile
+                $ExtraPermanentPaths = $RepositoryPathsConfig.PowerShellModule.PermanentPaths
+                $ExtraEphemeralPaths = $RepositoryPathsConfig.PowerShellModule.EphemeralPaths
+                $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
+                $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
+                $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
+                
+                $InitParams = @{
+                    IncludeModuleLoader   = $false # With the exception that we don't load the module locally (as it will conflict)
                     IncludePowerShellYaml = $true
                     IncludePlatyPS        = $true
                     IncludeBuildTestTools = $true
@@ -372,7 +396,7 @@ However please note this will overwrite the files listed above!
         {
             $FinalPermanentPaths = $DefaultPermanentPaths
         }
-        if ($ExtraEphemeralPaths)
+        if ($ExtraEphemeralPaths.Count -gt 0)
         {
             $FinalEphemeralPaths = $DefaultEphemeralPaths + $ExtraEphemeralPaths
         }
@@ -380,6 +404,7 @@ However please note this will overwrite the files listed above!
         {
             $FinalEphemeralPaths = $DefaultEphemeralPaths
         }
+        Write-Debug "FinalEphemeralPaths:`n  $($FinalEphemeralPaths.VariableName -join "`n  ")"
 
         $InitParams.Add('PermanentPaths', $FinalPermanentPaths)
         $InitParams.Add('EphemeralPaths', $FinalEphemeralPaths)
