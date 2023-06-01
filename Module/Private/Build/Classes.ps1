@@ -78,6 +78,7 @@ enum BrownserveCICD
 enum BrownserveRepoBuildType
 {
     PowerShellModule
+    BrownservePSTools
     Generic
 }
 <#
