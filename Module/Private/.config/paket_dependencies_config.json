@@ -36,7 +36,7 @@
             "comment": "To push the module up to nuget.org we use the standalone version of Nuget.",
             "rule": {
                 "source": "nuget",
-                "PackageName": "'NuGet.CommandLine"
+                "PackageName": "NuGet.CommandLine"
             }
         }
     ]
