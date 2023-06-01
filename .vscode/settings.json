@@ -30,7 +30,8 @@
     "pwsh",
     "teamcity",
     "TMPDIR",
-    "Teamcity"
+    "Teamcity",
+    "dedupe"
   ],
   "markdown.extension.toc.omittedFromToc": {
     "README.md": [
