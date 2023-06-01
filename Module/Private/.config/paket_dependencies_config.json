@@ -26,13 +26,6 @@
             }
         },
         {
-            "comment": "PlatyPS is used to build and maintain the module documentation.`nCurrently we have to build it from source to get some fixes that are not yet in the PSGallery release so we download it from GitHub.",
-            "rule": {
-                "source": "github",
-                "PackageName": "PowerShell/platyPS:v2"
-            }
-        },
-        {
             "comment": "To push the module up to nuget.org we use the standalone version of Nuget.",
             "rule": {
                 "source": "nuget",
