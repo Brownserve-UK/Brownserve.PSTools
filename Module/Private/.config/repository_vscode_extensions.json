@@ -11,6 +11,7 @@
                     "TMPDIR",
                     "Choco",
                     "CICD",
+                    "dedupe",
                     "devcontainer",
                     "mrkdwn",
                     "nugetconfig",
