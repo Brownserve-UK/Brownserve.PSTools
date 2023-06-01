@@ -15,7 +15,8 @@
                     "devcontainer",
                     "mrkdwn",
                     "nugetconfig",
-                    "nupkg"
+                    "nupkg",
+                    "yzhang"
                 ]
             }
         }
