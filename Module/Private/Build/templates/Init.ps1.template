@@ -45,18 +45,36 @@ $Global:BrownserveRepoRootDirectory = (Resolve-Path (Get-Item $PSScriptRoot -For
 $Global:BrownserveRepoName = Split-Path $Global:BrownserveRepoRootDirectory -Leaf
 
 # Set-up our ephemeral paths, that is those that will be destroyed and then recreated each time this script is called
-$EphemeralPaths = @(
-    ###EPHEMERAL_PATHS###
+# EphemeralDirectories are destroyed and recreated by this script
+# EphemeralPaths are destroyed but are not recreated, we assume whatever created them in the first place will do so again (e.g. paket.lock)
+$EphemeralDirectories = @(
+###EPHEMERAL_DIRECTORIES###
+)
+$EphemeralFiles = @(
+###EPHEMERAL_FILES###
 )
 try
 {
-    Write-Verbose 'Recreating ephemeral paths'
-    $EphemeralPaths | ForEach-Object {
-        if ((Test-Path $_))
-        {
-            Remove-Item $_ -Recurse -Force | Out-Null
+    if ($EphemeralDirectories.Count -gt 0)
+    {
+        Write-Verbose 'Destroying any preexisting ephemeral directories'
+        $EphemeralDirectories | ForEach-Object {
+            if ((Test-Path $_))
+            {
+                Remove-Item $_ -Recurse -Force | Out-Null
+            }
+            New-Item $_ -ItemType Directory -Force | Out-Null
         }
-        New-Item $_ -ItemType Directory -Force | Out-Null
+    }
+    if ($EphemeralFiles.Count -gt 0)
+    {
+        Write-Verbose 'Destroying any preexisting ephemeral files'
+        $EphemeralFiles | ForEach-Object {
+            if ((Test-Path $_))
+            {
+                Remove-Item $_ -Recurse -Force | Out-Null
+            }
+        }
     }
 }
 catch

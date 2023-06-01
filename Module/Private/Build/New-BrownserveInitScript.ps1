@@ -97,32 +97,61 @@ function New-BrownserveInitScript
 
         # For our ephemeral paths we first need to define them as standalone variables, so we can create them
         # if they don't already exist
-        $EphemeralPathText = ",`n"
-        $EphemeralPaths | ForEach-Object -Process {
-            # If we've got child paths we'll have to do some really fancy interpolation
-            if ($_.ChildPaths)
-            {
-                $Path = "-ChildPath '$($_.Path)' -AdditionalChildPath '$($_.ChildPaths | Join-String -Separator "','")'" 
-            }
-            else
-            {
-                $Path = "-ChildPath '$($_.Path)'"
-            }
-            $EphemeralPathText = $EphemeralPathText + @"
+        $EphemeralDirectoriesText = ''
+        $EphemeralFilesText = ''
+
+        $EphemeralDirectories = $EphemeralPaths | Where-Object { $_.PathType -eq 'Directory' }
+        $EphemeralFiles = $EphemeralPaths | Where-Object { $_.PathType -eq 'File' }
+
+        if ($EphemeralDirectories)
+        {
+            $EphemeralDirectories | ForEach-Object -Process {
+                # If we've got child paths we'll have to do some really fancy interpolation
+                if ($_.ChildPaths)
+                {
+                    $Path = "-ChildPath '$($_.Path)' -AdditionalChildPath '$($_.ChildPaths | Join-String -Separator "','")'" 
+                }
+                else
+                {
+                    $Path = "-ChildPath '$($_.Path)'"
+                }
+                $EphemeralDirectoriesText = $EphemeralDirectoriesText + @"
     (`$$($_.VariableName) = Join-Path -Path `$global:BrownserveRepoRootDirectory $Path)
 "@
-            # We are building an array in the template
-            # if this is the last line of the array then we don't want to add a comma!
-            if ($_ -eq $EphemeralPaths[-1])
-            {
-                $EphemeralPathText = $EphemeralPathText + "`n"
-            }
-            else
-            {
-                $EphemeralPathText = $EphemeralPathText + ",`n"
+                # We are building an array in the template
+                # if this is the last line of the array then we don't want to add a comma!
+                if ($_ -ne $EphemeralDirectories[-1])
+                {
+                    $EphemeralDirectoriesText = $EphemeralDirectoriesText + ",`n"
+                }
             }
         }
-        $InitTemplate = $InitTemplate.Replace('###EPHEMERAL_PATHS###', $EphemeralPathText)
+
+        if ($EphemeralFiles)
+        {
+            $EphemeralFiles | ForEach-Object -Process {
+                # If we've got child paths we'll have to do some really fancy interpolation
+                if ($_.ChildPaths)
+                {
+                    $Path = "-ChildPath '$($_.Path)' -AdditionalChildPath '$($_.ChildPaths | Join-String -Separator "','")'" 
+                }
+                else
+                {
+                    $Path = "-ChildPath '$($_.Path)'"
+                }
+                $EphemeralFilesText = $EphemeralFilesText + @"
+    (`$$($_.VariableName) = Join-Path -Path `$global:BrownserveRepoRootDirectory $Path)
+"@
+                # We are building an array in the template
+                # if this is the last line of the array then we don't want to add a comma!
+                if ($_ -ne $EphemeralFiles[-1])
+                {
+                    $EphemeralFilesText = $EphemeralFilesText + ",`n"
+                }
+            }
+        }
+        $InitTemplate = $InitTemplate.Replace('###EPHEMERAL_DIRECTORIES###', $EphemeralDirectoriesText)
+        $InitTemplate = $InitTemplate.Replace('###EPHEMERAL_FILES###', $EphemeralFilesText)
 
         # Now we can create our global variables that reference their proper paths
         $EphemeralPathVariableText = "`n"
