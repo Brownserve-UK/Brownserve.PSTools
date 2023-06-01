@@ -140,7 +140,7 @@ function New-BrownserveInitScript
                     $Path = "-ChildPath '$($_.Path)'"
                 }
                 $EphemeralFilesText = $EphemeralFilesText + @"
-    (`$$($_.VariableName) = Join-Path -Path `$global:BrownserveRepoRootDirectory $Path)
+    Join-Path -Path `$global:BrownserveRepoRootDirectory $Path
 "@
                 # We are building an array in the template
                 # if this is the last line of the array then we don't want to add a comma!
@@ -153,9 +153,9 @@ function New-BrownserveInitScript
         $InitTemplate = $InitTemplate.Replace('###EPHEMERAL_DIRECTORIES###', $EphemeralDirectoriesText)
         $InitTemplate = $InitTemplate.Replace('###EPHEMERAL_FILES###', $EphemeralFilesText)
 
-        # Now we can create our global variables that reference their proper paths
+        # Now we can create our global variables that reference their proper paths, we only do this for directories as we assume that files will be recreated by whatever created them in the first place
         $EphemeralPathVariableText = "`n"
-        $EphemeralPaths | ForEach-Object {
+        $EphemeralDirectories | ForEach-Object {
             # If we have a description we need to have that appear first
             if ($_.Description)
             {
@@ -234,7 +234,6 @@ try
 {
     Write-Verbose 'Downloading platyPS module'
     Save-Module 'platyPS' -Repository PSGallery -Path `$Global:BrownserveRepoNugetPackagesDirectory -ErrorAction 'Stop'
-    `$PlatyPSLocation = Join Path `$Global:BrownserveRepoPaketFilesDirectory -ChildPath PowerShell -AdditionalChildPath platyPS
     # DON'T import the module, set a well known variable that we can use later on.
     `$Global:BrownserveRepoPlatyPSPath = Get-ChildItem (Join-Path `$Global:BrownserveRepoNugetPackagesDirectory -ChildPath 'platyPS') -Filter 'platyPS.psd1' -Recurse
     if (!`$Global:BrownserveRepoPlatyPSPath)
