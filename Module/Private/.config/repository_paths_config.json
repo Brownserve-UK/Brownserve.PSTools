@@ -6,6 +6,13 @@
                 "Path": ".build",
                 "Description": "Contains build configuration along with this _init.ps1 script",
                 "PathType": "Directory"
+            },
+            {
+                "VariableName": "BrownserveRepoBuildTasksDirectory",
+                "Path": ".build",
+                "ChildPaths": "tasks",
+                "Description": "Stores any tasks that we pass to Invoke-Build",
+                "PathType": "Directory"
             }
         ],
         "EphemeralPaths": [
@@ -62,6 +69,13 @@
                 "VariableName": "BrownserveModuleDirectory",
                 "Path": "Module",
                 "Description": "Stores the PowerShell module",
+                "PathType": "Directory"
+            },
+            {
+                "VariableName": "BrownserveRepoTestsDirectory",
+                "Path": ".build",
+                "ChildPaths": "tasks",
+                "Description": "Stores any tests that we pass to Pester",
                 "PathType": "Directory"
             }
         ]
