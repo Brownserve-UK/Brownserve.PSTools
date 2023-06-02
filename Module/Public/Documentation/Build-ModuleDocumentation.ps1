@@ -64,16 +64,20 @@ function Build-ModuleDocumentation
         try
         {
             # First see if the special Brownserve variable is set, if so attempt to download the version from the repo.
+            # N.B. we always import using the -Global flag because otherwise when this module gets unloaded as part of the -ReloadModule flag
+            # it takes any imported modules with it 😬
             if (!$PreloadedPlatyPS)
             {
                 if ($Global:BrownserveRepoPlatyPSPath)
                 {
-                    Import-Module $Global:BrownserveRepoPlatyPSPath -Force -ErrorAction 'Stop'
+                    Write-Verbose 'Loading local version of platyPS'
+                    Import-Module $Global:BrownserveRepoPlatyPSPath -Force -Global -ErrorAction 'Stop'
                 }
                 # Otherwise attempt to load any version installed on the system
                 else
                 {
-                    Import-Module 'PlatyPS' -Force -ErrorAction 'Stop'
+                    Write-Verbose 'Loading system version of platyPS'
+                    Import-Module 'PlatyPS' -Force -Global -ErrorAction 'Stop'
                 }
             }
         }
@@ -111,6 +115,10 @@ function Build-ModuleDocumentation
                 $ErrorStep = "Failed to import module '$ModuleName' from $ModulePath."
                 Import-Module -Name $ModulePath -Force -Global -ErrorAction 'Stop' 
             }
+            # Try to keep the version of help in lockstep with the version of the module
+            $ModuleDetails = Get-Module -Name $ModuleName 
+            $HelpVersion = $ModuleDetails | Select-Object -ExpandProperty Version
+            $ModuleDescription = $ModuleDetails | Select-Object -ExpandProperty Description
             # Create a directory with the name of module to be used to store the docs
             $ModuleDocumentationDirectory = Join-Path $DocumentationPath $ModuleName
             if (!(Test-Path $ModuleDocumentationDirectory))
@@ -223,10 +231,6 @@ Resolve-Path '$(Join-Path $ModuleParent 'Private')' |
                 $NewDocsParams.Add('Module', $ModuleName)
                 $NewDocsParams.Add('WithModulePage', $true)
                 $NewDocsParams.Add('HelpVersion', '0.1.0')
-                if ($ModuleGUID)
-                {
-                    $NewDocsParams.Add('ModuleGUID', $ModuleGUID)
-                }
                 $ErrorStep = "Failed to build new module documentation for $ModuleName."
                 # Mute warnings as cmdlets that are not yet documented will cause complaints 🙄
                 New-MarkdownHelp @NewDocsParams -ErrorAction 'Stop' -WarningAction 'SilentlyContinue' | Out-Null
@@ -249,12 +253,47 @@ Resolve-Path '$(Join-Path $ModuleParent 'Private')' |
                 We may be able to remove the below once this issue is resolved: https://github.com/PowerShell/platyPS/issues/451
             #>
             $ErrorStep = "Failed to retrieve module page content from '$ModulePagePath'."
-            $ModulePageContent = Get-Content $ModulePagePath -ErrorAction 'Stop'
-            
-            
+            $ModulePageContent = Get-Content $ModulePagePath -ErrorAction 'Stop' -Raw
+            if (!$ModulePageContent)
+            {
+                throw 'Module page content appears to be blank'
+            }
             $ModulePageAdjustment = Split-Path $PublicCmdletDocPath -Leaf
             $SanitizedModulePageContent = $ModulePageContent -replace '\(([\w|\d]*-[\w|\d]*.md)\)', "(./$ModulePageAdjustment/`$1)"
-            $ErrorStep = "Failed to sanitize documentation links in $ModulePagePath."
+
+            # If we've passed in a GUID for the module then update the module page with that.
+            if ($ModuleGUID)
+            {
+                $SanitizedModulePageContent = $SanitizedModulePageContent -replace '00000000-0000-0000-0000-000000000000', $ModuleGUID
+            }
+            if ($HelpVersion)
+            {
+                Write-Verbose "New help version: $HelpVersion"
+                if ($SanitizedModulePageContent -imatch 'Help Version: (?<version>.*\n)')
+                {
+                    [version]$CurrentHelpVersion = $Matches['version']
+                    if ([version]$HelpVersion -ne $CurrentHelpVersion)
+                    {
+                        $HelpVersionString = $HelpVersion.ToString()
+                        $CurrentHelpVersionString = $CurrentHelpVersion.ToString()
+                        $SanitizedModulePageContent = $SanitizedModulePageContent.Replace("Help Version: $CurrentHelpVersionString", "Help Version: $HelpVersionString")
+                    }
+                }
+                else
+                {
+                    Write-Warning "Couldn't find help version number in the module page content."
+                }
+            }
+
+            if ($ModuleDescription)
+            {
+                if ($SanitizedModulePageContent -imatch '## Description[\s\n]*{{ Fill in the Description }}')
+                {
+                    # .Replace method doesn't work 🤷‍♀️ so use the -replace param instead.
+                    $SanitizedModulePageContent = $SanitizedModulePageContent -Replace '## Description[\s\n]*{{ Fill in the Description }}',"## Description`n$ModuleDescription"
+                }
+            }
+            $ErrorStep = "Failed to update module page with sanitized content at '$ModulePagePath'"
             Set-Content $ModulePagePath -Value $SanitizedModulePageContent -ErrorAction 'Stop'
 
             # Create some sensible return so that we can pipe it into a cmdlet to update the MALM
