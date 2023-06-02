@@ -1,9 +1,8 @@
 {
-    // Repo recommended extensions
-    "recommendations": [
-        "streetsidesoftware.code-spell-checker",
-        "ms-vscode.powershell",
-        "yzhang.markdown-all-in-one",
-        "nikitakunevich.snippet-creator"
-    ]
+  "recommendations": [
+    "streetsidesoftware.code-spell-checker",
+    "ms-vscode.powershell",
+    "yzhang.markdown-all-in-one",
+    "nikitakunevich.snippet-creator"
+  ]
 }
