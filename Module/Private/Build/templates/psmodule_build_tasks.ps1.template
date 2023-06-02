@@ -240,7 +240,12 @@ task ImportModule GenerateModuleManifest, {
     Write-Verbose "Importing built module"
     if ((Get-Module $ModuleName))
     {
-        Write-Warning "Replacing currently loaded version of $ModuleName with built version."
+        $WarningMessage = @"
+The PowerShell module '$ModuleName' has been reloaded using the version built by this script.
+This may mean that functionality has changed.
+You may wish to run _init.ps1 again to reload the stable version of this module.
+"@
+        Write-Warning $WarningMessage
         Remove-Module $ModuleName -Force -Confirm:$false -Verbose:$false
     }
     Import-Module $Script:BuiltModulePath -Force -Verbose:$false
