@@ -225,6 +225,24 @@ catch
         $InitTemplate = $InitTemplate.Replace('###MODULE_LOADER###', $ModuleText)
 
         $CustomExternalTooling = ''
+        if ($IncludePlatyPS -or $IncludePowerShellYaml)
+        {
+            $CustomExternalTooling += @"
+
+# The PackageManagement module needs to be loaded for Save-Module to function without being overly verbose
+if (!(Get-Module 'PackageManagement'))
+{
+    try
+    {
+        Import-Module 'PackageManagement' -ErrorAction 'Stop' -Verbose:`$False
+    }
+    catch
+    {
+        throw "Failed to import the 'PackageManagement' module.`$(`$_.Exception.Message)"
+    }
+}`n`n
+"@
+        }
 
         if ($IncludePlatyPS)
         {
