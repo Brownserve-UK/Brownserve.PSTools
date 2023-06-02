@@ -158,6 +158,20 @@ catch
 {
     throw "Failed to import Brownserve.PSTools.`n$($_.Exception.Message)"
 }
+
+# The PackageManagement module needs to be loaded for Save-Module to function without being overly verbose
+if (!(Get-Module 'PackageManagement'))
+{
+    try
+    {
+        Import-Module 'PackageManagement' -ErrorAction 'Stop' -Verbose:$False
+    }
+    catch
+    {
+        throw "Failed to import the 'PackageManagement' module.$($_.Exception.Message)"
+    }
+}
+
 <#
     Some cmdlets make use of the platyPS module so ensure it is available
     Unfortunately due to https://github.com/PowerShell/platyPS/issues/592 we cannot load this at the same time as powershell-yaml.
