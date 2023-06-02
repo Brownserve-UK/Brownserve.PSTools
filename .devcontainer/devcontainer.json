@@ -1,10 +1,10 @@
 {
   "name": "Ubuntu",
   "build": {
-    "dockerfile": "Dockerfile",
     "args": {
       "VARIANT": "focal"
-    }
+    },
+    "dockerfile": "Dockerfile"
   },
   "customizations": {
     "vscode": {
