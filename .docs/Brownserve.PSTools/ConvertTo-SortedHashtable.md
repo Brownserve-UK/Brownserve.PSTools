@@ -23,7 +23,7 @@ Converts a given hashtable to an alphabetically sorted hashtable
 
 ### Example 1
 ```powershell
- @{'a' = 1;'c' = 3;b = 2} | ConvertTo-SortedHashtable
+@{'a' = 1;'c' = 3;b = 2} | ConvertTo-SortedHashtable
 
 Name                           Value
 ----                           -----
