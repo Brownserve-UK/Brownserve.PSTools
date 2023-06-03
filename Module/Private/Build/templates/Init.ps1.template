@@ -45,34 +45,54 @@ $Global:BrownserveRepoRootDirectory = (Resolve-Path (Get-Item $PSScriptRoot -For
 $Global:BrownserveRepoName = Split-Path $Global:BrownserveRepoRootDirectory -Leaf
 
 # Set-up our ephemeral paths, that is those that will be destroyed and then recreated each time this script is called
-$EphemeralPaths = @(
-    ###EPHEMERAL_PATHS###
+# EphemeralDirectories are destroyed and recreated by this script
+# EphemeralPaths are destroyed but are not recreated, we assume whatever created them in the first place will do so again (e.g. paket.lock)
+$EphemeralDirectories = @(
+###EPHEMERAL_DIRECTORIES###
+)
+$EphemeralFiles = @(
+###EPHEMERAL_FILES###
 )
 try
 {
-    Write-Verbose 'Recreating ephemeral paths'
-    $EphemeralPaths | ForEach-Object {
-        if ((Test-Path $_))
-        {
-            Remove-Item $_ -Recurse -Force | Out-Null
+    if ($EphemeralDirectories.Count -gt 0)
+    {
+        Write-Verbose 'Destroying any preexisting ephemeral directories'
+        $EphemeralDirectories | ForEach-Object {
+            if ((Test-Path $_))
+            {
+                Remove-Item $_ -Recurse -Force | Out-Null
+            }
+            New-Item $_ -ItemType Directory -Force | Out-Null
         }
-        New-Item $_ -ItemType Directory -Force | Out-Null
+    }
+    if ($EphemeralFiles.Count -gt 0)
+    {
+        Write-Verbose 'Destroying any preexisting ephemeral files'
+        $EphemeralFiles | ForEach-Object {
+            if ((Test-Path $_))
+            {
+                Remove-Item $_ -Recurse -Force | Out-Null
+            }
+        }
     }
 }
 catch
 {
-    Write-Error $_.Exception.Message
-    break
+    throw "Failed to process ephemeral paths.`n$($_.Exception.Message)"
 }
 
 # Now that the ephemeral paths definitely exist we are free to set their global variables
 ###EPHEMERAL_PATH_VARIABLES###
 
 # We use paket for managing our dependencies and we get that via dotnet
+Push-Location
+Set-Location $Global:BrownserveRepoRootDirectory
 Write-Verbose "Restoring dotnet tools"
 $DotnetOutput = & dotnet tool restore
 if ($LASTEXITCODE -ne 0)
 {
+    Pop-Location
     $DotnetOutput
     throw "dotnet tool restore failed"
 }
@@ -81,9 +101,11 @@ Write-Verbose "Installing paket dependencies"
 $PaketOutput = & dotnet paket install
 if ($LASTEXITCODE -ne 0)
 {
+    Pop-Location
     $PaketOutput
     throw "Failed to install paket dependencies"
 }
+Pop-Location
 
 # If Brownserve.PSTools is already loaded in this session (e.g. it's installed globally) we need to unload it
 # This ensures only the expected version is available to us
@@ -93,7 +115,7 @@ if ((Get-Module 'Brownserve.PSTools'))
     {
         Write-Warning "The Brownserve.PSTools module is already loaded in this PSSession, this will be unloaded to Ensure the correct version for this repository is used"
         Write-Verbose "Unloading Brownserve.PSTools"
-        Remove-Module 'Brownserve.PSTools' -Force -Confirm:$false
+        Remove-Module 'Brownserve.PSTools' -Force -Confirm:$false -Verbose:$False
     }
     catch
     {
@@ -110,7 +132,7 @@ catch
 {
     throw "Failed to import Brownserve.PSTools.`n$($_.Exception.Message)"
 }
-###MODULE_LOADER######EXTERNAL_TOOLING###
+###MODULE_LOADER######EXTERNAL_TOOLING######PACKAGE_ALIASES###
 # Place any custom code below, this will be preserved whenever you update your _init script
 ### Start user defined _init steps
 ###CUSTOM_INIT_STEPS###

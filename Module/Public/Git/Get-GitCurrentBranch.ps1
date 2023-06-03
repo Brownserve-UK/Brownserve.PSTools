@@ -4,9 +4,9 @@ function Get-GitCurrentBranch
     param
     (
         # The repository path
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false, Position = 0, ValueFromPipeline = $true)]
         [string[]]
-        $RepositoryPath
+        $RepositoryPath = $PWD
     )
     
     begin

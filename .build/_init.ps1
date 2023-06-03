@@ -1,10 +1,10 @@
 <#
 .SYNOPSIS
-    This script initialises this repository.
-.DESCRIPTION
-    Long description
+    Initializes this repository
+.NOTES
+    THIS FILE IS MAINTAINED BY A TOOL.
+    MANUAL CHANGES WILL BE LOST UNLESS ADDED TO THE "user defined _init" SECTION.
 #>
-# We require 6.0+ due to using newer features of PowerShell
 #Requires -Version 6.0
 [CmdletBinding()]
 param (
@@ -20,7 +20,7 @@ $ErrorActionPreference = 'Stop'
 
 Write-Host 'Initialising repository, please wait...'
 
-# Store cmdlet information here so we can dump it to screen later on
+# We use this well-known global variable across a variety of projects for storing cmdlet names/summaries so we can output them if desired.
 $Global:BrownserveCmdlets = @()
 
 # If we're on Teamcity set the well-known $env:CI variable, this is set on most other CI/CD providers but not Teamcity :(
@@ -36,172 +36,222 @@ if ($env:CI)
     $SuppressOutput = $true
 }
 
-# Set up the paths that are needed by this repo for builds etc.
-# These are formed using the various 'Path' cmdlets (e.g. Join-Path) 
-# rather than manually forming paths to ensure we are cross compatible
+# Set up our permanent paths
+# This directory is the root of the repo, it's handy to reference sometimes
 $Global:BrownserveRepoRootDirectory = (Resolve-Path (Get-Item $PSScriptRoot -Force).PSParentPath) | Convert-Path # -Force flag is needed to find dot folders on *.nix
-$Global:BrownserveRepoBuildDirectory = $PSScriptRoot | Convert-Path
-$Global:BrownserveRepoBuildTasksDirectory = (Join-Path $Global:BrownserveRepoBuildDirectory -ChildPath 'tasks') | Convert-Path
-$Global:BrownserveRepoTestsDirectory = (Join-Path $Global:BrownserveRepoBuildDirectory -ChildPath 'tests') | Convert-Path
-$Global:BrownserveRepoDocsDirectory = (Join-Path $Global:BrownserveRepoRootDirectory -ChildPath '.docs') | Convert-Path
-$Global:BrownserveModuleDirectory = (Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'Module') | Convert-Path
+# Contains build configuration along with this _init.ps1 script
+$Global:BrownserveRepoBuildDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath '.build' | Convert-Path
+# Stores any tasks that we pass to Invoke-Build
+$Global:BrownserveRepoBuildTasksDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath '.build' -AdditionalChildPath 'tasks' | Convert-Path
+# Stores the PowerShell module
+$Global:BrownserveModuleDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath 'Module' | Convert-Path
+# Stores any tests that we pass to Pester
+$Global:BrownserveRepoTestsDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath '.build' -AdditionalChildPath 'tests' | Convert-Path
 
-# Set the repo name
-try
-{
-    # Try to get it from git in the first instance, but failing that we'll grab it from the directory name
-    $RepoName = (Split-Path (& git config --get remote.origin.url) -Leaf) -replace '\.git', ''
-}
-catch {}
-if ($RepoName)
-{
-    $Global:BrownserveRepoName = $RepoName
-}
-else
-{
-    $Global:BrownserveRepoName = Split-Path $Global:BrownserveRepoRootDirectory -Leaf
-}
 
-# Set up any ephemeral directories (those that get deleted and recreated on each run)
-$EphemeralPaths = @(
-    ($RepoTempDirectory = Join-Path $Global:BrownserveRepoRootDirectory -ChildPath '.tmp')
-    ($BrownserveRepoLogDirectory = Join-Path $RepoTempDirectory -ChildPath 'logs'),
-    ($BrownserveRepoNugetPackagesDirectory = Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'packages'),
-    ($BrownserveRepoBuildOutputDirectory = Join-Path $RepoTempDirectory -ChildPath 'output'),
-    ($BrownserveRepoBinaryDirectory = Join-Path $RepoTempDirectory 'bin')
+# Get the name of the repo
+$Global:BrownserveRepoName = Split-Path $Global:BrownserveRepoRootDirectory -Leaf
+
+# Set-up our ephemeral paths, that is those that will be destroyed and then recreated each time this script is called
+# EphemeralDirectories are destroyed and recreated by this script
+# EphemeralPaths are destroyed but are not recreated, we assume whatever created them in the first place will do so again (e.g. paket.lock)
+$EphemeralDirectories = @(
+    ($BrownserveRepoTempDirectory = Join-Path -Path $global:BrownserveRepoRootDirectory -ChildPath '.tmp'),
+    ($BrownserveRepoLogDirectory = Join-Path -Path $global:BrownserveRepoRootDirectory -ChildPath '.tmp' -AdditionalChildPath 'logs'),
+    ($BrownserveRepoBuildOutputDirectory = Join-Path -Path $global:BrownserveRepoRootDirectory -ChildPath '.tmp' -AdditionalChildPath 'output'),
+    ($BrownserveRepoBinaryDirectory = Join-Path -Path $global:BrownserveRepoRootDirectory -ChildPath '.tmp' -AdditionalChildPath 'bin'),
+    ($BrownserveRepoNugetPackagesDirectory = Join-Path -Path $global:BrownserveRepoRootDirectory -ChildPath 'packages'),
+    ($BrownserveRepoPaketFilesDirectory = Join-Path -Path $global:BrownserveRepoRootDirectory -ChildPath 'paket-files')
 )
-
-# Destroy and recreate the ephemeral paths
+$EphemeralFiles = @(
+    Join-Path -Path $global:BrownserveRepoRootDirectory -ChildPath 'paket.lock'
+)
 try
 {
-    Write-Verbose 'Recreating ephemeral paths'
-    $EphemeralPaths | ForEach-Object {
-        if ((Test-Path $_))
-        {
-            Remove-Item $_ -Recurse -Force -Confirm:$false | Out-Null
+    if ($EphemeralDirectories.Count -gt 0)
+    {
+        Write-Verbose 'Destroying any preexisting ephemeral directories'
+        $EphemeralDirectories | ForEach-Object {
+            if ((Test-Path $_))
+            {
+                Remove-Item $_ -Recurse -Force | Out-Null
+            }
+            New-Item $_ -ItemType Directory -Force | Out-Null
         }
-        New-Item $_ -ItemType Directory -Force | Out-Null
+    }
+    if ($EphemeralFiles.Count -gt 0)
+    {
+        Write-Verbose 'Destroying any preexisting ephemeral files'
+        $EphemeralFiles | ForEach-Object {
+            if ((Test-Path $_))
+            {
+                Remove-Item $_ -Recurse -Force | Out-Null
+            }
+        }
     }
 }
 catch
 {
-    Write-Error $_.Exception.Message
-    break
+    throw "Failed to process ephemeral paths.`n$($_.Exception.Message)"
 }
 
-<#
-    Now that our ephemeral paths have been created we can set their global variables
-    (we couldn't do this before as Convert-Path fails if the path does not exist)
-#>
-$Global:BrownserveRepoLogDirectory = $BrownserveRepoLogDirectory | Convert-Path
-$Global:BrownserveRepoNugetPackagesDirectory = $BrownserveRepoNugetPackagesDirectory | Convert-Path
-$Global:BrownserveRepoBuildOutputDirectory = $BrownserveRepoBuildOutputDirectory | Convert-Path
-$Global:BrownserveRepoBinaryDirectory = $BrownserveRepoBinaryDirectory | Convert-Path
-$Global:BrownserveRepoTempDirectory = $RepoTempDirectory | Convert-Path
+# Now that the ephemeral paths definitely exist we are free to set their global variables
 
-# We use functions from the Brownserve.PSTools module to create this module (inception music intensifies) so we always import it
-# First we remove it just in case the user has a local copy installed and loaded...
-if (Get-Module 'Brownserve.PSTools')
+# Used to store temporary files created for builds/tests
+$global:BrownserveRepoTempDirectory = $BrownserveRepoTempDirectory | Convert-Path
+# Used to store build logs, output from Invoke-NativeCommand and the like
+$global:BrownserveRepoLogDirectory = $BrownserveRepoLogDirectory | Convert-Path
+# Used to store any output from builds (e.g. Terraform plans, MSBuild artifacts etc)
+$global:BrownserveRepoBuildOutputDirectory = $BrownserveRepoBuildOutputDirectory | Convert-Path
+# Used to store any downloaded/copied binaries required for builds, cmdlets like Get-Vault make use of this variable
+$global:BrownserveRepoBinaryDirectory = $BrownserveRepoBinaryDirectory | Convert-Path
+# Paket/nuget will restore their dependencies to this directory, case sensitive on Linux
+$global:BrownserveRepoNugetPackagesDirectory = $BrownserveRepoNugetPackagesDirectory | Convert-Path
+# Paket will restore certain types of dependencies to this directory, case sensitive on Linux
+$global:BrownserveRepoPaketFilesDirectory = $BrownserveRepoPaketFilesDirectory | Convert-Path
+
+
+# We use paket for managing our dependencies and we get that via dotnet
+Push-Location
+Set-Location $Global:BrownserveRepoRootDirectory
+Write-Verbose "Restoring dotnet tools"
+$DotnetOutput = & dotnet tool restore
+if ($LASTEXITCODE -ne 0)
+{
+    Pop-Location
+    $DotnetOutput
+    throw "dotnet tool restore failed"
+}
+
+Write-Verbose "Installing paket dependencies"
+$PaketOutput = & dotnet paket install
+if ($LASTEXITCODE -ne 0)
+{
+    Pop-Location
+    $PaketOutput
+    throw "Failed to install paket dependencies"
+}
+Pop-Location
+
+# If Brownserve.PSTools is already loaded in this session (e.g. it's installed globally) we need to unload it
+# This ensures only the expected version is available to us
+if ((Get-Module 'Brownserve.PSTools'))
 {
     try
     {
-        Remove-Module 'Brownserve.PSTools' -Verbose:$false
+        Write-Warning "The Brownserve.PSTools module is already loaded in this PSSession, this will be unloaded to Ensure the correct version for this repository is used"
+        Write-Verbose "Unloading Brownserve.PSTools"
+        Remove-Module 'Brownserve.PSTools' -Force -Confirm:$false -Verbose:$False
     }
     catch
     {
-        Write-Error $_.Exception.Message
-        break
+        throw "Failed to unload Brownserve.PSTools.`n$($_.Exception.Message)"
     }
 }
-Write-Verbose 'Importing Brownserve.PSTools module'
+# Import the downloaded version of Brownserve.PSTools
 try
 {
-    Write-Verbose "Module path: $(Join-Path $Global:BrownserveModuleDirectory -ChildPath 'Brownserve.PSTools.psm1')"
-    Import-Module (Join-Path $Global:BrownserveModuleDirectory -ChildPath 'Brownserve.PSTools.psm1') `
-        -Verbose:$false `
-        -Force
+    Write-Verbose "Importing Brownserve.PSTools module"
+    Import-Module (Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Brownserve.PSTools' 'tools', 'Brownserve.PSTools.psd1') -Force -Verbose:$false
 }
 catch
 {
-    Write-Error "Failed to import the Brownserve.PSToolsModule.`n$($_.Exception.Message)"
+    throw "Failed to import Brownserve.PSTools.`n$($_.Exception.Message)"
 }
 
-# We use paket for managing dependencies, we download paket via dotnet
-try
+# The PackageManagement module needs to be loaded for Save-Module to function without being overly verbose
+if (!(Get-Module 'PackageManagement'))
 {
-    Write-Verbose 'Restoring dotnet tools'
-    Invoke-NativeCommand `
-        -FilePath 'dotnet' `
-        -ArgumentList 'tool', 'restore' `
-        -WorkingDirectory $Global:BrownserveRepoRootDirectory `
-        -SuppressOutput `
-        -Verbose:($PSBoundParameters['Verbose'] -eq $true)
-}
-catch
-{
-    throw "Failed to restore dotnet tools.`n$($_.Exception.Message)"
-}
-
-# Install the dependencies from paket.dependencies
-try
-{
-    Write-Verbose 'Installing paket dependencies'
-    Invoke-NativeCommand `
-        -FilePath 'dotnet' `
-        -ArgumentList 'paket', 'install' `
-        -WorkingDirectory $Global:BrownserveRepoRootDirectory `
-        -SuppressOutput `
-        -Verbose:($PSBoundParameters['Verbose'] -eq $true)
-}
-catch
-{
-    throw "Failed to install paket dependencies.`n$($_.Exception.Message)"
-}
-
-# Set an alias to Nuget.exe and update an env var
-# This ensures we use the local version every time
-try
-{
-    Set-Alias -Name 'nuget' -Value (Join-Path $global:BrownserveRepoNugetPackagesDirectory 'NuGet.CommandLine' 'tools', 'NuGet.exe') -Scope Global
-    $Global:BrownserveNugetPath = (Get-Command 'nuget').Definition
-}
-catch
-{
-    throw $_.Exception.Message
+    try
+    {
+        Import-Module 'PackageManagement' -ErrorAction 'Stop' -Verbose:$False
+    }
+    catch
+    {
+        throw "Failed to import the 'PackageManagement' module.$($_.Exception.Message)"
+    }
 }
 
 <#
-    We use platyPS for generating module documentation/help files.
-    As we don't want to install this globally we download the module to the 'packages' directory
+    Some cmdlets make use of the platyPS module so ensure it is available
+    Unfortunately due to https://github.com/PowerShell/platyPS/issues/592 we cannot load this at the same time as powershell-yaml.
+    This should be fixed in a later v2 release but v2 is incredibly buggy at the moment and often fails with unhelpful errors.
+    So we download the module and set a special variable to its path.
 #>
 try
 {
     Write-Verbose 'Downloading platyPS module'
-    #Save-Module 'platyPS' -Repository PSGallery -Path $Global:BrownserveRepoNugetPackagesDirectory
+    Save-Module 'platyPS' -Repository PSGallery -Path $Global:BrownserveRepoNugetPackagesDirectory -ErrorAction 'Stop'
+    # DON'T import the module, set a well known variable that we can use later on.
+    $Global:BrownserveRepoPlatyPSPath = Get-ChildItem (Join-Path $Global:BrownserveRepoNugetPackagesDirectory -ChildPath 'platyPS') -Filter 'platyPS.psd1' -Recurse
+    if (!$Global:BrownserveRepoPlatyPSPath)
+    {
+        throw 'Failed to find downloaded PlatyPS'
+    }
 }
 catch
 {
     throw "Failed to download the platyPS module.`n$($_.Exception.Message)"
 }
 
-# Now we can import all our tooling!
+# Some cmdlets make use of the powershell-yaml module so ensure it is available, we don't auto-load it to avoid clashing with platyPS
 try
 {
-    Write-Verbose 'Importing external modules'
-    @(
-        (Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Invoke-Build' -AdditionalChildPath 'tools', 'InvokeBuild.psd1'),
-        (Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Pester' -AdditionalChildPath 'tools', 'Pester.psd1')
-        #(Get-ChildItem (Join-Path $Global:BrownserveRepoNugetPackagesDirectory -ChildPath 'platyPS') -Filter 'platyPS.psd1' -Recurse)
-    ) | ForEach-Object {
-        Import-Module $_ -Force -Verbose:$false
+    Write-Verbose 'Downloading powershell-yaml module'
+    Save-Module 'powershell-yaml' -Repository PSGallery -Path $Global:BrownserveRepoNugetPackagesDirectory -ErrorAction 'stop'
+    $Global:BrownserveRepoPowerShellYAMLPath = Get-ChildItem (Join-Path $Global:BrownserveRepoNugetPackagesDirectory -ChildPath 'powershell-yaml') -Filter 'powershell-yaml.psd1' -Recurse
+    if (!$Global:BrownserveRepoPowerShellYAMLPath)
+    {
+        throw 'Failed to find powershell-yaml module after download'
     }
 }
 catch
 {
-    throw $_.Exception.Message
+    throw "Failed to download the powershell-yaml module.`n$($_.Exception.Message)"
 }
 
-Write-Host 'Repo initialised successfully!' -ForegroundColor Green
+# This repo makes use of Invoke-Build/Pester to run our builds so we need to import them.
+try
+{
+    # Both modules should have been grabbed from nuget by paket, we simply need to import them
+    Write-Verbose 'Importing Invoke-Build'
+    Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Invoke-Build' -AdditionalChildPath 'tools', 'InvokeBuild.psd1' | Import-Module -Force -Verbose:$false
+    Write-Verbose 'Importing Pester'
+    Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Pester' -AdditionalChildPath 'tools', 'Pester.psd1' | Import-Module -Force -Verbose:$False
+}
+catch
+{
+    throw "Failed to import build/test modules.`n$($_.Exception.Message)"
+}
+
+<# 
+    Sometimes packages we install from Paket/NuGet may already exist on the system, so we set aliases to ensure we only use the local versions
+    However aliases are only recognised by _this_ PowerShell session, so if we start another process or call a native command then it won't work.
+    Therefore we can choose to set a Global variable that we can use to pass to child processes
+#>
+try
+{    $Path = Get-ChildItem $global:BrownserveRepoNugetPackagesDirectory -Recurse -Filter 'NuGet.exe'
+    if (!$Path)
+    {
+        throw "Failed to find local path to 'NuGet.exe'"
+    }
+    if ($Path.Count -gt 1)
+    {
+        throw "Too many paths returned for 'NuGet.exe' expected 1, got $($Path.Count)"
+    }
+    Set-Alias -Name 'nuget' -Value $Path -Scope Global
+    $Global:BrownserveNugetPath = (Get-Command 'nuget').Definition
+}
+catch
+{
+    throw "Failed to set aliases.`n$($_.Exception.Message)"
+}
+
+
+# Place any custom code below, this will be preserved whenever you update your _init script
+### Start user defined _init steps
+
+### End user defined _init steps
 
 # If we're not suppressing output then we'll pipe out a list of cmdlets that are now available to the user along with
 # Their synopsis. 

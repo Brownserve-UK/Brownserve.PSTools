@@ -1,5 +1,5 @@
 <#
-.SYNOPSIS
+.DESCRIPTION
     A collection of useful cmdlets, functions and tools that can be used across a variety of projects.
 #>
 #Requires -Version 6.0

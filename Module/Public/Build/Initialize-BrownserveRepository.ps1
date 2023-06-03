@@ -42,7 +42,12 @@ function Initialize-BrownserveRepository
         # The config file that stores VS Code extension configuration
         [Parameter(Mandatory = $false, DontShow)]
         [string]
-        $VSCodeExtensionsConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'repository_vscode_extensions.json')
+        $VSCodeExtensionsConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'repository_vscode_extensions.json'),
+
+        # The config file that stores any package aliases we'd like to create
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $PackageAliasConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'package_aliases_config.json')
 
         #TODO: Create a changelog and licence automagically?
     )
@@ -68,6 +73,7 @@ function Initialize-BrownserveRepository
             $PaketDependenciesConfig = Read-ConfigurationFromFile $PaketDependenciesConfigFile
             $RepositoryPathsConfig = Read-ConfigurationFromFile $RepositoryPathsConfigFile
             $DevcontainerConfig = Read-ConfigurationFromFile $DevcontainerConfigFile
+            $PackageAliasConfig = Read-ConfigurationFromFile $PackageAliasConfigFile
             $VSCodeExtensionsConfig = Read-ConfigurationFromFile $VSCodeExtensionsConfigFile -AsHashtable
         }
         catch
@@ -249,7 +255,16 @@ However please note this will overwrite the files listed above!
             }
             catch
             {
-                throw "Failed to search '$GitIgnorePath' for manual entries.`n$($_.Exception.Message)"
+                $ErrorMessage = "Failed to search '$GitIgnorePath' for manual entries.`n$($_.Exception.Message)"
+                if (!$Force)
+                {
+                    throw $ErrorMessage
+                }
+                else
+                {
+                    # Do nothing, we'll overwrite
+                    # Write-Warning $ErrorMessage
+                }
             }
         }
         
@@ -266,7 +281,16 @@ However please note this will overwrite the files listed above!
             }
             catch
             {
-                throw "Failed to search '$PaketDependenciesPath' for manual entries.`n$($_.Exception.Message)"
+                $ErrorMessage = "Failed to search '$PaketDependenciesPath' for manual entries.`n$($_.Exception.Message)"
+                if (!$Force)
+                {
+                    throw $ErrorMessage
+                }
+                else
+                {
+                    # Do noting
+                    # Write-Warning $ErrorMessage
+                }
             }
         }
         
@@ -284,7 +308,16 @@ However please note this will overwrite the files listed above!
             }
             catch
             {
-                throw "Failed to search '$InitPath' for custom init steps.`n$($_.Exception.Message)"
+                $ErrorMessage = "Failed to search '$InitPath' for custom init steps.`n$($_.Exception.Message)"
+                if (!$Force)
+                {
+                throw $ErrorMessage
+                }
+                else
+                {
+                    # Do nothing
+                    # Write-Warning $ErrorMessage
+                }
             }
         }
         
@@ -298,8 +331,17 @@ However please note this will overwrite the files listed above!
         # Careful -AsHashtable makes key names case sensitive when converted from JSON! (defaults != Defaults)
         $DefaultVSCodeExtensions = $VSCodeExtensionsConfig.Defaults
 
+        $DefaultPackageAliases = $PackageAliasConfig.Defaults
+
         switch ($BuildType)
         {
+            <# 
+                    For a repo that houses a PowerShell module we'll want to include:
+                        - The logic for loading the module as part of the _init script
+                        - PlatyPS for building module documentation
+                        - powershell-yaml for working with CI/CD files
+                        - Invoke-Build/Pester for building and testing the module
+            #>
             'PowerShellModule'
             {
                 Write-Debug 'PowerShell Module selected'
@@ -310,15 +352,34 @@ However please note this will overwrite the files listed above!
                 $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
                 $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
-                <# 
-                    For a repo that houses a PowerShell module we'll want to include:
-                        - The logic for loading the module as part of the _init script
-                        - PlatyPS for building module documentation
-                        - powershell-yaml for working with CI/CD files
-                        - Invoke-Build/Pester for building and testing the module
-                #>
+                $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
+                
                 $InitParams = @{
                     IncludeModuleLoader   = $true
+                    IncludePowerShellYaml = $true
+                    IncludePlatyPS        = $true
+                    IncludeBuildTestTools = $true
+                }
+            }
+            <#
+                For the repo that houses this very PowerShell module we want to do things a little differently.
+                We avoid loading the Brownserve.PSTools module locally in _init.ps1 and use nuget as normal to get a stable version (this ensures that we can still get notified of failed builds)
+                We can use our build to load the local version of the module.
+            #>
+            'BrownservePSTools'
+            {
+                Write-Debug 'BrownservePSTools selected'
+                # For now we use the same basic config as all our other PowerShell modules
+                $DockerfileName = $DevcontainerConfig.PowerShellModule.Dockerfile
+                $ExtraPermanentPaths = $RepositoryPathsConfig.PowerShellModule.PermanentPaths
+                $ExtraEphemeralPaths = $RepositoryPathsConfig.PowerShellModule.EphemeralPaths
+                $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
+                $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
+                $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
+                $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
+                
+                $InitParams = @{
+                    IncludeModuleLoader   = $false # With the exception that we don't load the module locally (as it will conflict)
                     IncludePowerShellYaml = $true
                     IncludePlatyPS        = $true
                     IncludeBuildTestTools = $true
@@ -344,7 +405,7 @@ However please note this will overwrite the files listed above!
         {
             $FinalPermanentPaths = $DefaultPermanentPaths
         }
-        if ($ExtraEphemeralPaths)
+        if ($ExtraEphemeralPaths.Count -gt 0)
         {
             $FinalEphemeralPaths = $DefaultEphemeralPaths + $ExtraEphemeralPaths
         }
@@ -352,6 +413,7 @@ However please note this will overwrite the files listed above!
         {
             $FinalEphemeralPaths = $DefaultEphemeralPaths
         }
+        Write-Debug "FinalEphemeralPaths:`n  $($FinalEphemeralPaths.VariableName -join "`n  ")"
 
         $InitParams.Add('PermanentPaths', $FinalPermanentPaths)
         $InitParams.Add('EphemeralPaths', $FinalEphemeralPaths)
@@ -363,6 +425,13 @@ However please note this will overwrite the files listed above!
         else
         {
             $FinalGitIgnores = $DefaultGitIgnores
+        }
+
+        $FinalPackageAliases = $DefaultPackageAliases + $ExtraPackageAliases
+        if ($FinalPackageAliases)
+        {
+            Write-Host "Final Pack: $($FinalPackageAliases | Out-String)`nCount: $($FinalPackageAliases.Count)"
+            $InitParams.Add('PackageAliases',$FinalPackageAliases)
         }
 
         $GitIgnoreParams = @{

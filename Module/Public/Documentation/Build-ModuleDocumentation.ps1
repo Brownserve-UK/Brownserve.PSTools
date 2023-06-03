@@ -1,16 +1,3 @@
-<#
-.SYNOPSIS
-    This will build PowerShell module documentation using PlatyPS
-.DESCRIPTION
-    A longer description of the function, its purpose, common use cases, etc.
-.NOTES
-    Information or caveats about the function e.g. 'This function is not supported in Linux'
-.LINK
-    Specify a URI to a help page, this will show when Get-Help -Online is used.
-.EXAMPLE
-    Test-MyTestFunction -Verbose
-    Explanation of the function or its result. You can include multiple examples with additional .EXAMPLE lines
-#>
 function Build-ModuleDocumentation
 {
     [CmdletBinding()]
@@ -30,21 +17,16 @@ function Build-ModuleDocumentation
         [Parameter(Mandatory = $true)]
         [string]
         $DocumentationPath,
-    
-        # Whether or not to include private cmdlet documentation
-        [Parameter(Mandatory = $false)]
-        [bool]
-        $IncludePrivate = $true,
 
-        # Whether or not to force a reload of the module if it's already loaded
+        # If set forces a reload of the module your building docs for if it's already loaded
         [Parameter(Mandatory = $false)]
-        [bool]
-        $ReloadModule = $true,
+        [switch]
+        $ReloadModule,
 
-        # Whether or not to ignore parameters marked as 'DontShow'
+        # If set parameters marked as 'DontShow' will be included
         [Parameter(Mandatory = $false)]
-        [bool]
-        $IgnoreDontShow = $true,
+        [switch]
+        $IncludeDontShow,
 
         # The GUID of the module (if desired)
         [Parameter(Mandatory = $false)]
@@ -54,18 +36,40 @@ function Build-ModuleDocumentation
     
     begin
     {
-        # Ensure the PlatyPS module is loaded
+        # Ensure the documentation directory is indeed a dir
+        Assert-Directory $DocumentationPath -ErrorAction 'Stop'
+
+        # First we check if the module is already loaded
+        $PreloadedPlatyPS = Get-Module -Name 'PlatyPS'
+        # If it is then we don't need to do anything, the user has already provided us with platyPS
         try
         {
-            $PlatyPSCheck = Get-Module -Name 'PlatyPS'
-            if (!$PlatyPSCheck)
+            # First see if the special Brownserve variable is set, if so attempt to download the version from the repo.
+            # N.B. we always import using the -Global flag because otherwise when this module gets unloaded as part of the -ReloadModule flag
+            # it takes any imported modules with it 😬
+            if (!$PreloadedPlatyPS)
             {
-                Import-Module 'PlatyPS' -Force -ErrorAction 'Stop'
+                if ($Global:BrownserveRepoPlatyPSPath)
+                {
+                    Write-Verbose 'Loading local version of platyPS'
+                    Import-Module $Global:BrownserveRepoPlatyPSPath -Force -Global -ErrorAction 'Stop' -Verbose:$false
+                }
+                # Otherwise attempt to load any version installed on the system
+                else
+                {
+                    Write-Verbose 'Loading system version of platyPS'
+                    Import-Module 'PlatyPS' -Force -Global -ErrorAction 'Stop' -Verbose:$false
+                }
             }
         }
         catch
         {
-            throw "Failed to import PlatyPS module.`n$($_.Exception.Message)"
+            $ErrorMessage = 'Failed to load platyPS module.'
+            if (!$Global:BrownserveRepoPlatyPSPath)
+            {
+                $ErrorMessage += "`nThe '`$Global:BrownserveRepoPlatyPSPath' variable has not been set and PowerShell failed to load any versions installed locally."
+            }
+            throw "$ErrorMessage.`n$($_.Exception.Message)"
         }
 
         $Return = @()
@@ -73,282 +77,177 @@ function Build-ModuleDocumentation
     
     process
     {
+        # We'll encapsulate everything in one big try/catch block so we can unload the module if we have to.
+        # Once we can run platyPS and powershell-yaml side-by-side then we can refactor this hot mess.
         try
         {
             $ModuleDirectory = Get-Item (Split-Path $ModulePath) | Convert-Path
-        }
-        catch
-        {
-            throw "Unable to determine module directory.`n$($_.Exception.Message)"
-        }
-        # First if the module we want to make docs for is not already loaded then we should ensure that it is
-        try
-        {
-            $ModuleLoaded = Get-Module -Name $ModuleName
-        }
-        catch
-        {
-            # do nothing, probably isn't loaded yet
-        }
-        # Sometimes we may want to unload the module and reload it, especially if we've been working on changes as this ensures anything new will be picked up.
-        if ($ModuleLoaded -and $ReloadModule)
-        {
-            Write-Verbose 'reloading module'
-            try
+
+            # Check if the module is already loaded
+            $ModuleLoaded = Get-Module -Name $ModuleName -ErrorAction 'SilentlyContinue'
+            # Sometimes we may want to unload the module and reload it, especially if we've been working on changes as this ensures anything new will be picked up.
+            if ($ModuleLoaded -and $ReloadModule)
             {
+                $ErrorStep = "Unable to unload module '$ModuleName'"
                 Remove-Module $ModuleName -Force -ErrorAction 'Stop'
             }
-            catch
+            if (!$ModuleLoaded -or $ReloadModule)
             {
-                throw "Unable to unload module '$ModuleName'.`n$($_.Exception.Message)"
+                $ErrorStep = "Failed to import module '$ModuleName' from $ModulePath."
+                Import-Module -Name $ModulePath -Force -Global -ErrorAction 'Stop' -Verbose:$false
             }
-        }
-        if (!$ModuleLoaded -or $ReloadModule)
-        {
-            try
-            {
-                Import-Module -Name $ModulePath -Force -ErrorAction 'Stop' 
-            }
-            catch
-            {
-                throw "Failed to import module '$ModuleName' from $ModulePath.`n$($_.Exception.Message)"
-            }
-        }
-        # Check that the destination exists and if not create it
-        try
-        {
-            $OutputDirCheck = Get-Item $DocumentationPath -ErrorAction 'Stop' | Where-Object { $_.PSIsContainer }
-            if (!$OutputDirCheck)
-            {
-                throw "Documentation path '$DocumentationPath' does not exist or is not a directory."
-            }
+            # Try to keep the version of help in lockstep with the version of the module
+            $ModuleDetails = Get-Module -Name $ModuleName 
+            $HelpVersion = $ModuleDetails | Select-Object -ExpandProperty Version
+            $ModuleDescription = $ModuleDetails | Select-Object -ExpandProperty Description
+
+            # TODO: The below can be revisited when we've got updatable help figured out
+            # # Lets see if the module is part of a git repo, and if it is then try to work out the URL for the docs would be
+            # $ModuleRepoURL = Get-GitRemoteOriginURL $DocumentationPath -ErrorAction 'SilentlyContinue' | ConvertTo-HTTPSRepoURL -ErrorAction 'SilentlyContinue'
+            # if ($ModuleRepoURL)
+            # {
+            #     $HelpDocsLink = $ModuleRepoURL + "/tree/v$HelpVersion/$DocumentationPath/$ModuleName"
+            # }
+
             # Create a directory with the name of module to be used to store the docs
             $ModuleDocumentationDirectory = Join-Path $DocumentationPath $ModuleName
             if (!(Test-Path $ModuleDocumentationDirectory))
             {
+                $ErrorStep = 'Failed to create module documentation directory'
                 New-Item $ModuleDocumentationDirectory -ItemType Directory -ErrorAction 'Stop' | Out-Null
             }
-        }
-        catch
-        {
-            throw "Failed to create module documentation directory.`n$($_.Exception.Message)"
-        }
-
-        # We store out documentation slightly differently depending on whether or not we're including documentation for the modules private cmdlets
-        if ($IncludePrivate)
-        {
-            $PublicCmdletDocPath = Join-Path $ModuleDocumentationDirectory 'Public'
-            $PrivateCmdletDocPath = Join-Path $ModuleDocumentationDirectory 'Private'
-            $ModulePagePath = Join-Path $ModuleDocumentationDirectory "$($ModuleName).md"
-            # When documenting private functions we need to temporarily create a module that we can import and use
-            $PrivateModuleName = "$($ModuleName)Private"
-            try
-            {
-                $ModuleParent = Get-Item $ModulePath | Select-Object -ExpandProperty PSParentPath | Convert-Path
-                $PrivateModuleContent = @"
-[CmdletBinding()]
-param()
-`$ErrorActionPreference = 'Stop'
-
-Resolve-Path '$(Join-Path $ModuleParent 'Private')' |
-    Resolve-Path |
-    Get-ChildItem -Filter *.ps1 -Recurse |
-        ForEach-Object {
-        . `$_.FullName
-        Export-ModuleMember -Function `$_.BaseName
-        }
-"@
-            }
-            catch
-            {
-                throw "Failed to build temporary module for private cmdlets.`n$($_.Exception.Message)"
-            }
-
-            try
-            {
-                $TempPrivateModule = New-BrownserveTemporaryFile `
-                    -FileName $PrivateModuleName `
-                    -FileExtension '.psm1' `
-                    -Content $PrivateModuleContent `
-                    -ErrorAction 'Stop'
-            }
-            catch
-            {
-                throw "Failed to create the temporary module for private cmdlets.`n$($_.Exception.Message)"
-            }
-            try
-            {
-                <# 
-                    the -Global param is needed here due to some quirk in PlatyPS/PowerShell, if it's not used it doesn't seem to pick up that the module has been loaded :/
-                #>
-                Import-Module $TempPrivateModule -Force -ErrorAction 'Stop' -Global
-            }
-            catch
-            {
-                throw "Failed to import the temporary module for private cmdlets.`n$($_.Exception.Message)"
-            }
-            if (!(Test-Path $PrivateCmdletDocPath))
-            {
-                $NewPrivateDocsParams = @{
-                    Module                = $PrivateModuleName
-                    OutputFolder          = $PrivateCmdletDocPath
-                    AlphabeticParamsOrder = $tue
-                }
-                if ($IgnoreDontShow)
-                {
-                    $NewPrivateDocsParams.Add('ExcludeDontShow', $true)
-                }
-                try
-                {
-                    New-Item $PrivateCmdletDocPath -ItemType Directory -ErrorAction 'Stop' | Out-Null
-                }
-                catch
-                {
-                    Remove-Module $TempPrivateModule -Force -ErrorAction 'SilentlyContinue'
-                    throw "Failed to create private cmdlet directory.`n$($_.Exception.Message)"
-                }
-                try
-                {
-                    New-MarkdownHelp @NewPrivateDocsParams -ErrorAction 'Stop' | Out-Null
-                }
-                catch
-                {
-                    throw "Failed to create private cmdlet documentation.`n$($_.Exception.Message)"
-                }
-                finally
-                {
-                    Remove-Module $PrivateModuleName -Force -ErrorAction 'SilentlyContinue'
-                    Remove-Item $TempPrivateModule -Force -ErrorAction 'SilentlyContinue'
-                }
-            }
-            else
-            {
-                $UpdatePrivateDocsParams = @{
-                    Path                  = $PrivateCmdletDocPath
-                    AlphabeticParamsOrder = $true
-                    UpdateInputOutput     = $true
-                    Force                 = $true # This is a poorly named parameter it actually just deletes cmdlets that have been removed.
-                }
-                if ($IgnoreDontShow)
-                {
-                    $UpdatePrivateDocsParams.Add('ExcludeDontShow', $true)
-                }
-                try
-                {
-                    Update-MarkdownHelpModule @UpdatePrivateDocsParams -ErrorAction 'Stop' | Out-Null
-                }
-                catch
-                {
-                    throw "Failed to update private cmdlet documentation for $ModuleName.`n$($_.Exception.Message)"
-                }
-            }
-        }
-        else
-        {
             $PublicCmdletDocPath = $ModuleDocumentationDirectory
             $ModulePagePath = Join-Path $DocumentationPath "$($ModuleName).md"
-        }
 
-        if (!(Test-Path $PublicCmdletDocPath))
-        {
-            try
+            if (!(Test-Path $PublicCmdletDocPath))
             {
+                $ErrorStep = 'Failed to create public cmdlet directory.'
                 New-Item $PublicCmdletDocPath -ItemType Directory -ErrorAction 'Stop' | Out-Null
             }
-            catch
-            {
-                throw "Failed to create public cmdlet directory.`n$($_.Exception.Message)"
+
+            $PlatyParams = @{
+                AlphabeticParamsOrder = $true
+                ModulePagePath        = $ModulePagePath
             }
-        }
-
-        $PlatyParams = @{
-            AlphabeticParamsOrder = $true
-            ModulePagePath        = $ModulePagePath
-        }
-
-        if ($IgnoreDontShow)
-        {
-            $PlatyParams.Add('ExcludeDontShow', $true)
-        }
-
-        # Check if we've already got some docs for this module
-        try
-        {
-            $ExistingDocs = Get-Item $ModulePagePath
-        }
-        catch
-        {
-            # Don't do anything, probably doesn't exist
-        }
-
-        if (!$ExistingDocs)
-        {
-            $NewDocsParams = $PlatyParams
-            $NewDocsParams.Add('OutputFolder', $PublicCmdletDocPath)
-            $NewDocsParams.Add('Module', $ModuleName)
-            $NewDocsParams.Add('WithModulePage', $true)
-            $NewDocsParams.Add('HelpVersion', '0.1.0')
-            if ($ModuleGUID)
+    
+            if (!$IncludeDontShow)
             {
-                $NewDocsParams.Add('ModuleGUID', $ModuleGUID)
+                $PlatyParams.Add('ExcludeDontShow', $true)
             }
-            try
+
+            $ExistingDocs = Get-Item $ModulePagePath -ErrorAction 'SilentlyContinue'
+
+            if (!$ExistingDocs)
             {
+                $NewDocsParams = $PlatyParams
+                $NewDocsParams.Add('OutputFolder', $PublicCmdletDocPath)
+                $NewDocsParams.Add('Module', $ModuleName)
+                $NewDocsParams.Add('WithModulePage', $true)
+                if ($HelpVersion)
+                {
+                    $NewDocsParams.Add('HelpVersion', $HelpVersion)
+                }
+                if ($HelpDocsLink)
+                {
+                    $NewDocsParams.Add('FWLink', $HelpDocsLink)
+                }
+                $ErrorStep = "Failed to build new module documentation for $ModuleName."
                 # Mute warnings as cmdlets that are not yet documented will cause complaints 🙄
                 New-MarkdownHelp @NewDocsParams -ErrorAction 'Stop' -WarningAction 'SilentlyContinue' | Out-Null
             }
-            catch
+            else
             {
-                throw "Failed to build new module documentation for $ModuleName.`n$($_.Exception.Message)"
-            }
-        }
-        else
-        {
-            $UpdateDocsParams = $PlatyParams
-            $UpdateDocsParams.Add('Path', $PublicCmdletDocPath)
-            $UpdateDocsParams.Add('RefreshModulePage', $true)
-            $UpdateDocsParams.Add('UpdateInputOutput', $true)
-            $UpdateDocsParams.Add('Force', $true) # This is a poorly named parameter it actually just deletes cmdlets that have been removed.
-            # For some reason we get a lot of warnings when using the update cmdlet that make no sense, so just mute them for now.
-            try
-            {
+                $UpdateDocsParams = $PlatyParams
+                $UpdateDocsParams.Add('Path', $PublicCmdletDocPath)
+                $UpdateDocsParams.Add('RefreshModulePage', $true)
+                $UpdateDocsParams.Add('UpdateInputOutput', $true)
+                $UpdateDocsParams.Add('Force', $true) # This is a poorly named parameter it actually just deletes cmdlets that have been removed.
+                # For some reason we get a lot of warnings when using the update cmdlet that make no sense, so just mute them for now.
+                $ErrorStep = 'Failed to update module documentation'
                 Update-MarkdownHelpModule @UpdateDocsParams -ErrorAction 'Stop' -WarningAction 'SilentlyContinue' | Out-Null
             }
-            catch
-            {
-                throw "Failed to update module documentation for $ModuleName.`n$($_.Exception.Message)"
-            }
-        }
 
-        <#
-            Currently PlatyPS expects the Module page to be in the same directory as the help files and as such hard-codes the links :(
-            To get around this we'll import the page content and then adjust the links using regex to point them at the right place.
-            We may be able to remove the below once this issue is resolved: https://github.com/PowerShell/platyPS/issues/451
-        #>
-        try
-        {
-            $ModulePageContent = Get-Content $ModulePagePath -ErrorAction 'Stop'
-        }
-        catch
-        {
-            throw "Failed to get help content from '$ModulePagePath'."
-        }
-        try
-        {
+            <#
+                Currently PlatyPS expects the Module page to be in the same directory as the help files and as such hard-codes the links :(
+                To get around this we'll import the page content and then adjust the links using regex to point them at the right place.
+                We may be able to remove the below once this issue is resolved: https://github.com/PowerShell/platyPS/issues/451
+            #>
+            $ErrorStep = "Failed to retrieve module page content from '$ModulePagePath'."
+            $ModulePageContent = Get-Content $ModulePagePath -ErrorAction 'Stop' -Raw
+            if (!$ModulePageContent)
+            {
+                throw 'Module page content appears to be blank'
+            }
             $ModulePageAdjustment = Split-Path $PublicCmdletDocPath -Leaf
             $SanitizedModulePageContent = $ModulePageContent -replace '\(([\w|\d]*-[\w|\d]*.md)\)', "(./$ModulePageAdjustment/`$1)"
+
+            # If we've passed in a GUID for the module then update the module page with that.
+            if ($ModuleGUID)
+            {
+                $SanitizedModulePageContent = $SanitizedModulePageContent -replace '00000000-0000-0000-0000-000000000000', $ModuleGUID
+            }
+            if ($HelpVersion)
+            {
+                Write-Verbose "New help version: $HelpVersion"
+                if ($SanitizedModulePageContent -imatch 'Help Version: (?<version>.*\n)')
+                {
+                    [version]$CurrentHelpVersion = $Matches['version']
+                    if ([version]$HelpVersion -ne $CurrentHelpVersion)
+                    {
+                        $HelpVersionString = $HelpVersion.ToString()
+                        $CurrentHelpVersionString = $CurrentHelpVersion.ToString()
+                        $SanitizedModulePageContent = $SanitizedModulePageContent.Replace("Help Version: $CurrentHelpVersionString", "Help Version: $HelpVersionString")
+                    }
+                }
+                else
+                {
+                    Write-Warning "Couldn't find help version number in the module page content."
+                }
+            }
+
+            if ($ModuleDescription)
+            {
+                if ($SanitizedModulePageContent -imatch '## Description[\s\n]*{{ Fill in the Description }}')
+                {
+                    # .Replace method doesn't work 🤷‍♀️ so use the -replace param instead.
+                    $SanitizedModulePageContent = $SanitizedModulePageContent -Replace '## Description[\s\n]*{{ Fill in the Description }}', "## Description`n$ModuleDescription"
+                }
+            }
+            $ErrorStep = "Failed to update module page with sanitized content at '$ModulePagePath'"
             Set-Content $ModulePagePath -Value $SanitizedModulePageContent -ErrorAction 'Stop'
+
+            # Create some sensible return so that we can pipe it into a cmdlet to update the MALM
+            $Return += [pscustomobject]@{
+                ModuleDirectory   = $ModuleDirectory
+                HelpLanguage      = 'en-US' # Hardcoded as we only support the one atm
+                DocumentationPath = ($PublicCmdletDocPath | Convert-Path) # Only the public cmdlets need to be documented
+            }
         }
         catch
         {
-            throw "Failed to sanitize documentation links in $ModulePagePath.`n$($_.Exception.Message)"
+            $ErrorMessage = 'Failed to build module documentation.'
+            if ($ErrorStep)
+            {
+                $ErrorMessage += "`n$ErrorStep"
+            }
+            $ErrorMessage += "`n$($_.Exception.Message)"
+            throw $ErrorMessage
         }
-        # Create some sensible return so that we can pipe it into a cmdlet to update the MALM
-        $Return += [pscustomobject]@{
-            ModuleDirectory   = $ModuleDirectory
-            HelpLanguage      = 'en-US' # Hardcoded as we only support the one atm
-            DocumentationPath = ($PublicCmdletDocPath | Convert-Path) # Only the public cmdlets need to be documented
-        }
+        finally
+        {
+            <# 
+                If we've loaded platyPS as part of this cmdlet then chances are we're going to want to un-load it
+                This is due to https://github.com/PowerShell/platyPS/issues/592 and the fact we make use of powershell-yaml in places too
+            #>
+            if (!$PreloadedPlatyPS)
+            {
+                Remove-Module 'platyPS' -Force -ErrorAction 'SilentlyContinue'
+                if ((Get-Module 'platyPS'))
+                {
+                    Write-Error 'Failed to unload platyPS module.'
+                }
+            }
+        }  
     }
     
     end

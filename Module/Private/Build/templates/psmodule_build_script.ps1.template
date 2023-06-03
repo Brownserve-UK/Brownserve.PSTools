@@ -33,13 +33,13 @@ param
     [string]
     $BranchName,
 
-    # The build to run, defaults to test whereby the module is built and tests are performed against it
+    # The build to run, defaults to build whereby the module is built but no testing is performed
     [Parameter(
         Mandatory = $false
     )]
-    [ValidateSet('build', 'test', 'release')]
+    [ValidateSet('build', 'BuildImport', 'BuildPack', 'BuildImportTest', 'BuildPackTest', 'release')]
     [string]
-    $Build = 'test',
+    $Build = 'build',
 
     # Where the module should be published to
     [Parameter(

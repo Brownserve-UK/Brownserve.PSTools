@@ -109,10 +109,11 @@ Write-Verbose @"
 $script:CurrentCommitHash = & git rev-parse HEAD
 
 
-$global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory $ModuleName
+$global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory $ModuleName # This is global as it gets used in our tests too
 $script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'NuGetPackage'
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
 $script:GitHubRepoURI = "https://github.com/$GitHubOrg/$GitHubRepoName"
+$Script:BuiltModulePath = (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1")
 
 # On non-windows platforms mono is required to run NuGet 🤢
 $NugetCommand = 'nuget'
@@ -197,7 +198,7 @@ task CopyModule {
 }
 
 # Synopsis: Generates the module manifest
-task GenerateModuleManifest CopyModule, {
+task GenerateModuleManifest CopyModule, GenerateVersionInfo, {
     Write-Verbose 'Creating PowerShell module manifest'
     # Get a list of Public cmdlets so we can mark them for export.
     $PublicScripts = Get-ChildItem (Join-Path $global:BrownserveBuiltModuleDirectory 'Public') -Filter '*.ps1' -Recurse
@@ -205,7 +206,7 @@ task GenerateModuleManifest CopyModule, {
         $_.Name -replace '.ps1', ''
     }
     $ModuleManifest = @{
-        Path              = (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1")
+        Path              = $Script:BuiltModulePath
         Guid              = $ModuleGUID
         Author            = $ModuleAuthor
         Copyright         = "$(Get-Date -Format yyyy) $ModuleAuthor"
@@ -229,6 +230,32 @@ task GenerateModuleManifest CopyModule, {
         $ModuleManifest.add('Prerelease',($BranchName -replace '[^a-zA-Z0-9]',''))
     }
     New-ModuleManifest @ModuleManifest -ErrorAction 'Stop'
+}
+
+<# 
+.SYNOPSIS
+    Now we've built the module we need to import the freshly built version before we can test it.
+#>
+task ImportModule GenerateModuleManifest, {
+    Write-Verbose "Importing built module"
+    if ((Get-Module $ModuleName))
+    {
+        $WarningMessage = @"
+The PowerShell module '$ModuleName' has been reloaded using the version built by this script.
+This may mean that functionality has changed.
+You may wish to run _init.ps1 again to reload the stable version of this module.
+"@
+        Write-Warning $WarningMessage
+        Remove-Module $ModuleName -Force -Confirm:$false -Verbose:$false
+    }
+    Import-Module $Script:BuiltModulePath -Force -Verbose:$false
+}
+
+# Synopsis: Performs some tests to make sure everything works as intended
+task Tests ImportModule, {
+    Write-Verbose 'Performing unit testing, this may take a while...'
+    $Results = Invoke-Pester -Path $Global:BrownserveRepoTestsDirectory -PassThru
+    assert ($results.FailedCount -eq 0) "$($results.FailedCount) test(s) failed."
 }
 
 # Synopsis: Creates our NuGet package
@@ -269,7 +296,7 @@ task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule,
     $script:NuspecPath = $script:NuspecPath | Convert-Path
 }
 
-# Synopsis: Create the nuget package
+# Synopsis: Packs the nuget package ready for shipping off to nuget.org (or a private feed)
 task Pack CreateNugetPackage, GenerateModuleManifest, {
     Write-Verbose 'Creating NuGet package'
     exec {
@@ -295,15 +322,8 @@ task Pack CreateNugetPackage, GenerateModuleManifest, {
     $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$script:NugetPackageVersion.nupkg" | Convert-Path
 }
 
-# Synopsis: Performs some tests to make sure everything works as intended
-task Tests Pack, {
-    Write-Verbose 'Performing unit testing, this may take a while...'
-    $Results = Invoke-Pester -Path $Global:BrownserveRepoTestsDirectory -PassThru
-    assert ($results.FailedCount -eq 0) "$($results.FailedCount) test(s) failed."
-}
-
 # Synopsis: Push the package up to nuget
-task PushNuget CheckPreviousRelease, Tests, {
+task PushNuget CheckPreviousRelease, Tests, Pack, {
     # Only push to nuget if we want to
     if ('nuget' -in $PublishTo)
     {
@@ -375,11 +395,47 @@ task GitHubRelease PushNuget, PushPSGallery, {
     }
 }
 
-# Synopsis: wrapper task to build the nupkg
-task Build Pack, {}
+<#
+.SYNOPSIS
+    This meta task will perform all the steps required to build the PowerShell module, but will not import the module
+    nor build a NuGet packaged version of the module or perform any unit testing.
+    This is useful to quickly test changes to module metadata and the like
+#>
+task Build GenerateModuleManifest, {}
 
-# Synopsis: wrapper task to build then test the nupkg
-task Test Tests, {}
+<# 
+.SYNOPSIS 
+    This meta task will perform all the steps required to build the module and then import it into the current PowerShell session.
+    This will not build the nuget packaged version of the module.
+    This is useful to either test new functions/code locally or to ensure the module still loads after making changes
+#>
+task BuildImport ImportModule, {}
 
-# Synopsis: wrapper task to build, test then release the nupkg
+<#
+.SYNOPSIS
+    This meta task will build the module and create a NuGet package of the built module.
+    The module is not imported or tested.
+    This is useful to test changes to the NuGet metadata.
+#>
+task BuildPack Pack, {}
+
+<#
+.SYNOPSIS
+    This meta task will build the PowerShell module, import it and perform our unit tests
+    This is useful when you want to check your changes are valid.
+#>
+task BuildImportTest Tests, {}
+
+<#
+.SYNOPSIS
+    This meta task will build the PowerShell module, create a NuGet package, import the module and perform our unit tests.
+    This is useful to test the complete pipeline as it is one stop short of a release.
+#>
+task BuildPackTest Tests, {}
+
+<#
+.SYNOPSIS
+    This meta task builds, imports and tests the PowerShell module while also creating a NuGet packaged version of it.
+    This is then pushed to the various platforms that house our module.
+#>
 task Release GitHubRelease, {}

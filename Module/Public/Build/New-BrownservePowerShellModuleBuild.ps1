@@ -82,6 +82,7 @@ function New-BrownservePowerShellModuleBuild
 ./$($ModuleInfo.Name)/.build/build.ps1 ``
 -GitHubRepoName '$RepoName' ``
 -BranchName `$env:GITHUB_REF ``
+-Build BuildPackTest ``
 -Verbose
 "@
                 $BuildSteps = $DefaultSteps

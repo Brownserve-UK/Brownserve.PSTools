@@ -1,13 +1,17 @@
+# This file is managed by a tool, manual changes will be lost unless added to the designated section below
 source https://api.nuget.org/v3/index.json
 
-# We'll use Invoke-Build to make building our nuget package easy as peas
+## Auto generated dependencies: ##
+# Brownserve.PSTools is our special PowerShell module that we use to aid us in our builds/workflows
+nuget Brownserve.PSTools
+
+# Invoke-Build is used to run our builds
 nuget Invoke-Build
 
-# Pester for unit tests
+# Pester is used to perform testing on the PowerShell module
 nuget Pester
 
-# We'll need nuget to package things
+# To push the module up to nuget.org we use the standalone version of Nuget.
 nuget NuGet.CommandLine
 
-# try grabbing platyPS via GitHub
-github PowerShell/platyPS:v2
+## Manually defined dependencies: ##

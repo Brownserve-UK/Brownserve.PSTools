@@ -10,15 +10,25 @@ class InitPath
     [array] $ChildPaths
     # The description of the variable to be set in the _init script
     [string] $Description
-    # When using permanent paths this is the local location to the path
-    [string] $LocalPath
+    # Whether the path is a directory or file
+    [string] $PathType
     
 
     # These first 2 constructors allow us to easily spin up InitPath's from objects.
     InitPath([pscustomobject]$InitPath)
     {
-        $this.Path = $InitPath.path
-        $this.VariableName = $InitPath.VariableName
+        $RequiredProps = @('path','VariableName','PathType')
+        foreach ($Prop in $RequiredProps)
+        {
+            if (!$InitPath.$Prop)
+            {
+                throw "Object missing property '$Prop'"
+            }
+            else
+            {
+                $this.$Prop = $InitPath.$Prop
+            }
+        }
         if ($InitPath.ChildPaths)
         {
             $this.ChildPaths = $InitPath.ChildPaths
@@ -26,17 +36,23 @@ class InitPath
         if ($InitPath.Description)
         {
             $this.Description = $InitPath.Description
-        }
-        if ($InitPath.LocalPath)
-        {
-            $this.LocalPath = $InitPath.LocalPath
         }
     }
 
     InitPath([hashtable]$InitPath)
     {
-        $this.Path = $InitPath.path
-        $this.VariableName = $InitPath.VariableName
+        $RequiredKeys = @('path','VariableName','PathType')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$InitPath.$Key)
+            {
+                throw "Hashtable missing property '$Key'"
+            }
+            else
+            {
+                $this.$Key = $InitPath.$Key
+            }
+        }
         if ($InitPath.ChildPaths)
         {
             $this.ChildPaths = $InitPath.ChildPaths
@@ -45,28 +61,7 @@ class InitPath
         {
             $this.Description = $InitPath.Description
         }
-        if ($InitPath.LocalPath)
-        {
-            $this.LocalPath = $InitPath.LocalPath
-        }
     }
-
-    # Allow us to set the values by using 2 strings
-    InitPath([string]$VariableName, [string]$Path)
-    {
-        $this.Path = $Path
-        $this.VariableName = $VariableName
-    }
-
-    # Allow us to set the values by 3 strings, so we can have additional child paths if we want
-    InitPath([string]$VariableName, [string]$Path, [array]$ChildPaths)
-    {
-        $this.Path = $Path
-        $this.VariableName = $VariableName
-        $this.ChildPaths = $ChildPaths
-    }
-
-    
 }
 
 enum BrownserveCICD
@@ -78,6 +73,7 @@ enum BrownserveCICD
 enum BrownserveRepoBuildType
 {
     PowerShellModule
+    BrownservePSTools
     Generic
 }
 <#
@@ -208,6 +204,56 @@ class PaketDependency
                 }
             }
             $this.Comment = $SanitizedComment
+        }
+    }
+}
+
+class PackageAlias
+{
+    # The alias that should be set
+    [string] $Alias
+    # The name of the binary/executable/file to have the alias set
+    [string] $FileName
+    # If specified will create a global variable that also points to the same file (for external apps that can't see PowerShell aliases)
+    [string] $VariableName
+
+    PackageAlias([hashtable]$Hash)
+    {
+        $RequiredKeys = @('Alias','FileName')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Hash.$Key)
+            {
+                throw "Hashtable missing key '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Hash.$Key
+            }
+        }
+        if ($Hash.VariableName)
+        {
+            $this.VariableName = $Hash.VariableName
+        }
+    }
+
+    PackageAlias([pscustomobject]$Obj)
+    {
+        $RequiredProps = @('Alias','FileName')
+        foreach ($Prop in $RequiredProps)
+        {
+            if (!$Obj.$Prop)
+            {
+                throw "Object missing property '$Prop'"
+            }
+            else
+            {
+                $this.$Prop = $Obj.$Prop
+            }
+        }
+        if ($Obj.VariableName)
+        {
+            $this.VariableName = $Obj.VariableName
         }
     }
 }

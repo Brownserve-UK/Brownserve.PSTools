@@ -4,9 +4,9 @@ function New-GitBranch
     param
     (
         # The repository path
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [string]
-        $RepositoryPath,
+        $RepositoryPath = $PWD,
 
         # The branch to be created
         [Parameter(Mandatory = $true)]

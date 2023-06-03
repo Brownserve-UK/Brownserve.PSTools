@@ -11,10 +11,12 @@
                     "TMPDIR",
                     "Choco",
                     "CICD",
+                    "dedupe",
                     "devcontainer",
                     "mrkdwn",
                     "nugetconfig",
-                    "nupkg"
+                    "nupkg",
+                    "yzhang"
                 ]
             }
         }
@@ -41,6 +43,7 @@
                     "Dont",
                     "hashtable",
                     "hashtables",
+                    "imatch",
                     "LASTEXITCODE",
                     "MAML",
                     "Mddhhmm",
