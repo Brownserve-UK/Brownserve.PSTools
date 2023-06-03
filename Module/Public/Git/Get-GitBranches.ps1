@@ -4,9 +4,9 @@ function Get-GitBranches
     param
     (
         # The path to the repository
-        [Parameter(Mandatory = $true, Position = 0)]
+        [Parameter(Mandatory = $false, Position = 0)]
         [string]
-        $RepositoryPath
+        $RepositoryPath = $PWD
     )
     
     begin
