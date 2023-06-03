@@ -5,6 +5,37 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.12.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.12.0) (2023-06-03)
+
+**Features**
+Cmdlet updates/additions:
+- Various new classes for handling data types
+- `Initialize-BrownserveRepository` cmdlet which replaces the previous `Initialize-BrownserveBuildRepo` cmdlet
+- `New-BrownservePowerShellModuleBuild` which allows for the quick creation of builds in repos.
+- `Assert-Command` ensures a command is present in the current session
+- `ConvertTo-SortedHashtable` converts a hashtable to one which is ordered alphabetically
+- Tweak `Invoke-NativeCommand` to return the exit code
+- `Merge-Hashtable` merges two hashtables together
+- `New-BrownserveTemporaryDirectory` replaces `New-BrownserveTempDirectory` to be more consistent with our naming
+- `Read-ConfigurationFromFile` allows storing complex default data in `.json` files
+- `Search-FileContent` searches a file and returns any text between the two indicators
+- Rework our help generation cmdlets to actually work
+- `ConvertTo-HTTPSRepoURL` converts a ssh git repo URI to the HTTPS equivalent
+- Various cmdlets for working with `git`
+- Rename `ConvertFrom-URI` to `Split-URI`
+Build/Test features:
+- Updates the build/test scripts to use our new standard approach
+- Updates the repo to be compatible with our new automated init/update approach
+- Removed private cmdlet documentation, these will now be documented in the cmdlets themselves if required
+
+
+**Bugfixes**
+N/A
+
+**Known Issues**
+- This release renames a lot of our previously used cmdlets
+- Private cmdlet documentation has been removed
+
 ### [v0.11.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.11.0) (2023-04-19)
 
 **Features**
