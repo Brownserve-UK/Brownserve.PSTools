@@ -14,8 +14,7 @@ This will build markdown PowerShell module documentation using PlatyPS
 
 ```
 Build-ModuleDocumentation [-ModuleName] <String> [-ModulePath] <String> [-DocumentationPath] <String>
- [[-IncludePrivate] <Boolean>] [[-ReloadModule] <Boolean>] [[-IgnoreDontShow] <Boolean>] [[-ModuleGUID] <Guid>]
- [<CommonParameters>]
+ [-ReloadModule] [-IncludeDontShow] [[-ModuleGUID] <Guid>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -49,32 +48,17 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -IgnoreDontShow
-Whether or not to ignore parameters marked as 'DontShow'
+### -IncludeDontShow
+{{ Fill IncludeDontShow Description }}
 
 ```yaml
-Type: Boolean
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 6
-Default value: True
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -IncludePrivate
-Whether or not to include private cmdlet documentation
-
-```yaml
-Type: Boolean
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 4
-Default value: True
+Position: Named
+Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -128,7 +112,7 @@ Accept wildcard characters: False
 Whether or not to force a reload of the module if it's already loaded
 
 ```yaml
-Type: Boolean
+Type: SwitchParameter
 Parameter Sets: (All)
 Aliases:
 
