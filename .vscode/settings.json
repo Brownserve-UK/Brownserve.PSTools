@@ -8,10 +8,12 @@
     "CICD",
     "Cmdlets",
     "commitish",
+    "dedupe",
     "devcontainer",
     "Dont",
     "hashtable",
     "hashtables",
+    "imatch",
     "LASTEXITCODE",
     "MAML",
     "Mddhhmm",
@@ -29,9 +31,8 @@
     "pstools",
     "pwsh",
     "teamcity",
-    "TMPDIR",
     "Teamcity",
-    "dedupe",
+    "TMPDIR",
     "yzhang"
   ],
   "markdown.extension.toc.omittedFromToc": {
