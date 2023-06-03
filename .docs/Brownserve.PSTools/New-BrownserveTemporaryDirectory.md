@@ -5,28 +5,28 @@ online version:
 schema: 2.0.0
 ---
 
-# New-TempDirectory
+# New-BrownserveTemporaryDirectory
 
 ## SYNOPSIS
-Creates a new temporary directory with a random name in the systems temporary directory
+Creates a temporary directory
 
 ## SYNTAX
 
 ```
-New-TempDirectory [<CommonParameters>]
+New-BrownserveTemporaryDirectory [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Creates a new temporary directory with a random name in the systems temporary directory
+Creates a temporary directory in a known good location.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> New-TempDirectory
+PS C:\> {{ Add example code here }}
 ```
 
-Would create a new temp directory in C:\Windows\temp
+{{ Add example description here }}
 
 ## PARAMETERS
 
@@ -36,6 +36,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
