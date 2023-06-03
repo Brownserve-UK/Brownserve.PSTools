@@ -103,7 +103,7 @@ function Build-ModuleDocumentation
 
             # TODO: The below can be revisited when we've got updatable help figured out
             # # Lets see if the module is part of a git repo, and if it is then try to work out the URL for the docs would be
-            # $ModuleRepoURL = Get-GitRemoteOriginURL -ErrorAction 'SilentlyContinue' | ConvertTo-HTTPSRepoURL -ErrorAction 'SilentlyContinue'
+            # $ModuleRepoURL = Get-GitRemoteOriginURL $DocumentationPath -ErrorAction 'SilentlyContinue' | ConvertTo-HTTPSRepoURL -ErrorAction 'SilentlyContinue'
             # if ($ModuleRepoURL)
             # {
             #     $HelpDocsLink = $ModuleRepoURL + "/tree/v$HelpVersion/$DocumentationPath/$ModuleName"
