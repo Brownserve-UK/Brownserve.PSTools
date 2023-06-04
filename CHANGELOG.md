@@ -5,7 +5,7 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
-### [v0.12.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.12.0) (2023-06-03)
+### [v0.12.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.12.0) (2023-06-04)
 
 **Features**
 Cmdlet updates/additions:
