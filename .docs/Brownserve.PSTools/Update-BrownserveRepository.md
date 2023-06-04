@@ -13,7 +13,8 @@ Updates a given repository to use the latest tooling and settings
 ## SYNTAX
 
 ```
-Update-BrownserveRepository [-RepoPath] <String> [-BuildType <BrownserveRepoProjectType>] [<CommonParameters>]
+Update-BrownserveRepository [-RepoPath] <String> [-ProjectType <BrownserveRepoProjectType>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
