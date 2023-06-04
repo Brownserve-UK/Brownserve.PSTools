@@ -21,7 +21,13 @@ jobs:
           NugetFeedAPIKey: ${{ secrets.NUGET_API_KEY }}
           PSGalleryAPIKey: ${{ secrets.PSGALLERY_API_KEY }}
         run: |
-            ./Brownserve.PSTools/.build/build.ps1 -BranchName $env:GITHUB_REF -Build 'release' -NugetFeedAPIKey $env:NugetFeedAPIKey -PSGalleryAPIKey $env:PSGalleryAPIKey -Verbose
+            ./Brownserve.PSTools/.build/build.ps1 `
+              -BranchName $env:GITHUB_REF `
+              -GitHubRepoName 'Brownserve.PSTools' `
+              -Build 'release' `
+              -NugetFeedAPIKey $env:NugetFeedAPIKey `
+              -PSGalleryAPIKey $env:PSGalleryAPIKey `
+              -Verbose
     # Do a Slack notification
       - name: notify-slack
         shell: pwsh
