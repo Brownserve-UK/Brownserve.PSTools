@@ -12,7 +12,7 @@ function Update-BrownserveRepository
         [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
         [BrownserveRepoProjectType]
-        $BuildType = 'generic',
+        $ProjectType = 'generic',
 
         # The config file to use for setting our .gitignore content
         [Parameter(Mandatory = $false, DontShow)]
@@ -262,7 +262,7 @@ function Update-BrownserveRepository
             Our repos can house various different things, each with their own unique VS code extensions, paths, 
             gitignore contents etc
         #>
-        switch ($BuildType)
+        switch ($ProjectType)
         {
             <# 
                     For a repo that houses a PowerShell module we'll want to include:

@@ -23,10 +23,10 @@ This cmdlet can be used after a repository has been initialised using the `Initi
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+Update-BrownserveRepository -RepoPath 'C:\myPowershellModule' -ProjectType 'PowerShellModule'
 ```
 
-{{ Add example description here }}
+Would update the project at 'C:\myPowershellModule'
 
 ## PARAMETERS
 
