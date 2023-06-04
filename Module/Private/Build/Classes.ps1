@@ -70,7 +70,7 @@ enum BrownserveCICD
     TeamCity
 }
 
-enum BrownserveRepoBuildType
+enum BrownserveRepoProjectType
 {
     PowerShellModule
     BrownservePSTools

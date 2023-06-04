@@ -11,8 +11,8 @@ function Initialize-BrownserveRepository
         # The type of build that should be installed in this repo
         [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
-        [BrownserveRepoBuildType]
-        $BuildType = 'generic',
+        [BrownserveRepoProjectType]
+        $ProjectType = 'generic',
 
         # Forces the recreation of files even if they already exist
         [Parameter(Mandatory = $false)]
@@ -333,7 +333,7 @@ However please note this will overwrite the files listed above!
 
         $DefaultPackageAliases = $PackageAliasConfig.Defaults
 
-        switch ($BuildType)
+        switch ($ProjectType)
         {
             <# 
                     For a repo that houses a PowerShell module we'll want to include:

@@ -11,7 +11,7 @@ function Update-BrownserveRepository
         # The type of build that should be installed in this repo
         [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
-        [BrownserveRepoBuildType]
+        [BrownserveRepoProjectType]
         $BuildType = 'generic',
 
         # The config file to use for setting our .gitignore content
