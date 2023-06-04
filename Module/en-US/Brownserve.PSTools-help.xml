@@ -428,6 +428,99 @@
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Assert-Command</command:name>
+      <command:verb>Assert</command:verb>
+      <command:noun>Command</command:noun>
+      <maml:description>
+        <maml:para>Ensures the given command exists and is available to the current PowerShell session</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Ensures the given command exists and is available to the current PowerShell session</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Assert-Command</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>Command</maml:name>
+          <maml:description>
+            <maml:para>The command(s) to be checked</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>Command</maml:name>
+        <maml:description>
+          <maml:para>The command(s) to be checked</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+        <dev:type>
+          <maml:name>String[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------- Example 1: Command that is present --------------</maml:title>
+        <dev:code>Assert-Command 'pwsh'</dev:code>
+        <dev:remarks>
+          <maml:para>This command would pass successfully as the command exists</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>------------ Example 2: Command that is not present ------------</maml:title>
+        <dev:code>Assert-Command 'notArealCommand'</dev:code>
+        <dev:remarks>
+          <maml:para>This command would return a terminating error as the command doesn't exist</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------- Example 3: Check multiple commands --------------</maml:title>
+        <dev:code>Assert-Command 'notArealCommand', 'pwsh'</dev:code>
+        <dev:remarks>
+          <maml:para>This command would return a terminating error as one of the commands does not exist</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Assert-Directory</command:name>
       <command:verb>Assert</command:verb>
       <command:noun>Directory</command:noun>
@@ -567,38 +660,13 @@ We also have a handful of modules that we post to NuGet/AzDo and it's very impor
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
-          <maml:name>IncludePrivate</maml:name>
-          <maml:description>
-            <maml:para>Whether or not to include private cmdlet documentation</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
-          <dev:type>
-            <maml:name>Boolean</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>True</dev:defaultValue>
-        </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="5" aliases="none">
           <maml:name>ReloadModule</maml:name>
           <maml:description>
             <maml:para>Whether or not to force a reload of the module if it's already loaded</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
           <dev:type>
-            <maml:name>Boolean</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>True</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
-          <maml:name>IgnoreDontShow</maml:name>
-          <maml:description>
-            <maml:para>Whether or not to ignore parameters marked as 'DontShow'</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
-          <dev:type>
-            <maml:name>Boolean</maml:name>
+            <maml:name>SwitchParameter</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>True</dev:defaultValue>
@@ -615,6 +683,17 @@ We also have a handful of modules that we post to NuGet/AzDo and it's very impor
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>IncludeDontShow</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill IncludeDontShow Description }}</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -630,29 +709,17 @@ We also have a handful of modules that we post to NuGet/AzDo and it's very impor
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="6" aliases="none">
-        <maml:name>IgnoreDontShow</maml:name>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>IncludeDontShow</maml:name>
         <maml:description>
-          <maml:para>Whether or not to ignore parameters marked as 'DontShow'</maml:para>
+          <maml:para>{{ Fill IncludeDontShow Description }}</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
-          <maml:name>Boolean</maml:name>
+          <maml:name>SwitchParameter</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>True</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="4" aliases="none">
-        <maml:name>IncludePrivate</maml:name>
-        <maml:description>
-          <maml:para>Whether or not to include private cmdlet documentation</maml:para>
-        </maml:description>
-        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
-        <dev:type>
-          <maml:name>Boolean</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>True</dev:defaultValue>
+        <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="7" aliases="none">
         <maml:name>ModuleGUID</maml:name>
@@ -695,9 +762,9 @@ We also have a handful of modules that we post to NuGet/AzDo and it's very impor
         <maml:description>
           <maml:para>Whether or not to force a reload of the module if it's already loaded</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
-          <maml:name>Boolean</maml:name>
+          <maml:name>SwitchParameter</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>True</dev:defaultValue>
@@ -728,65 +795,42 @@ We also have a handful of modules that we post to NuGet/AzDo and it's very impor
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>ConvertFrom-URI</command:name>
-      <command:verb>ConvertFrom</command:verb>
-      <command:noun>URI</command:noun>
+      <command:name>ConvertTo-HTTPSRepoURL</command:name>
+      <command:verb>ConvertTo</command:verb>
+      <command:noun>HTTPSRepoURL</command:noun>
       <maml:description>
-        <maml:para>Converts a given URI into a PowerShell object</maml:para>
+        <maml:para>Converts a git SSH URI into the HTTPS equivalent</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Converts a given URI into a PowerShell object, splitting out things like the subdomain, hostname and path.</maml:para>
+      <maml:para>This cmdlet attempts to convert a git SSH URI into the HTTPS equivalent. This is done by using a regular expression to capture the constituent parts of the URI and rearranging them into a typical URL.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>ConvertFrom-URI</maml:name>
-        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+        <maml:name>ConvertTo-HTTPSRepoURL</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
           <maml:name>InputObject</maml:name>
           <maml:description>
             <maml:para>The URI to be converted</maml:para>
           </maml:description>
-          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <command:parameterValue required="true" variableLength="false">GitURI[]</command:parameterValue>
           <dev:type>
-            <maml:name>String[]</maml:name>
+            <maml:name>GitURI[]</maml:name>
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>AsHashtable</maml:name>
-          <maml:description>
-            <maml:para>Returns a hashtable instead of a custom object.</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
-        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>AsHashtable</maml:name>
-        <maml:description>
-          <maml:para>Returns a hashtable instead of a custom object.</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
         <maml:name>InputObject</maml:name>
         <maml:description>
           <maml:para>The URI to be converted</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+        <command:parameterValue required="true" variableLength="false">GitURI[]</command:parameterValue>
         <dev:type>
-          <maml:name>String[]</maml:name>
+          <maml:name>GitURI[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -795,7 +839,7 @@ We also have a handful of modules that we post to NuGet/AzDo and it's very impor
     <command:inputTypes>
       <command:inputType>
         <dev:type>
-          <maml:name>System.String[]</maml:name>
+          <maml:name>GitURI[]</maml:name>
         </dev:type>
         <maml:description>
           <maml:para></maml:para>
@@ -819,52 +863,102 @@ We also have a handful of modules that we post to NuGet/AzDo and it's very impor
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------- Example 1: Single URL --------------------</maml:title>
-        <dev:code>ConvertFrom-URI -InputObject 'https://www.example.com/'
-
-Hostname  : example
-Subdomain : www
-Domain    : com
-Protocol  : https
-URI       : https://www.example.com/</dev:code>
+        <maml:title>------------- Example 1: Convert a GitHub SSH URI -------------</maml:title>
+        <dev:code>'git@github.com:Brownserve-UK/Brownserve.PSTools.git' | ConvertTo-HTTPSRepoURL</dev:code>
         <dev:remarks>
-          <maml:para>This would extract all the relevant paths from the URI into an object</maml:para>
+          <maml:para>This would return `https://github.com/Brownserve-UK/Brownserve.PSTools.git`</maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
-        <maml:title>------------------ Example 2: Multiple URL's ------------------</maml:title>
-        <dev:code>@('https://www.example.com/','https://www.example.com:8080/myApp') | ConvertFrom-URI
-
-Hostname  : example
-Subdomain : www
-Domain    : com
-Protocol  : https
-URI       : https://www.example.com/
-
-Hostname  : example
-Subdomain : www
-Domain    : com
-Path      : myApp
-Protocol  : https
-Port      : 8080
-URI       : https://www.example.com:8080/myApp</dev:code>
+        <maml:title>------------- Example 2: Convert a GitLab SSH URI -------------</maml:title>
+        <dev:code>'git@gitlab.com:Brownserve-UK/Brownserve.PSTools.git' | ConvertTo-HTTPSRepoURL</dev:code>
         <dev:remarks>
-          <maml:para>This examples shows piping in an array of URI's and converting them. The Second URI has a path and protocol so those get set too.</maml:para>
+          <maml:para>This would return `https://gitlab.com/Brownserve-UK/Brownserve.PSTools.git`</maml:para>
         </dev:remarks>
       </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>ConvertTo-SortedHashtable</command:name>
+      <command:verb>ConvertTo</command:verb>
+      <command:noun>SortedHashtable</command:noun>
+      <maml:description>
+        <maml:para>Converts a given hashtable to an alphabetically sorted hashtable</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Converts a given hashtable to an alphabetically sorted hashtable</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>ConvertTo-SortedHashtable</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+          <maml:name>InputObject</maml:name>
+          <maml:description>
+            <maml:para>The hashtable(s) to be sorted</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable[]</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+        <maml:name>InputObject</maml:name>
+        <maml:description>
+          <maml:para>The hashtable(s) to be sorted</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Hashtable[]</command:parameterValue>
+        <dev:type>
+          <maml:name>Hashtable[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.Collections.Hashtable[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
       <command:example>
-        <maml:title>-------------------- Example 2: AsHashtable --------------------</maml:title>
-        <dev:code>'https://www.example.com/' | ConvertFrom-URI -AsHashtable
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>@{'a' = 1;'c' = 3;b = 2} | ConvertTo-SortedHashtable
 
 Name                           Value
 ----                           -----
-Hostname                       example
-Subdomain                      www
-Domain                         com
-Protocol                       https
-URI                            https://www.example.com/</dev:code>
+a                              1
+b                              2
+c                              3</dev:code>
         <dev:remarks>
-          <maml:para>This examples shows piping in a URI and converting them using the `-AsHashtable` parameter. This results in a hashtable being returned instead of a PowerShell object.</maml:para>
+          <maml:para>Converts to a sorted hashtable</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -975,6 +1069,164 @@ URI                            https://www.example.com/</dev:code>
         <dev:code>Format-ResourceName -ResourceName '1llegal_Resource_name'</dev:code>
         <dev:remarks>
           <maml:para>This would return 'N1llegal_Resource_name'</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-GitBranches</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>GitBranches</command:noun>
+      <maml:description>
+        <maml:para>Gets the current branches for the given repository</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Gets the current branches for the given repository</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-GitBranches</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>RepositoryPath</maml:name>
+          <maml:description>
+            <maml:para>The path to the repository to get the branches for</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>RepositoryPath</maml:name>
+        <maml:description>
+          <maml:para>The path to the repository to get the branches for</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>Get-GitBranches 'C:\myRepo'</dev:code>
+        <dev:remarks>
+          <maml:para>Would return the branches from `C:\myRepo`</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-GitCurrentBranch</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>GitCurrentBranch</command:noun>
+      <maml:description>
+        <maml:para>Gets the current branch for a given repository</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Gets the current branch for a given repository</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-GitCurrentBranch</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+          <maml:name>RepositoryPath</maml:name>
+          <maml:description>
+            <maml:para>The path to the repository</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByValue)" position="0" aliases="none">
+        <maml:name>RepositoryPath</maml:name>
+        <maml:description>
+          <maml:para>The path to the repository</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+        <dev:type>
+          <maml:name>String[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>Get-GitCurrentBranch 'C:\myRepo'</dev:code>
+        <dev:remarks>
+          <maml:para>Would get the current branch for the repo `c:\myRepo`</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1232,6 +1484,85 @@ URI                            https://www.example.com/</dev:code>
         <dev:code>Get-GitHubTags -GitHubOrg 'myOrg' -GitHubToke $GitHubToken -RepoName 'myRepo'</dev:code>
         <dev:remarks>
           <maml:para>This would fetch all the tags for the repository "myRepo" which lives in the GitHubOrg "myOrg"</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Get-GitRemoteOriginURL</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>GitRemoteOriginURL</command:noun>
+      <maml:description>
+        <maml:para>Gets the remote origin URL for a given repository</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Gets the remote origin URL for a given repository</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-GitRemoteOriginURL</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>RepositoryPath</maml:name>
+          <maml:description>
+            <maml:para>The path to the repository</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>RepositoryPath</maml:name>
+        <maml:description>
+          <maml:para>The path to the repository</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+        <dev:type>
+          <maml:name>String[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>Get-GitRemoteOriginURL 'C:\myRepo'</dev:code>
+        <dev:remarks>
+          <maml:para>Would return the remote origin URL for the repo at `C:\myRepo`</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -2033,28 +2364,23 @@ An alias is created that replaces the path to the `vault` command and the enviro
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>Initialize-BrownserveBuildRepo</command:name>
+      <command:name>Initialize-BrownserveRepository</command:name>
       <command:verb>Initialize</command:verb>
-      <command:noun>BrownserveBuildRepo</command:noun>
+      <command:noun>BrownserveRepository</command:noun>
       <maml:description>
-        <maml:para>Prepares a repo to be able to consume and use the Brownserve.PSTools PowerShell module</maml:para>
+        <maml:para>Prepares a repository for use for a given project</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This cmdlet will assist in bootstrapping a repo for use with the Brownserve.PSTools PowerShellModule, it does so by:</maml:para>
-      <maml:para>* Setting up our standard directories, gitignore's and VSCode settings</maml:para>
-      <maml:para>* Configuring NuGet/paket</maml:para>
-      <maml:para>* Creating and _init.ps1 script to initialize the repo during builds</maml:para>
-      <maml:para></maml:para>
-      <maml:para>This cmdlet is experimental and hasn't yet been extensively tested, use with care.</maml:para>
+      <maml:para>We typically use our repositories for a common set of purposes (e.g. PowerShell modules, standard builds etc) and this cmdlet will prepare a given repository for use.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
-        <maml:name>Initialize-BrownserveBuildRepo</maml:name>
+        <maml:name>Initialize-BrownserveRepository</maml:name>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>RepoPath</maml:name>
           <maml:description>
-            <maml:para>The path to the repository to initialize</maml:para>
+            <maml:para>The path to the repository to configure</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -2062,56 +2388,11 @@ An alias is created that replaces the path to the `vault` command and the enviro
             <maml:uri />
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>CustomInitSteps</maml:name>
-          <maml:description>
-            <maml:para>If you know in advance any custom code you'd like to be included in the _init.ps1 script you can include it here.</maml:para>
-          </maml:description>
-          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
-          <dev:type>
-            <maml:name>String</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>ExcludeModuleLoader</maml:name>
-          <maml:description>
-            <maml:para>If specified this will remove the code block that looks for custom PowerShell modules from the _init.ps1 script</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>ExcludeSnippets</maml:name>
-          <maml:description>
-            <maml:para>If specified will skip copying our default VSCode snippets</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
-        </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>ExcludeVSCodeSettings</maml:name>
-          <maml:description>
-            <maml:para>If specified will skip copying our default VSCode settings</maml:para>
-          </maml:description>
-          <dev:type>
-            <maml:name>SwitchParameter</maml:name>
-            <maml:uri />
-          </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Force</maml:name>
           <maml:description>
-            <maml:para>If set will forcefully overwrite existing data, only use this if instructed to do so.</maml:para>
+            <maml:para>Forces an overwrite of any files that already exist</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -2120,95 +2401,53 @@ An alias is created that replaces the path to the `vault` command and the enviro
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-          <maml:name>IncludeDevcontainer</maml:name>
+          <maml:name>ProjectType</maml:name>
           <maml:description>
-            <maml:para>If specified will copy over a basic devcontainer</maml:para>
+            <maml:para>The type of project that this repository holds</maml:para>
           </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">PowerShellModule</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">BrownservePSTools</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Generic</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">BrownserveRepoProjectType</command:parameterValue>
           <dev:type>
-            <maml:name>SwitchParameter</maml:name>
+            <maml:name>BrownserveRepoProjectType</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>False</dev:defaultValue>
+          <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>CustomInitSteps</maml:name>
+        <maml:name>Force</maml:name>
         <maml:description>
-          <maml:para>If you know in advance any custom code you'd like to be included in the _init.ps1 script you can include it here.</maml:para>
+          <maml:para>Forces an overwrite of any files that already exist</maml:para>
         </maml:description>
-        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
-          <maml:name>String</maml:name>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>ProjectType</maml:name>
+        <maml:description>
+          <maml:para>The type of project that this repository holds</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">BrownserveRepoProjectType</command:parameterValue>
+        <dev:type>
+          <maml:name>BrownserveRepoProjectType</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>ExcludeModuleLoader</maml:name>
-        <maml:description>
-          <maml:para>If specified this will remove the code block that looks for custom PowerShell modules from the _init.ps1 script</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>ExcludeSnippets</maml:name>
-        <maml:description>
-          <maml:para>If specified will skip copying our default VSCode snippets</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>ExcludeVSCodeSettings</maml:name>
-        <maml:description>
-          <maml:para>If specified will skip copying our default VSCode settings</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>Force</maml:name>
-        <maml:description>
-          <maml:para>If set will forcefully overwrite existing data, only use this if instructed to do so.</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
-      </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
-        <maml:name>IncludeDevcontainer</maml:name>
-        <maml:description>
-          <maml:para>If specified will copy over a basic devcontainer</maml:para>
-        </maml:description>
-        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
-        <dev:type>
-          <maml:name>SwitchParameter</maml:name>
-          <maml:uri />
-        </dev:type>
-        <dev:defaultValue>False</dev:defaultValue>
-      </command:parameter>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
         <maml:name>RepoPath</maml:name>
         <maml:description>
-          <maml:para>The path to the repository to initialize</maml:para>
+          <maml:para>The path to the repository to configure</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -2246,9 +2485,9 @@ An alias is created that replaces the path to the `vault` command and the enviro
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; Initialize-BrownserveBuildRepo -RepoPath C:\myRepo</dev:code>
+        <dev:code>Initialize-BrownserveRepository -RepoPath 'c:\MyPowerShellModule' -ProjectType 'PowerShellModule'</dev:code>
         <dev:remarks>
-          <maml:para>This would prepare the repo at 'C:\myRepo' for use with Brownserve.BuildTools</maml:para>
+          <maml:para>This would prepare the repo at 'c:\MyPowerShellModule' for use to store and build a PowerShell module</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -3748,6 +3987,172 @@ As many native commands can write verbose/logging information to stderr this cmd
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Merge-Hashtable</command:name>
+      <command:verb>Merge</command:verb>
+      <command:noun>Hashtable</command:noun>
+      <maml:description>
+        <maml:para>Merges two hashtables together</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Merges two hashtables together. If a key exists in both the `BaseObject` and `InputObject` then the value from `InputObject` will be used. If `-Deep` is specified then when a value is an array or another hashtable then the cmdlet will attempt to merge them.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Merge-Hashtable</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>BaseObject</maml:name>
+          <maml:description>
+            <maml:para>The base object to be used as part of the merge.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>InputObject</maml:name>
+          <maml:description>
+            <maml:para>The object that should be merged with the `BaseObject`</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Hashtable[]</command:parameterValue>
+          <dev:type>
+            <maml:name>Hashtable[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>Deep</maml:name>
+          <maml:description>
+            <maml:para>Whether or not to perform a deep merge. This will inspect each value and if they are another object that can be merged (arrays/hashes) then they will be merged.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>BaseObject</maml:name>
+        <maml:description>
+          <maml:para>The base object to be used as part of the merge.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Hashtable</command:parameterValue>
+        <dev:type>
+          <maml:name>Hashtable</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>Deep</maml:name>
+        <maml:description>
+          <maml:para>Whether or not to perform a deep merge. This will inspect each value and if they are another object that can be merged (arrays/hashes) then they will be merged.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>InputObject</maml:name>
+        <maml:description>
+          <maml:para>The object that should be merged with the `BaseObject`</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Hashtable[]</command:parameterValue>
+        <dev:type>
+          <maml:name>Hashtable[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>------------------- Example 1: Simple merge -------------------</maml:title>
+        <dev:code>&gt; $hash = @{ 
+key1 = 'value1'
+key2 = 'value2'
+}
+
+&gt; $hash2 = @{
+key1 = 'value1'
+key2 = 'value3'
+}
+
+&gt; Merge-Hashtable -BaseObject $hash -InputObject $hash2
+
+Name                           Value
+----                           -----
+key2                           value3
+key1                           value1</dev:code>
+        <dev:remarks>
+          <maml:para>Performs a simple merge, as key2 exists in both hashtables its value is replaced by the value of the `InputObject` hashtable.</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>-------------------- Example 2: Deep merge --------------------</maml:title>
+        <dev:code>&gt; $hash1 = @{
+key1 = 'value1'
+arr1 = @('a','b','c')
+nested_hash1 = @{ 'key2' = 'value2'}
+}
+
+&gt; $hash2 = @{
+key1 = 'value1'
+arr1 = @('a','d','e')
+nested_hash1 = @{'key2' = 'value3';'key3' = 'value4'}
+}
+
+&gt; Merge-Hashtable -BaseObject $hash1 -InputObject $hash2 -Deep
+
+Name                           Value
+----                           -----
+arr1                           {a, b, c, d…}
+key1                           value1
+nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
+        <dev:remarks>
+          <maml:para>Performs a deep merge of the two hashtables. The values of `arr1` are merged together and duplicates removed. `key2` from `nested_hash1` has been overwritten as it exists in both, `key3` has been added.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>New-BrownservePowerShellModule</command:name>
       <command:verb>New</command:verb>
       <command:noun>BrownservePowerShellModule</command:noun>
@@ -3785,7 +4190,7 @@ As many native commands can write verbose/logging information to stderr this cmd
           </dev:type>
           <dev:defaultValue>None</dev:defaultValue>
         </command:parameter>
-        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>Description</maml:name>
           <maml:description>
             <maml:para>The description of the module, used to fill out the synopsis heading.</maml:para>
@@ -3820,6 +4225,30 @@ As many native commands can write verbose/logging information to stderr this cmd
           </dev:type>
           <dev:defaultValue>False</dev:defaultValue>
         </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>ModuleGUID</maml:name>
+          <maml:description>
+            <maml:para>The GUID to use for the module, if none provided one will be generated automatically</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Guid</command:parameterValue>
+          <dev:type>
+            <maml:name>Guid</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>ModuleTags</maml:name>
+          <maml:description>
+            <maml:para>Optional set of tags to use for the module</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
       </command:syntaxItem>
     </command:syntax>
     <command:parameters>
@@ -3835,7 +4264,7 @@ As many native commands can write verbose/logging information to stderr this cmd
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
       </command:parameter>
-      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>Description</maml:name>
         <maml:description>
           <maml:para>The description of the module, used to fill out the synopsis heading.</maml:para>
@@ -3859,6 +4288,18 @@ As many native commands can write verbose/logging information to stderr this cmd
         </dev:type>
         <dev:defaultValue>False</dev:defaultValue>
       </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>ModuleGUID</maml:name>
+        <maml:description>
+          <maml:para>The GUID to use for the module, if none provided one will be generated automatically</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Guid</command:parameterValue>
+        <dev:type>
+          <maml:name>Guid</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="name">
         <maml:name>ModuleName</maml:name>
         <maml:description>
@@ -3867,6 +4308,18 @@ As many native commands can write verbose/logging information to stderr this cmd
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
           <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>ModuleTags</maml:name>
+        <maml:description>
+          <maml:para>Optional set of tags to use for the module</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+        <dev:type>
+          <maml:name>String[]</maml:name>
           <maml:uri />
         </dev:type>
         <dev:defaultValue>None</dev:defaultValue>
@@ -3919,6 +4372,215 @@ As many native commands can write verbose/logging information to stderr this cmd
     -Customisations '$foo = "bar"'</dev:code>
         <dev:remarks>
           <maml:para>This would create a new module in the C:\temp\TestModule folder called `TestModule.psm1` with the supplied description and custom code.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>New-BrownservePowerShellModuleBuild</command:name>
+      <command:verb>New</command:verb>
+      <command:noun>BrownservePowerShellModuleBuild</command:noun>
+      <maml:description>
+        <maml:para>Adds the various requirements to build a PowerShell module to a given project/repo. This cmdlet is still in development</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Adds the various requirements to build a PowerShell module to a given project/repo</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>New-BrownservePowerShellModuleBuild</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>CICDProvider</maml:name>
+          <maml:description>
+            <maml:para>The CICD provider that will be used with this project.</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">GitHubActions</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">TeamCity</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">BrownserveCICD</command:parameterValue>
+          <dev:type>
+            <maml:name>BrownserveCICD</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>ModuleInfo</maml:name>
+          <maml:description>
+            <maml:para>The modules info</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">BrownservePowerShellModule</command:parameterValue>
+          <dev:type>
+            <maml:name>BrownservePowerShellModule</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+          <maml:name>RepoPath</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill RepoPath Description }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+          <maml:name>RepoName</maml:name>
+          <maml:description>
+            <maml:para>{{ Fill RepoName Description }}</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>CICDProvider</maml:name>
+        <maml:description>
+          <maml:para>The CICD provider that will be used with this project.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">BrownserveCICD</command:parameterValue>
+        <dev:type>
+          <maml:name>BrownserveCICD</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>ModuleInfo</maml:name>
+        <maml:description>
+          <maml:para>The modules info</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">BrownservePowerShellModule</command:parameterValue>
+        <dev:type>
+          <maml:name>BrownservePowerShellModule</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
+        <maml:name>RepoName</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill RepoName Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <maml:name>RepoPath</maml:name>
+        <maml:description>
+          <maml:para>{{ Fill RepoPath Description }}</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>New-BrownservePowerShellModuleBuild -CICDProvider 'GitHubActions' -RepoPath 'C:\myPowerShellModule' -ModuleInfo 'C:\myPowerShellModule\ModuleInfo.json'</dev:code>
+        <dev:remarks>
+          <maml:para>Would create the various files require to build a PowerShell module at the given repo</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>New-BrownserveTemporaryDirectory</command:name>
+      <command:verb>New</command:verb>
+      <command:noun>BrownserveTemporaryDirectory</command:noun>
+      <maml:description>
+        <maml:para>Creates a temporary directory</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Creates a temporary directory in a known good location.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>New-BrownserveTemporaryDirectory</maml:name>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters />
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <dev:remarks>
+          <maml:para>{{ Add example description here }}</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -4152,6 +4814,133 @@ If none is provided then the cmdlet will use the `$BrownserveTempLocation` direc
         <dev:code>New-BrownserveTemporaryFile -SkipCreation</dev:code>
         <dev:remarks>
           <maml:para>This would return a path with a random file name and a `.tmp` extension (e.g. `as3fdg.tmp`) but the file would not be created by this cmdlet.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>New-GitBranch</command:name>
+      <command:verb>New</command:verb>
+      <command:noun>GitBranch</command:noun>
+      <maml:description>
+        <maml:para>Creates a new branch in a given git repository</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Creates a new branch in a given git repository, you can optionally checkout the new branch after creation.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>New-GitBranch</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>RepositoryPath</maml:name>
+          <maml:description>
+            <maml:para>The path to the repository</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>BranchName</maml:name>
+          <maml:description>
+            <maml:para>The name of the branch to create</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+          <maml:name>Checkout</maml:name>
+          <maml:description>
+            <maml:para>If set to `$true` will checkout the branch after creation</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+          <dev:type>
+            <maml:name>Boolean</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>True</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>BranchName</maml:name>
+        <maml:description>
+          <maml:para>The name of the branch to create</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <maml:name>Checkout</maml:name>
+        <maml:description>
+          <maml:para>If set to `$true` will checkout the branch after creation</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">Boolean</command:parameterValue>
+        <dev:type>
+          <maml:name>Boolean</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>True</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>RepositoryPath</maml:name>
+        <maml:description>
+          <maml:para>The path to the repository</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>---------------- Example 1: Create a new branch ----------------</maml:title>
+        <dev:code>New-GitBranch -RepositoryPath 'C:\myRepo' -BranchName 'new_branch'</dev:code>
+        <dev:remarks>
+          <maml:para>Would create a new branch in the `C:\myRepo` repository called `new_branch`. Upon successful creation it would be checked out.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -4782,60 +5571,6 @@ If none is provided then the cmdlet will use the `$BrownserveTempLocation` direc
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
-      <command:name>New-TempDirectory</command:name>
-      <command:verb>New</command:verb>
-      <command:noun>TempDirectory</command:noun>
-      <maml:description>
-        <maml:para>Creates a new temporary directory with a random name in the systems temporary directory</maml:para>
-      </maml:description>
-    </command:details>
-    <maml:description>
-      <maml:para>Creates a new temporary directory with a random name in the systems temporary directory</maml:para>
-    </maml:description>
-    <command:syntax>
-      <command:syntaxItem>
-        <maml:name>New-TempDirectory</maml:name>
-      </command:syntaxItem>
-    </command:syntax>
-    <command:parameters />
-    <command:inputTypes>
-      <command:inputType>
-        <dev:type>
-          <maml:name>None</maml:name>
-        </dev:type>
-        <maml:description>
-          <maml:para></maml:para>
-        </maml:description>
-      </command:inputType>
-    </command:inputTypes>
-    <command:returnValues>
-      <command:returnValue>
-        <dev:type>
-          <maml:name>System.Object</maml:name>
-        </dev:type>
-        <maml:description>
-          <maml:para></maml:para>
-        </maml:description>
-      </command:returnValue>
-    </command:returnValues>
-    <maml:alertSet>
-      <maml:alert>
-        <maml:para></maml:para>
-      </maml:alert>
-    </maml:alertSet>
-    <command:examples>
-      <command:example>
-        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; New-TempDirectory</dev:code>
-        <dev:remarks>
-          <maml:para>Would create a new temp directory in C:\Windows\temp</maml:para>
-        </dev:remarks>
-      </command:example>
-    </command:examples>
-    <command:relatedLinks />
-  </command:command>
-  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
-    <command:details>
       <command:name>New-TerraformResourceBlock</command:name>
       <command:verb>New</command:verb>
       <command:noun>TerraformResourceBlock</command:noun>
@@ -5270,6 +6005,258 @@ resource "github_repository" "Brownserve_PSTools" {
         <dev:code>Read-Changelog -ChangelogPath C:\repos\MyRepo\CHANGELOG.md</dev:code>
         <dev:remarks>
           <maml:para>Returns version number and release notes from the changelog at 'C:\repos\MyRepo\CHANGELOG.md'</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Read-ConfigurationFromFile</command:name>
+      <command:verb>Read</command:verb>
+      <command:noun>ConfigurationFromFile</command:noun>
+      <maml:description>
+        <maml:para>Reads values from a configuration file</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>This cmdlet allows us to read a JSON configuration file and extract the values. The purpose of this is to allow us to create cmdlets that perform a complex set of tasks which require equally complex parameter types and abstract the default values for these parameters into easy to read/write JSON objects.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Read-ConfigurationFromFile</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>ConfigurationFile</maml:name>
+          <maml:description>
+            <maml:para>The configuration file to be read.</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AsHashtable</maml:name>
+          <maml:description>
+            <maml:para>Returns a hashtable instead of a PowerShell object, this is especially useful when you want to iterate over the values.</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>AsHashtable</maml:name>
+        <maml:description>
+          <maml:para>Returns a hashtable instead of a PowerShell object, this is especially useful when you want to iterate over the values.</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>ConfigurationFile</maml:name>
+        <maml:description>
+          <maml:para>The configuration file to be read.</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>Read-ConfigurationFromFile -ConfigurationFile 'C:\myRepo\.config\SpecialConfig.json'</dev:code>
+        <dev:remarks>
+          <maml:para>Would read the given configuration file and return a PSObject of the values</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Search-FileContent</command:name>
+      <command:verb>Search</command:verb>
+      <command:noun>FileContent</command:noun>
+      <maml:description>
+        <maml:para>Searches a file for a given set of regex and returns any text between them.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Searches a file for a given set of regex and returns any text between them.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Search-FileContent</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>FilePath</maml:name>
+          <maml:description>
+            <maml:para>The path to the file to search for content</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>StartStringPattern</maml:name>
+          <maml:description>
+            <maml:para>The first line to look for</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+          <maml:name>StopStringPattern</maml:name>
+          <maml:description>
+            <maml:para>The last line to look for, if not provided the end of the file will be used</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AsString</maml:name>
+          <maml:description>
+            <maml:para>Returns the text as a string instead of an array</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>AsString</maml:name>
+        <maml:description>
+          <maml:para>Returns the text as a string instead of an array</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>FilePath</maml:name>
+        <maml:description>
+          <maml:para>The path to the file to search for content</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>StartStringPattern</maml:name>
+        <maml:description>
+          <maml:para>The first line to look for</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
+        <maml:name>StopStringPattern</maml:name>
+        <maml:description>
+          <maml:para>The last line to look for, if not provided the end of the file will be used</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>Search-FileContent -FilePath 'C:\MyFile.txt' -StartStringPattern '### Start Section' -StopStringPattern '### Stop Section'</dev:code>
+        <dev:remarks>
+          <maml:para>Would return any text found between the `### Start Section` and `### Stop Section` strings</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -6013,6 +7000,217 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Split-URI</command:name>
+      <command:verb>Split</command:verb>
+      <command:noun>URI</command:noun>
+      <maml:description>
+        <maml:para>Takes a given URI and splits it into its constituent parts.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>This will split a given URI into its relevant parts, protocol/domain/subdomain/hostname and the full URI.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Split-URI</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+          <maml:name>InputObject</maml:name>
+          <maml:description>
+            <maml:para>The URI to be split</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+          <dev:type>
+            <maml:name>String[]</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>AsHashtable</maml:name>
+          <maml:description>
+            <maml:para>Returns a hashtable instead of a PS object</maml:para>
+          </maml:description>
+          <dev:type>
+            <maml:name>SwitchParameter</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>False</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>AsHashtable</maml:name>
+        <maml:description>
+          <maml:para>Returns a hashtable instead of a PS object</maml:para>
+        </maml:description>
+        <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
+        <dev:type>
+          <maml:name>SwitchParameter</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>False</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
+        <maml:name>InputObject</maml:name>
+        <maml:description>
+          <maml:para>The URI to be split</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
+        <dev:type>
+          <maml:name>String[]</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String[]</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>--------------------- Example 1: Split URL ---------------------</maml:title>
+        <dev:code>'https://www.example.com/' | Split-URI
+
+Protocol  : https
+Domain    : com
+Subdomain : www
+Hostname  : example
+URI       : https://www.example.com/</dev:code>
+        <dev:remarks>
+          <maml:para>Splits the given URL into the parts listed above.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Switch-GitBranch</command:name>
+      <command:verb>Switch</command:verb>
+      <command:noun>GitBranch</command:noun>
+      <maml:description>
+        <maml:para>Checks out a given branch.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>Checks out a given branch.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Switch-GitBranch</maml:name>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>RepositoryPath</maml:name>
+          <maml:description>
+            <maml:para>The path to the repository</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+          <maml:name>BranchName</maml:name>
+          <maml:description>
+            <maml:para>The branch to checkout</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="1" aliases="none">
+        <maml:name>BranchName</maml:name>
+        <maml:description>
+          <maml:para>The branch to checkout</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>RepositoryPath</maml:name>
+        <maml:description>
+          <maml:para>The path to the repository</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>Switch-GitBranch -RepositoryPath 'C:\myRepo' -BranchName 'my_branch'</dev:code>
+        <dev:remarks>
+          <maml:para>Would checkout the branch `my_branch`</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Test-Administrator</command:name>
       <command:verb>Test</command:verb>
       <command:noun>Administrator</command:noun>
@@ -6295,6 +7493,114 @@ This is useful for cases where you want to quickly terminate a PowerShell run wh
         <dev:code>PS C:\&gt; Update-BrownservePowerShellModule -Path C:\Brownserve.PSTools.psm1</dev:code>
         <dev:remarks>
           <maml:para>This would update the module at the given path.</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
+      <command:name>Update-BrownserveRepository</command:name>
+      <command:verb>Update</command:verb>
+      <command:noun>BrownserveRepository</command:noun>
+      <maml:description>
+        <maml:para>Updates a given repository to use the latest tooling and settings</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>This cmdlet can be used after a repository has been initialised using the `Initialize-BrownserveRepository` cmdlet to keep the projects tooling and settings up to date.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Update-BrownserveRepository</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+          <maml:name>RepoPath</maml:name>
+          <maml:description>
+            <maml:para>The path to the repository to be updated</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>ProjectType</maml:name>
+          <maml:description>
+            <maml:para>The type of project this repository holds</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">PowerShellModule</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">BrownservePSTools</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Generic</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">BrownserveRepoProjectType</command:parameterValue>
+          <dev:type>
+            <maml:name>BrownserveRepoProjectType</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>ProjectType</maml:name>
+        <maml:description>
+          <maml:para>The type of project this repository holds</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">BrownserveRepoProjectType</command:parameterValue>
+        <dev:type>
+          <maml:name>BrownserveRepoProjectType</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
+        <maml:name>RepoPath</maml:name>
+        <maml:description>
+          <maml:para>The path to the repository to be updated</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>None</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
+        <dev:code>Update-BrownserveRepository -RepoPath 'C:\myPowershellModule' -ProjectType 'PowerShellModule'</dev:code>
+        <dev:remarks>
+          <maml:para>Would update the project at 'C:\myPowershellModule'</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
