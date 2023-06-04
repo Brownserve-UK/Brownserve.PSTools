@@ -13,8 +13,8 @@ Creates a new PowerShell module using the standard Brownserve format
 ## SYNTAX
 
 ```
-New-BrownservePowerShellModule [-Path] <String> [-ModuleName] <String> [[-Description] <String>]
- [[-Customisations] <String>] [-Force] [<CommonParameters>]
+New-BrownservePowerShellModule [-Path] <String> [-ModuleName] <String> [-ModuleGUID <Guid>]
+ [-ModuleTags <String[]>] [-Description] <String> [[-Customisations] <String>] [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -58,7 +58,7 @@ Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
+Required: True
 Position: 2
 Default value: None
 Accept pipeline input: False
@@ -80,6 +80,21 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -ModuleGUID
+The GUID to use for the module, if none provided one will be generated automatically
+
+```yaml
+Type: Guid
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -ModuleName
 The name of the module to be created.
 
@@ -90,6 +105,21 @@ Aliases: name
 
 Required: True
 Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ModuleTags
+Optional set of tags to use for the module
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
