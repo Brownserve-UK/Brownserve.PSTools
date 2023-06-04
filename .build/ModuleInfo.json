@@ -1,0 +1,6 @@
+{
+    "name": "Brownserve.PSTools",
+    "description": "A collection of common tools for use in Brownserve projects",
+    "guid": "44b45ef7-6e06-4d07-901a-210b8df05b96",
+    "tags": ["CI","CD","Brownserve-UK"]
+}

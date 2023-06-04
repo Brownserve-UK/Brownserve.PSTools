@@ -10,15 +10,25 @@ class InitPath
     [array] $ChildPaths
     # The description of the variable to be set in the _init script
     [string] $Description
-    # When using permanent paths this is the local location to the path
-    [string] $LocalPath
+    # Whether the path is a directory or file
+    [string] $PathType
     
 
     # These first 2 constructors allow us to easily spin up InitPath's from objects.
     InitPath([pscustomobject]$InitPath)
     {
-        $this.Path = $InitPath.path
-        $this.VariableName = $InitPath.VariableName
+        $RequiredProps = @('path','VariableName','PathType')
+        foreach ($Prop in $RequiredProps)
+        {
+            if (!$InitPath.$Prop)
+            {
+                throw "Object missing property '$Prop'"
+            }
+            else
+            {
+                $this.$Prop = $InitPath.$Prop
+            }
+        }
         if ($InitPath.ChildPaths)
         {
             $this.ChildPaths = $InitPath.ChildPaths
@@ -26,17 +36,23 @@ class InitPath
         if ($InitPath.Description)
         {
             $this.Description = $InitPath.Description
-        }
-        if ($InitPath.LocalPath)
-        {
-            $this.LocalPath = $InitPath.LocalPath
         }
     }
 
     InitPath([hashtable]$InitPath)
     {
-        $this.Path = $InitPath.path
-        $this.VariableName = $InitPath.VariableName
+        $RequiredKeys = @('path','VariableName','PathType')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$InitPath.$Key)
+            {
+                throw "Hashtable missing property '$Key'"
+            }
+            else
+            {
+                $this.$Key = $InitPath.$Key
+            }
+        }
         if ($InitPath.ChildPaths)
         {
             $this.ChildPaths = $InitPath.ChildPaths
@@ -45,26 +61,199 @@ class InitPath
         {
             $this.Description = $InitPath.Description
         }
-        if ($InitPath.LocalPath)
+    }
+}
+
+enum BrownserveCICD
+{
+    GitHubActions
+    TeamCity
+}
+
+enum BrownserveRepoProjectType
+{
+    PowerShellModule
+    BrownservePSTools
+    Generic
+}
+<#
+    This class is used to create GitHub Actions workflow jobs
+#>
+class GitHubActionsJob
+{
+    [string]$JobTitle
+    [string]$RunsOn
+    [hashtable[]]$Steps # Can't used ordered here, https://github.com/PowerShell/vscode-powershell/issues/1969#issuecomment-651874245
+
+    GitHubActionsJob([hashtable]$Hash)
+    {
+        $RequiredKeys = @('JobTitle', 'RunsOn', 'Steps')
+        foreach ($Key in $RequiredKeys)
         {
-            $this.LocalPath = $InitPath.LocalPath
+            if (!$Hash.$Key)
+            {
+                throw "Hashtable missing key '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Hash.$Key
+            }
+        }
+    }
+}
+
+class PaketDependencyRule
+{
+    [string]$Source
+    [string]$PackageName
+
+    PaketDependencyRule([hashtable]$Hashtable)
+    {
+        $RequiredKeys = @('Source', 'PackageName')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Hashtable.$Key)
+            {
+                throw "Hashtable missing key '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Hashtable.$Key
+            }
         }
     }
 
-    # Allow us to set the values by using 2 strings
-    InitPath([string]$VariableName, [string]$Path)
+    PaketDependencyRule([pscustomobject]$Object)
     {
-        $this.Path = $Path
-        $this.VariableName = $VariableName
+        $RequiredKeys = @('Source', 'PackageName')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Object.$Key)
+            {
+                throw "Object missing property '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Object.$Key
+            }
+        }
+    }
+}
+
+class PaketDependency
+{
+    [PaketDependencyRule[]]$Rule
+    [string]$Comment
+
+    PaketDependency([hashtable]$Hashtable)
+    {
+        if (!$Hashtable.Rule)
+        {
+            throw "Hashtable missing key 'Rule'"
+        }
+            
+        $this.Rule = $Hashtable.Rule
+        if ($Hashtable.Comment)
+        {
+            # Try to ensure every line starts with the pound symbol
+            $LocalComment = $Hashtable.Comment -split "`n"
+            $SanitizedComment = ''
+            $LocalComment | ForEach-Object {
+                if ($_ -notmatch '^\#')
+                {
+                    $SanitizedComment += "# $_"
+                }
+                else
+                {
+                    $SanitizedComment += $_
+                }
+                if ($_ -notmatch $LocalComment[-1])
+                {
+                    $SanitizedComment += "`n"
+                }
+            }
+            $this.Comment = $SanitizedComment
+        }
     }
 
-    # Allow us to set the values by 3 strings, so we can have additional child paths if we want
-    InitPath([string]$VariableName, [string]$Path, [array]$ChildPaths)
+    PaketDependency([pscustomobject]$Object)
     {
-        $this.Path = $Path
-        $this.VariableName = $VariableName
-        $this.ChildPaths = $ChildPaths
+        if (!$Object.Rule)
+        {
+            throw "Hashtable missing key 'Rule'"
+        }
+            
+        $this.Rule = $Object.Rule
+        if ($Object.Comment)
+        {
+            # Try to ensure every line starts with the pound symbol
+            $LocalComment = $Object.Comment -split "`n"
+            $SanitizedComment = ''
+            $LocalComment | ForEach-Object {
+                if ($_ -notmatch '^\#')
+                {
+                    $SanitizedComment += "# $_"
+                }
+                else
+                {
+                    $SanitizedComment += $_
+                }
+                if ($_ -notmatch $LocalComment[-1])
+                {
+                    $SanitizedComment += "`n"
+                }
+            }
+            $this.Comment = $SanitizedComment
+        }
+    }
+}
+
+class PackageAlias
+{
+    # The alias that should be set
+    [string] $Alias
+    # The name of the binary/executable/file to have the alias set
+    [string] $FileName
+    # If specified will create a global variable that also points to the same file (for external apps that can't see PowerShell aliases)
+    [string] $VariableName
+
+    PackageAlias([hashtable]$Hash)
+    {
+        $RequiredKeys = @('Alias','FileName')
+        foreach ($Key in $RequiredKeys)
+        {
+            if (!$Hash.$Key)
+            {
+                throw "Hashtable missing key '$Key'"
+            }
+            else
+            {
+                $this.$Key = $Hash.$Key
+            }
+        }
+        if ($Hash.VariableName)
+        {
+            $this.VariableName = $Hash.VariableName
+        }
     }
 
-    
+    PackageAlias([pscustomobject]$Obj)
+    {
+        $RequiredProps = @('Alias','FileName')
+        foreach ($Prop in $RequiredProps)
+        {
+            if (!$Obj.$Prop)
+            {
+                throw "Object missing property '$Prop'"
+            }
+            else
+            {
+                $this.$Prop = $Obj.$Prop
+            }
+        }
+        if ($Obj.VariableName)
+        {
+            $this.VariableName = $Obj.VariableName
+        }
+    }
 }
