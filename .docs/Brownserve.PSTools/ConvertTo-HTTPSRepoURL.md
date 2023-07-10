@@ -59,7 +59,6 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### GitURI[]
-
 ## OUTPUTS
 
 ### System.Object
