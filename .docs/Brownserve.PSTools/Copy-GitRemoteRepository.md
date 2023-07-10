@@ -5,34 +5,48 @@ online version:
 schema: 2.0.0
 ---
 
-# New-GitBranch
+# Copy-GitRemoteRepository
 
 ## SYNOPSIS
-Creates a new branch in a given git repository
+Clones a given git repository to the local machine
 
 ## SYNTAX
 
 ```
-New-GitBranch [[-RepositoryPath] <String>] [-BranchName] <String> [[-Checkout] <Boolean>] [<CommonParameters>]
+Copy-GitRemoteRepository [-URI] <String> [[-Path] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Creates a new branch in a given git repository, you can optionally checkout the new branch after creation.
+Clones a given git repository to the local machine
 
 ## EXAMPLES
 
-### Example 1: Create a new branch
+### Example 1
 ```powershell
-New-GitBranch -RepositoryPath 'C:\myRepo' -BranchName 'new_branch'
+Copy-GitRemoteRepository 'git@github.com:Brownserve-UK/Brownserve.PSTools.git' 'C:\MyRepos\'
 ```
 
-Would create a new branch in the `C:\myRepo` repository called `new_branch`.
-Upon successful creation it would be checked out.
+Would clone the Brownserve.PSTools repository to `C:\MyRepos\Brownserve.PSTools`
 
 ## PARAMETERS
 
-### -BranchName
-The name of the branch to create
+### -Path
+The directory in which to store the repository, a child directory will be made for the repository
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -URI
+The URI to the remote repository to clone
 
 ```yaml
 Type: String
@@ -40,36 +54,6 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Checkout
-If set to `$true` will checkout the branch after creation
-
-```yaml
-Type: Boolean
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 2
-Default value: True
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -RepositoryPath
-The path to the repository
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
 Position: 0
 Default value: None
 Accept pipeline input: False

@@ -108,7 +108,8 @@ Merges two hashtables together
 Creates a new PowerShell module using the standard Brownserve format
 
 ### [New-BrownservePowerShellModuleBuild](./Brownserve.PSTools/New-BrownservePowerShellModuleBuild.md)
-Adds the various requirements to build a PowerShell module to a given project/repo
+Adds the various requirements to build a PowerShell module to a given project/repo.
+**This cmdlet is still in development**
 
 ### [New-BrownserveTemporaryDirectory](./Brownserve.PSTools/New-BrownserveTemporaryDirectory.md)
 Creates a temporary directory
