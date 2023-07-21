@@ -24,7 +24,7 @@ function Assert-Directory
             $PathDetails = Get-Item $Path -Force -ErrorAction Stop
             if (!$PathDetails.PSIsContainer)
             {
-                Write-Error 'Path is not a directory'
+                Write-Error 'Path is not a directory' -ErrorAction Stop
             }
         }
         catch
