@@ -35,6 +35,9 @@ Converts a git SSH URI into the HTTPS equivalent
 ### [ConvertTo-SortedHashtable](./Brownserve.PSTools/ConvertTo-SortedHashtable.md)
 Converts a given hashtable to an alphabetically sorted hashtable
 
+### [Copy-GitRemoteRepository](./Brownserve.PSTools/Copy-GitRemoteRepository.md)
+Clones a given git repository to the local machine
+
 ### [Format-TerraformResourceName](./Brownserve.PSTools/Format-TerraformResourceName.md)
 Strips out illegal characters from Terraform resource names
 
@@ -74,11 +77,20 @@ Downloads the given version of Vault for your OS
 ### [Get-VaultSecret](./Brownserve.PSTools/Get-VaultSecret.md)
 Returns a secret from a given vault path
 
+### [Import-PlatyPSModule](./Brownserve.PSTools/Import-PlatyPSModule.md)
+Imports the PlatyPS module avoiding collisions with other modules.
+
+### [Import-PowerShellYAMLModule](./Brownserve.PSTools/Import-PowerShellYAMLModule.md)
+Wrapper cmdlet to load the powershell-yaml module
+
 ### [Initialize-BrownserveRepository](./Brownserve.PSTools/Initialize-BrownserveRepository.md)
 Prepares a repository for use for a given project
 
 ### [Install-ChocolateyPackage](./Brownserve.PSTools/Install-ChocolateyPackage.md)
 Helper cmdlet for installing Chocolatey packages programmatically
+
+### [Invoke-ConvertToYaml](./Brownserve.PSTools/Invoke-ConvertToYaml.md)
+Wrapper cmdlet for ConvertTo-YAML
 
 ### [Invoke-DownloadMethod](./Brownserve.PSTools/Invoke-DownloadMethod.md)
 Downloads a file using the best method available depending on operating system.
