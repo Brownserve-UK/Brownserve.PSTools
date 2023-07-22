@@ -211,6 +211,7 @@ function Build-ModuleDocumentation
             #>
             if (!$PreloadedPlatyPS)
             {
+                Write-Verbose "Unloading PlatyPS module."
                 Remove-Module 'platyPS' -Force -ErrorAction 'SilentlyContinue'
                 if ((Get-Module 'platyPS'))
                 {
