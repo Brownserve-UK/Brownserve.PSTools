@@ -40,37 +40,7 @@ function Build-ModuleDocumentation
         Assert-Directory $DocumentationPath -ErrorAction 'Stop'
 
         # First we check if the module is already loaded
-        $PreloadedPlatyPS = Get-Module -Name 'PlatyPS'
-        # If it is then we don't need to do anything, the user has already provided us with platyPS
-        try
-        {
-            # First see if the special Brownserve variable is set, if so attempt to download the version from the repo.
-            # N.B. we always import using the -Global flag because otherwise when this module gets unloaded as part of the -ReloadModule flag
-            # it takes any imported modules with it 😬
-            if (!$PreloadedPlatyPS)
-            {
-                if ($Global:BrownserveRepoPlatyPSPath)
-                {
-                    Write-Verbose 'Loading local version of platyPS'
-                    Import-Module $Global:BrownserveRepoPlatyPSPath -Force -Global -ErrorAction 'Stop' -Verbose:$false
-                }
-                # Otherwise attempt to load any version installed on the system
-                else
-                {
-                    Write-Verbose 'Loading system version of platyPS'
-                    Import-Module 'PlatyPS' -Force -Global -ErrorAction 'Stop' -Verbose:$false
-                }
-            }
-        }
-        catch
-        {
-            $ErrorMessage = 'Failed to load platyPS module.'
-            if (!$Global:BrownserveRepoPlatyPSPath)
-            {
-                $ErrorMessage += "`nThe '`$Global:BrownserveRepoPlatyPSPath' variable has not been set and PowerShell failed to load any versions installed locally."
-            }
-            throw "$ErrorMessage.`n$($_.Exception.Message)"
-        }
+        $PreloadedPlatyPS = Import-PlatyPSModule -ErrorAction 'Stop'
 
         $Return = @()
     }
@@ -241,6 +211,7 @@ function Build-ModuleDocumentation
             #>
             if (!$PreloadedPlatyPS)
             {
+                Write-Verbose "Unloading PlatyPS module."
                 Remove-Module 'platyPS' -Force -ErrorAction 'SilentlyContinue'
                 if ((Get-Module 'platyPS'))
                 {
