@@ -5,6 +5,17 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.13.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.13.1) (2023-07-23)
+
+**Features**
+- Fix: Invoke-ConvertToYaml fails with $null params
+
+**Bugfixes**
+- Fix: Invoke-ConvertToYaml fails with $null params
+  
+**Known Issues**
+N/A
+
 ### [v0.13.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.13.0) (2023-07-23)
 
 **Features**
