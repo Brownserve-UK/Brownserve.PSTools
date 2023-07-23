@@ -34,7 +34,15 @@ function Invoke-ConvertToYaml
 
         try
         {
-            $Return = ConvertTo-Yaml -Data $InputObject @Parameters -ErrorAction 'Stop'
+            # Seems like splatting "$null" causes weirdness, so only splat if we have params
+            if ($null -ne $Parameters)
+            {
+                $Return = ConvertTo-Yaml -Data $InputObject @Parameters -ErrorAction 'Stop'
+            }
+            else
+            {
+                $Return = ConvertTo-Yaml -Data $InputObject -ErrorAction 'Stop'
+            }
         }
         catch
         {
