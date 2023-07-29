@@ -2,7 +2,7 @@
 Module Name: Brownserve.PSTools
 Module Guid: 44b45ef7-6e06-4d07-901a-210b8df05b96
 Download Help Link: https://github.com/Brownserve-UK/Brownserve.PSTools/tree/main/.docs/Brownserve.PSTools
-Help Version: 0.13.0
+Help Version: 0.14.0
 Locale: en-US
 ---
 
@@ -88,6 +88,9 @@ Prepares a repository for use for a given project
 
 ### [Install-ChocolateyPackage](./Brownserve.PSTools/Install-ChocolateyPackage.md)
 Helper cmdlet for installing Chocolatey packages programmatically
+
+### [Invoke-ConvertFromYaml](./Brownserve.PSTools/Invoke-ConvertFromYaml.md)
+Wrapper cmdlet for ConvertFrom-Yaml
 
 ### [Invoke-ConvertToYaml](./Brownserve.PSTools/Invoke-ConvertToYaml.md)
 Wrapper cmdlet for ConvertTo-YAML
