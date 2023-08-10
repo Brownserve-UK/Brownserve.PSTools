@@ -35,11 +35,11 @@ function New-BlockComment
         $InputObject | ForEach-Object {
             if ($_ -match '^\s*$')
             {
-                $Return += $_
+                $Return += "$_`n"
             }
             else
             {
-                $Return += "$CommentCharacter $_"
+                $Return += "$CommentCharacter $_`n"
             }
         }
     }
