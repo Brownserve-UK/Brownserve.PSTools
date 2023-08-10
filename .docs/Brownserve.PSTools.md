@@ -29,6 +29,9 @@ Ensures that a directory is valid
 ### [Build-ModuleDocumentation](./Brownserve.PSTools/Build-ModuleDocumentation.md)
 This will build markdown PowerShell module documentation using PlatyPS
 
+### [ConvertTo-BlockComment](./Brownserve.PSTools/ConvertTo-BlockComment.md)
+Converts a given text string into a block comment
+
 ### [ConvertTo-HTTPSRepoURL](./Brownserve.PSTools/ConvertTo-HTTPSRepoURL.md)
 Converts a git SSH URI into the HTTPS equivalent
 
