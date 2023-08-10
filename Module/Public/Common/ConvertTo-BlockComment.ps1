@@ -1,4 +1,4 @@
-function New-BlockComment
+function ConvertTo-BlockComment
 {
     [CmdletBinding()]
     param
@@ -26,14 +26,13 @@ function New-BlockComment
     
     begin
     {
-        
+        $Return = @()
     }
     
     process
     {
-        $Return = @()
         $InputObject | ForEach-Object {
-            if ($_ -match '^\s*$')
+            if ($_.StartsWith("$CommentCharacter"))
             {
                 $Return += "$_`n"
             }
@@ -48,7 +47,7 @@ function New-BlockComment
     {
         if ($Return.Count -gt 0)
         {
-            return $Return
+            return ($Return | Out-String -NoNewline)
         }
         else
         {
