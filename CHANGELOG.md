@@ -5,6 +5,17 @@ This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.h
 
 ## Release
 
+### [v0.15.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.15.0) (2023-08-10)
+
+**Features**
+- Add ConvertTo-BlockComment cmdlet
+
+**Bugfixes**
+N/A
+
+**Known Issues**
+N/A
+
 ### [v0.14.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.14.0) (2023-07-29)
 
 **Features**
