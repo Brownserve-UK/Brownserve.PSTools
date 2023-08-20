@@ -29,6 +29,7 @@ function Get-OpenPullRequests
         [string]
         $RepoName
     )
+    Write-Warning "Get-OpenPullRequests is deprecated and will be removed in a future release.`nUse Get-GitHubPullRequests instead"
     $Header = @{                                                                                                                                         
         Authorization = "token $GitHubToken"
         Accept        = 'application/vnd.github.v3+json'
