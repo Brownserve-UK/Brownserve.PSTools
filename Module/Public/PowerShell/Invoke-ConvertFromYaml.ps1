@@ -29,40 +29,94 @@ function Invoke-ConvertFromYaml
     
     process
     {
-        # First import the powershell-yaml module, if the cmdlet returns something then we must unload the module at the end
-        $LoadedModule = Import-PowerShellYAMLModule -ErrorAction 'Stop'
+        <#
+            There's an incompatibility between PlatyPS and PowerShell-YAML due to them both using the same assembly but requiring different versions.
+            See https://github.com/PowerShell/platyPS/issues/592 for more information.
+            This should be fixed in the future but PlatyPS are being very slow to ship the fix.
+            As it's very hard to completely get around this in the same session we'll create a new pwsh process to do the conversion.
+            We use a scriptblock to do this so that we can pass in the variable parameters and the input object.
+        #>
+        $ScriptBlock = {
+            param($Arguments)
+            $Return = $null
+            # First load the module
+            try
+            {
+                if ($Arguments.PowerShellYAMLPath)
+                {
+                    Import-Module $Arguments.PowerShellYAMLPath `
+                        -Force `
+                        -ErrorAction 'Stop' `
+                        -Verbose:$false
+                }
+                else
+                {
+                    Import-Module 'powershell-yaml' `
+                        -Force `
+                        -ErrorAction 'Stop' `
+                        -Verbose:$false
+                }
+            }
+            catch
+            {
+                $ErrorMessage = 'Failed to load powershell-yaml module.'
+                if (!$Arguments.PowerShellYAMLPath)
+                {
+                    $ErrorMessage += "`nThe '`$Global:BrownserveRepoPowerShellYAMLPath' variable has not been set and PowerShell failed to load any versions installed locally."
+                }
+                throw "$ErrorMessage.`n$($_.Exception.Message)"
+            }
+
+            try
+            {
+                # Seems like splatting "$null" causes weirdness, so only splat if we have params
+                if ($null -ne $Arguments.YamlParameters)
+                {
+                    $YamlParameters = $Arguments.YamlParameters
+                    $Return = ConvertFrom-Yaml -Yaml $Arguments.InputObject @YamlParameters -ErrorAction 'Stop'
+                }
+                else
+                {
+                    $Return = ConvertFrom-Yaml -Yaml $Arguments.InputObject -ErrorAction 'Stop'
+                }
+            }
+            catch
+            {
+                throw "`n$($_.Exception.Message)"
+            }
+            return $Return
+        }
 
         try
         {
-            # Seems like splatting "$null" causes weirdness, so only splat if we have params
-            if ($null -ne $Parameters)
-            {
-                $Return = ConvertFrom-YAML -yaml $InputObject @Parameters -ErrorAction 'Stop'
+            $Arguments = @{
+                InputObject = $InputObject
             }
-            else
+            if ($Global:BrownserveRepoPowerShellYAMLPath)
             {
-                $Return = ConvertFrom-YAML -yaml $InputObject -ErrorAction 'Stop'
+                $Arguments.Add('PowerShellYAMLPath',$Global:BrownserveRepoPowerShellYAMLPath)
+            }
+            if ($Parameters)
+            {
+                $Arguments.Add('YamlParameters',$Parameters)
+            }
+            $Result = & pwsh -NoLogo -NonInteractive -Command $ScriptBlock -Args $Arguments
+            if ($LASTEXITCODE -ne 0)
+            {
+                throw "Pwsh failed with exitcode $LASTEXITCODE"
             }
         }
         catch
         {
-            throw "`n$($_.Exception.Message)"
-        }
-        finally
-        {
-            if($LoadedModule)
-            {
-                Write-Verbose "Unloading powershell-yaml module"
-                Remove-Module 'powershell-yaml' -Force -ErrorAction SilentlyContinue -Verbose:$false
-            }
+            throw "Failed to convert YAML into a PowerShell object. `n$($_.Exception.Message)"
         }
     }
     
     end
     {
-        if ($Return)
+        if ($Result)
         {
-            return $Return
+            return $Result
         }
         else
         {
