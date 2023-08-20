@@ -2,7 +2,7 @@
 Module Name: Brownserve.PSTools
 Module Guid: 44b45ef7-6e06-4d07-901a-210b8df05b96
 Download Help Link: https://github.com/Brownserve-UK/Brownserve.PSTools/tree/main/.docs/Brownserve.PSTools
-Help Version: 0.14.0
+Help Version: 0.15.0
 Locale: en-US
 ---
 
@@ -49,6 +49,9 @@ Gets the current branches for the given repository
 
 ### [Get-GitCurrentBranch](./Brownserve.PSTools/Get-GitCurrentBranch.md)
 Gets the current branch for a given repository
+
+### [Get-GitHubPullRequests](./Brownserve.PSTools/Get-GitHubPullRequests.md)
+Gets pull request information from a given GitHub repository.
 
 ### [Get-GitHubRelease](./Brownserve.PSTools/Get-GitHubRelease.md)
 Gets a list of releases from a given GitHub repo

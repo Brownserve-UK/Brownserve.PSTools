@@ -8,6 +8,7 @@ schema: 2.0.0
 # Get-OpenPullRequests
 
 ## SYNOPSIS
+*This cmdlet is deprecated. Please use Get-GitHubOpenPullRequests instead*
 Gets the open Pull requests for a given repository
 
 ## SYNTAX
