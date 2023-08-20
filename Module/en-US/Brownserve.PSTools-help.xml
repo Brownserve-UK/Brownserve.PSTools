@@ -1448,6 +1448,185 @@ c                              3</dev:code>
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
+      <command:name>Get-GitHubPullRequests</command:name>
+      <command:verb>Get</command:verb>
+      <command:noun>GitHubPullRequests</command:noun>
+      <maml:description>
+        <maml:para>Gets pull request information from a given GitHub repository.</maml:para>
+      </maml:description>
+    </command:details>
+    <maml:description>
+      <maml:para>This cmdlet will return a list of pull requests from a given GitHub repository.
+You are able to get both open and closed pull requests.</maml:para>
+    </maml:description>
+    <command:syntax>
+      <command:syntaxItem>
+        <maml:name>Get-GitHubPullRequests</maml:name>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+          <maml:name>RepoName</maml:name>
+          <maml:description>
+            <maml:para>The name of the repository</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="2" aliases="GitHubOrganisation, GitHubOrganization">
+          <maml:name>GitHubOrg</maml:name>
+          <maml:description>
+            <maml:para>The owner of the GitHub repository</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="3" aliases="none">
+          <maml:name>State</maml:name>
+          <maml:description>
+            <maml:para>The type of pull requests to retrieve</maml:para>
+          </maml:description>
+          <command:parameterValueGroup>
+            <command:parameterValue required="false" command:variableLength="false">Open</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">Closed</command:parameterValue>
+            <command:parameterValue required="false" command:variableLength="false">All</command:parameterValue>
+          </command:parameterValueGroup>
+          <command:parameterValue required="true" variableLength="false">GitHubPullRequestState</command:parameterValue>
+          <dev:type>
+            <maml:name>GitHubPullRequestState</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>Open</dev:defaultValue>
+        </command:parameter>
+        <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+          <maml:name>GitHubToken</maml:name>
+          <maml:description>
+            <maml:para>The token with read permissions against the repository</maml:para>
+          </maml:description>
+          <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+          <dev:type>
+            <maml:name>String</maml:name>
+            <maml:uri />
+          </dev:type>
+          <dev:defaultValue>None</dev:defaultValue>
+        </command:parameter>
+      </command:syntaxItem>
+    </command:syntax>
+    <command:parameters>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="2" aliases="GitHubOrganisation, GitHubOrganization">
+        <maml:name>GitHubOrg</maml:name>
+        <maml:description>
+          <maml:para>The owner of the GitHub repository</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
+        <maml:name>GitHubToken</maml:name>
+        <maml:description>
+          <maml:para>The token with read permissions against the repository</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="1" aliases="none">
+        <maml:name>RepoName</maml:name>
+        <maml:description>
+          <maml:para>The name of the repository</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
+        <dev:type>
+          <maml:name>String</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>None</dev:defaultValue>
+      </command:parameter>
+      <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="3" aliases="none">
+        <maml:name>State</maml:name>
+        <maml:description>
+          <maml:para>The type of pull requests to retrieve</maml:para>
+        </maml:description>
+        <command:parameterValue required="true" variableLength="false">GitHubPullRequestState</command:parameterValue>
+        <dev:type>
+          <maml:name>GitHubPullRequestState</maml:name>
+          <maml:uri />
+        </dev:type>
+        <dev:defaultValue>Open</dev:defaultValue>
+      </command:parameter>
+    </command:parameters>
+    <command:inputTypes>
+      <command:inputType>
+        <dev:type>
+          <maml:name>System.String</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+      <command:inputType>
+        <dev:type>
+          <maml:name>GitHubPullRequestState</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:inputType>
+    </command:inputTypes>
+    <command:returnValues>
+      <command:returnValue>
+        <dev:type>
+          <maml:name>System.Object</maml:name>
+        </dev:type>
+        <maml:description>
+          <maml:para></maml:para>
+        </maml:description>
+      </command:returnValue>
+    </command:returnValues>
+    <maml:alertSet>
+      <maml:alert>
+        <maml:para></maml:para>
+      </maml:alert>
+    </maml:alertSet>
+    <command:examples>
+      <command:example>
+        <maml:title>---------------- Example 1: Open Pull Requests ----------------</maml:title>
+        <dev:code>Get-GitHubPullRequests -GitHubToken $MyToken -GitHubOrg "Brownserve-UK" -RepoName "Brownserve.PSTools" -State Open</dev:code>
+        <dev:remarks>
+          <maml:para>This would return all open pull requests from the `Brownserve-UK/Brownserve.PSTools` repository</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>--------------- Example 2: Closed Pull Requests ---------------</maml:title>
+        <dev:code>Get-GitHubPullRequests -GitHubToken $MyToken -GitHubOrg "Brownserve-UK" -RepoName "Brownserve.PSTools" -State Closed</dev:code>
+        <dev:remarks>
+          <maml:para>This would return all closed/merged pull requests from the `Brownserve-UK/Brownserve.PSTools` repository</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>----------------- Example 3: All Pull Requests -----------------</maml:title>
+        <dev:code>Get-GitHubPullRequests -GitHubToken $MyToken -GitHubOrg "Brownserve-UK" -RepoName "Brownserve.PSTools" -State All</dev:code>
+        <dev:remarks>
+          <maml:para>This would return all open, closed and merged pull requests from the `Brownserve-UK/Brownserve.PSTools` repository</maml:para>
+        </dev:remarks>
+      </command:example>
+    </command:examples>
+    <command:relatedLinks />
+  </command:command>
+  <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
+    <command:details>
       <command:name>Get-GitHubRelease</command:name>
       <command:verb>Get</command:verb>
       <command:noun>GitHubRelease</command:noun>

@@ -1,4 +1,4 @@
-function Get-OpenPullRequests
+function Get-GitHubPullRequests
 {
     [CmdletBinding()]
     param
@@ -27,19 +27,34 @@ function Get-OpenPullRequests
             Position = 1
         )]
         [string]
-        $RepoName
+        $RepoName,
+
+        # Pull request state
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 3
+        )]
+        [GitHubPullRequestState]
+        $State = 'open'
     )
-    Write-Warning "Get-OpenPullRequests is deprecated and will be removed in a future release.`nUse Get-GitHubPullRequests instead"
     $Header = @{                                                                                                                                         
         Authorization = "token $GitHubToken"
         Accept        = 'application/vnd.github.v3+json'
     }
-    # FollowReLink should give free pagination! 🎉
-    $URI = "https://api.github.com/repos/$GitHubOrg/$RepoName/pulls"
+    # The GitHub API requires the state to be lowercase, our enum is uppercase
+    $StateStr = ($State | Out-String).ToLower()
+    $URI = "https://api.github.com/repos/$GitHubOrg/$RepoName/pulls?state=$StateStr"
     Write-Verbose "Attempting to get open pull requests from $URI"
     try
     {
-        $Response = Invoke-RestMethod -Headers $Header -Uri $URI -FollowRelLink | ForEach-Object {$_} # Needed cos https://github.com/PowerShell/PowerShell/issues/5526
+        # FollowReLink should give free pagination! 🎉
+        $Response = Invoke-RestMethod `
+            -Headers $Header `
+            -Uri $URI `
+            -FollowRelLink `
+            -ErrorAction 'Stop' | 
+            ForEach-Object {$_} # Needed cos https://github.com/PowerShell/PowerShell/issues/5526
     }
     catch
     {
@@ -48,5 +63,9 @@ function Get-OpenPullRequests
     if ($Response)
     {
         Return $Response
+    }
+    else
+    {
+        Return $null
     }
 }
