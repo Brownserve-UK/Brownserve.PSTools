@@ -12,3 +12,22 @@ enum GitHubPullRequestState
     Closed
     All
 }
+
+## Type validation classes
+
+# This class validates a string to be a valid SemVer string.
+class SemVer
+{
+    [string] $Value
+    SemVer([string] $Value)
+    {
+        if ($Value -cnotmatch '^((([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$')
+        {
+            throw "Invalid SemVer string: $Value"
+        }
+        else
+        {
+            $this.Value = $Value     
+        }
+    }
+}
