@@ -4,6 +4,63 @@
     Previously the module used to have a lot of private classes spread across various files, this is an attempt to consolidate them into one file.
 #>
 
+## Git related classes
+
+<#
+    This class converts shorthand git status into human readable status
+#>
+class GitStatus
+{
+    [string] $Value
+    
+    GitStatus([char] $Value)
+    {
+        $StatusMap = @{
+            '?' = 'Untracked'
+            '!' = 'Ignored'
+            'A' = 'Added'
+            'C' = 'Copied'
+            'D' = 'Deleted'
+            'M' = 'Modified'
+            'R' = 'Renamed'
+            'T' = 'Type Changed'
+            'U' = 'Unmerged'
+            ' ' = 'Unmodified'
+        }
+        if ($StatusMap.ContainsKey($Value))
+        {
+            $this.Value = $StatusMap[$Value]
+        }
+        else
+        {
+            throw "Invalid git status: '$Value'"
+        }
+    }
+
+    GitStatus([string] $Value)
+    {
+        $StatusMap = @{
+            '?' = 'Untracked'
+            '!' = 'Ignored'
+            'A' = 'Added'
+            'C' = 'Copied'
+            'D' = 'Deleted'
+            'M' = 'Modified'
+            'R' = 'Renamed'
+            'T' = 'Type Changed'
+            'U' = 'Unmerged'
+            ' ' = 'Unmodified'
+        }
+        if ($StatusMap.ContainsKey($Value))
+        {
+            $this.Value = $StatusMap[$Value]
+        }
+        else
+        {
+            throw "Invalid git status: '$Value'"
+        }
+    }
+}
 
 ## GitHub related classes
 enum GitHubPullRequestState
