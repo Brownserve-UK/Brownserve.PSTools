@@ -168,9 +168,9 @@ task GenerateVersionInfo {
     {
         $NugetPackageVersionParams.Add('PreRelease', $true)
     }
-    $script:NugetPackageVersion = New-NuGetPackageVersion @NugetPackageVersionParams
+    $global:NugetPackageVersion = New-NuGetPackageVersion @NugetPackageVersionParams
     Write-Verbose "Version: $script:Version"
-    Write-Verbose "Nuget package version: $script:NugetPackageVersion"
+    Write-Verbose "Nuget package version: $global:NugetPackageVersion"
     Write-Verbose "Release notes:`n$script:ReleaseNotes"
 }
 
@@ -183,9 +183,9 @@ task CheckPreviousRelease GenerateVersionInfo, {
             -GitHubToken $GitHubPAT `
             -RepoName $GitHubRepoName `
             -GitHubOrg $GitHubOrg
-        if ($CurrentReleases.tag_name -contains "v$script:NugetPackageVersion")
+        if ($CurrentReleases.tag_name -contains "v$global:NugetPackageVersion")
         {
-            throw "There already appears to be a v$script:NugetPackageVersion release!`nDid you forget to update the changelog?"
+            throw "There already appears to be a v$global:NugetPackageVersion release!`nDid you forget to update the changelog?"
         }
     }
 }
@@ -277,7 +277,7 @@ task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule,
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>$ModuleName</id>
-    <version>$script:NugetPackageVersion</version>
+    <version>$global:NugetPackageVersion</version>
     <authors>$ModuleAuthor</authors>
     <owners>Brownserve UK</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -319,7 +319,7 @@ task Pack CreateNugetPackage, GenerateModuleManifest, {
         }
         & $NugetCommand $NugetArguments
     }
-    $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$script:NugetPackageVersion.nupkg" | Convert-Path
+    $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$global:NugetPackageVersion.nupkg" | Convert-Path
 }
 
 # Synopsis: Push the package up to nuget
@@ -373,10 +373,10 @@ task PushPSGallery CheckPreviousRelease, Tests, {
 task GitHubRelease PushNuget, PushPSGallery, {
     if ('GitHub' -in $PublishTo)
     {
-        Write-Verbose "Creating GitHub release for $script:NugetPackageVersion"
+        Write-Verbose "Creating GitHub release for $global:NugetPackageVersion"
         $ReleaseParams = @{
-            Name        = "v$script:NugetPackageVersion"
-            Tag         = "v$script:NugetPackageVersion"
+            Name        = "v$global:NugetPackageVersion"
+            Tag         = "v$global:NugetPackageVersion"
             Description = $script:ReleaseNotes
             GitHubToken = $GitHubPAT
             RepoName    = $GitHubRepoName
