@@ -64,7 +64,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepoName
-{{ Fill RepoName Description }}
+The name of the repo (if different to the directory provided to -RepoPath)
 
 ```yaml
 Type: String
@@ -79,7 +79,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepoPath
-{{ Fill RepoPath Description }}
+The path to the repository
 
 ```yaml
 Type: String

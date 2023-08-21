@@ -14,7 +14,7 @@ This will build markdown PowerShell module documentation using PlatyPS
 
 ```
 Build-ModuleDocumentation [-ModuleName] <String> [-ModulePath] <String> [-DocumentationPath] <String>
- [-ReloadModule] [-IncludeDontShow] [[-ModuleGUID] <Guid>] [<CommonParameters>]
+ [-ReloadModule] [-IncludeDontShow] [[-ModuleGUID] <Guid>] [-HelpVersion <SemVer>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -48,8 +48,25 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -HelpVersion
+The version number of the help.  
+Ideally this should match the version of the module being shipped.
+
+```yaml
+Type: SemVer
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
 ### -IncludeDontShow
-{{ Fill IncludeDontShow Description }}
+If passed will include parameters marked as "DontShow" in documentation.
+This is usually undesirable but may be needed if you wish document some complicated logic.
 
 ```yaml
 Type: SwitchParameter
