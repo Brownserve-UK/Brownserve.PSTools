@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Builds, tests and releases the PowerShell module via Invoke-Build.
+    Builds, tests and releases the PowerShell module via Invoke-Build and Pester.
 #>
 [CmdletBinding()]
 param
@@ -25,7 +25,16 @@ param
     [string]
     $DefaultBranch = 'main',
 
-    # The name of the branch you are running on, this is used to work out if the release is production or pre-release
+    # The name of the feature branch
+    # This should be the branch that is used to develop and test new features and fixes before they are merged into the default branch
+    [Parameter(
+        Mandatory = $false
+    )]
+    [string]
+    $FeatureBranch = 'dev',
+
+    # The name of the branch you are running on
+    # this is used to work out if the release is production or pre-release
     [Parameter(
         Mandatory = $false
     )]
@@ -33,13 +42,20 @@ param
     [string]
     $BranchName,
 
+    # The base/target branch you are merging into when running as part of a pull request
+    [Parameter(
+        Mandatory = $false
+    )]
+    [string]
+    $TargetBranch,
+
     # The build to run, defaults to build whereby the module is built but no testing is performed
     [Parameter(
         Mandatory = $false
     )]
     [ValidateSet('build', 'BuildImport', 'BuildPack', 'BuildImportTest', 'BuildImportGenerateDocs', 'BuildPackTest', 'release')]
     [string]
-    $Build = 'build',
+    $Build = 'BuildImport',
 
     # Where the module should be published to
     [Parameter(
@@ -106,6 +122,15 @@ $PreRelease = $true
 if ($DefaultBranch -eq $BranchName)
 {
     $PreRelease = $false
+}
+
+# If this is running as part of a PR then we need to check the merge is to the default branch
+if ($TargetBranch)
+{
+    if (($TargetBranch -eq $DefaultBranch) -and ($BranchName -ne $FeatureBranch))
+    {
+        throw "Pull requests to '$DefaultBranch' are only supported from '$FeatureBranch'"
+    }
 }
 
 # If we're not passing in the module information via the parameter try to load it from our well-known file.
