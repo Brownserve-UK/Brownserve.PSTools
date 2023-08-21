@@ -63,6 +63,7 @@ Gets a list of tags for a given GitHub repository
 Gets the remote origin URL for a given repository
 
 ### [Get-OpenPullRequests](./Brownserve.PSTools/Get-OpenPullRequests.md)
+*This cmdlet is deprecated. Please use Get-GitHubOpenPullRequests instead*
 Gets the open Pull requests for a given repository
 
 ### [Get-Response](./Brownserve.PSTools/Get-Response.md)

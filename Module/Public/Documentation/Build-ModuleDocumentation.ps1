@@ -31,7 +31,16 @@ function Build-ModuleDocumentation
         # The GUID of the module (if desired)
         [Parameter(Mandatory = $false)]
         [guid]
-        $ModuleGUID
+        $ModuleGUID,
+
+        # The help version number to use
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipeline = $true,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [SemVer]
+        $HelpVersion
     )
     
     begin
@@ -66,9 +75,29 @@ function Build-ModuleDocumentation
                 $ErrorStep = "Failed to import module '$ModuleName' from $ModulePath."
                 Import-Module -Name $ModulePath -Force -Global -ErrorAction 'Stop' -Verbose:$false
             }
-            # Try to keep the version of help in lockstep with the version of the module
-            $ModuleDetails = Get-Module -Name $ModuleName 
-            $HelpVersion = $ModuleDetails | Select-Object -ExpandProperty Version
+            $ModuleDetails = Get-Module -Name $ModuleName
+            # We no longer generate the help version here, we rely on it being passed in.
+            # If we need to bring this back in the future we can make a param like -GenerateVersion or something
+            # if (!$HelpVersion)
+            # {
+                
+            #     $HelpVersion = ($ModuleDetails | Select-Object -ExpandProperty Version).ToString()
+            #     if ($ModuleDetails.PrivateData.PSData.Prerelease)
+            #     {
+            #         $HelpVersion = "$($HelpVersion.Value)-$($ModuleDetails.PrivateData.PSData.Prerelease)"
+            #     }
+            # }
+            if (!$ModuleGUID)
+            {
+                $ModuleGUID = $ModuleDetails.Guid.Guid
+            }
+            else
+            {
+                if ($ModuleGUID -ne $ModuleDetails.Guid.Guid)
+                {
+                    throw "Module GUID '$ModuleGUID' doesn't match the GUID of the module '$($ModuleDetails.Guid.Guid)'."
+                }
+            }
             $ModuleDescription = $ModuleDetails | Select-Object -ExpandProperty Description
 
             # TODO: The below can be revisited when we've got updatable help figured out
@@ -154,19 +183,24 @@ function Build-ModuleDocumentation
             # If we've passed in a GUID for the module then update the module page with that.
             if ($ModuleGUID)
             {
-                $SanitizedModulePageContent = $SanitizedModulePageContent -replace '00000000-0000-0000-0000-000000000000', $ModuleGUID
+                $SanitizedModulePageContent = $SanitizedModulePageContent -replace 'Module Guid: (.*)', "Module Guid: $ModuleGUID"
             }
+            <#
+                We only update the help version number if it has been passed in, this is so that our build pipelines can handle it without creating merge conflicts etc.
+            #>
             if ($HelpVersion)
             {
-                Write-Verbose "New help version: $HelpVersion"
-                if ($SanitizedModulePageContent -imatch 'Help Version: (?<version>.*\n)')
+                $NewHelpVersion = $HelpVersion.Value
+                Write-Verbose "New help version: $NewHelpVersion"
+                # We match on any character due to the fact that the help version header could be {{ update help version }}
+                # as well as a genuine version number
+                if ($SanitizedModulePageContent -imatch 'Help Version: (?<version>.*)\n')
                 {
-                    [version]$CurrentHelpVersion = $Matches['version']
-                    if ([version]$HelpVersion -ne $CurrentHelpVersion)
+                    $CurrentHelpVersion = $Matches['version']
+                    if ($NewHelpVersion -ne $CurrentHelpVersion)
                     {
-                        $HelpVersionString = $HelpVersion.ToString()
-                        $CurrentHelpVersionString = $CurrentHelpVersion.ToString()
-                        $SanitizedModulePageContent = $SanitizedModulePageContent.Replace("Help Version: $CurrentHelpVersionString", "Help Version: $HelpVersionString")
+                        Write-Verbose 'Updating help version'
+                        $SanitizedModulePageContent = $SanitizedModulePageContent.Replace("Help Version: $CurrentHelpVersion", "Help Version: $NewHelpVersion")
                     }
                 }
                 else
@@ -211,7 +245,7 @@ function Build-ModuleDocumentation
             #>
             if (!$PreloadedPlatyPS)
             {
-                Write-Verbose "Unloading PlatyPS module."
+                Write-Verbose 'Unloading PlatyPS module.'
                 Remove-Module 'platyPS' -Force -ErrorAction 'SilentlyContinue'
                 if ((Get-Module 'platyPS'))
                 {

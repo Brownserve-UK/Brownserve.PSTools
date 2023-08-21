@@ -119,7 +119,7 @@ $Script:BuiltModulePath = (Join-Path $global:BrownserveBuiltModuleDirectory -Chi
 $NugetCommand = 'nuget'
 if (-not $isWindows)
 {
-    Write-Verbose "Running on linux, will use mono when running nuget"
+    Write-Verbose 'Running on linux, will use mono when running nuget'
     $NugetCommand = 'mono'
 }
 
@@ -168,9 +168,9 @@ task GenerateVersionInfo {
     {
         $NugetPackageVersionParams.Add('PreRelease', $true)
     }
-    $script:NugetPackageVersion = New-NuGetPackageVersion @NugetPackageVersionParams
+    $global:NugetPackageVersion = New-NuGetPackageVersion @NugetPackageVersionParams
     Write-Verbose "Version: $script:Version"
-    Write-Verbose "Nuget package version: $script:NugetPackageVersion"
+    Write-Verbose "Nuget package version: $global:NugetPackageVersion"
     Write-Verbose "Release notes:`n$script:ReleaseNotes"
 }
 
@@ -183,9 +183,9 @@ task CheckPreviousRelease GenerateVersionInfo, {
             -GitHubToken $GitHubPAT `
             -RepoName $GitHubRepoName `
             -GitHubOrg $GitHubOrg
-        if ($CurrentReleases.tag_name -contains "v$script:NugetPackageVersion")
+        if ($CurrentReleases.tag_name -contains "v$global:NugetPackageVersion")
         {
-            throw "There already appears to be a v$script:NugetPackageVersion release!`nDid you forget to update the changelog?"
+            throw "There already appears to be a v$global:NugetPackageVersion release!`nDid you forget to update the changelog?"
         }
     }
 }
@@ -227,7 +227,7 @@ task GenerateModuleManifest CopyModule, GenerateVersionInfo, {
     # If this is not a production release then update the fields accordingly
     if ($PreRelease -eq $true)
     {
-        $ModuleManifest.add('Prerelease',($BranchName -replace '[^a-zA-Z0-9]',''))
+        $ModuleManifest.add('Prerelease', ($BranchName -replace '[^a-zA-Z0-9]', ''))
     }
     New-ModuleManifest @ModuleManifest -ErrorAction 'Stop'
 }
@@ -237,7 +237,7 @@ task GenerateModuleManifest CopyModule, GenerateVersionInfo, {
     Now we've built the module we need to import the freshly built version before we can test it.
 #>
 task ImportModule GenerateModuleManifest, {
-    Write-Verbose "Importing built module"
+    Write-Verbose 'Importing built module'
     if ((Get-Module $ModuleName))
     {
         $WarningMessage = @"
@@ -251,7 +251,24 @@ You may wish to run _init.ps1 again to reload the stable version of this module.
     Import-Module $Script:BuiltModulePath -Force -Verbose:$false
 }
 
-# Synopsis: Performs some tests to make sure everything works as intended
+# Synopsis: Generates the markdown documentation for the module
+task GenerateDocs ImportModule, {
+    Write-Verbose 'Generating markdown documentation'
+    $DocsParams = @{
+        ModuleName        = $ModuleName
+        ModulePath        = $Script:BuiltModulePath
+        DocumentationPath = $Global:BrownserveRepoDocsDirectory
+    }
+    #TODO: main should not be hardcoded and we should have provision for dev too
+    if ($BranchName -eq 'main')
+    {
+        $DocsParams.Add('HelpVersion', $global:NugetPackageVersion)
+        $DocsParams.Add('ModuleGUID', $ModuleGUID)
+    }
+    Build-ModuleDocumentation @DocsParams
+}
+
+# Synopsis: Performs some testing on the module
 task Tests ImportModule, {
     Write-Verbose 'Performing unit testing, this may take a while...'
     $Results = Invoke-Pester -Path $Global:BrownserveRepoTestsDirectory -PassThru
@@ -277,7 +294,7 @@ task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule,
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>$ModuleName</id>
-    <version>$script:NugetPackageVersion</version>
+    <version>$global:NugetPackageVersion</version>
     <authors>$ModuleAuthor</authors>
     <owners>Brownserve UK</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -319,7 +336,7 @@ task Pack CreateNugetPackage, GenerateModuleManifest, {
         }
         & $NugetCommand $NugetArguments
     }
-    $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$script:NugetPackageVersion.nupkg" | Convert-Path
+    $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$global:NugetPackageVersion.nupkg" | Convert-Path
 }
 
 # Synopsis: Push the package up to nuget
@@ -373,10 +390,10 @@ task PushPSGallery CheckPreviousRelease, Tests, {
 task GitHubRelease PushNuget, PushPSGallery, {
     if ('GitHub' -in $PublishTo)
     {
-        Write-Verbose "Creating GitHub release for $script:NugetPackageVersion"
+        Write-Verbose "Creating GitHub release for $global:NugetPackageVersion"
         $ReleaseParams = @{
-            Name        = "v$script:NugetPackageVersion"
-            Tag         = "v$script:NugetPackageVersion"
+            Name        = "v$global:NugetPackageVersion"
+            Tag         = "v$global:NugetPackageVersion"
             Description = $script:ReleaseNotes
             GitHubToken = $GitHubPAT
             RepoName    = $GitHubRepoName
@@ -411,6 +428,15 @@ task Build GenerateModuleManifest, {}
 #>
 task BuildImport ImportModule, {}
 
+<#
+.SYNOPSIS
+    This meta task will perform all the steps required to build the PowerShell module, import it into the current PowerShell session
+    and then build the Markdown documentation for the module.
+    This ensures that there is an easy way to create documentation for the module.
+#>
+task BuildImportGenerateDocs GenerateDocs, {}
+
+#TODO: Look at below and see when we need to insert GenerateDocs
 <#
 .SYNOPSIS
     This meta task will build the module and create a NuGet package of the built module.

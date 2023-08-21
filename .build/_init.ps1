@@ -250,7 +250,8 @@ catch
 
 # Place any custom code below, this will be preserved whenever you update your _init script
 ### Start user defined _init steps
-
+# TODO: This should be part of the permanent paths
+$Global:BrownserveRepoDocsDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath '.docs' | Convert-Path
 ### End user defined _init steps
 
 # If we're not suppressing output then we'll pipe out a list of cmdlets that are now available to the user along with

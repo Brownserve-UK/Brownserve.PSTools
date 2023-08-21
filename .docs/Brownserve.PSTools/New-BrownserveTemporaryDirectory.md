@@ -23,10 +23,10 @@ Creates a temporary directory in a known good location.
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\> New-BrownserveTemporaryDirectory
 ```
 
-{{ Add example description here }}
+Would create a directory under `C:\Temp`
 
 ## PARAMETERS
 
