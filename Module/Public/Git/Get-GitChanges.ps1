@@ -64,12 +64,12 @@ function Get-GitChanges
                     # If the path is a rename/move then we need to split it into the source and destination
                     if ($Path -match '^{(?<Source>.*) -> (?<Destination>.*)}$')
                     {
-                        $Source = $Matches['Source'] | Resolve-Path
-                        $Destination = $Matches['Destination'] | Resolve-Path
+                        $Source = $Matches['Source']
+                        $Destination = $Matches['Destination']
                     }
                     else
                     {
-                        $Source = $Path | Resolve-Path
+                        $Source = $Path
                         $Destination = $null
                     }
                     # The status is a combination of two characters, the first is the staged status and the second is the unstaged status
