@@ -1,2 +1,4 @@
 # Set the default behavior for all files.
 * text=auto
+
+*.md text eol=lf
