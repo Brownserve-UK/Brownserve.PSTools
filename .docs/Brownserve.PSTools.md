@@ -87,9 +87,6 @@ Returns a secret from a given vault path
 ### [Import-PlatyPSModule](./Brownserve.PSTools/Import-PlatyPSModule.md)
 Imports the PlatyPS module avoiding collisions with other modules.
 
-### [Import-PowerShellYAMLModule](./Brownserve.PSTools/Import-PowerShellYAMLModule.md)
-Wrapper cmdlet to load the powershell-yaml module
-
 ### [Initialize-BrownserveRepository](./Brownserve.PSTools/Initialize-BrownserveRepository.md)
 Prepares a repository for use for a given project
 
