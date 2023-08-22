@@ -7,13 +7,13 @@
 ## Git related classes
 
 <#
-    This class converts shorthand git status into human readable status
+    This class converts shorthand git diffs into human readable status
 #>
-class GitStatus
+class GitDiff
 {
     [string] $Value
-    
-    GitStatus([char] $Value)
+
+    GitDiff([char] $Value)
     {
         $StatusMap = @{
             '?' = 'Untracked'
@@ -37,7 +37,7 @@ class GitStatus
         }
     }
 
-    GitStatus([string] $Value)
+    GitDiff([string] $Value)
     {
         $StatusMap = @{
             '?' = 'Untracked'
@@ -59,6 +59,143 @@ class GitStatus
         {
             throw "Invalid git status: '$Value'"
         }
+    }
+
+    [string] ToString()
+    {
+        return "$($this.Value)"
+    }
+}
+
+<#
+    This class is used to construct a git file object.
+    Sometimes they contain a source and destination if the file is a move/rename, but should always contain a source.
+#>
+class GitFile
+{
+    [string]$Source
+    [string]$Destination
+
+    GitFile([string]$Source, [string]$Destination)
+    {
+        $this.Source = $Source
+        $this.Destination = $Destination
+    }
+
+    GitFile([pscustomobject]$File)
+    {
+        if (!$File.Source)
+        {
+            throw 'Cannot create GitFile object without a Source'
+        }
+        $this.Source = $File.Source
+        $this.Destination = $File.Destination
+    }
+
+    GitFile([hashtable]$Change)
+    {
+        if (!$Change.Source)
+        {
+            throw 'Cannot create GitFile object without a Source'
+        }
+        $this.Source = $Change.Source
+        $this.Destination = $Change.Destination
+    }
+
+    [string] ToString()
+    {
+        return "{Source: $($this.Source), Destination: $($this.Destination)}"
+    }
+}
+
+<#
+    This class helps us to construct git change objects
+#>
+class GitChange
+{
+    [GitDiff]$Staged
+    [GitDiff]$Unstaged
+
+    GitChange([string]$Staged, [string]$Unstaged)
+    {
+        $this.Staged = $Staged
+        $this.Unstaged = $Unstaged
+    }
+
+    GitChange([pscustomobject]$Change)
+    {
+        if (!$Change.Staged -and !$Change.Unstaged)
+        {
+            throw 'Cannot create GitChange object without a Staged or Unstaged change'
+        }
+        $this.Staged = $Change.Staged
+        $this.Unstaged = $Change.Unstaged
+    }
+
+    GitChange([hashtable]$Change)
+    {
+        if (!$Change.Staged -and !$Change.Unstaged)
+        {
+            throw 'Cannot create GitChange object without a Staged or Unstaged change'
+        }
+        $this.Staged = $Change.Staged
+        $this.Unstaged = $Change.Unstaged
+    }
+
+    [string] ToString()
+    {
+        return "{Staged: $($this.Staged), Unstaged: $($this.Unstaged)}"
+    }
+}
+
+<#
+    This class helps us format git status objects
+#>
+class GitStatus
+{
+    [GitDiff]$Staged
+    [GitDiff]$Unstaged
+    [string]$Source
+    [string]$Destination
+
+    GitStatus([string]$Staged, [string]$Unstaged, [string]$Source, [string]$Destination)
+    {
+        $this.Staged = $Staged
+        $this.Unstaged = $Unstaged
+        $this.Source = $Source
+        $this.Destination = $Destination
+    }
+
+    GitStatus([pscustomobject]$Status)
+    {
+        if (!$Status.Staged -and !$Status.Unstaged)
+        {
+            throw 'Cannot create GitStatus object without a Staged or Unstaged change'
+        }
+        if (!$Status.Source)
+        {
+            throw 'Cannot create GitStatus object without a Source'
+        }
+        $this.Staged = $Status.Staged
+        $this.Unstaged = $Status.Unstaged
+        $this.Source = $Status.Source
+        $this.Destination = $Status.Destination
+    }
+
+    GitStatus([hashtable]$Status)
+    {
+        if (!$Status.Staged -and !$Status.Unstaged)
+        {
+            throw 'Cannot create GitStatus object without a Staged or Unstaged change'
+        }
+        if (!$Status.Source)
+        {
+            throw 'Cannot create GitStatus object without a Source'
+        }
+        $this.Staged = $Status.Staged
+        $this.Unstaged = $Status.Unstaged
+        $this.Source = $Status.Source
+        $this.Destination = $Status.Destination
     }
 }
 
