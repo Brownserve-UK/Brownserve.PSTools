@@ -47,6 +47,9 @@ Strips out illegal characters from Terraform resource names
 ### [Get-GitBranches](./Brownserve.PSTools/Get-GitBranches.md)
 Gets the current branches for the given repository
 
+### [Get-GitChanges](./Brownserve.PSTools/Get-GitChanges.md)
+Gets the git status for a given repository
+
 ### [Get-GitCurrentBranch](./Brownserve.PSTools/Get-GitCurrentBranch.md)
 Gets the current branch for a given repository
 
