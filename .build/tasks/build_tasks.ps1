@@ -478,7 +478,7 @@ task BuildImportTest Tests, {}
     and ensure no uncommitted changes are present.
     This helps to ensure any pull requests are valid and good to merge.
 #>
-task BuildImportGenerateDocsTest Tests, CheckForUncommittedChanges, {}
+task BuildImportGenerateDocsTest CheckForUncommittedChanges, Tests,{}
 
 <#
 .SYNOPSIS
