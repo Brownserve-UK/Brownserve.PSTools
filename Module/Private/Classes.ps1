@@ -68,87 +68,6 @@ class GitDiff
 }
 
 <#
-    This class is used to construct a git file object.
-    Sometimes they contain a source and destination if the file is a move/rename, but should always contain a source.
-#>
-class GitFile
-{
-    [string]$Source
-    [string]$Destination
-
-    GitFile([string]$Source, [string]$Destination)
-    {
-        $this.Source = $Source
-        $this.Destination = $Destination
-    }
-
-    GitFile([pscustomobject]$File)
-    {
-        if (!$File.Source)
-        {
-            throw 'Cannot create GitFile object without a Source'
-        }
-        $this.Source = $File.Source
-        $this.Destination = $File.Destination
-    }
-
-    GitFile([hashtable]$Change)
-    {
-        if (!$Change.Source)
-        {
-            throw 'Cannot create GitFile object without a Source'
-        }
-        $this.Source = $Change.Source
-        $this.Destination = $Change.Destination
-    }
-
-    [string] ToString()
-    {
-        return "{Source: $($this.Source), Destination: $($this.Destination)}"
-    }
-}
-
-<#
-    This class helps us to construct git change objects
-#>
-class GitChange
-{
-    [GitDiff]$Staged
-    [GitDiff]$Unstaged
-
-    GitChange([string]$Staged, [string]$Unstaged)
-    {
-        $this.Staged = $Staged
-        $this.Unstaged = $Unstaged
-    }
-
-    GitChange([pscustomobject]$Change)
-    {
-        if (!$Change.Staged -and !$Change.Unstaged)
-        {
-            throw 'Cannot create GitChange object without a Staged or Unstaged change'
-        }
-        $this.Staged = $Change.Staged
-        $this.Unstaged = $Change.Unstaged
-    }
-
-    GitChange([hashtable]$Change)
-    {
-        if (!$Change.Staged -and !$Change.Unstaged)
-        {
-            throw 'Cannot create GitChange object without a Staged or Unstaged change'
-        }
-        $this.Staged = $Change.Staged
-        $this.Unstaged = $Change.Unstaged
-    }
-
-    [string] ToString()
-    {
-        return "{Staged: $($this.Staged), Unstaged: $($this.Unstaged)}"
-    }
-}
-
-<#
     This class helps us format git status objects
 #>
 class GitStatus
@@ -156,7 +75,7 @@ class GitStatus
     [GitDiff]$Staged
     [GitDiff]$Unstaged
     [string]$Source
-    [string]$Destination
+    hidden [string]$Destination
 
     GitStatus([string]$Staged, [string]$Unstaged, [string]$Source, [string]$Destination)
     {
@@ -196,6 +115,7 @@ class GitStatus
         $this.Unstaged = $Status.Unstaged
         $this.Source = $Status.Source
         $this.Destination = $Status.Destination
+        
     }
 }
 
