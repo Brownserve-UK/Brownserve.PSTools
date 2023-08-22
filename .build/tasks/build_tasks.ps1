@@ -284,7 +284,7 @@ task CheckForUncommittedChanges GenerateDocs, UpdateChangelog, {
     {
         # TODO: Ignore changes to the changelog and documentation module page
         # TODO: special error for documentation changes
-        throw "Uncommitted changes found, please commit or stash your changes before continuing. `n$($Status.Source -join "`n")"
+        throw "The build has resulted in uncommitted changes being produced: `n$($Status.Source -join "`n")"
     }
 }
 
