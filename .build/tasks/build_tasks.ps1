@@ -280,6 +280,7 @@ task GenerateDocs ImportModule, {
 # Synopsis: Updates the module help
 task UpdateModuleHelp GenerateDocs, {
     Write-Verbose 'Updating module help'
+    New-Item (Join-Path $global:BrownserveBuiltModuleDirectory 'en-US') -ItemType Directory
     $HelpParams = @{
         ModuleDirectory   = $global:BrownserveBuiltModuleDirectory
         DocumentationPath = (Join-Path $global:BrownserveRepoDocsDirectory 'Brownserve.PSTools')
@@ -337,7 +338,7 @@ task Tests ImportModule, {
 }
 
 # Synopsis: Creates our NuGet package
-task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule, UpdateModuleHelp, {
+task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule, UpdateModuleHelp, SetLineEndings, {
     # We'll copy our build module to the nuget package and rename it to 'tools'
     Write-Verbose 'Copying built module into NuGet package'
     Copy-Item $global:BrownserveBuiltModuleDirectory -Destination (Join-Path $script:NugetPackageDirectory 'tools') -Recurse
