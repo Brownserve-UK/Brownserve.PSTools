@@ -214,7 +214,7 @@ function Build-ModuleDocumentation
                 if ($SanitizedModulePageContent -imatch '## Description[\s\n]*{{ Fill in the Description }}')
                 {
                     # .Replace method doesn't work 🤷‍♀️ so use the -replace param instead.
-                    $SanitizedModulePageContent = $SanitizedModulePageContent -Replace '## Description[\s\n]*{{ Fill in the Description }}', "## Description`n$ModuleDescription"
+                    $SanitizedModulePageContent = $SanitizedModulePageContent -Replace '## Description[\s\n]*{{ Fill in the Description }}', "## Description`r`n$ModuleDescription"
                 }
             }
             $ErrorStep = "Failed to update module page with sanitized content at '$ModulePagePath'"
