@@ -14,13 +14,13 @@ Sends a notification to a given Slack webhook
 
 ### Default (Default)
 ```
-Send-SlackNotification [-Message] <String> [-Webhook] <String> [-Channel <String>] [-UpperBlocks <Array>]
+Send-SlackNotification [-Message] <String> [-Webhook] <String> [[-Channel] <String>] [-UpperBlocks <Array>]
  [<CommonParameters>]
 ```
 
 ### Attachments
 ```
-Send-SlackNotification [-Message] <String> [-Webhook] <String> [-Channel <String>] [-Colour <String>]
+Send-SlackNotification [-Message] <String> [-Webhook] <String> [[-Channel] <String>] [-Colour <String>]
  [-Title <String>] [-UpperBlocks <Array>] [-SubBlocks <Array>] [-Fields <Array>] [<CommonParameters>]
 ```
 
@@ -77,7 +77,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 3
 Default value: None
 Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
@@ -201,6 +201,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.String
+### System.Array
 ## OUTPUTS
 
 ### System.Object
