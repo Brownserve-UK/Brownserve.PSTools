@@ -1,5 +1,6 @@
-# Set default behavior to automatically normalize line endings.
-# NO We don't want this!! LEAVE line endings alone
+# LEAVE line endings alone
 # * text=auto
-# Bash shell scripts make sure to keep unix line endings
+# Ensure our generated docs have sensible line endings
 /.docs/Brownserve.PSTools* text eol=lf
+/.docs/Brownserve.PSTools.md text eol=lf
+CHANGELOG.md text eol=lf
