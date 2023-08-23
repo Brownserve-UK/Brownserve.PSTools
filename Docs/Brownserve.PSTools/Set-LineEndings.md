@@ -1,7 +1,7 @@
 ---
 external help file: Brownserve.PSTools-help.xml
 Module Name: Brownserve.PSTools
-online version: https://api.slack.com/messaging/composing/layouts
+online version:
 schema: 2.0.0
 ---
 
