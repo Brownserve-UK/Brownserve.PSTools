@@ -53,6 +53,9 @@ Gets the git status for a given repository
 ### [Get-GitCurrentBranch](./Brownserve.PSTools/Get-GitCurrentBranch.md)
 Gets the current branch for a given repository
 
+### [Get-GitHubIssues](./Brownserve.PSTools/Get-GitHubIssues.md)
+Gets the issues for a given GitHub repository
+
 ### [Get-GitHubPullRequests](./Brownserve.PSTools/Get-GitHubPullRequests.md)
 Gets pull request information from a given GitHub repository.
 

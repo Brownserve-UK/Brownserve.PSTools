@@ -14,7 +14,7 @@ Gets pull request information from a given GitHub repository.
 
 ```
 Get-GitHubPullRequests -GitHubToken <String> [-GitHubOrg] <String> [-RepoName] <String>
- [[-State] <GitHubPullRequestState>] [<CommonParameters>]
+ [[-State] <GitHubIssueState>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -95,7 +95,7 @@ Accept wildcard characters: False
 The type of pull requests to retrieve
 
 ```yaml
-Type: GitHubPullRequestState
+Type: GitHubIssueState
 Parameter Sets: (All)
 Aliases:
 Accepted values: Open, Closed, All
@@ -113,7 +113,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.String
-### GitHubPullRequestState
+### GitHubIssueState
 ## OUTPUTS
 
 ### System.Object
