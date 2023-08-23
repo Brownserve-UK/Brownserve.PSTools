@@ -13,8 +13,8 @@ Creates a new PowerShell module using the standard Brownserve format
 ## SYNTAX
 
 ```
-New-BrownservePowerShellModule [-Path] <String> [-ModuleName] <String> [-ModuleGUID <Guid>]
- [-ModuleTags <String[]>] [-Description] <String> [[-Customisations] <String>] [-Force] [<CommonParameters>]
+New-BrownservePowerShellModule [-Path] <String> [-ModuleName] <String> [[-ModuleGUID] <Guid>]
+ [[-ModuleTags] <String[]>] [-Description] <String> [[-Customisations] <String>] [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -44,7 +44,7 @@ Parameter Sets: (All)
 Aliases: Customizations
 
 Required: False
-Position: 3
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -59,7 +59,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 2
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -89,7 +89,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -119,7 +119,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

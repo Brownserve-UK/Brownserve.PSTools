@@ -13,8 +13,8 @@ Sends a standard Brownserve build notification.
 ## SYNTAX
 
 ```
-Send-BuildNotification [[-BuildName] <String>] [-BuildStatus] <String> [-RepoName <String>]
- [-RepoBranch <String>] [-Webhook] <String> [[-Message] <String>] [[-PushMessage] <String>]
+Send-BuildNotification [[-BuildName] <String>] [-BuildStatus] <String> [[-RepoName] <String>]
+ [[-RepoBranch] <String>] [-Webhook] <String> [[-Message] <String>] [[-PushMessage] <String>]
  [<CommonParameters>]
 ```
 
@@ -75,7 +75,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 3
+Position: 4
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -90,7 +90,7 @@ Parameter Sets: (All)
 Aliases: Push, Title
 
 Required: False
-Position: 4
+Position: 5
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -105,7 +105,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -120,7 +120,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -135,7 +135,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 2
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

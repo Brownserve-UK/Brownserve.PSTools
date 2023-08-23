@@ -14,7 +14,7 @@ This will build markdown PowerShell module documentation using PlatyPS
 
 ```
 Build-ModuleDocumentation [-ModuleName] <String> [-ModulePath] <String> [-DocumentationPath] <String>
- [-ReloadModule] [-IncludeDontShow] [[-ModuleGUID] <Guid>] [-HelpVersion <SemVer>] [<CommonParameters>]
+ [-ReloadModule] [-IncludeDontShow] [[-ModuleGUID] <Guid>] [[-HelpVersion] <SemVer>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -42,7 +42,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 3
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -58,7 +58,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: Named
+Position: 4
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
@@ -89,7 +89,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 7
+Position: 3
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -104,7 +104,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 1
+Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -119,7 +119,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 2
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -134,7 +134,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 5
+Position: Named
 Default value: True
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -145,8 +145,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
+### SemVer
 ## OUTPUTS
 
+### System.Object
 ## NOTES
 
 ## RELATED LINKS
