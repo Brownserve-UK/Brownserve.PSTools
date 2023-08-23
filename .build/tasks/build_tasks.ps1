@@ -114,6 +114,7 @@ $script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirec
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
 $script:GitHubRepoURI = "https://github.com/$GitHubOrg/$GitHubRepoName"
 $Script:BuiltModulePath = (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1")
+$script:TrackedFiles = @()
 
 # On non-windows platforms mono is required to run NuGet 🤢
 $NugetCommand = 'nuget'
@@ -268,21 +269,12 @@ task GenerateDocs ImportModule, {
     }
     Build-ModuleDocumentation @DocsParams
 
-    # Ensure the line endings are set correctly
-    $Docs = Get-ChildItem `
-        -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath "Brownserve.PSTools")  `
-        -Filter *.md `
-        -Recurse | Select-Object -ExpandProperty 'FullName'
-    $ModulePage = Get-Item `
-        -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath "Brownserve.PSTools.md")
-    Set-LineEndings `
-        -Path $Docs `
-        -LineEnding 'LF' `
-        -ErrorAction 'Stop'
-    Set-LineEndings `
-        -Path $ModulePage `
-        -LineEnding 'LF' `
-        -ErrorAction 'Stop'
+    $script:TrackedFiles += (Get-ChildItem `
+            -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath 'Brownserve.PSTools')  `
+            -Filter *.md `
+            -Recurse | Select-Object -ExpandProperty 'FullName')
+    $script:TrackedFiles += (Get-Item `
+            -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath 'Brownserve.PSTools.md'))
 }
 
 # Synopsis: Updates the module help
@@ -293,12 +285,7 @@ task UpdateModuleHelp GenerateDocs, {
         DocumentationPath = (Join-Path $global:BrownserveRepoDocsDirectory 'Brownserve.PSTools')
     }
     Add-ModuleHelp @HelpParams
-
-    # Again we want to ensure the line endings are set correctly
-    Set-LineEndings `
-        -Path (Join-Path $Global:BrownserveModuleDirectory -ChildPath "en-US" -AdditionalChildPath 'Brownserve.PSTools-help.xml') `
-        -LineEnding 'LF' `
-        -ErrorAction 'Stop'
+    $script:TrackedFiles += (Join-Path $Global:BrownserveModuleDirectory -ChildPath 'en-US' -AdditionalChildPath 'Brownserve.PSTools-help.xml')
 }
 
 # Synopsis: Updates the changelog
@@ -308,8 +295,31 @@ task UpdateChangelog {
     Write-Verbose 'Updating changelog'
 }
 
+<#
+.SYNOPSIS
+    Ensures line endings for tracked files are set to 'LF'
+.DESCRIPTION
+    PowerShell seems to insist on doing inconsistent things with line endings when running on different OSes.
+    This results in constant line ending change diffs in git which fails the build.
+    Therefore any (tracked) files that are files created as part of the build have their line endings explicitly set
+#>
+task SetLineEndings {
+    if ($script:TrackedFiles.Count -gt 0)
+    {
+        Write-Verbose 'Ensuring line endings are consistent'
+        Set-LineEndings `
+            -Path $script:TrackedFiles `
+            -LineEnding 'LF' `
+            -ErrorAction 'Stop'
+    }
+    else
+    {
+        Write-Warning 'No tracked files were specified for line ending checks'
+    }
+}
+
 # Synopsis: Checks for uncommitted changes, this should run after we've updated the documentation and changelog
-task CheckForUncommittedChanges GenerateDocs, UpdateChangelog, {
+task CheckForUncommittedChanges GenerateDocs, UpdateChangelog, SetLineEndings, {
     Write-Verbose 'Checking for uncommitted changes'
     $Status = Get-GitChanges
     if ($Status)
@@ -486,7 +496,7 @@ task BuildImport ImportModule, {}
     and then build the Markdown documentation for the module.
     This ensures that there is an easy way to create documentation for the module.
 #>
-task BuildImportGenerateDocs GenerateDocs, {}
+task BuildImportGenerateDocs GenerateDocs, SetLineEndings, {}
 
 #TODO: Look at below and see when we need to insert GenerateDocs
 <#
@@ -510,7 +520,7 @@ task BuildImportTest Tests, {}
     and ensure no uncommitted changes are present.
     This helps to ensure any pull requests are valid and good to merge.
 #>
-task BuildImportGenerateDocsTest UpdateModuleHelp, CheckForUncommittedChanges, Tests,{}
+task BuildImportGenerateDocsTest UpdateModuleHelp, CheckForUncommittedChanges, Tests, {}
 
 <#
 .SYNOPSIS
