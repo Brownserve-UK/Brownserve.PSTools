@@ -209,5 +209,3 @@ This cmdlet currently uses the "attachments" method which has now been deprecate
 We can't yet switch over to the full block-kit method as it's lacking colour support which we make heavy use of, once that becomes available we can make the switch though some logic tweaking will be required.
 
 ## RELATED LINKS
-
-[Slack messaging documentation](https://api.slack.com/messaging/composing/layouts)

@@ -114,6 +114,7 @@ $script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirec
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
 $script:GitHubRepoURI = "https://github.com/$GitHubOrg/$GitHubRepoName"
 $Script:BuiltModulePath = (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1")
+$script:TrackedFiles = @()
 
 # On non-windows platforms mono is required to run NuGet 🤢
 $NugetCommand = 'nuget'
@@ -188,6 +189,7 @@ task CheckPreviousRelease GenerateVersionInfo, {
             throw "There already appears to be a v$global:NugetPackageVersion release!`nDid you forget to update the changelog?"
         }
     }
+    # TODO: Check for previous releases in NuGet and PSGallery as well
 }
 
 # Synopsis: Copies over all the necessary files to be packaged for a release
@@ -243,7 +245,7 @@ task ImportModule GenerateModuleManifest, {
         $WarningMessage = @"
 The PowerShell module '$ModuleName' has been reloaded using the version built by this script.
 This may mean that functionality has changed.
-You may wish to run _init.ps1 again to reload the stable version of this module.
+You may wish to run _init.ps1 again to reload the current stable version of this module.
 "@
         Write-Warning $WarningMessage
         Remove-Module $ModuleName -Force -Confirm:$false -Verbose:$false
@@ -259,13 +261,73 @@ task GenerateDocs ImportModule, {
         ModulePath        = $Script:BuiltModulePath
         DocumentationPath = $Global:BrownserveRepoDocsDirectory
     }
-    #TODO: main should not be hardcoded and we should have provision for dev too
+    #TODO: main should not be hardcoded and we should have provision for dev too (can we make use of PreRelease?)
     if ($BranchName -eq 'main')
     {
         $DocsParams.Add('HelpVersion', $global:NugetPackageVersion)
         $DocsParams.Add('ModuleGUID', $ModuleGUID)
     }
     Build-ModuleDocumentation @DocsParams
+
+    $script:TrackedFiles += (Get-ChildItem `
+            -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath 'Brownserve.PSTools')  `
+            -Filter *.md `
+            -Recurse | Select-Object -ExpandProperty 'FullName')
+    $script:TrackedFiles += (Get-Item `
+            -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath 'Brownserve.PSTools.md'))
+}
+
+# Synopsis: Updates the module help
+task UpdateModuleHelp GenerateDocs, {
+    Write-Verbose 'Updating module help'
+    $HelpParams = @{
+        ModuleDirectory   = $Global:BrownserveModuleDirectory
+        DocumentationPath = (Join-Path $global:BrownserveRepoDocsDirectory 'Brownserve.PSTools')
+    }
+    Add-ModuleHelp @HelpParams
+    $script:TrackedFiles += (Join-Path $Global:BrownserveModuleDirectory -ChildPath 'en-US' -AdditionalChildPath 'Brownserve.PSTools-help.xml')
+}
+
+# Synopsis: Updates the changelog
+task UpdateChangelog {
+    # TODO: how do we handle changelogs for dev branch?
+    # Possibly anytime we're doing a release we make sure the changelog gets updated? (e.g 0.1.0-dev)
+    Write-Verbose 'Updating changelog'
+}
+
+<#
+.SYNOPSIS
+    Ensures line endings for tracked files are set to 'LF'
+.DESCRIPTION
+    PowerShell seems to insist on doing inconsistent things with line endings when running on different OSes.
+    This results in constant line ending change diffs in git which fails the build.
+    Therefore any (tracked) files that are files created as part of the build have their line endings explicitly set
+#>
+task SetLineEndings {
+    if ($script:TrackedFiles.Count -gt 0)
+    {
+        Write-Verbose 'Ensuring line endings are consistent'
+        Set-LineEndings `
+            -Path $script:TrackedFiles `
+            -LineEnding 'LF' `
+            -ErrorAction 'Stop'
+    }
+    else
+    {
+        Write-Warning 'No tracked files were specified for line ending checks'
+    }
+}
+
+# Synopsis: Checks for uncommitted changes, this should run after we've updated the documentation and changelog
+task CheckForUncommittedChanges GenerateDocs, UpdateChangelog, SetLineEndings, {
+    Write-Verbose 'Checking for uncommitted changes'
+    $Status = Get-GitChanges
+    if ($Status)
+    {
+        # TODO: Ignore changes to the changelog and documentation module page
+        # TODO: special error for documentation changes
+        throw "The build has resulted in uncommitted changes being produced: `n$($Status.Source -join "`n")"
+    }
 }
 
 # Synopsis: Performs some testing on the module
@@ -340,7 +402,7 @@ task Pack CreateNugetPackage, GenerateModuleManifest, {
 }
 
 # Synopsis: Push the package up to nuget
-task PushNuget CheckPreviousRelease, Tests, Pack, {
+task PushNuget CheckPreviousRelease, Tests, Pack, CheckForUncommittedChanges, {
     # Only push to nuget if we want to
     if ('nuget' -in $PublishTo)
     {
@@ -369,7 +431,7 @@ task PushNuget CheckPreviousRelease, Tests, Pack, {
 }
 
 # Synopsis: Push the module to PSGallery too
-task PushPSGallery CheckPreviousRelease, Tests, {
+task PushPSGallery CheckPreviousRelease, Tests, CheckForUncommittedChanges, {
     if ('PSGallery' -in $PublishTo)
     {
         Write-Verbose 'Pushing to PSGallery'
@@ -387,7 +449,7 @@ task PushPSGallery CheckPreviousRelease, Tests, {
 }
 
 # Synopsis: Creates a GitHub release for this version, we only do this once we've had a successful NuGet push
-task GitHubRelease PushNuget, PushPSGallery, {
+task GitHubRelease PushNuget, PushPSGallery, CheckForUncommittedChanges, {
     if ('GitHub' -in $PublishTo)
     {
         Write-Verbose "Creating GitHub release for $global:NugetPackageVersion"
@@ -434,7 +496,7 @@ task BuildImport ImportModule, {}
     and then build the Markdown documentation for the module.
     This ensures that there is an easy way to create documentation for the module.
 #>
-task BuildImportGenerateDocs GenerateDocs, {}
+task BuildImportGenerateDocs GenerateDocs, SetLineEndings, {}
 
 #TODO: Look at below and see when we need to insert GenerateDocs
 <#
@@ -454,10 +516,18 @@ task BuildImportTest Tests, {}
 
 <#
 .SYNOPSIS
+    This meta task will build the PowerShell module, import it, generate the Markdown documentation ,perform our unit tests
+    and ensure no uncommitted changes are present.
+    This helps to ensure any pull requests are valid and good to merge.
+#>
+task BuildImportGenerateDocsTest UpdateModuleHelp, CheckForUncommittedChanges, Tests, {}
+
+<#
+.SYNOPSIS
     This meta task will build the PowerShell module, create a NuGet package, import the module and perform our unit tests.
     This is useful to test the complete pipeline as it is one stop short of a release.
 #>
-task BuildPackTest Tests, {}
+task BuildPackTest Tests, Pack, {}
 
 <#
 .SYNOPSIS

@@ -53,7 +53,15 @@ param
     [Parameter(
         Mandatory = $false
     )]
-    [ValidateSet('build', 'BuildImport', 'BuildPack', 'BuildImportTest', 'BuildImportGenerateDocs', 'BuildPackTest', 'release')]
+    [ValidateSet(
+        'build',
+        'BuildImport',
+        'BuildPack',
+        'BuildImportTest',
+        'BuildImportGenerateDocs',
+        'BuildImportGenerateDocsTest',
+        'BuildPackTest',
+        'release')]
     [string]
     $Build = 'BuildImport',
 
