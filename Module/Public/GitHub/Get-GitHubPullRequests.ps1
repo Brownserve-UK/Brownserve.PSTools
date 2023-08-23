@@ -35,7 +35,7 @@ function Get-GitHubPullRequests
             ValueFromPipelineByPropertyName = $true,
             Position = 3
         )]
-        [GitHubPullRequestState]
+        [GitHubIssueState]
         $State = 'open'
     )
     $Header = @{                                                                                                                                         
