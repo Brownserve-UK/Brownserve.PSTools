@@ -172,6 +172,9 @@ Sends a standard Brownserve build notification.
 ### [Send-SlackNotification](./Brownserve.PSTools/Send-SlackNotification.md)
 Sends a notification to a given Slack webhook
 
+### [Set-LineEndings](./Brownserve.PSTools/Set-LineEndings.md)
+{{ Fill in the Synopsis }}
+
 ### [Set-TeamcityBuildNumber](./Brownserve.PSTools/Set-TeamcityBuildNumber.md)
 Sets the build number in Teamcity.
 
