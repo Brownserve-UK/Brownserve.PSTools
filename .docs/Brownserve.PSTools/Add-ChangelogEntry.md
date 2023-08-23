@@ -22,18 +22,18 @@ Inserts a new changelog entry into a given changelog file
 ## EXAMPLES
 
 ### EXAMPLE 1: Add a changelog entry
-```powershell
+```
 Add-ChangelogEntry -ChangelogPath C:\CHANGELOG.md -NewContent "This is a test"
 ```
 
-Would enter the value "This is a test" at the top of the changelog located at `C:\CHANGELOG.md`
+Would enter the value "This is a test" at the top of the changelog located at \`C:\CHANGELOG.md\`
 
 ### EXAMPLE 2: Add a changelog entry from pipeline
-```powershell
+```
 Read-Changelog -ChangelogPath C:\CHANGELOG.md | Add-ChangelogEntry -NewContent "This is a test"
 ```
 
-Would enter the value "This is a test" at the top of the changelog located at `C:\CHANGELOG.md`
+Would enter the value "This is a test" at the top of the changelog located at \`C:\CHANGELOG.md\`
 
 ## PARAMETERS
 
