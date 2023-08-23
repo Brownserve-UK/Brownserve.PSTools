@@ -155,7 +155,7 @@
             <maml:name>String</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>En-US</dev:defaultValue>
+          <dev:defaultValue>en-US</dev:defaultValue>
         </command:parameter>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="2" aliases="none">
           <maml:name>DocumentationPath</maml:name>
@@ -194,7 +194,7 @@
           <maml:name>String</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>En-US</dev:defaultValue>
+        <dev:defaultValue>en-US</dev:defaultValue>
       </command:parameter>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="0" aliases="none">
         <maml:name>ModuleDirectory</maml:name>
@@ -617,7 +617,9 @@ Assert-Directory -Path C:\temp\TestDir.txt</dev:code>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This cmdlet acts as a sort of wrapper for PlatyPS so that we can easily create PowerShell module documentation for some of our more complicated modules. We oftentimes have very specific PowerShell modules in our repos that could do with well written documentation and this cmdlet serves to facilitate that by making it easy to add PlatyPS documentation for any of these modules. We also have a handful of modules that we post to NuGet/AzDo and it's very important to ensure these are also well documented.</maml:para>
+      <maml:para>This cmdlet acts as a sort of wrapper for PlatyPS so that we can easily create PowerShell module documentation for some of our more complicated modules.
+We oftentimes have very specific PowerShell modules in our repos that could do with well written documentation and this cmdlet serves to facilitate that by making it easy to add PlatyPS documentation for any of these modules.
+We also have a handful of modules that we post to NuGet/AzDo and it's very important to ensure these are also well documented.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -684,7 +686,8 @@ Assert-Directory -Path C:\temp\TestDir.txt</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="none">
           <maml:name>HelpVersion</maml:name>
           <maml:description>
-            <maml:para>{{ Fill HelpVersion Description }}</maml:para>
+            <maml:para>The version number of the help.
+Ideally this should match the version of the module being shipped.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">SemVer</command:parameterValue>
           <dev:type>
@@ -696,7 +699,7 @@ Assert-Directory -Path C:\temp\TestDir.txt</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>IncludeDontShow</maml:name>
           <maml:description>
-            <maml:para>{{ Fill IncludeDontShow Description }}</maml:para>
+            <maml:para>If passed will include parameters marked as "DontShow" in documentation. This is usually undesirable but may be needed if you wish document some complicated logic.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -722,7 +725,8 @@ Assert-Directory -Path C:\temp\TestDir.txt</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="named" aliases="none">
         <maml:name>HelpVersion</maml:name>
         <maml:description>
-          <maml:para>{{ Fill HelpVersion Description }}</maml:para>
+          <maml:para>The version number of the help.
+Ideally this should match the version of the module being shipped.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">SemVer</command:parameterValue>
         <dev:type>
@@ -734,7 +738,7 @@ Assert-Directory -Path C:\temp\TestDir.txt</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>IncludeDontShow</maml:name>
         <maml:description>
-          <maml:para>{{ Fill IncludeDontShow Description }}</maml:para>
+          <maml:para>If passed will include parameters marked as "DontShow" in documentation. This is usually undesirable but may be needed if you wish document some complicated logic.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -1395,11 +1399,11 @@ c                              3</dev:code>
       <command:verb>Get</command:verb>
       <command:noun>GitChanges</command:noun>
       <maml:description>
-        <maml:para>{{ Fill in the Synopsis }}</maml:para>
+        <maml:para>Gets the git status for a given repository</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>{{ Fill in the Description }}</maml:para>
+      <maml:para>This cmdlet gets the git status for a given repository. It will return a list of files along with the type of change that has been made to them. This cmdlet has been named in such a way so as not to conflict with `Get-GitStatus` from the posh-git module.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -1407,19 +1411,19 @@ c                              3</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
           <maml:name>Path</maml:name>
           <maml:description>
-            <maml:para>{{ Fill Path Description }}</maml:para>
+            <maml:para>The path to the git repository to get the status of. If not specified, the current directory will be used.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
             <maml:name>String</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
+          <dev:defaultValue>$PWD</dev:defaultValue>
         </command:parameter>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
           <maml:name>UsePorcelain</maml:name>
           <maml:description>
-            <maml:para>{{ Fill UsePorcelain Description }}</maml:para>
+            <maml:para>By default this cmdlet uses the `git status -s` command to query the status of the repository. The output of this command could potentially change between versions of git. The `-UsePorcelain` switch will instead use the `git status --porcelain` command which is designed to remain consistent between versions of git.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -1433,19 +1437,19 @@ c                              3</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
         <maml:name>Path</maml:name>
         <maml:description>
-          <maml:para>{{ Fill Path Description }}</maml:para>
+          <maml:para>The path to the git repository to get the status of. If not specified, the current directory will be used.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
           <maml:name>String</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
+        <dev:defaultValue>$PWD</dev:defaultValue>
       </command:parameter>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
         <maml:name>UsePorcelain</maml:name>
         <maml:description>
-          <maml:para>{{ Fill UsePorcelain Description }}</maml:para>
+          <maml:para>By default this cmdlet uses the `git status -s` command to query the status of the repository. The output of this command could potentially change between versions of git. The `-UsePorcelain` switch will instead use the `git status --porcelain` command which is designed to remain consistent between versions of git.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -1491,9 +1495,9 @@ c                              3</dev:code>
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <dev:code>Get-GitChanges -Path C:\MyRepo</dev:code>
         <dev:remarks>
-          <maml:para>{{ Add example description here }}</maml:para>
+          <maml:para>This will return a list of files that have been changed in the repository at `C:\MyRepo`</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -1588,7 +1592,8 @@ c                              3</dev:code>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This cmdlet will return a list of pull requests from a given GitHub repository. You are able to get both open and closed pull requests.</maml:para>
+      <maml:para>This cmdlet will return a list of pull requests from a given GitHub repository.
+You are able to get both open and closed pull requests.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -2098,7 +2103,7 @@ c                              3</dev:code>
       <command:verb>Get</command:verb>
       <command:noun>OpenPullRequests</command:noun>
       <maml:description>
-        <maml:para>Gets the open Pull requests for a given repository</maml:para>
+        <maml:para>This cmdlet is deprecated. Please use Get-GitHubOpenPullRequests instead Gets the open Pull requests for a given repository</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
@@ -2457,7 +2462,10 @@ c                              3</dev:code>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This cmdlet downloads the specified version of Terraform to the a given directory. This allows us to use different versions of Terraform across different repositories easily (though the cmdlet could be used to download Terraform to your system if desired). This cmdlet should work across Windows, macOS and Linux. The command `terraform` is replaced by an alias to the downloaded binary and the `$env:TerraformPath` variable is set pointing to the downloaded version of Terraform, this only affects your current PowerShell session.</maml:para>
+      <maml:para>This cmdlet downloads the specified version of Terraform to the a given directory.
+This allows us to use different versions of Terraform across different repositories easily (though the cmdlet could be used to download Terraform to your system if desired).
+This cmdlet should work across Windows, macOS and Linux.
+The command `terraform` is replaced by an alias to the downloaded binary and the `$env:TerraformPath` variable is set pointing to the downloaded version of Terraform, this only affects your current PowerShell session.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -2544,14 +2552,16 @@ c                              3</dev:code>
         <maml:title>----------- EXAMPLE 1: Download the default version -----------</maml:title>
         <dev:code>Get-Terraform -DownloadPath 'C:\tools'</dev:code>
         <dev:remarks>
-          <maml:para>Will download Terraform to C:\tools An Alias for the `terraform` command would be created and the `$env:TerraformPath` variable would be set pointing to this version for your current PowerShell session.</maml:para>
+          <maml:para>Will download Terraform to C:\tools
+An Alias for the `terraform` command would be created and the `$env:TerraformPath` variable would be set pointing to this version for your current PowerShell session.</maml:para>
         </dev:remarks>
       </command:example>
       <command:example>
         <maml:title>------------- EXAMPLE 2: Pass in a version number -------------</maml:title>
         <dev:code>Get-Terraform -TerraformVersion '1.0.0' -DownloadPath 'C:\tools'</dev:code>
         <dev:remarks>
-          <maml:para>Will download Terraform v1.0.0 to C:\tools An Alias for the `terraform` command would be created and the `$env:TerraformPath` variable would be set pointing to this version for your current PowerShell session.</maml:para>
+          <maml:para>Will download Terraform v1.0.0 to C:\tools
+An Alias for the `terraform` command would be created and the `$env:TerraformPath` variable would be set pointing to this version for your current PowerShell session.</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -2599,7 +2609,8 @@ c                              3</dev:code>
         <command:parameter required="false" variableLength="true" globbing="true" pipelineInput="True (ByPropertyName)" position="2" aliases="none">
           <maml:name>TerraformConfigPath</maml:name>
           <maml:description>
-            <maml:para>Specifies a path to look for the resource block in. Can be a file or a directory.</maml:para>
+            <maml:para>Specifies a path to look for the resource block in.
+Can be a file or a directory.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -2638,7 +2649,8 @@ c                              3</dev:code>
       <command:parameter required="false" variableLength="true" globbing="true" pipelineInput="True (ByPropertyName)" position="2" aliases="none">
         <maml:name>TerraformConfigPath</maml:name>
         <maml:description>
-          <maml:para>Specifies a path to look for the resource block in. Can be a file or a directory.</maml:para>
+          <maml:para>Specifies a path to look for the resource block in.
+Can be a file or a directory.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -2696,7 +2708,8 @@ c                              3</dev:code>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This cmdlet will download the specified version of Vault to the given directory. An alias is created that replaces the path to the `vault` command and the environment variable `$env:VaultPath` is set to point to this downloaded version, this only affects your current PowerShell session.</maml:para>
+      <maml:para>This cmdlet will download the specified version of Vault to the given directory.
+An alias is created that replaces the path to the `vault` command and the environment variable `$env:VaultPath` is set to point to this downloaded version, this only affects your current PowerShell session.</maml:para>
       <maml:para>This allows us to lock vault to different versions across projects if we need to.</maml:para>
     </maml:description>
     <command:syntax>
@@ -2705,7 +2718,8 @@ c                              3</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
           <maml:name>VaultVersion</maml:name>
           <maml:description>
-            <maml:para>The version of Vault to use</maml:para>
+            <maml:para>The version of Vault to use
+</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Version</command:parameterValue>
           <dev:type>
@@ -2744,7 +2758,8 @@ c                              3</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="0" aliases="none">
         <maml:name>VaultVersion</maml:name>
         <maml:description>
-          <maml:para>The version of Vault to use</maml:para>
+          <maml:para>The version of Vault to use
+</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">Version</command:parameterValue>
         <dev:type>
@@ -2886,7 +2901,8 @@ c                              3</dev:code>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Currently the PlatyPS and powershell-yaml modules cannot be loaded at the same time due both requiring the `YAMLDotNet` assembly but attempting to load different versions. This is already fixed in powershell-yaml and should be fixed with V2 of PlatyPS (https://github.com/PowerShell/platyPS/issues/592) but a build has not yet been released that incorporates these changes. Therefore for the time being we have custom loaders to ensure the modules are imported and disposed of when finished.</maml:para>
+      <maml:para>Currently the PlatyPS and powershell-yaml modules cannot be loaded at the same time due both requiring the `YAMLDotNet` assembly but attempting to load different versions. This is already fixed in powershell-yaml and should be fixed with V2 of PlatyPS (https://github.com/PowerShell/platyPS/issues/592) but a build has not yet been released that incorporates these changes.
+Therefore for the time being we have custom loaders to ensure the modules are imported and disposed of when finished.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -3103,7 +3119,8 @@ c                              3</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Upgrade</maml:name>
           <maml:description>
-            <maml:para>If set will upgrade the package to the latest available version, providing a specific version has not been provided already. If used with pipeline input then this will upgrade all packages that are provided through the pipeline that do not have a specific version set.</maml:para>
+            <maml:para>If set will upgrade the package to the latest available version, providing a specific version has not been provided already.
+If used with pipeline input then this will upgrade all packages that are provided through the pipeline that do not have a specific version set.</maml:para>
           </maml:description>
           <dev:type>
             <maml:name>SwitchParameter</maml:name>
@@ -3141,7 +3158,8 @@ c                              3</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Upgrade</maml:name>
         <maml:description>
-          <maml:para>If set will upgrade the package to the latest available version, providing a specific version has not been provided already. If used with pipeline input then this will upgrade all packages that are provided through the pipeline that do not have a specific version set.</maml:para>
+          <maml:para>If set will upgrade the package to the latest available version, providing a specific version has not been provided already.
+If used with pipeline input then this will upgrade all packages that are provided through the pipeline that do not have a specific version set.</maml:para>
         </maml:description>
         <command:parameterValue required="false" variableLength="false">SwitchParameter</command:parameterValue>
         <dev:type>
@@ -3554,7 +3572,10 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This cmdlet will call a native process (e.g `ping`) and will allow for writing the commands output to host while also returning the output after the command completes successfully if desired. This is useful when you want to monitor a commands output while also capturing it for processing later on. If you only want the output of the command and not the stream output you can pass the `-SuppressOutput` parameter. As many native commands can write verbose/logging information to stderr this cmdlet attempts to be clever about only returning truly terminating errors, it does so by inspecting the exit code and only raising an exception if the exit code is invalid.</maml:para>
+      <maml:para>This cmdlet will call a native process (e.g `ping`) and will allow for writing the commands output to host while also returning the output after the command completes successfully if desired.
+This is useful when you want to monitor a commands output while also capturing it for processing later on.
+If you only want the output of the command and not the stream output you can pass the `-SuppressOutput` parameter.
+As many native commands can write verbose/logging information to stderr this cmdlet attempts to be clever about only returning truly terminating errors, it does so by inspecting the exit code and only raising an exception if the exit code is invalid.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -3954,7 +3975,7 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
             <maml:name>String</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>Terraform</dev:defaultValue>
+          <dev:defaultValue>terraform</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
@@ -4041,7 +4062,7 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
           <maml:name>String</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>Terraform</dev:defaultValue>
+        <dev:defaultValue>terraform</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes>
@@ -4145,7 +4166,7 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
             <maml:name>String</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>Terraform</dev:defaultValue>
+          <dev:defaultValue>terraform</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
@@ -4184,7 +4205,7 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
           <maml:name>String</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>Terraform</dev:defaultValue>
+        <dev:defaultValue>terraform</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes>
@@ -4340,7 +4361,7 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
             <maml:name>String</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>Terraform</dev:defaultValue>
+          <dev:defaultValue>terraform</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
@@ -4439,7 +4460,7 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
           <maml:name>String</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>Terraform</dev:defaultValue>
+        <dev:defaultValue>terraform</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes>
@@ -4542,7 +4563,7 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
             <maml:name>String</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>Terraform</dev:defaultValue>
+          <dev:defaultValue>terraform</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
@@ -4581,7 +4602,7 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
           <maml:name>String</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>Terraform</dev:defaultValue>
+        <dev:defaultValue>terraform</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes>
@@ -4676,7 +4697,7 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
             <maml:name>String</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>Terraform</dev:defaultValue>
+          <dev:defaultValue>terraform</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
@@ -4715,7 +4736,7 @@ Invoke-ConvertToYaml $Data -Parameters $Params</dev:code>
           <maml:name>String</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>Terraform</dev:defaultValue>
+        <dev:defaultValue>terraform</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes>
@@ -5200,7 +5221,7 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
           <maml:name>RepoPath</maml:name>
           <maml:description>
-            <maml:para>{{ Fill RepoPath Description }}</maml:para>
+            <maml:para>The path to the repository</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -5212,7 +5233,7 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
           <maml:name>RepoName</maml:name>
           <maml:description>
-            <maml:para>{{ Fill RepoName Description }}</maml:para>
+            <maml:para>The name of the repo (if different to the directory provided to -RepoPath)</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -5251,7 +5272,7 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="3" aliases="none">
         <maml:name>RepoName</maml:name>
         <maml:description>
-          <maml:para>{{ Fill RepoName Description }}</maml:para>
+          <maml:para>The name of the repo (if different to the directory provided to -RepoPath)</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -5263,7 +5284,7 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="False" position="2" aliases="none">
         <maml:name>RepoPath</maml:name>
         <maml:description>
-          <maml:para>{{ Fill RepoPath Description }}</maml:para>
+          <maml:para>The path to the repository</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -5355,9 +5376,9 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
     <command:examples>
       <command:example>
         <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <dev:code>PS C:\&gt; New-BrownserveTemporaryDirectory</dev:code>
         <dev:remarks>
-          <maml:para>{{ Add example description here }}</maml:para>
+          <maml:para>Would create a directory under `C:\Temp`</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
@@ -5373,7 +5394,8 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>We often want to create temporary files commonly during builds but also during certain script executions. This cmdlet allows us to create them in an easily identifiable format and place, by default it will create them in a repositories `.tmp` directory (if present) or system-wide temporary directory. It also allows you to set the content of the temporary file directly if desired or skip creation entirely if some other process will create the file and instead simply return a known-good path to be used.</maml:para>
+      <maml:para>We often want to create temporary files commonly during builds but also during certain script executions.
+This cmdlet allows us to create them in an easily identifiable format and place, by default it will create them in a repositories `.tmp` directory (if present) or system-wide temporary directory. It also allows you to set the content of the temporary file directly if desired or skip creation entirely if some other process will create the file and instead simply return a known-good path to be used.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -5381,7 +5403,8 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>Content</maml:name>
           <maml:description>
-            <maml:para>An optional set of content to be written to the temporary file upon creation. This can only be used when `-SkipCreation` is not used.</maml:para>
+            <maml:para>An optional set of content to be written to the temporary file upon creation.
+This can only be used when `-SkipCreation` is not used.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -5417,7 +5440,8 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>FilePath</maml:name>
           <maml:description>
-            <maml:para>The path to where the temporary file should be stored. If none is provided then the cmdlet will use the `$BrownserveTempLocation` directory which varies depending on the OS and the location this module was imported</maml:para>
+            <maml:para>The path to where the temporary file should be stored.
+If none is provided then the cmdlet will use the `$BrownserveTempLocation` directory which varies depending on the OS and the location this module was imported</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -5456,7 +5480,8 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
           <maml:name>FilePath</maml:name>
           <maml:description>
-            <maml:para>The path to where the temporary file should be stored. If none is provided then the cmdlet will use the `$BrownserveTempLocation` directory which varies depending on the OS and the location this module was imported</maml:para>
+            <maml:para>The path to where the temporary file should be stored.
+If none is provided then the cmdlet will use the `$BrownserveTempLocation` directory which varies depending on the OS and the location this module was imported</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -5482,7 +5507,8 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>Content</maml:name>
         <maml:description>
-          <maml:para>An optional set of content to be written to the temporary file upon creation. This can only be used when `-SkipCreation` is not used.</maml:para>
+          <maml:para>An optional set of content to be written to the temporary file upon creation.
+This can only be used when `-SkipCreation` is not used.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -5518,7 +5544,8 @@ nested_hash1                   {[key2, value3], [key3, value4]}</dev:code>
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="False" position="named" aliases="none">
         <maml:name>FilePath</maml:name>
         <maml:description>
-          <maml:para>The path to where the temporary file should be stored. If none is provided then the cmdlet will use the `$BrownserveTempLocation` directory which varies depending on the OS and the location this module was imported</maml:para>
+          <maml:para>The path to where the temporary file should be stored.
+If none is provided then the cmdlet will use the `$BrownserveTempLocation` directory which varies depending on the OS and the location this module was imported</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -7043,7 +7070,8 @@ resource "github_repository" "Brownserve_PSTools" {
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This cmdlet will send a standard Brownserve build notification to our build channel. This cmdlet is largely useless outside of Brownserve workflows</maml:para>
+      <maml:para>This cmdlet will send a standard Brownserve build notification to our build channel.
+This cmdlet is largely useless outside of Brownserve workflows</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -7308,7 +7336,8 @@ resource "github_repository" "Brownserve_PSTools" {
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
           <maml:name>Channel</maml:name>
           <maml:description>
-            <maml:para>The ID of the channel you wish to post to (e.g. CC64VC954) you get get this from visiting Slack in a Browser and copying it from the URL. This parameter is completely optional, if left blank it will use the default channel assigned to the webhook.</maml:para>
+            <maml:para>The ID of the channel you wish to post to (e.g. CC64VC954) you get get this from visiting Slack in a Browser and copying it from the URL.
+This parameter is completely optional, if left blank it will use the default channel assigned to the webhook.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -7320,7 +7349,8 @@ resource "github_repository" "Brownserve_PSTools" {
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="color">
           <maml:name>Colour</maml:name>
           <maml:description>
-            <maml:para>The colour (if any) to use for the notification, it will be displayed down the left hand side of the message. The colour should be in hexadecimal format.</maml:para>
+            <maml:para>The colour (if any) to use for the notification, it will be displayed down the left hand side of the message.
+The colour should be in hexadecimal format.</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
           <dev:type>
@@ -7344,7 +7374,9 @@ resource "github_repository" "Brownserve_PSTools" {
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
           <maml:name>SubBlocks</maml:name>
           <maml:description>
-            <maml:para>Any additional sub-blocks you would like displayed at the end of the message, these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet. If your message is over 3000 characters in length then SubBlocks cannot be used, please use the `-UpperBlocks` or `-Fields` parameters instead. More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
+            <maml:para>Any additional sub-blocks you would like displayed at the end of the message, these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet.
+If your message is over 3000 characters in length then SubBlocks cannot be used, please use the `-UpperBlocks` or `-Fields` parameters instead.
+More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
           <dev:type>
@@ -7368,7 +7400,8 @@ resource "github_repository" "Brownserve_PSTools" {
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
           <maml:name>UpperBlocks</maml:name>
           <maml:description>
-            <maml:para>Blocks that appear at the top of the message these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet. More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
+            <maml:para>Blocks that appear at the top of the message these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet.
+More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
           <dev:type>
@@ -7383,7 +7416,8 @@ resource "github_repository" "Brownserve_PSTools" {
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
         <maml:name>Channel</maml:name>
         <maml:description>
-          <maml:para>The ID of the channel you wish to post to (e.g. CC64VC954) you get get this from visiting Slack in a Browser and copying it from the URL. This parameter is completely optional, if left blank it will use the default channel assigned to the webhook.</maml:para>
+          <maml:para>The ID of the channel you wish to post to (e.g. CC64VC954) you get get this from visiting Slack in a Browser and copying it from the URL.
+This parameter is completely optional, if left blank it will use the default channel assigned to the webhook.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -7395,7 +7429,8 @@ resource "github_repository" "Brownserve_PSTools" {
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="color">
         <maml:name>Colour</maml:name>
         <maml:description>
-          <maml:para>The colour (if any) to use for the notification, it will be displayed down the left hand side of the message. The colour should be in hexadecimal format.</maml:para>
+          <maml:para>The colour (if any) to use for the notification, it will be displayed down the left hand side of the message.
+The colour should be in hexadecimal format.</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -7431,7 +7466,9 @@ resource "github_repository" "Brownserve_PSTools" {
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
         <maml:name>SubBlocks</maml:name>
         <maml:description>
-          <maml:para>Any additional sub-blocks you would like displayed at the end of the message, these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet. If your message is over 3000 characters in length then SubBlocks cannot be used, please use the `-UpperBlocks` or `-Fields` parameters instead. More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
+          <maml:para>Any additional sub-blocks you would like displayed at the end of the message, these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet.
+If your message is over 3000 characters in length then SubBlocks cannot be used, please use the `-UpperBlocks` or `-Fields` parameters instead.
+More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
         <dev:type>
@@ -7455,7 +7492,8 @@ resource "github_repository" "Brownserve_PSTools" {
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName)" position="named" aliases="none">
         <maml:name>UpperBlocks</maml:name>
         <maml:description>
-          <maml:para>Blocks that appear at the top of the message these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet. More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
+          <maml:para>Blocks that appear at the top of the message these need to be formed as an array of hashtable's and are not validated in any way by the cmdlet.
+More info can be found at https://api.slack.com/reference/block-kit/blocks</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">Array</command:parameterValue>
         <dev:type>
@@ -7499,7 +7537,8 @@ resource "github_repository" "Brownserve_PSTools" {
     </command:returnValues>
     <maml:alertSet>
       <maml:alert>
-        <maml:para>This cmdlet currently uses the "attachments" method which has now been deprecated by Slack. We can't yet switch over to the full block-kit method as it's lacking colour support which we make heavy use of, once that becomes available we can make the switch though some logic tweaking will be required.</maml:para>
+        <maml:para>This cmdlet currently uses the "attachments" method which has now been deprecated by Slack.
+We can't yet switch over to the full block-kit method as it's lacking colour support which we make heavy use of, once that becomes available we can make the switch though some logic tweaking will be required.</maml:para>
       </maml:alert>
     </maml:alertSet>
     <command:examples>
@@ -7774,12 +7813,7 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -7791,7 +7825,7 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>Provides an easy way to set the Terraform log level. Valid options are: DEBUG TRACE INFO WARN     * none The default value is "none"</maml:para>
+      <maml:para>Provides an easy way to set the Terraform log level. Valid options are:     * DEBUG     * TRACE     * INFO     * WARN     * none The default value is "none"</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -7814,7 +7848,7 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
             <maml:name>String</maml:name>
             <maml:uri />
           </dev:type>
-          <dev:defaultValue>None</dev:defaultValue>
+          <dev:defaultValue>none</dev:defaultValue>
         </command:parameter>
       </command:syntaxItem>
     </command:syntax>
@@ -7829,7 +7863,7 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
           <maml:name>String</maml:name>
           <maml:uri />
         </dev:type>
-        <dev:defaultValue>None</dev:defaultValue>
+        <dev:defaultValue>none</dev:defaultValue>
       </command:parameter>
     </command:parameters>
     <command:inputTypes>
@@ -7880,12 +7914,7 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -7993,12 +8022,7 @@ URI       : https://www.example.com/</dev:code>
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -8101,12 +8125,7 @@ URI       : https://www.example.com/</dev:code>
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -8160,12 +8179,7 @@ URI       : https://www.example.com/</dev:code>
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -8177,7 +8191,8 @@ URI       : https://www.example.com/</dev:code>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>This cmdlet will test the current operating system and compare it against the list provided to the `-SupportedOS` parameter, if the current OS is not in the supported list a terminating error is thrown. This is useful for cases where you want to quickly terminate a PowerShell run when running on an unsupported OS</maml:para>
+      <maml:para>This cmdlet will test the current operating system and compare it against the list provided to the `-SupportedOS` parameter, if the current OS is not in the supported list a terminating error is thrown.
+This is useful for cases where you want to quickly terminate a PowerShell run when running on an unsupported OS</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -8249,12 +8264,7 @@ URI       : https://www.example.com/</dev:code>
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -8404,12 +8414,7 @@ URI       : https://www.example.com/</dev:code>
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -8517,12 +8522,7 @@ URI       : https://www.example.com/</dev:code>
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -8797,12 +8797,7 @@ URI       : https://www.example.com/</dev:code>
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -8911,12 +8906,7 @@ URI       : https://www.example.com/</dev:code>
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
   <command:command xmlns:maml="http://schemas.microsoft.com/maml/2004/10" xmlns:command="http://schemas.microsoft.com/maml/dev/command/2004/10" xmlns:dev="http://schemas.microsoft.com/maml/dev/2004/10" xmlns:MSHelp="http://msdn.microsoft.com/mshelp">
     <command:details>
@@ -8995,11 +8985,6 @@ URI       : https://www.example.com/</dev:code>
         </dev:remarks>
       </command:example>
     </command:examples>
-    <command:relatedLinks>
-      <maml:navigationLink>
-        <maml:linkText>Online Version:</maml:linkText>
-        <maml:uri>https://api.slack.com/messaging/composing/layouts</maml:uri>
-      </maml:navigationLink>
-    </command:relatedLinks>
+    <command:relatedLinks />
   </command:command>
 </helpItems>

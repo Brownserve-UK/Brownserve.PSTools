@@ -205,4 +205,3 @@ Writes a Teamcity build problem to StdOut and the same message to StdErr.
 ### [Write-TeamcityStatus](./Brownserve.PSTools/Write-TeamcityStatus.md)
 Writes a status message to StdOut
 
-
