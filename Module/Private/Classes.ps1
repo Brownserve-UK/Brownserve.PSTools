@@ -120,7 +120,11 @@ class GitStatus
 }
 
 ## GitHub related classes
-enum GitHubPullRequestState
+
+<#
+    Simple enum for GitHub issue/PR states
+#>
+enum GitHubIssueState
 {
     Open
     Closed
