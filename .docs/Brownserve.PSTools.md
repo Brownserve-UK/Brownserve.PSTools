@@ -11,6 +11,9 @@ Locale: en-US
 A collection of PowerShell tools used in various projects.
 
 ## Brownserve.PSTools Cmdlets
+### [Add-ChangelogEntry](./Brownserve.PSTools/Add-ChangelogEntry.md)
+Inserts a new changelog entry into a given changelog file
+
 ### [Add-ModuleHelp](./Brownserve.PSTools/Add-ModuleHelp.md)
 Creates XML MALM help for a PowerShell module
 
