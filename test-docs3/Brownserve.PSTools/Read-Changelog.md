@@ -92,4 +92,3 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 The resulting object from this cmdlet can be piped into Add-ChangelogEntry for convenience.
 
 ## RELATED LINKS
-

@@ -85,4 +85,3 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 $env:TerraformPath will be set upon successful download/extraction and the command 'terraform' will be set to this downloaded version of terraform for this session.
 
 ## RELATED LINKS
-

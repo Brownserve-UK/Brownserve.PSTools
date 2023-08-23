@@ -81,4 +81,3 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 See https://www.jetbrains.com/help/teamcity/configuring-general-settings.html#Artifact+Paths for more information
 
 ## RELATED LINKS
-

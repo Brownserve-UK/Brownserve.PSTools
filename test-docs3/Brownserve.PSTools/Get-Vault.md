@@ -83,4 +83,3 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 $env:VaultPath will be set upon successful download/extraction of Vault and the command 'vault' will be set to the downloaded version of vault for this session.
 
 ## RELATED LINKS
-
