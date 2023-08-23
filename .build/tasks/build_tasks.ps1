@@ -267,6 +267,38 @@ task GenerateDocs ImportModule, {
         $DocsParams.Add('ModuleGUID', $ModuleGUID)
     }
     Build-ModuleDocumentation @DocsParams
+
+    # Ensure the line endings are set correctly
+    $Docs = Get-ChildItem `
+        -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath "Brownserve.PSTools")  `
+        -Filter *.md `
+        -Recurse | Select-Object -ExpandProperty 'FullName'
+    $ModulePage = Get-Item `
+        -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath "Brownserve.PSTools.md")
+    Set-LineEndings `
+        -Path $Docs `
+        -LineEnding 'LF' `
+        -ErrorAction 'Stop'
+    Set-LineEndings `
+        -Path $ModulePage `
+        -LineEnding 'LF' `
+        -ErrorAction 'Stop'
+}
+
+# Synopsis: Updates the module help
+task UpdateModuleHelp GenerateDocs, {
+    Write-Verbose 'Updating module help'
+    $HelpParams = @{
+        ModuleDirectory   = $Global:BrownserveModuleDirectory
+        DocumentationPath = (Join-Path $global:BrownserveRepoDocsDirectory 'Brownserve.PSTools')
+    }
+    Add-ModuleHelp @HelpParams
+
+    # Again we want to ensure the line endings are set correctly
+    Set-LineEndings `
+        -Path (Join-Path $Global:BrownserveModuleDirectory -ChildPath "en-US" -AdditionalChildPath 'Brownserve.PSTools-help.xml') `
+        -LineEnding 'LF' `
+        -ErrorAction 'Stop'
 }
 
 # Synopsis: Updates the changelog
@@ -478,7 +510,7 @@ task BuildImportTest Tests, {}
     and ensure no uncommitted changes are present.
     This helps to ensure any pull requests are valid and good to merge.
 #>
-task BuildImportGenerateDocsTest CheckForUncommittedChanges, Tests,{}
+task BuildImportGenerateDocsTest UpdateModuleHelp, CheckForUncommittedChanges, Tests,{}
 
 <#
 .SYNOPSIS
