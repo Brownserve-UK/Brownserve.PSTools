@@ -1,4 +1,4 @@
-# LEAVE line endings alone
+# Tell git to manage line endings
 * text=auto
 # Ensure our generated docs have sensible line endings
 /.docs/Brownserve.PSTools* text eol=lf
