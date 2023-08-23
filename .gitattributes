@@ -1,5 +1,5 @@
 # LEAVE line endings alone
-# * text=auto
+* text=auto
 # Ensure our generated docs have sensible line endings
 /.docs/Brownserve.PSTools* text eol=lf
 /.docs/Brownserve.PSTools.md text eol=lf
