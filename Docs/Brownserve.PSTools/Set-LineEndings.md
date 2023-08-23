@@ -8,7 +8,7 @@ schema: 2.0.0
 # Set-LineEndings
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Sets the line endings of a file to either CRLF or LF
 
 ## SYNTAX
 
@@ -17,21 +17,28 @@ Set-LineEndings [-Path] <String[]> [[-LineEnding] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Due to the way PowerShell handles line endings when creating/updating files it can be difficult to ensure that the line endings are correct. This function will set the line endings of a file to either CRLF or LF.
 
 ## EXAMPLES
 
-### Example 1
+### Example 1: Set the line endings of a file to CRLF
 ```
-PS C:\> {{ Add example code here }}
+PS C:\> Set-LineEndings -Path C:\Temp\test.txt -LineEnding CRLF
 ```
 
-{{ Add example description here }}
+This command will set the line endings of the file C:\Temp\test.txt to CRLF
+
+### Example 2: Set the line endings of a file to LF
+```
+PS C:\> Set-LineEndings -Path C:\Temp\test.txt -LineEnding LF
+```
+
+This command will set the line endings of the file C:\Temp\test.txt to LF
 
 ## PARAMETERS
 
 ### -LineEnding
-{{ Fill LineEnding Description }}
+The line ending to set the file to. Valid values are CRLF and LF
 
 ```yaml
 Type: String
@@ -47,7 +54,7 @@ Accept wildcard characters: False
 ```
 
 ### -Path
-{{ Fill Path Description }}
+The path to the file to set the line endings of
 
 ```yaml
 Type: String[]

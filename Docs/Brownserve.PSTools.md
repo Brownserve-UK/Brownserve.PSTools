@@ -173,7 +173,7 @@ Sends a standard Brownserve build notification.
 Sends a notification to a given Slack webhook
 
 ### [Set-LineEndings](./Brownserve.PSTools/Set-LineEndings.md)
-{{ Fill in the Synopsis }}
+Sets the line endings of a file to either CRLF or LF
 
 ### [Set-TeamcityBuildNumber](./Brownserve.PSTools/Set-TeamcityBuildNumber.md)
 Sets the build number in Teamcity.

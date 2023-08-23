@@ -7592,11 +7592,11 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
       <command:verb>Set</command:verb>
       <command:noun>LineEndings</command:noun>
       <maml:description>
-        <maml:para>{{ Fill in the Synopsis }}</maml:para>
+        <maml:para>Sets the line endings of a file to either CRLF or LF</maml:para>
       </maml:description>
     </command:details>
     <maml:description>
-      <maml:para>{{ Fill in the Description }}</maml:para>
+      <maml:para>Due to the way PowerShell handles line endings when creating/updating files it can be difficult to ensure that the line endings are correct. This function will set the line endings of a file to either CRLF or LF.</maml:para>
     </maml:description>
     <command:syntax>
       <command:syntaxItem>
@@ -7604,7 +7604,7 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
         <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
           <maml:name>Path</maml:name>
           <maml:description>
-            <maml:para>{{ Fill Path Description }}</maml:para>
+            <maml:para>The path to the file to set the line endings of</maml:para>
           </maml:description>
           <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
           <dev:type>
@@ -7616,7 +7616,7 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
         <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="1" aliases="none">
           <maml:name>LineEnding</maml:name>
           <maml:description>
-            <maml:para>{{ Fill LineEnding Description }}</maml:para>
+            <maml:para>The line ending to set the file to. Valid values are CRLF and LF</maml:para>
           </maml:description>
           <command:parameterValueGroup>
             <command:parameterValue required="false" command:variableLength="false">CRLF</command:parameterValue>
@@ -7635,7 +7635,7 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
       <command:parameter required="false" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="1" aliases="none">
         <maml:name>LineEnding</maml:name>
         <maml:description>
-          <maml:para>{{ Fill LineEnding Description }}</maml:para>
+          <maml:para>The line ending to set the file to. Valid values are CRLF and LF</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String</command:parameterValue>
         <dev:type>
@@ -7647,7 +7647,7 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
       <command:parameter required="true" variableLength="true" globbing="false" pipelineInput="True (ByPropertyName, ByValue)" position="0" aliases="none">
         <maml:name>Path</maml:name>
         <maml:description>
-          <maml:para>{{ Fill Path Description }}</maml:para>
+          <maml:para>The path to the file to set the line endings of</maml:para>
         </maml:description>
         <command:parameterValue required="true" variableLength="false">String[]</command:parameterValue>
         <dev:type>
@@ -7692,10 +7692,17 @@ Send-SlackNotification -Message "This is a test" -Webhook "https://mywebhook" -C
     </maml:alertSet>
     <command:examples>
       <command:example>
-        <maml:title>-------------------------- Example 1 --------------------------</maml:title>
-        <dev:code>PS C:\&gt; {{ Add example code here }}</dev:code>
+        <maml:title>------ Example 1: Set the line endings of a file to CRLF ------</maml:title>
+        <dev:code>PS C:\&gt; Set-LineEndings -Path C:\Temp\test.txt -LineEnding CRLF</dev:code>
         <dev:remarks>
-          <maml:para>{{ Add example description here }}</maml:para>
+          <maml:para>This command will set the line endings of the file C:\Temp\test.txt to CRLF</maml:para>
+        </dev:remarks>
+      </command:example>
+      <command:example>
+        <maml:title>------- Example 2: Set the line endings of a file to LF -------</maml:title>
+        <dev:code>PS C:\&gt; Set-LineEndings -Path C:\Temp\test.txt -LineEnding LF</dev:code>
+        <dev:remarks>
+          <maml:para>This command will set the line endings of the file C:\Temp\test.txt to LF</maml:para>
         </dev:remarks>
       </command:example>
     </command:examples>
