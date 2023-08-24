@@ -80,6 +80,9 @@ function Update-Version
         {
             if ($PreReleaseString)
             {
+                # Remove invalid characters from the suffix.
+                $PreReleaseString = $PreReleaseString -replace '[/]', '-'
+                $PreReleaseString = $PreReleaseString -replace '[^0-9A-Za-z-]', ''
                 [System.Management.Automation.SemanticVersion]$NewVersion = "$($NewVersion.ToString())-$PreReleaseString"
             }
         }
