@@ -39,7 +39,7 @@ function Build-ModuleDocumentation
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true
         )]
-        [SemVer]
+        [System.Management.Automation.SemanticVersion]
         $HelpVersion
     )
     
