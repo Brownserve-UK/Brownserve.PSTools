@@ -38,6 +38,19 @@ param
     [string[]]
     $ModuleTags = 'brownserve-UK',
 
+    # The type of changes that this version of the module contains
+    # this is used to determine the version number
+    [Parameter(
+        Mandatory = $false
+    )]
+    [ValidateSet(
+        'major',
+        'minor',
+        'patch'
+    )]
+    [string]
+    $ReleaseType = 'patch',
+
     # If set to true this will denote a pre-production release
     [Parameter(
         Mandatory = $False
@@ -96,7 +109,14 @@ param
         Mandatory = $False
     )]
     [string]
-    $PSGalleryAPIKey
+    $PSGalleryAPIKey,
+
+    # If set will load the working copy of the module at the start of the build
+    [Parameter(
+        Mandatory = $false
+    )]
+    [switch]
+    $UseWorkingCopy
 )
 # Depending on how we got the branch name we may need to remove the full ref
 $BranchName = $BranchName -replace 'refs\/heads\/', ''
@@ -156,11 +176,43 @@ if ('GitHub' -in $PublishTo)
     }
 }
 
+<#
+.SYNOPSIS
+    Loads the working copy of the module from the module directory
+.DESCRIPTION
+    By default we pull the latest _stable_ copy of Brownserve.PSTools in to run this build, however if we make changes
+    to any of the cmdlets used in this build we won't get the changes until a new release is pushed.
+    This build task allows us to unload the stable version and reload the working copy of the module
+#>
+task UseWorkingCopy {
+    if ($UseWorkingCopy -eq $true)
+    {
+        Write-Verbose "Loading working copy of module from $Global:BrownserveModuleDirectory"
+        if ((Get-Module $ModuleName))
+        {
+            Write-Warning "The current version of $ModuleName has been unloaded and replaced with the working copy from $Global:BrownserveModuleDirectory. `nFunctionality may be unstable"
+            Remove-Module $ModuleName -Force -ErrorAction 'Stop' -Verbose:$false
+        }
+        Import-Module (Join-Path $Global:BrownserveModuleDirectory 'Brownserve.PSTools.psm1') -Force -ErrorAction 'Stop' -Verbose:$false
+    }
+}
+
 # Synopsis: Generate version info from the changelog and branch name.
-task GenerateVersionInfo {
+task GenerateVersionInfo UseWorkingCopy, {
     $script:Changelog = Read-Changelog -ChangelogPath (Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'CHANGELOG.md')
-    $script:Version = $Changelog.CurrentVersion
+    $CurrentVersion = $Changelog.CurrentVersion
+    $UpdateVersionParams = @{
+        Version = $CurrentVersion
+        ReleaseType = $ReleaseType
+    }
+    if ($PreRelease)
+    {
+        $UpdateVersionParams.Add('PreReleaseString', $BranchName)
+    }
+    # TODO: Add build number support?
+    $script:Version = Update-Version @UpdateVersionParams -ErrorAction 'Stop'
     $script:ReleaseNotes = $Changelog.ReleaseNotes -replace '"', '\"' -replace '`', '' -replace '\*', '' # Filter out characters that'll break the XML and/or just generally look horrible in NuGet
+    # TODO: Update this cmdlet to support semver
     $NugetPackageVersionParams = @{
         Version    = $Version
         BranchName = $BranchName
@@ -214,7 +266,7 @@ task GenerateModuleManifest CopyModule, GenerateVersionInfo, {
         Copyright         = "$(Get-Date -Format yyyy) $ModuleAuthor"
         CompanyName       = 'Brownserve UK'
         RootModule        = "$ModuleName.psm1"
-        ModuleVersion     = "$script:Version"
+        ModuleVersion     = $script:Version
         Description       = $ModuleDescription
         PowerShellVersion = '6.0'
         ReleaseNotes      = $script:ReleaseNotes
@@ -234,7 +286,7 @@ task GenerateModuleManifest CopyModule, GenerateVersionInfo, {
     New-ModuleManifest @ModuleManifest -ErrorAction 'Stop'
 }
 
-<# 
+<#
 .SYNOPSIS
     Now we've built the module we need to import the freshly built version before we can test it.
 #>

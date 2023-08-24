@@ -65,6 +65,19 @@ param
     [string]
     $Build = 'BuildImport',
 
+    # The type of changes that this version of the module contains
+    # this is used to determine the version number
+    [Parameter(
+        Mandatory = $false
+    )]
+    [ValidateSet(
+        'major',
+        'minor',
+        'patch'
+    )]
+    [string]
+    $ReleaseType = 'patch',
+
     # Where the module should be published to
     [Parameter(
         Mandatory = $false
@@ -79,7 +92,7 @@ param
     [ValidateNotNullOrEmpty()]
     [string]
     $GitHubOrg = 'Brownserve-UK',
-    
+
     # The GitHub repo that contains this module, it's needed to build up documentation URI's
     [Parameter(
         Mandatory = $true
@@ -87,7 +100,7 @@ param
     [ValidateNotNullOrEmpty()]
     [string]
     $GitHubRepoName,
-    
+
     # The PAT for pushing to GitHub
     [Parameter(
         Mandatory = $false
@@ -108,7 +121,14 @@ param
         Mandatory = $false
     )]
     [string]
-    $PSGalleryAPIKey
+    $PSGalleryAPIKey,
+
+    # If set will load the working copy of the module at the start of the build
+    [Parameter(
+        Mandatory = $false
+    )]
+    [switch]
+    $UseWorkingCopy
 )
 # Always stop on errors
 $ErrorActionPreference = 'Stop'
@@ -147,7 +167,6 @@ if (!$ModuleInfo)
     try
     {
         $ModuleInfo = Get-Content (Join-Path $PSScriptRoot 'ModuleInfo.json') -Raw | ConvertFrom-Json
-    
     }
     catch
     {
@@ -180,12 +199,14 @@ try
     $BuildParams = @{
         File              = (Join-Path -Path $global:BrownserveRepoBuildTasksDirectory -ChildPath 'build_tasks.ps1' | Convert-Path)
         Task              = $Build
+        ReleaseType       = $ReleaseType
         BranchName        = $BranchName
         ModuleName        = $ModuleInfo.Name
         ModuleDescription = $ModuleInfo.Description
         ModuleAuthor      = $ModuleAuthor
         ModuleGuid        = $ModuleInfo.GUID
         ModuleTags        = $ModuleInfo.Tags
+        UseWorkingCopy    = ($PSBoundParameters['UseWorkingCopy'] -eq $true)
     }
     if ($PreRelease)
     {
