@@ -145,7 +145,14 @@ if (!$BranchName)
 # Depending on how we got the branch name we may need to remove the full ref
 $BranchName = $BranchName -replace 'refs\/heads\/', ''
 
-# Work out if this is a production release depending on the branch we're building from
+<#
+    Work out if this is a production release depending on the branch we're building from
+    We default to $true unless we detect that we're running on the default branch, as anything that is in the default
+    branch should be the one to build shipped version of the code.
+    This should ensure that:
+        * Main can never be used a prerelease tag
+        * Feature branches cannot ever create a production release
+#>
 $PreRelease = $true
 if ($DefaultBranch -eq $BranchName)
 {
