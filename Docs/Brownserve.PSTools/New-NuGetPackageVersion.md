@@ -8,6 +8,7 @@ schema: 2.0.0
 # New-NuGetPackageVersion
 
 ## SYNOPSIS
+*This cmdlet has been deprecated and will be removed in a future release, please use Format-NuGetPackageVersion instead*
 Obtains a NuGet package version based on the build version number and branch name.
 
 ## SYNTAX
