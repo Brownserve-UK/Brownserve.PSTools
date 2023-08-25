@@ -26,7 +26,11 @@ function Update-Version
             Position = 1,
             ValueFromPipelineByPropertyName = $true
         )]
-        [ValidateSet('major', 'minor', 'patch')]
+        [ValidateSet(
+            'major',
+            'minor',
+            'patch'
+        )]
         [string]
         $ReleaseType,
 
