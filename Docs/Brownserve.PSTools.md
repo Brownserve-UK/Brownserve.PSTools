@@ -41,6 +41,9 @@ Converts a given hashtable to an alphabetically sorted hashtable
 ### [Copy-GitRemoteRepository](./Brownserve.PSTools/Copy-GitRemoteRepository.md)
 Clones a given git repository to the local machine
 
+### [Format-NuGetPackageVersion](./Brownserve.PSTools/Format-NuGetPackageVersion.md)
+Formats a version number to ensure compatibility with NuGet and nuget.org
+
 ### [Format-TerraformResourceName](./Brownserve.PSTools/Format-TerraformResourceName.md)
 Strips out illegal characters from Terraform resource names
 
@@ -149,6 +152,7 @@ Creates a new branch in a given git repository
 Creates a release on GitHub
 
 ### [New-NuGetPackageVersion](./Brownserve.PSTools/New-NuGetPackageVersion.md)
+*This cmdlet has been deprecated and will be removed in a future release, please use Format-NuGetPackageVersion instead*
 Obtains a NuGet package version based on the build version number and branch name.
 
 ### [New-PullRequest](./Brownserve.PSTools/New-PullRequest.md)
@@ -204,6 +208,9 @@ Updates a given repository to use the latest tooling and settings
 
 ### [Update-Changelog](./Brownserve.PSTools/Update-Changelog.md)
 Updates a repo's changelog according to the semver v1.0.0 spec.
+
+### [Update-Version](./Brownserve.PSTools/Update-Version.md)
+A simple function to increment a semantic version number.
 
 ### [Write-TeamcityBuildProblem](./Brownserve.PSTools/Write-TeamcityBuildProblem.md)
 Writes a Teamcity build problem to StdOut and the same message to StdErr.

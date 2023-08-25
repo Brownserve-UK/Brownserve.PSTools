@@ -14,7 +14,8 @@ This will build markdown PowerShell module documentation using PlatyPS
 
 ```
 Build-ModuleDocumentation [-ModuleName] <String> [-ModulePath] <String> [-DocumentationPath] <String>
- [-ReloadModule] [-IncludeDontShow] [[-ModuleGUID] <Guid>] [[-HelpVersion] <SemVer>] [<CommonParameters>]
+ [-ReloadModule] [-IncludeDontShow] [[-ModuleGUID] <Guid>] [[-HelpVersion] <SemanticVersion>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -53,7 +54,7 @@ The version number of the help.
 Ideally this should match the version of the module being shipped.
 
 ```yaml
-Type: SemVer
+Type: SemanticVersion
 Parameter Sets: (All)
 Aliases:
 
@@ -145,7 +146,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### SemVer
+### System.Management.Automation.SemanticVersion
 ## OUTPUTS
 
 ### System.Object
