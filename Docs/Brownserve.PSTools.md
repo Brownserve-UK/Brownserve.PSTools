@@ -68,6 +68,9 @@ Gets a list of releases from a given GitHub repo
 ### [Get-GitHubTags](./Brownserve.PSTools/Get-GitHubTags.md)
 Gets a list of tags for a given GitHub repository
 
+### [Get-GitMerges](./Brownserve.PSTools/Get-GitMerges.md)
+Returns a list of merge commits for a given GitHub repository
+
 ### [Get-GitRemoteOriginURL](./Brownserve.PSTools/Get-GitRemoteOriginURL.md)
 Gets the remote origin URL for a given repository
 
