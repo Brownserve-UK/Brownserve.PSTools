@@ -118,18 +118,12 @@ param
     [switch]
     $UseWorkingCopy
 )
+# Set up a bunch of variables that we'll use through the build, some of these are global as they're used in our tests too
+$global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory $ModuleName
 # Depending on how we got the branch name we may need to remove the full ref
 $BranchName = $BranchName -replace 'refs\/heads\/', ''
-Write-Verbose @"
-`nBuild parameters:
-    PreRelease = $PreRelease
-    BranchName = $BranchName
-    PublishTo = $($PublishTo -join ', ')
-"@
 $script:CurrentCommitHash = & git rev-parse HEAD
-
-
-$global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory $ModuleName # This is global as it gets used in our tests too
+$script:ChangelogPath = Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'CHANGELOG.md'
 $script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'NuGetPackage'
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
 $script:GitHubRepoURI = "https://github.com/$GitHubOrg/$GitHubRepoName"
@@ -197,10 +191,23 @@ task UseWorkingCopy {
     }
 }
 
-# Synopsis: Generate version info from the changelog and branch name.
+<#
+.SYNOPSIS
+    Generates the version number for the module
+#>
 task GenerateVersionInfo UseWorkingCopy, {
-    $script:Changelog = Read-Changelog -ChangelogPath (Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'CHANGELOG.md')
+    <#
+        We get the currently released version of the module by reading the changelog.
+        This ensures that if we've added a new release endpoint we still stay consistent with the past releases.
+    #>
+    Write-Verbose 'Generating version information'
+    $script:Changelog = Read-Changelog `
+        -ChangelogPath $script:ChangelogPath
     $CurrentVersion = $Changelog.CurrentVersion
+    if (!$CurrentVersion)
+    {
+        throw 'Unable to determine current version from changelog'
+    }
     $UpdateVersionParams = @{
         Version = $CurrentVersion
         ReleaseType = $ReleaseType
@@ -210,38 +217,73 @@ task GenerateVersionInfo UseWorkingCopy, {
         $UpdateVersionParams.Add('PreReleaseString', $BranchName)
     }
     # TODO: Add build number support?
-    $script:Version = Update-Version @UpdateVersionParams -ErrorAction 'Stop'
+    $script:NewVersion = Update-Version @UpdateVersionParams -ErrorAction 'Stop'
+    # TODO: move this to a separate task as we'll need to update the changelog
     $script:ReleaseNotes = $Changelog.ReleaseNotes -replace '"', '\"' -replace '`', '' -replace '\*', '' # Filter out characters that'll break the XML and/or just generally look horrible in NuGet
-    # TODO: Update this cmdlet to support semver
     $NugetPackageVersionParams = @{
-        Version    = $Version
-        BranchName = $BranchName
+        Version    = $script:NewVersion
+        # We use SemVer 1.0.0 as while NuGet has supported SemVer 2.0.0 since 4.3.0 we want to ensure we're compatible with older versions (for now)
+        SemanticVersion = '1.0.0'
     }
-    if ($PreRelease -eq $true)
-    {
-        $NugetPackageVersionParams.Add('PreRelease', $true)
-    }
-    $global:NugetPackageVersion = New-NuGetPackageVersion @NugetPackageVersionParams
-    Write-Verbose "Version: $script:Version"
-    Write-Verbose "Nuget package version: $global:NugetPackageVersion"
-    Write-Verbose "Release notes:`n$script:ReleaseNotes"
+    $NugetPackageVersion = Format-NuGetPackageVersion @NugetPackageVersionParams
+    <#
+        We use the NugetPackageVersion for our release version as currently this is the most restrictive in terms of supported format.
+        This should mean everything stays consistent.
+    #>
+    $global:VersionToRelease = $NugetPackageVersion
+    Write-Debug @"
+
+    CurrentVersion: $CurrentVersion
+    NewVersion: $script:NewVersion
+    ReleaseNotes: $script:ReleaseNotes
+    NugetPackageVersion: $NugetPackageVersion
+    VersionToRelease: $global:VersionToRelease
+"@
 }
 
 # Synopsis: Checks to make sure we don't already have this release in GitHub
-task CheckPreviousRelease GenerateVersionInfo, {
+task CheckPreviousReleases GenerateVersionInfo, {
+    Write-Verbose 'Checking for previous releases'
     if ('GitHub' -in $PublishTo)
     {
-        Write-Verbose 'Checking for previous releases'
+        Write-Verbose 'Checking for previous releases in GitHub'
         $CurrentReleases = Get-GitHubRelease `
             -GitHubToken $GitHubPAT `
             -RepoName $GitHubRepoName `
             -GitHubOrg $GitHubOrg
-        if ($CurrentReleases.tag_name -contains "v$global:NugetPackageVersion")
+        if ($CurrentReleases.tag_name -contains "v$global:VersionToRelease")
         {
-            throw "There already appears to be a v$global:NugetPackageVersion release!`nDid you forget to update the changelog?"
+            throw "There already appears to be a v$global:VersionToRelease release!`nDid you forget to update the changelog?"
         }
     }
-    # TODO: Check for previous releases in NuGet and PSGallery as well
+    if ('PSGallery' -in $PublishTo)
+    {
+        Write-Verbose 'Checking for previous releases to PSGallery'
+        $CurrentReleases = Find-Module `
+            -Name $ModuleName `
+            -Repository PSGallery `
+            -AllVersions `
+            -AllowPrerelease `
+            -ErrorAction SilentlyContinue # We don't care if this fails, we'll just assume there's no previous release
+        if ($CurrentReleases.Version -contains $global:VersionToRelease)
+        {
+            throw "There already appears to be a $global:VersionToRelease release!`nDid you forget to update the changelog?"
+        }
+    }
+    if ('nuget' -in $PublishTo)
+    {
+        Write-Verbose 'Checking for previous releases to NuGet'
+        $CurrentReleases = Find-Package `
+            -Name $ModuleName `
+            -Source "https://nuget.org/api/v2" `
+            -AllVersions `
+            -AllowPrereleaseVersions `
+            -ErrorAction SilentlyContinue # We don't care if this fails, we'll just assume there's no previous release
+        if ($CurrentReleases.Version -contains $global:VersionToRelease)
+        {
+            throw "There already appears to be a $global:VersionToRelease release!`nDid you forget to update the changelog?"
+        }
+    }
 }
 
 # Synopsis: Copies over all the necessary files to be packaged for a release
@@ -266,7 +308,7 @@ task GenerateModuleManifest CopyModule, GenerateVersionInfo, {
         Copyright         = "$(Get-Date -Format yyyy) $ModuleAuthor"
         CompanyName       = 'Brownserve UK'
         RootModule        = "$ModuleName.psm1"
-        ModuleVersion     = $script:Version
+        ModuleVersion     = $script:NewVersion
         Description       = $ModuleDescription
         PowerShellVersion = '6.0'
         ReleaseNotes      = $script:ReleaseNotes
@@ -316,7 +358,7 @@ task GenerateDocs ImportModule, {
     #TODO: main should not be hardcoded and we should have provision for dev too (can we make use of PreRelease?)
     if ($BranchName -eq 'main')
     {
-        $DocsParams.Add('HelpVersion', $global:NugetPackageVersion)
+        $DocsParams.Add('HelpVersion', $global:VersionToRelease)
         $DocsParams.Add('ModuleGUID', $ModuleGUID)
     }
     Build-ModuleDocumentation @DocsParams
@@ -408,7 +450,7 @@ task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule,
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>$ModuleName</id>
-    <version>$global:NugetPackageVersion</version>
+    <version>$global:VersionToRelease</version>
     <authors>$ModuleAuthor</authors>
     <owners>Brownserve UK</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -437,7 +479,7 @@ task Pack CreateNugetPackage, GenerateModuleManifest, {
             "$script:NuspecPath",
             '-NoPackageAnalysis',
             '-Version',
-            "$NugetPackageVersion",
+            "$global:VersionToRelease",
             '-OutputDirectory',
             "$Global:BrownserveRepoBuildOutputDirectory"
         )
@@ -454,7 +496,7 @@ task Pack CreateNugetPackage, GenerateModuleManifest, {
 }
 
 # Synopsis: Push the package up to nuget
-task PushNuget CheckPreviousRelease, Tests, Pack, CheckForUncommittedChanges, {
+task PushNuget CheckPreviousReleases, Tests, Pack, CheckForUncommittedChanges, {
     # Only push to nuget if we want to
     if ('nuget' -in $PublishTo)
     {
@@ -483,7 +525,7 @@ task PushNuget CheckPreviousRelease, Tests, Pack, CheckForUncommittedChanges, {
 }
 
 # Synopsis: Push the module to PSGallery too
-task PushPSGallery CheckPreviousRelease, Tests, CheckForUncommittedChanges, {
+task PushPSGallery CheckPreviousReleases, Tests, CheckForUncommittedChanges, {
     if ('PSGallery' -in $PublishTo)
     {
         Write-Verbose 'Pushing to PSGallery'
@@ -501,13 +543,14 @@ task PushPSGallery CheckPreviousRelease, Tests, CheckForUncommittedChanges, {
 }
 
 # Synopsis: Creates a GitHub release for this version, we only do this once we've had a successful NuGet push
-task GitHubRelease PushNuget, PushPSGallery, CheckForUncommittedChanges, {
+#TODO: sort out ordering here now that we support multiple platforms (do we just have a single task that does all the push things?)
+task GitHubRelease CheckPreviousReleases, PushNuget, PushPSGallery, CheckForUncommittedChanges, {
     if ('GitHub' -in $PublishTo)
     {
-        Write-Verbose "Creating GitHub release for $global:NugetPackageVersion"
+        Write-Verbose "Creating GitHub release for $global:VersionToRelease"
         $ReleaseParams = @{
-            Name        = "v$global:NugetPackageVersion"
-            Tag         = "v$global:NugetPackageVersion"
+            Name        = "v$global:VersionToRelease"
+            Tag         = "v$global:VersionToRelease"
             Description = $script:ReleaseNotes
             GitHubToken = $GitHubPAT
             RepoName    = $GitHubRepoName
@@ -534,8 +577,8 @@ task GitHubRelease PushNuget, PushPSGallery, CheckForUncommittedChanges, {
 #>
 task Build GenerateModuleManifest, {}
 
-<# 
-.SYNOPSIS 
+<#
+.SYNOPSIS
     This meta task will perform all the steps required to build the module and then import it into the current PowerShell session.
     This will not build the nuget packaged version of the module.
     This is useful to either test new functions/code locally or to ensure the module still loads after making changes
@@ -580,6 +623,18 @@ task BuildImportGenerateDocsTest UpdateModuleHelp, CheckForUncommittedChanges, T
     This is useful to test the complete pipeline as it is one stop short of a release.
 #>
 task BuildPackTest Tests, Pack, {}
+
+<#
+.SYNOPSIS
+    Prepares for a release
+#>
+task StageRelease {
+    # TODO: Maybe this belongs elsewhere as "StageRelease" should be used only to actually do the things
+    Write-Build @"
+Version to release:
+"@
+    Write-Build "This is what would happen provided you released now."
+}
 
 <#
 .SYNOPSIS
