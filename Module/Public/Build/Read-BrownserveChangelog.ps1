@@ -28,7 +28,7 @@ function Read-BrownserveChangelog
             DontShow
         )]
         [string]
-        $VersionPattern = '^#*\s\[v(?<version>[0-9]+\.[0-9]+\.[0-9]+)\]\((?:.*)\)\s\([0-9]+\-[0-9]+\-[0-9]+\)$',
+        $VersionPattern = '^#*\s\[v(?<version>(([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)\]\((?:.*)\)\s\([0-9]+\-[0-9]+\-[0-9]+\)',
 
         # The regex pattern for matching the release URL.
         # It should always contain a capture group named "url" and this what the regex searched will use to extract your url
@@ -73,9 +73,7 @@ function Read-BrownserveChangelog
         $VersionHistory = @()
 
         <#
-            To get the release notes for a version we need to know the line of that contains the previously released
-            version as well as the version we are currently checking, this is so we can extract the text from between
-            these two versions which should be the release notes
+            Set up a bunch of variables that'll be used (and explained) later on
         #>
         $PreviousVersion = $null
         $PreviousReleaseDate = $null
@@ -83,15 +81,13 @@ function Read-BrownserveChangelog
         $ReleaseNotesStartOn = $null
         $ReleaseNotesEndOn = $null
 
-        # Go through each line until we find what we need
+        # Go through each line of the changelog
         $Changelog | ForEach-Object {
             $Line = $_.Trim()
             # See if the line matches a version
             $VersionMatch = [regex]::Match($Line, $VersionPattern)
             if ($VersionMatch.Success)
             {
-                Write-Debug "Current line is: $LineCount"
-                Write-Debug "Line contents: $Line"
                 # Congratulations this line matches a version number. 🎉 we'll store it for use later
                 $ThisVersion = [semver]$VersionMatch.Groups['version'].Value
                 # This line should also contain a date of the release, we'll want that too
@@ -100,6 +96,7 @@ function Read-BrownserveChangelog
                 {
                     $ThisReleaseDate = $ReleaseDateMatch.Groups['date'].Value
                 }
+                # Similarly this line should also contain a URL that points to the release, we'll want that too
                 $ReleaseURLMatch = [regex]::Match($Line, $ReleaseURLPattern)
                 if ($ReleaseURLMatch.Success)
                 {
@@ -115,18 +112,28 @@ function Read-BrownserveChangelog
                     $NewChangelogLine = $LineCount - 1
                 }
                 <#
-                    TODO: explain
+                    If this is the first version we've matched against then we $PreviousVersion will be null.
+                    We'll set PreviousVersion to version number we've just matched against.
+                    The release notes for this version will start on the _next_ line after the version number so we'll
+                    set ReleaseNotesStartOn to the current line number + 1
+                    We'll also store the release date and URL for this version for use later
                 #>
                 if (-not $PreviousVersion)
                 {
                     $PreviousVersion = $ThisVersion
                     $PreviousReleaseDate = $ThisReleaseDate
                     $PreviousURL = $ThisURL
-                    # The release notes for this version will start on the _next_ line after the version number
                     $ReleaseNotesStartOn = $LineCount + 1
                 }
                 else
                 {
+                    <#
+                        If we've reached this point then we've matched against another version number.
+                        This means we've reached the end of the release notes for the previous version.
+                        So we know that all the text between here and the previous version number is the release notes for
+                        the previous version.
+                        We'll create an object of the data we've gathered and add it to the version history.
+                    #>
                     # The release notes will end on the line _before_ the previous version number
                     $ReleaseNotesEndOn = $LineCount - 1
                     $ThisReleaseNotes = $Changelog[$ReleaseNotesStartOn..$ReleaseNotesEndOn]
@@ -146,9 +153,6 @@ function Read-BrownserveChangelog
                         $ThisReleaseNotes = $ThisReleaseNotes[$FirstLine..$LastLine]
                     }
 
-                    <#
-                        Create an object of the data we've gathered
-                    #>
                     $VersionHistory += [BrownserveVersionHistory]@{
                         Version      = $PreviousVersion
                         ReleaseDate  = $PreviousReleaseDate
@@ -157,7 +161,10 @@ function Read-BrownserveChangelog
                     }
 
 
-                    # TODO: explain
+                    <#
+                        Now we've added the previous version to the version history we can set the variables for the
+                        current version and continue on our merry way.
+                    #>
                     $PreviousVersion = $ThisVersion
                     $PreviousReleaseDate = $ThisReleaseDate
                     $PreviousURL = $ThisURL
@@ -168,8 +175,8 @@ function Read-BrownserveChangelog
             $LineCount++
         }
         <#
-            To get the release notes from the last entry in the list we need to
-            TODO: explain
+            Once we've gone through the entire changelog we'll have a bunch of data for the last version.
+            We know the release notes for the last version will end on the last line of the changelog.
         #>
         $LastReleaseNotes = $Changelog[$ReleaseNotesStartOn..$Changelog.Count]
         # Try to trim off any empty lines at the start and end of the release note text
@@ -194,13 +201,9 @@ function Read-BrownserveChangelog
         }
 
         # TODO: Do we want to create a "LatestVersion object?"
-        $Return += [pscustomobject]@{
-            ChangeLogPath  = $ChangelogPath # The path to the changelog - useful when piping into other cmdlets
-            VersionHistory = $VersionHistory | Sort-Object -Property Version -Descending # The version history of the changelog
-            LatestVersion  = $VersionHistory[0].Version # The latest version according to the changelog
-            ReleasedOn     = $VersionHistory[0].ReleaseDate # The date of the last release
-            ReleaseNotes   = $VersionHistory[0].ReleaseNotes -join [System.Environment]::NewLine # The release notes for the latest version only
-            NextEntryLine  = $NewChangelogLine # This will be the line that we can start inserting new entries into
+        $Return += [BrownserveChangelog]@{
+            VersionHistory     = $VersionHistory
+            NewEntryInsertLine = $NewChangelogLine # This will be the line that we can start inserting new entries into
         }
     }
     end
