@@ -149,7 +149,7 @@ function Read-BrownserveChangelog
                     <#
                         Create an object of the data we've gathered
                     #>
-                    $VersionHistory += [pscustomobject]@{
+                    $VersionHistory += [BrownserveVersionHistory]@{
                         Version      = $PreviousVersion
                         ReleaseDate  = $PreviousReleaseDate
                         URL          = $PreviousURL
@@ -186,7 +186,7 @@ function Read-BrownserveChangelog
             $FirstLine ++
             $LastReleaseNotes = $LastReleaseNotes[$FirstLine..$LastLine]
         }
-        $VersionHistory += [pscustomobject]@{
+        $VersionHistory += [BrownserveVersionHistory]@{
             Version      = $PreviousVersion
             ReleaseDate  = $PreviousReleaseDate
             URL          = $PreviousURL
