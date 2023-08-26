@@ -164,6 +164,7 @@ class BrownserveVersionHistory
     [BrownserveShortDate]$ReleaseDate
     [string]$URL
     [string[]]$ReleaseNotes
+    [bool]$PreRelease = $false
 
     BrownserveVersionHistory([semver]$Version, [datetime]$ReleaseDate, [string]$URL, [string]$ReleaseNotes)
     {
@@ -171,6 +172,10 @@ class BrownserveVersionHistory
         $this.ReleaseDate = $ReleaseDate
         $this.URL = $URL
         $this.ReleaseNotes = $ReleaseNotes
+        if ($this.Version.PreReleaseLabel)
+        {
+            $this.PreRelease = $true
+        }
     }
 
     BrownserveVersionHistory([pscustomobject]$VersionHistory)
@@ -195,6 +200,10 @@ class BrownserveVersionHistory
         $this.ReleaseDate = $VersionHistory.ReleaseDate
         $this.URL = $VersionHistory.URL
         $this.ReleaseNotes = $VersionHistory.ReleaseNotes
+        if ($this.Version.PreReleaseLabel)
+        {
+            $this.PreRelease = $true
+        }
     }
 
     BrownserveVersionHistory([hashtable]$VersionHistory)
@@ -219,10 +228,61 @@ class BrownserveVersionHistory
         $this.ReleaseDate = $VersionHistory.ReleaseDate
         $this.URL = $VersionHistory.URL
         $this.ReleaseNotes = $VersionHistory.ReleaseNotes
+        if ($this.Version.PreReleaseLabel)
+        {
+            $this.PreRelease = $true
+        }
     }
 
     [string] ToString()
     {
         return "$($this.Version) - $($this.ReleaseDate)"
+    }
+}
+
+<#
+    Class for storing Brownserve Changelog data
+#>
+class BrownserveChangelog
+{
+    [BrownserveVersionHistory[]]$VersionHistory
+    [int]$NewEntryInsertLine
+    [BrownserveVersionHistory]$LatestVersion
+
+    BrownserveChangelog([BrownserveVersionHistory[]]$VersionHistory, [int]$NewEntryInsertLine)
+    {
+        $this.VersionHistory = $VersionHistory | Sort-Object -Property ReleaseDate -Descending
+        $this.NewEntryInsertLine = $NewEntryInsertLine
+        $this.LatestVersion = $this.VersionHistory[0]
+    }
+
+    BrownserveChangelog([pscustomobject]$Changelog)
+    {
+        if (!$Changelog.VersionHistory)
+        {
+            throw 'Cannot create BrownserveChangelog object without VersionHistory'
+        }
+        if (!$Changelog.NewEntryInsertLine)
+        {
+            throw 'Cannot create BrownserveChangelog object without NewEntryInsertLine'
+        }
+        $this.VersionHistory = $Changelog.VersionHistory | Sort-Object -Property ReleaseDate -Descending
+        $this.NewEntryInsertLine = $Changelog.NewEntryInsertLine
+        $this.LatestVersion = $this.VersionHistory[0]
+    }
+
+    BrownserveChangelog([hashtable]$Changelog)
+    {
+        if (!$Changelog.VersionHistory)
+        {
+            throw 'Cannot create BrownserveChangelog object without VersionHistory'
+        }
+        if (!$Changelog.NewEntryInsertLine)
+        {
+            throw 'Cannot create BrownserveChangelog object without NewEntryInsertLine'
+        }
+        $this.VersionHistory = $Changelog.VersionHistory | Sort-Object -Property ReleaseDate -Descending
+        $this.NewEntryInsertLine = $Changelog.NewEntryInsertLine
+        $this.LatestVersion = $this.VersionHistory[0]
     }
 }
