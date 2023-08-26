@@ -8,6 +8,7 @@ schema: 2.0.0
 # Read-Changelog
 
 ## SYNOPSIS
+**This cmdlet is deprecated and will be removed in a future release, please use Read-BrownserveChangelog instead.**
 Retrieves version information and release notes from a CHANGELOG.md file.
 
 ## SYNTAX
