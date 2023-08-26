@@ -64,9 +64,6 @@ function Read-BrownserveChangelog
             throw "Failed to get changelog content.$($_.Exception.Message)"
         }
 
-        # We'll store all the lines after the headers in this array so we can get the entire changelog text if we want it
-        $ChangelogText = @()
-
         # We'll read through the changelog line-by-line and keep a track of various important lines
         $LineCount = 0
 
@@ -76,20 +73,15 @@ function Read-BrownserveChangelog
         $VersionHistory = @()
 
         <#
-            To get the changes that feature in the latest entry (i.e. release notes) we need to know both the current and
-            previous released versions.
-            We can then find the text block between these lines which should be our release notes.
+            To get the release notes for a version we need to know the line of that contains the previously released
+            version as well as the version we are currently checking, this is so we can extract the text from between
+            these two versions which should be the release notes
         #>
-        $CurrentVersion = $null
         $PreviousVersion = $null
+        $PreviousReleaseDate = $null
+        $PreviousURL = $null
         $ReleaseNotesStartOn = $null
         $ReleaseNotesEndOn = $null
-
-        # We'll also look for the line that we can insert a new entry into (if we want)
-        $NewChangelogLine = $null
-
-        # We'll also look for the date of the last release
-        $LastReleaseDate = $null
 
         # Go through each line until we find what we need
         $Changelog | ForEach-Object {
@@ -113,125 +105,101 @@ function Read-BrownserveChangelog
                 {
                     $ThisURL = $ReleaseURLMatch.Groups['url'].Value
                 }
-                <#
-                    If we don't already have the current version then this must be it as our changelog is descending order
-                    Set the $CurrentVersionVariable, we'll also be able to tell where the current release notes start as
-                    they will be on the next line _after_ the version line.
-                    Similarly the line for inserting a new entry will be the line _before_ the current versions line
-                #>
-                if (-not $CurrentVersion)
+                if (-not $NewChangelogLine)
                 {
-                    $CurrentVersion = $ThisVersion
-                    # The current release notes will start on the _next_ line after the version number
-                    $ReleaseNotesStartOn = $LineCount + 1
-                    # If we want to insert any new changelog entries then we'll need to known where we can do that
-                    # It will be the line _before_ our line with the version number on
+                    <#
+                        We need to know where to insert a new changelog entry.
+                        As our changelog goes in descending order (newest releases at the top) the line to insert a new
+                        entry is the line directly before the first version string we match against.
+                    #>
                     $NewChangelogLine = $LineCount - 1
-                    Write-Verbose "Current version determined to be $CurrentVersion"
-                    # Now we've got our current version we can also extract the date of the last release
-                    $LastReleaseDate = $ThisReleaseDate
-                    Write-Verbose "Last release date determined to be $LastReleaseDate"
+                }
+                <#
+                    TODO: explain
+                #>
+                if (-not $PreviousVersion)
+                {
+                    $PreviousVersion = $ThisVersion
+                    $PreviousReleaseDate = $ThisReleaseDate
+                    $PreviousURL = $ThisURL
+                    # The release notes for this version will start on the _next_ line after the version number
+                    $ReleaseNotesStartOn = $LineCount + 1
                 }
                 else
                 {
-                    <#
-                        We should only end up here once $CurrentVersion has been set on a previous line read.
-                        This should ensure we can never accidentally read the CurrentVersion as the PreviousVersion
-                    #>
-                    if (-not $PreviousVersion)
-                    {
-                        # We've found a potential match!
-                        $PreviousVersion = $ThisVersion
-                        # The release notes will end on the line _before_ the previous version number
-                        $ReleaseNotesEndOn = $LineCount - 1
-                        <#
-                            Just in case we've somehow ended up with PreviousVersion and CurrentVersion being the same
-                            (i.e. we've read the same line twice!)
-                            Then we reset the variables and carry on
-                        #>
-                        if ($PreviousVersion -eq $CurrentVersion)
-                        {
-                            $PreviousVersion = $null
-                            $ReleaseNotesEndOn = $null
-                        }
-                    }
-                }
-                <#
-                    Once the $CurrentVersion variable has been set we know that we've gone past the header section and
-                    whitespace at the top of the changelog and we should be good to start storing every line of text to
-                    return the changelog sans the header.
-                #>
-                if ($CurrentVersion)
-                {
-                    $ChangelogText += $Line
-                }
+                    # The release notes will end on the line _before_ the previous version number
+                    $ReleaseNotesEndOn = $LineCount - 1
+                    $ThisReleaseNotes = $Changelog[$ReleaseNotesStartOn..$ReleaseNotesEndOn]
 
-                <#
-                    Create an object of the data we've gathered
-                #>
-                $VersionHistory += [pscustomobject]@{
-                    Version     = $ThisVersion
-                    ReleaseDate = $ThisReleaseDate
-                    URL         = $ThisURL
+                    # Try to trim off any empty lines at the start and end of the release note text
+                    $LastLine = $ThisReleaseNotes.Count
+                    while (!$ThisReleaseNotes[-1])
+                    {
+                        $LastLine = $LastLine - 1
+                        $ThisReleaseNotes = $ThisReleaseNotes[0..$LastLine]
+                    }
+                    $FirstLine = 0
+                    while (!$ThisReleaseNotes[0])
+                    {
+                        $LastLine = $ThisReleaseNotes.Count
+                        $FirstLine ++
+                        $ThisReleaseNotes = $ThisReleaseNotes[$FirstLine..$LastLine]
+                    }
+
+                    <#
+                        Create an object of the data we've gathered
+                    #>
+                    $VersionHistory += [pscustomobject]@{
+                        Version      = $PreviousVersion
+                        ReleaseDate  = $PreviousReleaseDate
+                        URL          = $PreviousURL
+                        ReleaseNotes = $ThisReleaseNotes
+                    }
+
+
+                    # TODO: explain
+                    $PreviousVersion = $ThisVersion
+                    $PreviousReleaseDate = $ThisReleaseDate
+                    $PreviousURL = $ThisURL
+                    $ReleaseNotesStartOn = $LineCount + 1
                 }
             }
             # Finally increase the line count for the next loop
             $LineCount++
         }
-
-        # If we haven't got our release notes ending line _and_ a previous version it likely means that we don't have one! (i.e. we are still on the first release!)
-        # So just read until the end of the file
-        if ((-not $ReleaseNotesEndOn) -and (-not $PreviousVersion))
+        <#
+            To get the release notes from the last entry in the list we need to
+            TODO: explain
+        #>
+        $LastReleaseNotes = $Changelog[$ReleaseNotesStartOn..$Changelog.Count]
+        # Try to trim off any empty lines at the start and end of the release note text
+        $LastLine = $LastReleaseNotes.Count
+        while (!$LastReleaseNotes[-1])
         {
-            Write-Verbose "It looks like there is only one release.`nRelease notes will be read from line $ReleaseNotesStartOn until the end of the file"
-            $ReleaseNotesEndOn = $Changelog.Length
+            $LastLine = $LastLine - 1
+            $LastReleaseNotes = $LastReleaseNotes[0..$LastLine]
         }
-        else
+        $FirstLine = 0
+        while (!$LastReleaseNotes[0])
         {
-            Write-Verbose "Previous version was: $PreviousVersion, the current versions release notes end on line $ReleaseNotesEndOn"
+            $LastLine = $LastReleaseNotes.Count
+            $FirstLine ++
+            $LastReleaseNotes = $LastReleaseNotes[$FirstLine..$LastLine]
         }
-        # Extract the lines that equate to our current release notes
-        try
-        {
-            $ReleaseNotes = $Changelog[$ReleaseNotesStartOn..$ReleaseNotesEndOn]
-
-            # Try to trim off any empty lines at the start and end of the release note text
-            $LastLine = $ReleaseNotes.Count
-            while (!$ReleaseNotes[-1])
-            {
-                $LastLine = $LastLine -1
-                $ReleaseNotes = $ReleaseNotes[0..$LastLine]
-            }
-            $FirstLine = 0
-            while (!$ReleaseNotes[0])
-            {
-                $LastLine = $ReleaseNotes.Count
-                $FirstLine ++
-                $ReleaseNotes = $ReleaseNotes[$FirstLine..$LastLine]
-            }
-        }
-        catch
-        {
-            # Ignore errors, we'll throw below
-        }
-
-        # If we haven't found a version or the release notes, raise an error
-        if (-not $CurrentVersion)
-        {
-            throw "Failed to find version in changelog file: $ChangelogPath"
-        }
-        if (!$ReleaseNotes)
-        {
-            throw 'Unable to work out current release notes.'
+        $VersionHistory += [pscustomobject]@{
+            Version      = $PreviousVersion
+            ReleaseDate  = $PreviousReleaseDate
+            URL          = $PreviousURL
+            ReleaseNotes = $LastReleaseNotes
         }
 
         # TODO: Do we want to create a "LatestVersion object?"
         $Return += [pscustomobject]@{
             ChangeLogPath  = $ChangelogPath # The path to the changelog - useful when piping into other cmdlets
             VersionHistory = $VersionHistory | Sort-Object -Property Version -Descending # The version history of the changelog
-            LatestVersion  = $CurrentVersion # The latest version according to the changelog
-            ReleasedOn     = $LastReleaseDate # The date of the last release
-            ReleaseNotes   = $ReleaseNotes -join [System.Environment]::NewLine # The release notes for the latest version only
+            LatestVersion  = $VersionHistory[0].Version # The latest version according to the changelog
+            ReleasedOn     = $VersionHistory[0].ReleaseDate # The date of the last release
+            ReleaseNotes   = $VersionHistory[0].ReleaseNotes -join [System.Environment]::NewLine # The release notes for the latest version only
             NextEntryLine  = $NewChangelogLine # This will be the line that we can start inserting new entries into
         }
     }
