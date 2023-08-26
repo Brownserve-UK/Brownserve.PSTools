@@ -41,6 +41,8 @@ function Read-Changelog
         $LastReleaseDatePattern = '\((?<date>[\d|-]*)\)'
     )
 
+    Write-Warning 'This cmdlet is deprecated and will be removed in a future release, please use Read-BrownserveChangelog instead.'
+
     # Import the changelog, we don't use the -Raw switch as we want to read the file line by line
     try
     {
