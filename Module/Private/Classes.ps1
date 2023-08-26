@@ -131,3 +131,98 @@ enum GitHubIssueState
 }
 
 ## Type validation classes
+
+<#
+    Simple class to ensure datetime objects are displayed as short dates in output but retain their date time attribute
+#>
+class BrownserveShortDate
+{
+    [datetime]$Date
+
+    BrownserveShortDate([datetime]$Date)
+    {
+        $this.Date = $Date
+    }
+
+    BrownserveShortDate([string]$Date)
+    {
+        $this.Date = $Date
+    }
+
+    [string] ToString()
+    {
+        return "$(Get-Date $this.Date -Format 'yyyy/MM/dd')"
+    }
+}
+
+<#
+    This class helps us to format version history entries from a changelog
+#>
+class BrownserveVersionHistory
+{
+    [semver]$Version
+    [BrownserveShortDate]$ReleaseDate
+    [string]$URL
+    [string[]]$ReleaseNotes
+
+    BrownserveVersionHistory([semver]$Version, [datetime]$ReleaseDate, [string]$URL, [string]$ReleaseNotes)
+    {
+        $this.Version = $Version
+        $this.ReleaseDate = $ReleaseDate
+        $this.URL = $URL
+        $this.ReleaseNotes = $ReleaseNotes
+    }
+
+    BrownserveVersionHistory([pscustomobject]$VersionHistory)
+    {
+        if (!$VersionHistory.Version)
+        {
+            throw 'Cannot create BrownserveVersionHistory object without a Version'
+        }
+        if (!$VersionHistory.ReleaseDate)
+        {
+            throw 'Cannot create BrownserveVersionHistory object without a ReleaseDate'
+        }
+        if (!$VersionHistory.URL)
+        {
+            throw 'Cannot create BrownserveVersionHistory object without a URL'
+        }
+        if (!$VersionHistory.ReleaseNotes)
+        {
+            throw 'Cannot create BrownserveVersionHistory object without ReleaseNotes'
+        }
+        $this.Version = $VersionHistory.Version
+        $this.ReleaseDate = $VersionHistory.ReleaseDate
+        $this.URL = $VersionHistory.URL
+        $this.ReleaseNotes = $VersionHistory.ReleaseNotes
+    }
+
+    BrownserveVersionHistory([hashtable]$VersionHistory)
+    {
+        if (!$VersionHistory.Version)
+        {
+            throw 'Cannot create BrownserveVersionHistory object without a Version'
+        }
+        if (!$VersionHistory.ReleaseDate)
+        {
+            throw 'Cannot create BrownserveVersionHistory object without a ReleaseDate'
+        }
+        if (!$VersionHistory.URL)
+        {
+            throw 'Cannot create BrownserveVersionHistory object without a URL'
+        }
+        if (!$VersionHistory.ReleaseNotes)
+        {
+            throw 'Cannot create BrownserveVersionHistory object without ReleaseNotes'
+        }
+        $this.Version = $VersionHistory.Version
+        $this.ReleaseDate = $VersionHistory.ReleaseDate
+        $this.URL = $VersionHistory.URL
+        $this.ReleaseNotes = $VersionHistory.ReleaseNotes
+    }
+
+    [string] ToString()
+    {
+        return "$($this.Version) - $($this.ReleaseDate)"
+    }
+}
