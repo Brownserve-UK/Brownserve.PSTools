@@ -9,8 +9,9 @@ function Get-GitHubIssues
             ValueFromPipelineByPropertyName = $true,
             Position = 0
         )]
+        [Alias('GitHubToken', 'GitHubPAT')]
         [string]
-        $GitHubToken,
+        $Token,
 
         # The org name from GitHub
         [Parameter(
@@ -43,12 +44,11 @@ function Get-GitHubIssues
     )
     begin
     {
-        
     }
     process
     {
         $Header = @{
-            Authorization = "token $GitHubToken"
+            Authorization = "token $Token"
             Accept        = 'application/vnd.github.v3+json'
         }
 
