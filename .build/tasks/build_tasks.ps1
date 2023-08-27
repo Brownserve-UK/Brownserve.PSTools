@@ -231,6 +231,8 @@ task GenerateVersionInfo UseWorkingCopy, {
         This should mean everything stays consistent.
     #>
     $global:VersionToRelease = $NugetPackageVersion
+    # For GitHub releases and the changelog we prefix the version with a 'v'
+    $script:PrefixedVersion = "v$($global:VersionToRelease)"
     Write-Debug @"
 
     CurrentVersion: $CurrentVersion
