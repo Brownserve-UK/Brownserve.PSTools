@@ -1,6 +1,6 @@
 name: 'Feature Request'
 description: 'Request a new feature or an enhancement'
-title: '[ENH]: '
+title: '[FEAT]: '
 labels:
   - 'feature request'
   - 'enhancement'

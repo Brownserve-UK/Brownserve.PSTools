@@ -1,0 +1,19 @@
+name: 'Feature Request'
+description: 'Request a new feature or an enhancement'
+title: '[DOCS]: '
+labels:
+  - 'documentation'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to let us know about a documentation issue!
+        Please help us to prioritize this by filling in the below information.
+  - type: textarea
+    id: feature
+    attributes:
+      label: Describe the documentation issue that you're seeing
+      description: Try to be descriptive and include examples or suggestions wherever possible.
+      placeholder: (e.g. the documentation for Test-Cmdlet is very confusing, I think it would help if you had an extra example for scenario XYZ)
+    validations:
+      required: true
