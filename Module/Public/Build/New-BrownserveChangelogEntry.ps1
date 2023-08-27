@@ -98,7 +98,7 @@ function New-BrownserveChangelogEntry
             ValueFromPipelineByPropertyName = $true
         )]
         [string[]]
-        $IssueLabelsToInclude = @('bug','documentation'),
+        $IssueLabelsToInclude = @('bug', 'documentation'),
 
         # An optional list of labels to use to filter bug fixes/known issues
         [Parameter(
@@ -106,7 +106,7 @@ function New-BrownserveChangelogEntry
             ValueFromPipelineByPropertyName = $true
         )]
         [string[]]
-        $IssueLabelsToExclude = @('feature request','enhancement'),
+        $IssueLabelsToExclude = @('feature request', 'enhancement'),
 
         # An optional flag to indicate that the cmdlet should attempt to automatically populate the changelog entry with features, bugfixes and known issues
         [Parameter(
