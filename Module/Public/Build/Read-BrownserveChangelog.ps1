@@ -16,6 +16,7 @@ function Read-BrownserveChangelog
             Position = 0,
             ValueFromPipelineByPropertyName = $true
         )]
+        [Alias('Path')]
         [ValidateNotNullOrEmpty()]
         [SupportsWildcards()]
         [string]
@@ -199,8 +200,6 @@ function Read-BrownserveChangelog
             URL          = $PreviousURL
             ReleaseNotes = $LastReleaseNotes
         }
-
-        # TODO: Do we want to create a "LatestVersion object?"
         $Return += [BrownserveChangelog]@{
             VersionHistory     = $VersionHistory
             NewEntryInsertLine = $NewChangelogLine # This will be the line that we can start inserting new entries into
