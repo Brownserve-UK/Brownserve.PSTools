@@ -1,3 +1,9 @@
+<#
+.SYNOPSIS
+    Formats a changelog block for use in a Brownserve changelog.
+.DESCRIPTION
+    Very simple that will create a properly formatted changelog block for use in a Brownserve changelog.
+#>
 function New-BrownserveChangelogBlock
 {
     [CmdletBinding()]
@@ -11,15 +17,6 @@ function New-BrownserveChangelogBlock
         )]
         [semver]
         $Version,
-
-        # The URL to the repo
-        [Parameter(
-            Mandatory = $true,
-            Position = 2,
-            ValueFromPipelineByPropertyName = $true
-        )]
-        [string]
-        $ReleaseURL,
 
         # The new features that have been added in this version
         [Parameter(
@@ -96,7 +93,7 @@ function New-BrownserveChangelogBlock
     }
     else
     {
-        $BugfixBlock = $BugfixBlock + "N/A`n"
+        $BugfixBlock = $BugfixBlock + "*N/A*`n"
     }
     # Same for known issues
     $KnownIssueBlock = "**Known Issues**  `nThe following bugs have been raised since the last release and remain unresolved:`n`n"
@@ -109,9 +106,9 @@ function New-BrownserveChangelogBlock
     }
     else
     {
-        $KnownIssueBlock = $KnownIssueBlock + "N/A`n"
+        $KnownIssueBlock = $KnownIssueBlock + "*N/A*`n"
     }
-    $KnownIssueBlock += "For a full list of current known issues see the project's [issues page](https://$RepositoryHost/$($RepositoryOwner)/$($RepositoryName)/issues)."
+    $KnownIssueBlock += "`nFor a full list of current known issues see the project's [issues page](https://$RepositoryHost/$($RepositoryOwner)/$($RepositoryName)/issues)."
     # Now concatenate all the bits together with some spacers and return it
     $FinalBlock = $VersionHeader + "`n" + $FeaturesBlock + "`n" + $BugfixBlock + "`n" + $KnownIssueBlock
 
