@@ -248,12 +248,16 @@ class BrownserveChangelog
     [BrownserveVersionHistory[]]$VersionHistory
     [int]$NewEntryInsertLine
     [BrownserveVersionHistory]$LatestVersion
+    hidden [string]$ChangelogPath
+    hidden [string[]]$Content
 
-    BrownserveChangelog([BrownserveVersionHistory[]]$VersionHistory, [int]$NewEntryInsertLine)
+    BrownserveChangelog([BrownserveVersionHistory[]]$VersionHistory, [int]$NewEntryInsertLine, [string]$ChangelogPath, [string[]]$Content)
     {
         $this.VersionHistory = $VersionHistory | Sort-Object -Property ReleaseDate -Descending
         $this.NewEntryInsertLine = $NewEntryInsertLine
         $this.LatestVersion = $this.VersionHistory[0]
+        $this.ChangelogPath = $ChangelogPath
+        $this.Content = $Content
     }
 
     BrownserveChangelog([pscustomobject]$Changelog)
@@ -266,9 +270,19 @@ class BrownserveChangelog
         {
             throw 'Cannot create BrownserveChangelog object without NewEntryInsertLine'
         }
+        if (!$Changelog.ChangelogPath)
+        {
+            throw 'Cannot create BrownserveChangelog object without ChangelogPath'
+        }
+        if (!$Changelog.Content)
+        {
+            throw 'Cannot create BrownserveChangelog object without Content'
+        }
         $this.VersionHistory = $Changelog.VersionHistory | Sort-Object -Property ReleaseDate -Descending
         $this.NewEntryInsertLine = $Changelog.NewEntryInsertLine
         $this.LatestVersion = $this.VersionHistory[0]
+        $this.ChangelogPath = $Changelog.ChangelogPath
+        $this.Content = $Changelog.Content
     }
 
     BrownserveChangelog([hashtable]$Changelog)
@@ -281,8 +295,18 @@ class BrownserveChangelog
         {
             throw 'Cannot create BrownserveChangelog object without NewEntryInsertLine'
         }
+        if (!$Changelog.ChangelogPath)
+        {
+            throw 'Cannot create BrownserveChangelog object without ChangelogPath'
+        }
+        if (!$Changelog.Content)
+        {
+            throw 'Cannot create BrownserveChangelog object without Content'
+        }
         $this.VersionHistory = $Changelog.VersionHistory | Sort-Object -Property ReleaseDate -Descending
         $this.NewEntryInsertLine = $Changelog.NewEntryInsertLine
         $this.LatestVersion = $this.VersionHistory[0]
+        $this.ChangelogPath = $Changelog.ChangelogPath
+        $this.Content = $Changelog.Content
     }
 }
