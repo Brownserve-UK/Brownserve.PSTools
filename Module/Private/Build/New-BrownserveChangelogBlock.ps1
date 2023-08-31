@@ -72,45 +72,53 @@ function New-BrownserveChangelogBlock
         [string]
         $RepositoryHost = 'github.com'
     )
-    # Make sure our repo URL doesn't have a trailing slash
-    $RepoURL = $RepoURL -replace '\/$', ''
+    begin
+    {
+    }
+    process
+    {
+        # Make sure our repo URL doesn't have a trailing slash
+        $RepoURL = $RepoURL -replace '\/$', ''
 
-    # Start by creating each header
-    $VersionHeader = "### [v$($Version.ToString())](https://$RepositoryHost/$RepositoryOwner/$RepositoryName/tree/v$($Version.ToString())) ($(Get-Date -Format yyyy-MM-dd))`n`n"
-    $FeaturesBlock = "**Features**  `nThese are the changes that have been made since the last release:`n`n"
-    foreach ($Feature in $Features)
-    {
-        $FeaturesBlock = $FeaturesBlock + "- $Feature`n"
-    }
-    $BugfixBlock = "**Bugfixes**  `nThe following bugs have been marked as resolved since the last release:`n`n"
-    # If we've got some bug fixes, list them out otherwise simply add and N/A
-    if ($Bugfixes)
-    {
-        foreach ($Bugfix in $Bugfixes)
+        # Start by creating each header
+        $VersionHeader = "### [v$($Version.ToString())](https://$RepositoryHost/$RepositoryOwner/$RepositoryName/tree/v$($Version.ToString())) ($(Get-Date -Format yyyy-MM-dd))`n`n"
+        $FeaturesBlock = "**Features**  `nThese are the changes that have been made since the last release:`n`n"
+        foreach ($Feature in $Features)
         {
-            $BugfixBlock = $BugfixBlock + "- $Bugfix`n"
+            $FeaturesBlock = $FeaturesBlock + "- $Feature`n"
         }
-    }
-    else
-    {
-        $BugfixBlock = $BugfixBlock + "*N/A*`n"
-    }
-    # Same for known issues
-    $KnownIssueBlock = "**Known Issues**  `nThe following bugs have been raised since the last release and remain unresolved:`n`n"
-    if ($KnownIssues)
-    {
-        foreach ($KnownIssue in $KnownIssues)
+        $BugfixBlock = "**Bugfixes**  `nThe following bugs have been marked as resolved since the last release:`n`n"
+        # If we've got some bug fixes, list them out otherwise simply add and N/A
+        if ($Bugfixes)
         {
-            $KnownIssueBlock = $KnownIssueBlock + "- $KnownIssue`n"
+            foreach ($Bugfix in $Bugfixes)
+            {
+                $BugfixBlock = $BugfixBlock + "- $Bugfix`n"
+            }
         }
+        else
+        {
+            $BugfixBlock = $BugfixBlock + "*N/A*`n"
+        }
+        # Same for known issues
+        $KnownIssueBlock = "**Known Issues**  `nThe following bugs have been raised since the last release and remain unresolved:`n`n"
+        if ($KnownIssues)
+        {
+            foreach ($KnownIssue in $KnownIssues)
+            {
+                $KnownIssueBlock = $KnownIssueBlock + "- $KnownIssue`n"
+            }
+        }
+        else
+        {
+            $KnownIssueBlock = $KnownIssueBlock + "*N/A*`n"
+        }
+        $KnownIssueBlock += "`nFor a full list of current known issues see the project's [issues page](https://$RepositoryHost/$($RepositoryOwner)/$($RepositoryName)/issues)."
+        # Now concatenate all the bits together with some spacers and return it
+        $FinalBlock = $VersionHeader + "`n" + $FeaturesBlock + "`n" + $BugfixBlock + "`n" + $KnownIssueBlock
     }
-    else
+    end
     {
-        $KnownIssueBlock = $KnownIssueBlock + "*N/A*`n"
+        Return $FinalBlock
     }
-    $KnownIssueBlock += "`nFor a full list of current known issues see the project's [issues page](https://$RepositoryHost/$($RepositoryOwner)/$($RepositoryName)/issues)."
-    # Now concatenate all the bits together with some spacers and return it
-    $FinalBlock = $VersionHeader + "`n" + $FeaturesBlock + "`n" + $BugfixBlock + "`n" + $KnownIssueBlock
-
-    Return $FinalBlock
 }
