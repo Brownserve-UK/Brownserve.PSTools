@@ -203,6 +203,8 @@ function Read-BrownserveChangelog
         $Return += [BrownserveChangelog]@{
             VersionHistory     = $VersionHistory
             NewEntryInsertLine = $NewChangelogLine # This will be the line that we can start inserting new entries into
+            ChangelogPath      = $ChangelogPath
+            Content            = $Changelog
         }
     }
     end
