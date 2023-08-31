@@ -20,16 +20,7 @@ function New-BrownserveChangelogEntry
         [ValidateNotNullOrEmpty()]
         [SupportsWildcards()]
         [string]
-        $ChangelogPath = $PWD,
-
-        # The Changelog file
-        [Parameter(
-            Mandatory = $false,
-            Position = 1,
-            ValueFromPipelineByPropertyName = $true
-        )]
-        [string]
-        $ChangelogFile = 'CHANGELOG.md',
+        $ChangelogPath = (Join-Path $PWD "CHANGELOG.md"),
 
         # The version number to use for the new entry
         [Parameter(
@@ -124,7 +115,7 @@ function New-BrownserveChangelogEntry
             DontShow = $true
         )]
         [BrownserveChangeLog]
-        $Changelog
+        $ChangelogObject
     )
     begin
     {
@@ -140,12 +131,12 @@ function New-BrownserveChangelogEntry
     {
         $Return = $null
         $PullRequestDetails = @()
-        if (!$Changelog)
+        if (!$ChangelogObject)
         {
             try
             {
-                $ChangelogFullPath = Join-Path -Path $ChangelogPath -ChildPath $ChangelogFile
-                $Changelog = Read-BrownserveChangelog -Path $ChangelogFullPath
+                Write-Verbose "Loading changelog from $ChangelogPath"
+                $ChangelogObject = Read-BrownserveChangelog -Path $ChangelogPath
             }
             catch
             {
@@ -153,12 +144,12 @@ function New-BrownserveChangelogEntry
             }
         }
 
-        if ($Version -in $Changelog.VersionHistory.Version)
+        if ($Version -in $ChangelogObject.VersionHistory.Version)
         {
             throw "Version '$Version' already exists in the changelog"
         }
 
-        $LastReleasedVersion = $Changelog.LatestVersion
+        $LastReleasedVersion = $ChangelogObject.LatestVersion
 
         if ($Auto)
         {
