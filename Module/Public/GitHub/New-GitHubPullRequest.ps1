@@ -1,7 +1,7 @@
-function New-PullRequest
+function New-GitHubPullRequest
 {
     [CmdletBinding()]
-    param (       
+    param (
         # The GitHub PAT
         [Parameter(
             Mandatory = $true
@@ -14,7 +14,7 @@ function New-PullRequest
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true
         )]
-        [Alias('GitHubOrganisation','GitHubOrganization')]
+        [Alias('GitHubOrganisation', 'GitHubOrganization')]
         [string]
         $GitHubOrg,
 
@@ -62,35 +62,49 @@ function New-PullRequest
         [string]
         $RepoName
     )
-    Write-Warning "This function is deprecated and will be removed in a future release. Please use New-GitHubPullRequest instead."
-    $Header = @{                                                                                                                                         
-        Authorization = "token $GitHubToken"
-        Accept        = 'application/vnd.github.v3+json'
-    }
-    $URI = "https://api.github.com/repos/$GitHubOrg/$RepoName/pulls"
-    $Body = @{
-        title = $PRTitle
-        body  = $PRBody
-        base  = $BaseBranch
-        head  = $HeadBranch
-    }
-    try
+    begin
     {
-        $BodyJSON = $Body | ConvertTo-Json
-    
     }
-    catch
+    process
     {
-        Write-Error "Failed to convert PR body to JSON.`n$($_.Exception.Message)"
+        $Header = @{
+            Authorization = "token $GitHubToken"
+            Accept        = 'application/vnd.github.v3+json'
+        }
+        $URI = "https://api.github.com/repos/$GitHubOrg/$RepoName/pulls"
+        $Body = @{
+            title = $PRTitle
+            body  = $PRBody
+            base  = $BaseBranch
+            head  = $HeadBranch
+        }
+        try
+        {
+            $BodyJSON = $Body | ConvertTo-Json
+        }
+        catch
+        {
+            Write-Error "Failed to convert PR body to JSON.`n$($_.Exception.Message)"
+        }
+        Write-Verbose "Attempting to raise PR at $URI"
+        try
+        {
+            $Request = Invoke-RestMethod -Headers $Header -Uri $URI -Body $BodyJSON -Method Post
+        }
+        catch
+        {
+            Write-Error $_.Exception.Message
+        }
     }
-    Write-Verbose "Attempting to raise PR at $URI"
-    try
+    end
     {
-        $Request = Invoke-RestMethod -Headers $Header -Uri $URI -Body $BodyJSON -Method Post
+        if ($Request)
+        {
+            Return $Request
+        }
+        else
+        {
+            return $null
+        }
     }
-    catch
-    {
-        Write-Error $_.Exception.Message
-    }
-    Return $Request
 }
