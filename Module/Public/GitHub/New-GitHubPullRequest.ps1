@@ -4,43 +4,45 @@ function New-GitHubPullRequest
     param (
         # The GitHub PAT
         [Parameter(
-            Mandatory = $true
+            Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true
         )]
+        [Alias('GitHubToken', 'GitHubPAT')]
         [string]
-        $GitHubToken,
+        $Token,
 
-        # The GitHub Organization to check
+        # The org name from GitHub
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true
         )]
-        [Alias('GitHubOrganisation', 'GitHubOrganization')]
+        [Alias('GitHubOrganisation', 'GitHubOrganization', 'GitHubOrg')]
         [string]
-        $GitHubOrg,
+        $RepositoryOwner,
 
         # The body of the pull request
-        [Parameter(
-            Mandatory = $true,
-            ValueFromPipelineByPropertyName = $true,
-            Position = 2
-        )]
-        [string]
-        $PRBody,
-
-        # The title of the pull request
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
             Position = 1
         )]
         [string]
-        $PRTitle,
+        $Body,
+
+        # The title of the pull request
+        [Parameter(
+            Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 0
+        )]
+        [string]
+        $Title,
 
         # The branch you want to pull changes into
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
-            Position = 3
+            Position = 2
         )]
         [string]
         $BaseBranch,
@@ -49,18 +51,19 @@ function New-GitHubPullRequest
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
-            Position = 4
+            Position = 3
         )]
         [string]
         $HeadBranch,
 
-        # The name of the repo
+        # The repository name to check for issues
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true
         )]
+        [Alias('RepoName')]
         [string]
-        $RepoName
+        $RepositoryName
     )
     begin
     {
@@ -68,13 +71,13 @@ function New-GitHubPullRequest
     process
     {
         $Header = @{
-            Authorization = "token $GitHubToken"
+            Authorization = "token $Token"
             Accept        = 'application/vnd.github.v3+json'
         }
-        $URI = "https://api.github.com/repos/$GitHubOrg/$RepoName/pulls"
+        $URI = "https://api.github.com/repos/$RepositoryOwner/$RepositoryName/pulls"
         $Body = @{
-            title = $PRTitle
-            body  = $PRBody
+            title = $Title
+            body  = $Body
             base  = $BaseBranch
             head  = $HeadBranch
         }
