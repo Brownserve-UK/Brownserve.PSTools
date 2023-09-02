@@ -12,9 +12,10 @@ A collection of PowerShell tools used in various projects.
 
 ## Brownserve.PSTools Cmdlets
 ### [Add-BrownserveChangelogEntry](./Brownserve.PSTools/Add-BrownserveChangelogEntry.md)
-{{ Fill in the Synopsis }}
+Inserts a new changelog entry into a given changelog file
 
 ### [Add-ChangelogEntry](./Brownserve.PSTools/Add-ChangelogEntry.md)
+**This cmdlet is deprecated. Please use Add-BrownserveChangelogEntry instead.**
 Inserts a new changelog entry into a given changelog file
 
 ### [Add-GitChanges](./Brownserve.PSTools/Add-GitChanges.md)
@@ -161,7 +162,7 @@ Creates a temporary file in a known good location.
 Creates a new branch in a given git repository
 
 ### [New-GitHubPullRequest](./Brownserve.PSTools/New-GitHubPullRequest.md)
-{{ Fill in the Synopsis }}
+Creates a new GitHub pull request
 
 ### [New-GitHubRelease](./Brownserve.PSTools/New-GitHubRelease.md)
 Creates a release on GitHub
@@ -171,6 +172,7 @@ Creates a release on GitHub
 Obtains a NuGet package version based on the build version number and branch name.
 
 ### [New-PullRequest](./Brownserve.PSTools/New-PullRequest.md)
+**This cmdlet is deprecated. Please use New-GitHubPullRequest instead.**
 Creates a new pull request in GitHub
 
 ### [New-TerraformResourceBlock](./Brownserve.PSTools/New-TerraformResourceBlock.md)
