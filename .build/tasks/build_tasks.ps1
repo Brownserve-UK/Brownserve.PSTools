@@ -679,8 +679,9 @@ task PushBranch CreateStagingBranch, CommitTrackedChanges, {
     Checks for uncommitted changes and fails the build if any are found
 .DESCRIPTION
     This check is especially handy for catching any documentation changes that may have been made during but not committed.
+    This check has no dependencies as the exact point it should be run really needs to be determined by a meta task.
 #>
-task CheckForUncommittedChanges UpdateModuleDocumentation, UpdateChangelog, SetLineEndings, CommitTrackedChanges, {
+task CheckForUncommittedChanges {
     Write-Verbose 'Checking for uncommitted changes'
     $Status = Get-GitChanges
     if ($Status)
