@@ -562,7 +562,7 @@ task UpdateModulePageHelpVersion SetVersion, UpdateModuleDocumentation, {
 #>
 task CreateModuleHelp UpdateModuleDocumentation, {
     Write-Verbose 'Updating module help'
-    New-Item (Join-Path $global:BrownserveBuiltModuleDirectory 'en-US') -ItemType Directory
+    New-Item (Join-Path $global:BrownserveBuiltModuleDirectory 'en-US') -ItemType Directory | Out-Null
     $HelpParams = @{
         ModuleDirectory   = $global:BrownserveBuiltModuleDirectory
         DocumentationPath = (Join-Path $global:BrownserveRepoDocsDirectory 'Brownserve.PSTools')
