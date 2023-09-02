@@ -46,17 +46,11 @@ param
     [ValidateSet(
         'major',
         'minor',
-        'patch'
+        'patch',
+        'republish'
     )]
     [string]
-    $ReleaseType = 'patch',
-
-    # If set to true this will denote a pre-production release
-    [Parameter(
-        Mandatory = $False
-    )]
-    [bool]
-    $PreRelease = $true,
+    $ReleaseType,
 
     # The branch this is being built from
     [Parameter(
@@ -64,6 +58,13 @@ param
     )]
     [string]
     $BranchName,
+
+    # The default branch for this repository
+    [Parameter(
+        Mandatory = $true
+    )]
+    [string]
+    $DefaultBranch,
 
     # The Nuget feeds to publish to
     [Parameter(
@@ -80,7 +81,7 @@ param
     )]
     [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubOrg = $true,
+    $GitHubRepoOwner,
 
     # The GitHub repo to publish the release to and used to fill in release details for Nuget/PSGallery
     [Parameter(
@@ -123,12 +124,27 @@ $global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOu
 # Depending on how we got the branch name we may need to remove the full ref
 $BranchName = $BranchName -replace 'refs\/heads\/', ''
 $script:CurrentCommitHash = & git rev-parse HEAD
-$script:ChangelogPath = Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'CHANGELOG.md'
+$script:ChangelogPath = Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'test-changelog.md' # TODO: replace this with the real changelog path
 $script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'NuGetPackage'
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
-$script:GitHubRepoURI = "https://github.com/$GitHubOrg/$GitHubRepoName"
+$script:GitHubRepoURI = "https://github.com/$GitHubRepoOwner/$GitHubRepoName"
 $Script:BuiltModulePath = (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1")
 $script:TrackedFiles = @()
+$script:LineEndingFiles = @()
+
+<#
+    Work out if this is a production release depending on the branch we're building from
+    We default to $true unless we detect that we're running on the default branch, as anything that is in the default
+    branch should be the one to build shipped versions of the code.
+    This should ensure that:
+        * Main can never be used a prerelease tag
+        * Feature branches cannot ever create a production release
+#>
+$PreRelease = $true
+if ($DefaultBranch -eq $BranchName)
+{
+    $PreRelease = $false
+}
 
 # On non-windows platforms mono is required to run NuGet 🤢
 $NugetCommand = 'nuget'
@@ -138,35 +154,40 @@ if (-not $isWindows)
     $NugetCommand = 'mono'
 }
 
-if ('PSGallery' -in $PublishTo)
+# BuildTask is a variable that is set by Invoke-Build to indicate the build task that has been called
+# it might be useful to have specific logic for certain tasks
+switch ($BuildTask)
 {
-    if (!$PSGalleryAPIKey)
-    {
-        throw 'PSGalleryAPIKey not provided'
-    }
+    default {}
 }
 
-if ('nuget' -in $PublishTo)
-{
-    if (!$NugetFeedApiKey)
+<#
+.SYNOPSIS
+    Checks that all the required parameters have been provided to publish a release
+#>
+task CheckPublishingParameters {
+    if ('PSGallery' -in $PublishTo)
     {
-        throw 'NugetFeedApiKey not provided'
+        if (!$PSGalleryAPIKey)
+        {
+            throw 'PSGalleryAPIKey not provided'
+        }
     }
-}
 
-if ('GitHub' -in $PublishTo)
-{
-    if (!$GitHubOrg)
+    if ('nuget' -in $PublishTo)
     {
-        throw 'GitHubOrg not provided'
+        if (!$NugetFeedApiKey)
+        {
+            throw 'NugetFeedApiKey not provided'
+        }
     }
-    if (!$GitHubRepoName)
+
+    if ('GitHub' -in $PublishTo)
     {
-        throw 'GitHubRepoName not provided'
-    }
-    if (!$GitHubPAT)
-    {
-        throw 'GitHub PAT not provided'
+        if (!$GitHubPAT)
+        {
+            throw 'GitHub PAT not provided'
+        }
     }
 }
 
@@ -174,9 +195,10 @@ if ('GitHub' -in $PublishTo)
 .SYNOPSIS
     Loads the working copy of the module from the module directory
 .DESCRIPTION
-    By default we pull the latest _stable_ copy of Brownserve.PSTools in to run this build, however if we make changes
-    to any of the cmdlets used in this build we won't get the changes until a new release is pushed.
-    This build task allows us to unload the stable version and reload the working copy of the module
+    By default we pull in the latest _stable_ copy of Brownserve.PSTools via the _init.ps1 script to run this build,
+    however if we make changes to any of the cmdlets used in this build we won't get the changes until a new release
+    is pushed.
+    This task allows us to unload the stable version and reload the copy of this module from the repo's module directory.
 #>
 task UseWorkingCopy {
     if ($UseWorkingCopy -eq $true)
@@ -193,58 +215,195 @@ task UseWorkingCopy {
 
 <#
 .SYNOPSIS
-    Generates the version number for the module
+    Reads information about the current release from the changelog
+.DESCRIPTION
+    This task will read the changelog and extract the version history.
+    When staging a release this will be used to determine what the next version number should be.
+    When performing a release this will be used to set the release notes and version for the release.
 #>
-task GenerateVersionInfo UseWorkingCopy, {
-    <#
-        We get the currently released version of the module by reading the changelog.
-        This ensures that if we've added a new release endpoint we still stay consistent with the past releases.
-    #>
-    Write-Verbose 'Generating version information'
-    $script:Changelog = Read-Changelog `
+task GetReleaseHistory {
+    Write-Verbose 'Getting release history'
+    # Store the changelog object - we'll use it when updating the changelog later on
+    $script:Changelog = Read-BrownserveChangelog `
         -ChangelogPath $script:ChangelogPath
-    $CurrentVersion = $Changelog.CurrentVersion
+    <#
+        There may be times where our last release was a pre-release but we don't want to select this as our "latest" version.
+        For example, say 1.0.0 is our current stable version, but we last released 2.0.0-rc1 so it's at the top of our changelog.
+        If we select 2.0.0-rc1 then when we try to promote 2.0.0 to a stable release the version number would get incremented.
+        automatically as part of the build (so for example 2.0.0-rc1 -> 2.0.1)
+        Also if we had to do an emergency release of the latest stable version (e.g 1.0.0 -> 1.1.0) to patch a security
+        issue then we wouldn't want to select our 2.0.0-rc1 pre-release version to base the new patch release off of.
+        Therefore we select the last "stable" release which should always be what we want to work with
+    #>
+    $script:LastRelease = $script:Changelog.VersionHistory |
+        Where-Object { $_.PreRelease -eq $false } |
+            Select-Object -First 1
+}
+<#
+.SYNOPSIS
+    Sets the correct version number for a release
+.DESCRIPTION
+    This is done by looking at the last release and determining the next version number based on the type of release
+    we're doing.
+    We use the changelog as that _should_ be the greatest source of truth for determining the currently released version.
+    There are some fail-safes later on in the build to ensure we don't accidentally release a version that already exists.
+#>
+task SetVersion GetReleaseHistory, {
+    Write-Verbose 'Setting version information'
+    $CurrentVersion = $script:LastRelease |
+        Select-Object -ExpandProperty Version
     if (!$CurrentVersion)
     {
         throw 'Unable to determine current version from changelog'
     }
-    $UpdateVersionParams = @{
-        Version = $CurrentVersion
-        ReleaseType = $ReleaseType
-    }
-    if ($PreRelease)
+    <#
+        Occasionally we may want to republish a version that we've already released.
+        For example if we add another release endpoint or if we failed to release to one of our current endpoints 
+        due to an api key issue etc.
+    #>
+    if ($ReleaseType -eq 'republish')
     {
-        $UpdateVersionParams.Add('PreReleaseString', $BranchName)
+        Write-Verbose "Republishing $CurrentVersion"
+        $script:NewVersion = $CurrentVersion
     }
-    # TODO: Add build number support?
-    $script:NewVersion = Update-Version @UpdateVersionParams -ErrorAction 'Stop'
-    # TODO: move this to a separate task as we'll need to update the changelog
-    $script:ReleaseNotes = $Changelog.ReleaseNotes -replace '"', '\"' -replace '`', '' -replace '\*', '' # Filter out characters that'll break the XML and/or just generally look horrible in NuGet
+    else
+    {
+        $UpdateVersionParams = @{
+            Version     = $CurrentVersion
+            ReleaseType = $ReleaseType
+        }
+        if ($PreRelease)
+        {
+            $UpdateVersionParams.Add('PreReleaseString', $BranchName)
+        }
+        # TODO: Add build number support
+        $script:NewVersion = Update-Version @UpdateVersionParams -ErrorAction 'Stop'
+    }
+    <#
+        NuGet has a very specific version format that we need to adhere to.
+    #>
     $NugetPackageVersionParams = @{
-        Version    = $script:NewVersion
+        Version         = $script:NewVersion
         # We use SemVer 1.0.0 as while NuGet has supported SemVer 2.0.0 since 4.3.0 we want to ensure we're compatible with older versions (for now)
         SemanticVersion = '1.0.0'
     }
     $NugetPackageVersion = Format-NuGetPackageVersion @NugetPackageVersionParams
     <#
-        We use the NugetPackageVersion for our release version as currently this is the most restrictive in terms of supported format.
+        We use the NugetPackageVersion for our release version as currently this is the most restrictive in terms
+        of supported format.
         This should mean everything stays consistent.
     #>
     $global:VersionToRelease = $NugetPackageVersion
     # For GitHub releases and the changelog we prefix the version with a 'v'
     $script:PrefixedVersion = "v$($global:VersionToRelease)"
     Write-Debug @"
-
+Version Information:
     CurrentVersion: $CurrentVersion
     NewVersion: $script:NewVersion
-    ReleaseNotes: $script:ReleaseNotes
     NugetPackageVersion: $NugetPackageVersion
     VersionToRelease: $global:VersionToRelease
 "@
 }
 
-# Synopsis: Checks to make sure we don't already have this release in GitHub
-task CheckPreviousReleases GenerateVersionInfo, {
+<#
+.SYNOPSIS
+    Creates a new changelog entry.
+.DESCRIPTION
+    This task creates a new changelog entry for the current release.
+    It will check for:
+        * Merged PRs since the last release
+        * Issues closed since the last release
+        * Issues opened since the last release
+#>
+task CreateChangelogEntry SetVersion, {
+    Write-Verbose "Creating new changelog entry for $script:NewVersion"
+    $NewChangelogEntryParams = @{
+        Version         = $script:NewVersion
+        RepositoryOwner = $GitHubRepoOwner
+        RepositoryName  = $GitHubRepoName
+        Changelog       = $script:Changelog
+    }
+    if ($GitHubPAT)
+    {
+        $NewChangelogEntryParams.Add('Auto', $true)
+        $NewChangelogEntryParams.Add('GitHubToken', $GitHubPAT)
+    }
+    else
+    {
+        # TODO: in future it might be nice to have a provision for providing manual release notes
+        throw 'GitHub token not provided, cannot generate release notes'
+    }
+    try
+    {
+        $script:NewReleaseNotes = New-BrownserveChangelogEntry @NewChangelogEntryParams
+    }
+    catch
+    {
+        throw "Failed to update changelog. `n$($_.Exception.Message)"
+    }
+}
+
+<#
+.SYNOPSIS
+    Updates the changelog with the new release notes.
+.DESCRIPTION
+    This task should only be run as part of the StageRelease task.
+#>
+task UpdateChangelog CreateChangelogEntry, {
+    Write-Verbose 'Updating changelog'
+    try
+    {
+        $script:Changelog | Add-BrownserveChangelogEntry `
+            -NewContent $script:NewReleaseNotes `
+            -ErrorAction 'Stop'
+    }
+    catch
+    {
+        throw "Failed to update changelog. `n$($_.Exception.Message)"
+    }
+    $script:LineEndingFiles += $script:ChangelogPath
+    $script:TrackedFiles += ($script:ChangelogPath | Convert-Path)
+}
+
+<#
+.SYNOPSIS
+    Removes characters from the release notes that may make things sad
+.DESCRIPTION
+    A previous run of the StageRelease task will have generated the release notes and stored them in the changelog which
+    we will have read in to the $script:LastRelease.ReleaseNotes variable at the beginning of the build.
+    This task will remove any characters that may cause issues when we try to use the release notes in our NuGet package.
+#>
+task FormatReleaseNotes SetVersion, {
+    Write-Verbose 'Formatting release notes.'
+    $script:ReleaseNotes = $script:LastRelease.ReleaseNotes
+    if (!$script:ReleaseNotes)
+    {
+        throw 'Release notes missing'
+    }
+    try
+    {
+        # $script:CleanReleaseNotes = Remove-Markdown -String $script:ReleaseNotes -ErrorAction 'Stop'
+        $script:CleanReleaseNotes = $script:ReleaseNotes | Out-String # TODO: restore this in future
+    }
+    catch
+    {
+        throw "Failed to remove markdown from release notes. `n$($_.Exception.Message)"
+    }
+    # Filter out characters that'll break the XML and/or just generally look horrible in NuGet
+    $script:CleanReleaseNotes = $script:CleanReleaseNotes -replace '"', '\"' -replace '`', '' -replace '\*', ''
+    Write-Verbose "Release notes for $global:VersionToRelease:`n$script:CleanReleaseNotes"
+}
+
+<#
+.SYNOPSIS
+    Checks for previous releases to ensure we're not trying to release a version that already exists
+.DESCRIPTION
+    This task will check for previous releases in GitHub, the PSGallery and NuGet.
+    If a release is found with the same version number as the one we're trying to release then the build will fail.
+    Even if only one of the endpoints has a release with the same version number the build will fail.
+    We should be consistent across all endpoints.
+#>
+task CheckPreviousReleases SetVersion, {
     Write-Verbose 'Checking for previous releases'
     if ('GitHub' -in $PublishTo)
     {
@@ -252,10 +411,10 @@ task CheckPreviousReleases GenerateVersionInfo, {
         $CurrentReleases = Get-GitHubRelease `
             -GitHubToken $GitHubPAT `
             -RepoName $GitHubRepoName `
-            -GitHubOrg $GitHubOrg
-        if ($CurrentReleases.tag_name -contains "v$global:VersionToRelease")
+            -GitHubOrg $GitHubRepoOwner
+        if ($CurrentReleases.tag_name -contains "$script:PrefixedVersion")
         {
-            throw "There already appears to be a v$global:VersionToRelease release!`nDid you forget to update the changelog?"
+            throw "There already appears to be a $script:PrefixedVersion release!"
         }
     }
     if ('PSGallery' -in $PublishTo)
@@ -269,7 +428,7 @@ task CheckPreviousReleases GenerateVersionInfo, {
             -ErrorAction SilentlyContinue # We don't care if this fails, we'll just assume there's no previous release
         if ($CurrentReleases.Version -contains $global:VersionToRelease)
         {
-            throw "There already appears to be a $global:VersionToRelease release!`nDid you forget to update the changelog?"
+            throw "There already appears to be a $global:VersionToRelease release!"
         }
     }
     if ('nuget' -in $PublishTo)
@@ -277,13 +436,13 @@ task CheckPreviousReleases GenerateVersionInfo, {
         Write-Verbose 'Checking for previous releases to NuGet'
         $CurrentReleases = Find-Package `
             -Name $ModuleName `
-            -Source "https://nuget.org/api/v2" `
+            -Source 'https://nuget.org/api/v2' `
             -AllVersions `
             -AllowPrereleaseVersions `
             -ErrorAction SilentlyContinue # We don't care if this fails, we'll just assume there's no previous release
         if ($CurrentReleases.Version -contains $global:VersionToRelease)
         {
-            throw "There already appears to be a $global:VersionToRelease release!`nDid you forget to update the changelog?"
+            throw "There already appears to be a $global:VersionToRelease release!"
         }
     }
 }
@@ -296,7 +455,7 @@ task CopyModule {
 }
 
 # Synopsis: Generates the module manifest
-task GenerateModuleManifest CopyModule, GenerateVersionInfo, {
+task CreateModuleManifest SetVersion, FormatReleaseNotes, CopyModule, {
     Write-Verbose 'Creating PowerShell module manifest'
     # Get a list of Public cmdlets so we can mark them for export.
     $PublicScripts = Get-ChildItem (Join-Path $global:BrownserveBuiltModuleDirectory 'Public') -Filter '*.ps1' -Recurse
@@ -313,7 +472,7 @@ task GenerateModuleManifest CopyModule, GenerateVersionInfo, {
         ModuleVersion     = $script:NewVersion
         Description       = $ModuleDescription
         PowerShellVersion = '6.0'
-        ReleaseNotes      = $script:ReleaseNotes
+        ReleaseNotes      = $script:CleanReleaseNotes
         LicenseUri        = "$script:GitHubRepoURI/blob/main/LICENSE"
         ProjectUri        = "$script:GitHubRepoURI"
         FunctionsToExport = $PublicFunctions
@@ -325,7 +484,7 @@ task GenerateModuleManifest CopyModule, GenerateVersionInfo, {
     # If this is not a production release then update the fields accordingly
     if ($PreRelease -eq $true)
     {
-        $ModuleManifest.add('Prerelease', ($BranchName -replace '[^a-zA-Z0-9]', ''))
+        $ModuleManifest.add('Prerelease', (([semver]$global:VersionToRelease).PreReleaseLabel))
     }
     New-ModuleManifest @ModuleManifest -ErrorAction 'Stop'
 }
@@ -334,7 +493,7 @@ task GenerateModuleManifest CopyModule, GenerateVersionInfo, {
 .SYNOPSIS
     Now we've built the module we need to import the freshly built version before we can test it.
 #>
-task ImportModule GenerateModuleManifest, {
+task ImportModule CreateModuleManifest, {
     Write-Verbose 'Importing built module'
     if ((Get-Module $ModuleName))
     {
@@ -349,46 +508,66 @@ You may wish to run _init.ps1 again to reload the current stable version of this
     Import-Module $Script:BuiltModulePath -Force -Verbose:$false
 }
 
-# Synopsis: Generates the markdown documentation for the module
-task GenerateDocs ImportModule, {
-    Write-Verbose 'Generating markdown documentation'
+<#
+.SYNOPSIS
+    Uses PlatyPS to generate the markdown documentation for the module
+.DESCRIPTION
+    We store our modules help information in markdown files in the docs directory of the repo.
+    This task will generate those docs using PlatyPS.
+#>
+task UpdateModuleDocumentation ImportModule, {
+    Write-Verbose 'Updating markdown documentation'
     $DocsParams = @{
         ModuleName        = $ModuleName
         ModulePath        = $Script:BuiltModulePath
         DocumentationPath = $Global:BrownserveRepoDocsDirectory
+        ModuleGUID        = $ModuleGUID
     }
-    #TODO: main should not be hardcoded and we should have provision for dev too (can we make use of PreRelease?)
-    if ($BranchName -eq 'main')
-    {
-        $DocsParams.Add('HelpVersion', $global:VersionToRelease)
-        $DocsParams.Add('ModuleGUID', $ModuleGUID)
-    }
-    Build-ModuleDocumentation @DocsParams
-
-    $script:TrackedFiles += (Get-ChildItem `
+    Build-ModuleDocumentation @DocsParams | Out-Null
+    <#
+        Store this in a script variable as we'll potentially use it later on.
+        We do this _after_ we've generated the docs as the module page might not exist before which will cause
+        Resolve-Path to fail.
+    #>
+    $Script:ModulePagePath = Join-Path $Global:BrownserveRepoDocsDirectory 'Brownserve.PSTools.md' | Resolve-Path
+    $script:LineEndingFiles += (Get-ChildItem `
             -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath 'Brownserve.PSTools')  `
             -Filter *.md `
             -Recurse | Select-Object -ExpandProperty 'FullName')
-    $script:TrackedFiles += (Get-Item `
-            -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath 'Brownserve.PSTools.md'))
+    $script:LineEndingFiles += (Get-Item -Path $Script:ModulePagePath)
 }
 
-# Synopsis: Updates the module help
-task UpdateModuleHelp GenerateDocs, {
+<#
+.SYNOPSIS
+    Update the module page help version to match the version we're releasing
+.DESCRIPTION
+    This task should only be run as part of the StageRelease task.
+#>
+task UpdateModulePageHelpVersion SetVersion, UpdateModuleDocumentation, {
+    Write-Verbose 'Updating module page help version'
+    Update-PlatyPSModulePageHelpVersion `
+        -HelpVersion $global:VersionToRelease `
+        -ModulePagePath $Script:ModulePagePath `
+        -ErrorAction 'Stop'
+    $script:TrackedFiles += $Script:ModulePagePath
+}
+
+<#
+.SYNOPSIS
+    Updates the modules MALM help
+.DESCRIPTION
+    PlatyPS will read in the markdown files in the docs directory and generate a MALM help file for the module.
+    This needs to be shipped with the module so that PowerShell can display help for the module, therefore we copy it
+    over to the built module directory.
+#>
+task CreateModuleHelp UpdateModuleDocumentation, {
     Write-Verbose 'Updating module help'
     New-Item (Join-Path $global:BrownserveBuiltModuleDirectory 'en-US') -ItemType Directory
     $HelpParams = @{
         ModuleDirectory   = $global:BrownserveBuiltModuleDirectory
         DocumentationPath = (Join-Path $global:BrownserveRepoDocsDirectory 'Brownserve.PSTools')
     }
-    Add-ModuleHelp @HelpParams
-}
-
-# Synopsis: Updates the changelog
-task UpdateChangelog {
-    # TODO: how do we handle changelogs for dev branch?
-    # Possibly anytime we're doing a release we make sure the changelog gets updated? (e.g 0.1.0-dev)
-    Write-Verbose 'Updating changelog'
+    Add-ModuleHelp @HelpParams | Out-Null
 }
 
 <#
@@ -397,14 +576,18 @@ task UpdateChangelog {
 .DESCRIPTION
     PowerShell seems to insist on doing inconsistent things with line endings when running on different OSes.
     This results in constant line ending change diffs in git which fails the build.
-    Therefore any (tracked) files that are files created as part of the build have their line endings explicitly set
+    Therefore some files that are created as part of the build need to have their line endings set to 'LF' to ensure
+    consistency.
+
+    This task has no dependencies as it should be run after all other tasks that may modify tracked files so be
+    careful with where you place it in the build.
 #>
 task SetLineEndings {
-    if ($script:TrackedFiles.Count -gt 0)
+    if ($script:LineEndingFiles.Count -gt 0)
     {
         Write-Verbose 'Ensuring line endings are consistent'
         Set-LineEndings `
-            -Path $script:TrackedFiles `
+            -Path $script:LineEndingFiles `
             -LineEnding 'LF' `
             -ErrorAction 'Stop'
     }
@@ -414,40 +597,161 @@ task SetLineEndings {
     }
 }
 
-# Synopsis: Checks for uncommitted changes, this should run after we've updated the documentation and changelog
-task CheckForUncommittedChanges GenerateDocs, UpdateChangelog, SetLineEndings, {
+<#
+.SYNOPSIS
+    Creates a new branch for staging the release
+.DESCRIPTION
+    Before we perform a release we need to ensure the changelog and help files are updated.
+    As we can't push to the main branch we need to create a new branch to stage the release and submit a PR.
+    This is helpful as we can review everything before we actually release it.
+    The branch name is determined by the version number.
+    For example if we're releasing version 1.0.0 then the branch name will be 'release/1.0.0'
+#>
+task CreateStagingBranch SetVersion, {
+    $Script:StagingBranchName = "release/$script:PrefixedVersion"
+    Write-Verbose "Creating branch: $Script:StagingBranchName"
+    try
+    {
+        New-GitBranch `
+            -RepositoryPath $Global:BrownserveRepoRootDirectory `
+            -BranchName $Script:StagingBranchName `
+            -Checkout $true `
+            -ErrorAction 'Stop'
+    }
+    catch
+    {
+        throw "Failed to create git branch $Blah.`n$($_.Exception.Message)"
+    }
+}
+
+<#
+.SYNOPSIS
+    Commits any (expected) changes made during the build
+.DESCRIPTION
+    Sometimes we expect some files to get modified during certain builds.
+    For example when we update the changelog or module documentation before a release.
+    We want to commit those changes so they get included in the release. (and don't fail the build later on)
+#>
+task CommitTrackedChanges UpdateChangelog, UpdateModuleDocumentation, CreateStagingBranch, SetLineEndings, {
+    $CommitMessage = "auto: Prepare for $script:PrefixedVersion`n`nThis commit was automatically generated."
+    if ($script:TrackedFiles.Count -gt 0)
+    {
+        Write-Verbose 'Committing tracked changes'
+        try
+        {
+            $script:TrackedFiles | Add-GitChanges -RepositoryPath $Global:BrownserveRepoRootDirectory
+            Submit-GitChanges `
+                -RepositoryPath $Global:BrownserveRepoRootDirectory `
+                -Message $CommitMessage
+        }
+        catch
+        {
+            throw $_.Exception.Message
+        }
+    }
+    else
+    {
+        Write-Verbose 'No tracked files to commit.'
+    }
+}
+
+<#
+.SYNOPSIS
+    Pushes the current branch to the remote repository
+#>
+task PushBranch CreateStagingBranch, CommitTrackedChanges, {
+    Write-Verbose 'Pushing branch to remote repository'
+    try
+    {
+        Push-GitChanges `
+            -BranchName $script:StagingBranchName `
+            -RepositoryPath $Global:BrownserveRepoRootDirectory `
+            -ErrorAction 'Stop'
+    }
+    catch
+    {
+        throw "Failed to push branch to remote repository.`n$($_.Exception.Message)"
+    }
+}
+
+<#
+.Synopsis
+    Checks for uncommitted changes and fails the build if any are found
+.DESCRIPTION
+    This check is especially handy for catching any documentation changes that may have been made during but not committed.
+#>
+task CheckForUncommittedChanges UpdateModuleDocumentation, UpdateChangelog, SetLineEndings, CommitTrackedChanges, {
     Write-Verbose 'Checking for uncommitted changes'
     $Status = Get-GitChanges
     if ($Status)
     {
-        # TODO: Ignore changes to the changelog and documentation module page
-        # TODO: special error for documentation changes
         throw "The build has resulted in uncommitted changes being produced: `n$($Status.Source -join "`n")"
     }
 }
 
-# Synopsis: Performs some testing on the module
-task Tests ImportModule, {
+<#
+.SYNOPSIS
+    Creates a PR for merging the staging release branch into the default branch
+#>
+task CreatePullRequest PushBranch, CheckForUncommittedChanges, {
+    Write-Verbose 'Creating pull request'
+    try
+    {
+        $Body = @'
+This PR was automatically generated.
+Please review the changes and merge if they look good.
+'@
+        $PullRequestParams = @{
+            BaseBranch      = $DefaultBranch
+            HeadBranch      = $script:StagingBranchName
+            Title           = "Prepare for $script:PrefixedVersion"
+            Body            = $Body
+            GitHubToken     = $GitHubPAT
+            RepositoryName  = $GitHubRepoName
+            RepositoryOwner = $GitHubRepoOwner
+        }
+        $PRDetails = New-GitHubPullRequest @PullRequestParams
+        Write-Verbose "Pull request created: $($PRDetails.html_url)"
+    }
+    catch
+    {
+        throw "Failed to create pull request.`n$($_.Exception.Message)"
+    }
+}
+
+<#
+.SYNOPSIS
+    Performs tests on the module
+.DESCRIPTION
+    We use Pester to perform unit testing on the module.
+    This task will run all the tests in the "tests" directory and fail the build if any of them fail.
+#>
+task Tests ImportModule, UpdateModuleDocumentation, {
     Write-Verbose 'Performing unit testing, this may take a while...'
     $Results = Invoke-Pester -Path $Global:BrownserveRepoTestsDirectory -PassThru
     assert ($results.FailedCount -eq 0) "$($results.FailedCount) test(s) failed."
 }
 
-# Synopsis: Creates our NuGet package
-task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule, UpdateModuleHelp, SetLineEndings, {
-    # We'll copy our build module to the nuget package and rename it to 'tools'
-    Write-Verbose 'Copying built module into NuGet package'
-    Copy-Item $global:BrownserveBuiltModuleDirectory -Destination (Join-Path $script:NugetPackageDirectory 'tools') -Recurse
-    # Copy each of the necessary files over to the build output directory
-    $ItemsToCopy = @(
+<#
+.SYNOPSIS
+    Creates a NuGet package for the module
+#>
+task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, CreateModuleHelp, {
+    if ('nuget' -in $PublishTo)
+    {
+        # We'll copy our build module to the nuget package and rename it to 'tools'
+        Write-Verbose "Copying built module to $script:NugetPackageDirectory"
+        Copy-Item $global:BrownserveBuiltModuleDirectory -Destination (Join-Path $script:NugetPackageDirectory 'tools') -Recurse
+        # Copy each of the necessary files over to the build output directory
+        $ItemsToCopy = @(
         (Join-Path $Global:BrownserveRepoRootDirectory 'CHANGELOG.md'),
         (Join-Path $Global:BrownserveRepoRootDirectory 'LICENSE'),
         (Join-Path $Global:BrownserveRepoRootDirectory README.md)
-    )
-    Copy-Item $ItemsToCopy -Destination $script:NugetPackageDirectory -Force
-    # Now we'll generate a nuspec file and pop it in the root of NuGet package
-    Write-Verbose 'Creating nuspec file'
-    $Nuspec = @"
+        )
+        Copy-Item $ItemsToCopy -Destination $script:NugetPackageDirectory -Force
+        # Now we'll generate a nuspec file and pop it in the root of NuGet package
+        Write-Verbose 'Creating nuspec file'
+        $Nuspec = @"
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
@@ -459,7 +763,7 @@ task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule,
     <summary>$ModuleDescription</summary>
     <description>$ModuleDescription</description>
     <projectUrl>$script:GitHubRepoURI</projectUrl>
-    <releaseNotes>$script:ReleaseNotes</releaseNotes>
+    <releaseNotes>$script:CleanReleaseNotes</releaseNotes>
     <readme>README.md</readme>
     <copyright>Copyright $(Get-Date -Format yyyy) Brownserve UK.</copyright>
     <tags>$($ModuleTags -join ' ')</tags>
@@ -467,38 +771,53 @@ task CreateNugetPackage GenerateVersionInfo, GenerateModuleManifest, CopyModule,
   </metadata>
 </package>
 "@
-    New-Item $script:NuspecPath -Value $Nuspec -Force | Out-Null
-    $script:NuspecPath = $script:NuspecPath | Convert-Path
+        New-Item $script:NuspecPath -Value $Nuspec -Force | Out-Null
+        $script:NuspecPath = $script:NuspecPath | Convert-Path
+    }
+    else
+    {
+        Write-Verbose 'Nuget not targeted, skipping...'
+    }
 }
 
 # Synopsis: Packs the nuget package ready for shipping off to nuget.org (or a private feed)
-task Pack CreateNugetPackage, GenerateModuleManifest, {
-    Write-Verbose 'Creating NuGet package'
-    exec {
-        # Note: the paths must be a separate index to the switch in the array
-        $NugetArguments = @(
-            'pack',
-            "$script:NuspecPath",
-            '-NoPackageAnalysis',
-            '-Version',
-            "$global:VersionToRelease",
-            '-OutputDirectory',
-            "$Global:BrownserveRepoBuildOutputDirectory"
-        )
-        # On *nix we need to use mono to invoke nuget, so fudge the arguments a bit
-        if (-not $isWindows)
-        {
-            # Mono won't have access to our NuGet PowerShell alias, so set the path using our env var
-            $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
-            Write-Verbose "Calling Nuget with:`n$NugetArguments"
+task PackNuGetPackage PrepareNuGetPackage, {
+    if ('nuget' -in $PublishTo)
+    {
+        Write-Verbose 'Creating NuGet package'
+        exec {
+            # Note: the paths must be a separate index to the switch in the array
+            $NugetArguments = @(
+                'pack',
+                "$script:NuspecPath",
+                '-NoPackageAnalysis',
+                '-Version',
+                "$global:VersionToRelease",
+                '-OutputDirectory',
+                "$Global:BrownserveRepoBuildOutputDirectory"
+            )
+            # On *nix we need to use mono to invoke nuget, so fudge the arguments a bit
+            if (-not $isWindows)
+            {
+                # Mono won't have access to our NuGet PowerShell alias, so set the path using our env var
+                $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
+                Write-Verbose "Calling Nuget with:`n$NugetArguments"
+            }
+            & $NugetCommand $NugetArguments
         }
-        & $NugetCommand $NugetArguments
+        $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$global:NugetPackageVersion.nupkg" | Convert-Path
     }
-    $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$global:NugetPackageVersion.nupkg" | Convert-Path
+    else
+    {
+        Write-Verbose 'Nuget not targeted, skipping...'
+    }
 }
 
-# Synopsis: Push the package up to nuget
-task PushNuget CheckPreviousReleases, Tests, Pack, CheckForUncommittedChanges, {
+<#
+.SYNOPSIS
+    Publishes the new release to the various endpoints
+#>
+task PublishRelease CheckPreviousReleases, Tests, PackNuGetPackage, CheckForUncommittedChanges, {
     # Only push to nuget if we want to
     if ('nuget' -in $PublishTo)
     {
@@ -524,10 +843,7 @@ task PushNuget CheckPreviousReleases, Tests, Pack, CheckForUncommittedChanges, {
     {
         Write-Verbose 'nuget not targetted, skipping...'
     }
-}
 
-# Synopsis: Push the module to PSGallery too
-task PushPSGallery CheckPreviousReleases, Tests, CheckForUncommittedChanges, {
     if ('PSGallery' -in $PublishTo)
     {
         Write-Verbose 'Pushing to PSGallery'
@@ -542,11 +858,7 @@ task PushPSGallery CheckPreviousReleases, Tests, CheckForUncommittedChanges, {
     {
         Write-Verbose 'PSGallery not targeted, skipping...'
     }
-}
 
-# Synopsis: Creates a GitHub release for this version, we only do this once we've had a successful NuGet push
-#TODO: sort out ordering here now that we support multiple platforms (do we just have a single task that does all the push things?)
-task GitHubRelease CheckPreviousReleases, PushNuget, PushPSGallery, CheckForUncommittedChanges, {
     if ('GitHub' -in $PublishTo)
     {
         Write-Verbose "Creating GitHub release for $global:VersionToRelease"
@@ -556,7 +868,7 @@ task GitHubRelease CheckPreviousReleases, PushNuget, PushPSGallery, CheckForUnco
             Description = $script:ReleaseNotes
             GitHubToken = $GitHubPAT
             RepoName    = $GitHubRepoName
-            GitHubOrg   = $GitHubOrg
+            GitHubOrg   = $GitHubRepoOwner
         }
         if ($PreRelease -eq $true)
         {
@@ -573,74 +885,33 @@ task GitHubRelease CheckPreviousReleases, PushNuget, PushPSGallery, CheckForUnco
 
 <#
 .SYNOPSIS
-    This meta task will perform all the steps required to build the PowerShell module, but will not import the module
-    nor build a NuGet packaged version of the module or perform any unit testing.
-    This is useful to quickly test changes to module metadata and the like
+    Meta task for building the module.
+.DESCRIPTION
+    This task will run all the tasks required to build the module.
+    #TODO: review use of SetLineEndings here
 #>
-task Build GenerateModuleManifest, {}
-
-<#
-.SYNOPSIS
-    This meta task will perform all the steps required to build the module and then import it into the current PowerShell session.
-    This will not build the nuget packaged version of the module.
-    This is useful to either test new functions/code locally or to ensure the module still loads after making changes
-#>
-task BuildImport ImportModule, {}
-
-<#
-.SYNOPSIS
-    This meta task will perform all the steps required to build the PowerShell module, import it into the current PowerShell session
-    and then build the Markdown documentation for the module.
-    This ensures that there is an easy way to create documentation for the module.
-#>
-task BuildImportGenerateDocs GenerateDocs, SetLineEndings, {}
-
-#TODO: Look at below and see when we need to insert GenerateDocs
-<#
-.SYNOPSIS
-    This meta task will build the module and create a NuGet package of the built module.
-    The module is not imported or tested.
-    This is useful to test changes to the NuGet metadata.
-#>
-task BuildPack Pack, {}
-
-<#
-.SYNOPSIS
-    This meta task will build the PowerShell module, import it and perform our unit tests
-    This is useful when you want to check your changes are valid.
-#>
-task BuildImportTest Tests, {}
-
-<#
-.SYNOPSIS
-    This meta task will build the PowerShell module, import it, generate the Markdown documentation ,perform our unit tests
-    and ensure no uncommitted changes are present.
-    This helps to ensure any pull requests are valid and good to merge.
-#>
-task BuildImportGenerateDocsTest UpdateModuleHelp, CheckForUncommittedChanges, Tests, {}
-
-<#
-.SYNOPSIS
-    This meta task will build the PowerShell module, create a NuGet package, import the module and perform our unit tests.
-    This is useful to test the complete pipeline as it is one stop short of a release.
-#>
-task BuildPackTest Tests, Pack, {}
-
-<#
-.SYNOPSIS
-    Prepares for a release
-#>
-task StageRelease {
-    # TODO: Maybe this belongs elsewhere as "StageRelease" should be used only to actually do the things
-    Write-Build @"
-Version to release:
-"@
-    Write-Build "This is what would happen provided you released now."
+task Build UseWorkingCopy, CreateModuleManifest, UpdateModuleDocumentation, CreateModuleHelp, SetLineEndings, {
+    Write-Build Green 'Build complete'
 }
 
 <#
 .SYNOPSIS
-    This meta task builds, imports and tests the PowerShell module while also creating a NuGet packaged version of it.
-    This is then pushed to the various platforms that house our module.
+    Meta task for building and testing the module.
+.DESCRIPTION
+    This task will build the module and perform unit tests on it.
 #>
-task Release GitHubRelease, {}
+task BuildAndTest Build, Tests, {
+    Write-Build Green 'Build and test complete'
+}
+
+<#
+.SYNOPSIS
+    Meta task for building and testing the module, then finally confirming there are no uncommitted changes.
+.DESCRIPTION
+    This task will build the module, perform unit tests on it and then ensure there are no uncommitted changes
+    resulting from the build.
+    This is the build we use for our pull request CI pipeline.
+#>
+task BuildTestAndCheck BuildAndTest, CheckForUncommittedChanges, {
+    Write-Build Green 'Build, test and check complete'
+}

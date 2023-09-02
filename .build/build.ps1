@@ -25,14 +25,6 @@ param
     [string]
     $DefaultBranch = 'main',
 
-    # The name of the feature branch
-    # This should be the branch that is used to develop and test new features and fixes before they are merged into the default branch
-    [Parameter(
-        Mandatory = $false
-    )]
-    [string]
-    $FeatureBranch = 'dev',
-
     # The name of the branch you are running on
     # this is used to work out if the release is production or pre-release
     [Parameter(
@@ -54,16 +46,12 @@ param
         Mandatory = $false
     )]
     [ValidateSet(
-        'build',
-        'BuildImport',
-        'BuildPack',
-        'BuildImportTest',
-        'BuildImportGenerateDocs',
-        'BuildImportGenerateDocsTest',
-        'BuildPackTest',
-        'release')]
+        'Build',
+        'BuildAndTest',
+        'BuildTestAndCheck'
+    )]
     [string]
-    $Build = 'BuildImport',
+    $Build = 'Build',
 
     # The type of changes that this version of the module contains
     # this is used to determine the version number
@@ -73,7 +61,8 @@ param
     [ValidateSet(
         'major',
         'minor',
-        'patch'
+        'patch',
+        'rerelease'
     )]
     [string]
     $ReleaseType = 'patch',
@@ -83,7 +72,7 @@ param
         Mandatory = $false
     )]
     [string[]]
-    $PublishTo = @('nuget', 'PSGallery', 'GitHub'),
+    $PublishTo,
 
     # The GitHub organisation/account that owns this module
     [Parameter(
@@ -91,7 +80,7 @@ param
     )]
     [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubOrg = 'Brownserve-UK',
+    $GitHubRepoOwner = 'Brownserve-UK',
 
     # The GitHub repo that contains this module, it's needed to build up documentation URI's
     [Parameter(
@@ -107,7 +96,7 @@ param
     )]
     [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubPAT = $env:GitHubPAT,
+    $GitHubPAT,
 
     # The API key to use when publishing to a NuGet feed, this is always needed but may not always be used
     [Parameter(
@@ -145,20 +134,6 @@ if (!$BranchName)
 # Depending on how we got the branch name we may need to remove the full ref
 $BranchName = $BranchName -replace 'refs\/heads\/', ''
 
-<#
-    Work out if this is a production release depending on the branch we're building from
-    We default to $true unless we detect that we're running on the default branch, as anything that is in the default
-    branch should be the one to build shipped version of the code.
-    This should ensure that:
-        * Main can never be used a prerelease tag
-        * Feature branches cannot ever create a production release
-#>
-$PreRelease = $true
-if ($DefaultBranch -eq $BranchName)
-{
-    $PreRelease = $false
-}
-
 # If this is running as part of a PR then we need to check the merge is to the default branch
 if ($TargetBranch)
 {
@@ -194,12 +169,6 @@ catch
     Write-Error "Failed to init repo.`n$($_.Exception.Message)"
 }
 
-# Ensure we have everything needed to perform a release
-if ($Build -eq 'release')
-{
-    <# Add any steps here that are required for a release #>
-}
-
 # Invoke our build task
 try
 {
@@ -208,6 +177,7 @@ try
         Task              = $Build
         ReleaseType       = $ReleaseType
         BranchName        = $BranchName
+        DefaultBranch     = $DefaultBranch
         ModuleName        = $ModuleInfo.Name
         ModuleDescription = $ModuleInfo.Description
         ModuleAuthor      = $ModuleAuthor
@@ -215,17 +185,9 @@ try
         ModuleTags        = $ModuleInfo.Tags
         UseWorkingCopy    = ($PSBoundParameters['UseWorkingCopy'] -eq $true)
     }
-    if ($PreRelease)
+    if ($GitHubRepoOwner)
     {
-        $BuildParams.Add('Prerelease', $true)
-    }
-    else
-    {
-        $BuildParams.Add('Prerelease', $false)
-    }
-    if ($GitHubOrg)
-    {
-        $BuildParams.Add('GitHubOrg', $GitHubOrg)
+        $BuildParams.Add('GitHubRepoOwner', $GitHubRepoOwner)
     }
     if ($GitHubRepoName)
     {
