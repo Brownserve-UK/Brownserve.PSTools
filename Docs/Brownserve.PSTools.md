@@ -11,8 +11,14 @@ Locale: en-US
 A collection of PowerShell tools used in various projects.
 
 ## Brownserve.PSTools Cmdlets
+### [Add-BrownserveChangelogEntry](./Brownserve.PSTools/Add-BrownserveChangelogEntry.md)
+{{ Fill in the Synopsis }}
+
 ### [Add-ChangelogEntry](./Brownserve.PSTools/Add-ChangelogEntry.md)
 Inserts a new changelog entry into a given changelog file
+
+### [Add-GitChanges](./Brownserve.PSTools/Add-GitChanges.md)
+This cmdlet is a wrapper for the git command 'git add \<path\>'.
 
 ### [Add-ModuleHelp](./Brownserve.PSTools/Add-ModuleHelp.md)
 Creates XML MALM help for a PowerShell module
@@ -135,6 +141,9 @@ Performs a 'terraform validate'
 ### [Merge-Hashtable](./Brownserve.PSTools/Merge-Hashtable.md)
 Merges two hashtables together
 
+### [New-BrownserveChangelogEntry](./Brownserve.PSTools/New-BrownserveChangelogEntry.md)
+Creates a new changelog entry for a given version in the standard Brownserve format.
+
 ### [New-BrownservePowerShellModule](./Brownserve.PSTools/New-BrownservePowerShellModule.md)
 Creates a new PowerShell module using the standard Brownserve format
 
@@ -150,6 +159,9 @@ Creates a temporary file in a known good location.
 
 ### [New-GitBranch](./Brownserve.PSTools/New-GitBranch.md)
 Creates a new branch in a given git repository
+
+### [New-GitHubPullRequest](./Brownserve.PSTools/New-GitHubPullRequest.md)
+{{ Fill in the Synopsis }}
 
 ### [New-GitHubRelease](./Brownserve.PSTools/New-GitHubRelease.md)
 Creates a release on GitHub
@@ -167,7 +179,14 @@ Creates a Terraform resource block that can easily be inserted into Terraform co
 ### [Publish-TeamcityArtifact](./Brownserve.PSTools/Publish-TeamcityArtifact.md)
 Tells Teamcity to export a given file/folder as an artifact.
 
+### [Push-GitChanges](./Brownserve.PSTools/Push-GitChanges.md)
+Pushes local git changes to the remote repository.
+
+### [Read-BrownserveChangelog](./Brownserve.PSTools/Read-BrownserveChangelog.md)
+Reads in a changelog file and returns the contents as a custom object.
+
 ### [Read-Changelog](./Brownserve.PSTools/Read-Changelog.md)
+**This cmdlet is deprecated and will be removed in a future release, please use Read-BrownserveChangelog instead.**
 Retrieves version information and release notes from a CHANGELOG.md file.
 
 ### [Read-ConfigurationFromFile](./Brownserve.PSTools/Read-ConfigurationFromFile.md)
@@ -194,6 +213,9 @@ Provides an easy way to set the Terraform log level.
 ### [Split-URI](./Brownserve.PSTools/Split-URI.md)
 Takes a given URI and splits it into its constituent parts.
 
+### [Submit-GitChanges](./Brownserve.PSTools/Submit-GitChanges.md)
+This cmdlet is a wrapper for \<git commit\>.
+
 ### [Switch-GitBranch](./Brownserve.PSTools/Switch-GitBranch.md)
 Checks out a given branch.
 
@@ -211,6 +233,18 @@ Updates a given repository to use the latest tooling and settings
 
 ### [Update-Changelog](./Brownserve.PSTools/Update-Changelog.md)
 Updates a repo's changelog according to the semver v1.0.0 spec.
+
+### [Update-PlatyPSModulePageDescription](./Brownserve.PSTools/Update-PlatyPSModulePageDescription.md)
+Updates the PlatyPS module page module description field.
+
+### [Update-PlatyPSModulePageGUID](./Brownserve.PSTools/Update-PlatyPSModulePageGUID.md)
+Updates the module GUID in the PlatyPS module page.
+
+### [Update-PlatyPSModulePageHelpVersion](./Brownserve.PSTools/Update-PlatyPSModulePageHelpVersion.md)
+Updates the help version in the PlatyPS module page.
+
+### [Update-PlatyPSModulePageLinks](./Brownserve.PSTools/Update-PlatyPSModulePageLinks.md)
+Updates the links to cmdlet documentation in the PlatyPS module page.
 
 ### [Update-Version](./Brownserve.PSTools/Update-Version.md)
 A simple function to increment a semantic version number.
