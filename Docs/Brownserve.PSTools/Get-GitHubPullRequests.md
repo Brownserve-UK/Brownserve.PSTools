@@ -47,7 +47,7 @@ This would return all open, closed and merged pull requests from the `Brownserve
 ## PARAMETERS
 
 ### -RepositoryName
-{{ Fill RepositoryName Description }}
+The name of the repository to check for pull requests
 
 ```yaml
 Type: String
@@ -62,7 +62,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryOwner
-{{ Fill RepositoryOwner Description }}
+The owner of the repository that you want to check for pull requests
 
 ```yaml
 Type: String
