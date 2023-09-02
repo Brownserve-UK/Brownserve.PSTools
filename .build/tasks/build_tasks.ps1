@@ -688,6 +688,7 @@ task CheckForUncommittedChanges {
     {
         throw "The build has resulted in uncommitted changes being produced: `n$($Status.Source -join "`n")"
     }
+    Write-Build Green 'No lingering uncommitted changes.'
 }
 
 <#
