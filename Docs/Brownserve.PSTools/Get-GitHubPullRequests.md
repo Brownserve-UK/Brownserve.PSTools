@@ -13,7 +13,7 @@ Gets pull request information from a given GitHub repository.
 ## SYNTAX
 
 ```
-Get-GitHubPullRequests -GitHubToken <String> [-GitHubOrg] <String> [-RepoName] <String>
+Get-GitHubPullRequests -Token <String> [-RepositoryOwner] <String> [-RepositoryName] <String>
  [[-State] <GitHubIssueState>] [<CommonParameters>]
 ```
 
@@ -46,46 +46,31 @@ This would return all open, closed and merged pull requests from the `Brownserve
 
 ## PARAMETERS
 
-### -GitHubOrg
-The owner of the GitHub repository
+### -RepositoryName
+{{ Fill RepositoryName Description }}
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: GitHubOrganisation, GitHubOrganization
+Aliases: GitHubRepo, RepoName
 
 Required: True
-Position: 2
+Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -GitHubToken
-The token with read permissions against the repository
+### -RepositoryOwner
+{{ Fill RepositoryOwner Description }}
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: GitHubOrganisation, GitHubOrganization, GitHubOrg
 
 Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -RepoName
-The name of the repository
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 1
+Position: 2
 Default value: None
 Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
@@ -104,6 +89,21 @@ Required: False
 Position: 3
 Default value: Open
 Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Token
+The GitHub token to use for authentication
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: GitHubToken, GitHubPAT
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 

@@ -5,104 +5,34 @@ online version:
 schema: 2.0.0
 ---
 
-# New-PullRequest
+# New-GitHubPullRequest
 
 ## SYNOPSIS
-**This cmdlet is deprecated. Please use New-GitHubPullRequest instead.**
-Creates a new pull request in GitHub
+Creates a new GitHub pull request
 
 ## SYNTAX
 
 ```
-New-PullRequest -GitHubToken <String> -GitHubOrg <String> [-PRBody] <String> [-PRTitle] <String>
- [-BaseBranch] <String> [-HeadBranch] <String> -RepoName <String> [<CommonParameters>]
+New-GitHubPullRequest -Token <String> -RepositoryOwner <String> [-Body] <String> [-Title] <String>
+ [-BaseBranch] <String> [-HeadBranch] <String> -RepositoryName <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Creates a new pull request in GitHub
+This cmdlet will create a new GitHub pull request
 
 ## EXAMPLES
 
-### EXAMPLE 1
+### Example 1
 ```powershell
-New-PullRequest
-    -GitHubUsername 'a_user' `
-    -GitHubPAT 'abc-1234' `
-    -GitHubOrganization 'acme' `
-    -RepoName 'myRepo' `
-    -BaseBranch 'main' `
-    -HeadBranch 'my-feature-branch' `
-    -PRTitle 'Add new feature' `
-    -PRBody 'This adds my new feature to main'
+New-GitHubPullRequest -Token $GitHubToken -RepositoryOwner "Brownserve-UK" -RepositoryName "Brownserve.PSTools" -Title "This is a test" -Body "This is a test" -BaseBranch "main" -HeadBranch "test"
 ```
 
-This would create a new PR against acme/myRepo with a goal to merge 'my-feature-branch' into 'main'.
-The PR would be titled 'Add new feature' and would contain a comment of 'This adds my new feature to main'
+This would create a new pull request in the `Brownserve-UK/Brownserve.PSTools` repository with the title "This is a test" and the body "This is a test"
 
 ## PARAMETERS
 
 ### -BaseBranch
 The branch you want to pull changes into
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 3
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -GitHubOrg
-The GitHub org/user that owns the repository
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases: GitHubOrganisation, GitHubOrganization
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -GitHubToken
-The GitHub PAT
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -HeadBranch
-Your feature branch that you want to merge into your base branch
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 4
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -PRBody
-The body of the pull request
 
 ```yaml
 Type: String
@@ -116,8 +46,8 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -PRTitle
-The title of the pull request
+### -Body
+The body (message content) of the pull request
 
 ```yaml
 Type: String
@@ -131,13 +61,73 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -RepoName
-The name of the repo
+### -HeadBranch
+Your feature branch that you want to merge into your base branch
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
+
+Required: True
+Position: 3
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -RepositoryName
+The name of the repository to create the pull request in
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: RepoName
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -RepositoryOwner
+The owner of the repository you want to create the pull request in
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: GitHubOrganisation, GitHubOrganization, GitHubOrg
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Title
+The title of the pull request
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: True
+Position: 0
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Token
+The token to use for authentication
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: GitHubToken, GitHubPAT
 
 Required: True
 Position: Named

@@ -37,7 +37,7 @@ The path to the changelog file
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: Path
 
 Required: True
 Position: 1

@@ -5,36 +5,29 @@ online version:
 schema: 2.0.0
 ---
 
-# Add-ChangelogEntry
+# Add-BrownserveChangelogEntry
 
 ## SYNOPSIS
-**This cmdlet is deprecated. Please use Add-BrownserveChangelogEntry instead.**
 Inserts a new changelog entry into a given changelog file
 
 ## SYNTAX
 
 ```
-Add-ChangelogEntry [-ChangelogPath] <String> [-NewContent] <String> [<CommonParameters>]
+Add-BrownserveChangelogEntry [[-ChangelogPath] <String>] [-NewContent] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Inserts a new changelog entry into a given changelog file
+Inserts a new changelog entry into a given changelog file.
+You can pipe new content directly into this cmdlet from Read-Changelog for ease of use.
 
 ## EXAMPLES
 
-### EXAMPLE 1: Add a changelog entry
-```
-Add-ChangelogEntry -ChangelogPath C:\CHANGELOG.md -NewContent "This is a test"
-```
-
-Would enter the value "This is a test" at the top of the changelog located at \`C:\CHANGELOG.md\`
-
-### EXAMPLE 2: Add a changelog entry from pipeline
-```
-Read-Changelog -ChangelogPath C:\CHANGELOG.md | Add-ChangelogEntry -NewContent "This is a test"
+### Example 1
+```powershell
+Add-BrownserveChangelogEntry -ChangelogPath C:\CHANGELOG.md -NewContent "This is a test"
 ```
 
-Would enter the value "This is a test" at the top of the changelog located at \`C:\CHANGELOG.md\`
+Would enter the value "This is a test" at the top of the changelog located at `C:\CHANGELOG.md`
 
 ## PARAMETERS
 
@@ -46,7 +39,7 @@ Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: 0
 Default value: None
 Accept pipeline input: True (ByPropertyName)
@@ -64,7 +57,7 @@ Aliases:
 Required: True
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
@@ -74,11 +67,10 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.String
-### System.Management.Automation.PSObject
+### BrownserveChangelog
 ## OUTPUTS
 
 ### System.Object
 ## NOTES
-You can pipe new content directly into this cmdlet from Read-Changelog for ease of use
 
 ## RELATED LINKS

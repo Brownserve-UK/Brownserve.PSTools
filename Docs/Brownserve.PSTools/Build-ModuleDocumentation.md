@@ -61,7 +61,7 @@ Aliases:
 Required: False
 Position: 4
 Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
@@ -153,6 +153,3 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
-
-[Specify a URI to a help page, this will show when Get-Help -Online is used.]()
-
