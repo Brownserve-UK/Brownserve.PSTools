@@ -150,7 +150,6 @@ Creates a new PowerShell module using the standard Brownserve format
 
 ### [New-BrownservePowerShellModuleBuild](./Brownserve.PSTools/New-BrownservePowerShellModuleBuild.md)
 Adds the various requirements to build a PowerShell module to a given project/repo.
-**This cmdlet is still in development**
 
 ### [New-BrownserveTemporaryDirectory](./Brownserve.PSTools/New-BrownserveTemporaryDirectory.md)
 Creates a temporary directory
@@ -193,6 +192,9 @@ Retrieves version information and release notes from a CHANGELOG.md file.
 
 ### [Read-ConfigurationFromFile](./Brownserve.PSTools/Read-ConfigurationFromFile.md)
 Reads values from a configuration file
+
+### [Remove-Markdown](./Brownserve.PSTools/Remove-Markdown.md)
+This cmdlet removes markdown from a string.
 
 ### [Search-FileContent](./Brownserve.PSTools/Search-FileContent.md)
 Searches a file for a given set of regex and returns any text between them.
