@@ -41,7 +41,8 @@ param
     [ValidateSet(
         'Build',
         'BuildAndTest',
-        'BuildTestAndCheck'
+        'BuildTestAndCheck',
+        'StageRelease'
     )]
     [AllowEmptyString()]
     [string]
@@ -187,21 +188,20 @@ try
     {
         $BuildParams.Add('GitHubRepoName', $GitHubRepoName)
     }
-    # Add extra parameters when doing a release
-    if ($Build -eq 'release')
+    if ($NugetFeedApiKey)
     {
-        if ($NugetFeedApiKey)
-        {
-            $BuildParams.Add('NugetFeedApiKey', $NugetFeedApiKey)
-        }
-        if ($PSGalleryAPIKey)
-        {
-            $BuildParams.Add('PSGalleryAPIKey', $PSGalleryAPIKey)
-        }
-        if ($GitHubPAT)
-        {
-            $BuildParams.Add('GitHubPAT', $GitHubPAT)
-        }
+        $BuildParams.Add('NugetFeedApiKey', $NugetFeedApiKey)
+    }
+    if ($PSGalleryAPIKey)
+    {
+        $BuildParams.Add('PSGalleryAPIKey', $PSGalleryAPIKey)
+    }
+    if ($GitHubPAT)
+    {
+        $BuildParams.Add('GitHubPAT', $GitHubPAT)
+    }
+    if ($PublishTo)
+    {
         $BuildParams.Add('PublishTo', $PublishTo)
     }
     Write-Verbose "Invoking build: $Build"
