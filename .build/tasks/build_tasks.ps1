@@ -1007,7 +1007,7 @@ task BuildTestAndCheck BuildAndTest, CheckForUncommittedChanges, {}
     This allows us to review the changes and make any adjustments before we actually release them.
     We use this task in the stage_release CI pipeline.
 #>
-task StageRelease CheckStagingParameters, UseWorkingCopy, CreateChangelogEntry, UpdateChangelog, UpdateModuleDocumentation, SetLineEndings, CreatePullRequest, {
+task StageRelease CheckStagingParameters, UseWorkingCopy, CreateChangelogEntry, UpdateChangelog, UpdateModuleDocumentation, UpdateModulePageHelpVersion, SetLineEndings, CreatePullRequest, {
     $BuildMessage = @"
 The release has been successfully staged and a pull request has been created.
 Please review the changes at $script:PRLink and merge if they look good.
