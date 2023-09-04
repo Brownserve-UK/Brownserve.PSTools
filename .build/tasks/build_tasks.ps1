@@ -583,9 +583,9 @@ task UpdateModuleDocumentation ImportModule, {
         We do this _after_ we've generated the docs as the module page might not exist before which will cause
         Resolve-Path to fail.
     #>
-    $Script:ModulePagePath = Join-Path $Global:BrownserveRepoDocsDirectory 'Brownserve.PSTools.md' | Resolve-Path
+    $Script:ModulePagePath = Join-Path $Global:BrownserveRepoDocsDirectory "$ModuleName.md" | Resolve-Path
     $script:LineEndingFiles += (Get-ChildItem `
-            -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath 'Brownserve.PSTools')  `
+            -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath $ModuleName)  `
             -Filter *.md `
             -Recurse | Select-Object -ExpandProperty 'FullName')
     $script:LineEndingFiles += (Get-Item -Path $Script:ModulePagePath)
@@ -624,7 +624,7 @@ task CreateModuleHelp UpdateModuleDocumentation, {
     New-Item (Join-Path $global:BrownserveBuiltModuleDirectory 'en-US') -ItemType Directory | Out-Null
     $HelpParams = @{
         ModuleDirectory   = $global:BrownserveBuiltModuleDirectory
-        DocumentationPath = (Join-Path $global:BrownserveRepoDocsDirectory 'Brownserve.PSTools')
+        DocumentationPath = (Join-Path $global:BrownserveRepoDocsDirectory $ModuleName)
     }
     Add-ModuleHelp @HelpParams | Out-Null
 }
