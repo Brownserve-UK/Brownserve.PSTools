@@ -34,13 +34,6 @@ param
     [string]
     $BranchName,
 
-    # The base/target branch you are merging into when running as part of a pull request
-    [Parameter(
-        Mandatory = $false
-    )]
-    [string]
-    $TargetBranch,
-
     # The build to run, defaults to build whereby the module is built but no testing is performed
     [Parameter(
         Mandatory = $false
@@ -50,22 +43,23 @@ param
         'BuildAndTest',
         'BuildTestAndCheck'
     )]
+    [AllowEmptyString()]
     [string]
     $Build = 'Build',
 
-    # The type of changes that this version of the module contains
-    # this is used to determine the version number
+    # When preparing a release this denotes the type of changes that have been made.
+    # This is used to determine the version number to use for the release.
+    # For more information check the RELEASING.md file.
     [Parameter(
         Mandatory = $false
     )]
     [ValidateSet(
         'major',
         'minor',
-        'patch',
-        'rerelease'
+        'patch'
     )]
     [string]
-    $ReleaseType = 'patch',
+    $ReleaseType = 'minor',
 
     # Where the module should be published to
     [Parameter(
@@ -84,11 +78,11 @@ param
 
     # The GitHub repo that contains this module, it's needed to build up documentation URI's
     [Parameter(
-        Mandatory = $true
+        Mandatory = $false
     )]
     [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubRepoName,
+    $GitHubRepoName = 'Brownserve.PSTools',
 
     # The PAT for pushing to GitHub
     [Parameter(
@@ -134,15 +128,6 @@ if (!$BranchName)
 # Depending on how we got the branch name we may need to remove the full ref
 $BranchName = $BranchName -replace 'refs\/heads\/', ''
 
-# If this is running as part of a PR then we need to check the merge is to the default branch
-if ($TargetBranch)
-{
-    if (($TargetBranch -eq $DefaultBranch) -and ($BranchName -ne $FeatureBranch))
-    {
-        throw "Pull requests to '$DefaultBranch' are only supported from '$FeatureBranch'"
-    }
-}
-
 # If we're not passing in the module information via the parameter try to load it from our well-known file.
 if (!$ModuleInfo)
 {
@@ -155,6 +140,12 @@ if (!$ModuleInfo)
         throw 'Failed to load module information.'
     }
     Write-Verbose "Loaded module information from ModuleInfo.json:`n$($ModuleInfo | Out-String)"
+}
+
+# Just in case...
+if (!$GitHubRepoName)
+{
+    throw 'GitHubRepoName is required.'
 }
 
 # Run the init script
@@ -175,7 +166,6 @@ try
     $BuildParams = @{
         File              = (Join-Path -Path $global:BrownserveRepoBuildTasksDirectory -ChildPath 'build_tasks.ps1' | Convert-Path)
         Task              = $Build
-        ReleaseType       = $ReleaseType
         BranchName        = $BranchName
         DefaultBranch     = $DefaultBranch
         ModuleName        = $ModuleInfo.Name
@@ -184,6 +174,10 @@ try
         ModuleGuid        = $ModuleInfo.GUID
         ModuleTags        = $ModuleInfo.Tags
         UseWorkingCopy    = ($PSBoundParameters['UseWorkingCopy'] -eq $true)
+    }
+    if ($ReleaseType)
+    {
+        $BuildParams.Add('ReleaseType', $ReleaseType)
     }
     if ($GitHubRepoOwner)
     {
