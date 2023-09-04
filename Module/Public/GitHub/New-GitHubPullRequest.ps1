@@ -75,7 +75,7 @@ function New-GitHubPullRequest
             Accept        = 'application/vnd.github.v3+json'
         }
         $URI = "https://api.github.com/repos/$RepositoryOwner/$RepositoryName/pulls"
-        $Body = @{
+        $BodyObj = @{
             title = $Title
             body  = $Body
             base  = $BaseBranch
@@ -83,7 +83,7 @@ function New-GitHubPullRequest
         }
         try
         {
-            $BodyJSON = $Body | ConvertTo-Json
+            $BodyJSON = $BodyObj | ConvertTo-Json
         }
         catch
         {
