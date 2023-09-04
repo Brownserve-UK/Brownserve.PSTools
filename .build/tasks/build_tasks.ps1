@@ -323,16 +323,15 @@ task SetVersion GetReleaseHistory, {
             This should mean everything stays consistent.
         #>
     }
-    # TODO: is this variable named sensibly? It's used in both the release and build tasks...
-    $global:VersionToRelease = $NugetPackageVersion
+    $Global:BuildVersion = $NugetPackageVersion
     # For GitHub releases and the changelog we prefix the version with a 'v'
-    $script:PrefixedVersion = "v$($global:VersionToRelease)"
+    $script:PrefixedVersion = "v$($Global:BuildVersion)"
     Write-Debug @"
 Version Information:
     CurrentVersion: $CurrentVersion
     NewVersion: $script:NewVersion
     NugetPackageVersion: $NugetPackageVersion
-    VersionToRelease: $global:VersionToRelease
+    VersionToRelease: $Global:BuildVersion
 "@
 }
 
@@ -427,7 +426,7 @@ task FormatReleaseNotes SetVersion, {
     }
     # Filter out characters that'll break the XML and/or just generally look horrible in NuGet
     $script:CleanReleaseNotes = $script:CleanReleaseNotes -replace '"', '\"' -replace '`', '' -replace '\*', ''
-    Write-Verbose "Release notes for $($global:VersionToRelease):`n$script:CleanReleaseNotes"
+    Write-Verbose "Release notes for $($Global:BuildVersion):`n$script:CleanReleaseNotes"
 }
 
 <#
@@ -464,9 +463,9 @@ task CheckPreviousReleases SetVersion, {
             -AllVersions `
             -AllowPrerelease `
             -ErrorAction SilentlyContinue # We don't care if this fails, we'll just assume there's no previous release
-        if ($CurrentReleases.Version -contains $global:VersionToRelease)
+        if ($CurrentReleases.Version -contains $Global:BuildVersion)
         {
-            throw "There already appears to be a $global:VersionToRelease release!"
+            throw "There already appears to be a $Global:BuildVersion release!"
         }
     }
     if ('nuget' -in $PublishTo)
@@ -478,9 +477,9 @@ task CheckPreviousReleases SetVersion, {
             -AllVersions `
             -AllowPrereleaseVersions `
             -ErrorAction SilentlyContinue # We don't care if this fails, we'll just assume there's no previous release
-        if ($CurrentReleases.Version -contains $global:VersionToRelease)
+        if ($CurrentReleases.Version -contains $Global:BuildVersion)
         {
-            throw "There already appears to be a $global:VersionToRelease release!"
+            throw "There already appears to be a $Global:BuildVersion release!"
         }
     }
 }
@@ -535,7 +534,7 @@ task CreateModuleManifest SetVersion, FormatReleaseNotes, CopyModule, {
     # If this is not a production release then update the fields accordingly
     if ($PreRelease -eq $true)
     {
-        $ModuleManifest.add('Prerelease', (([semver]$global:VersionToRelease).PreReleaseLabel))
+        $ModuleManifest.add('Prerelease', (([semver]$Global:BuildVersion).PreReleaseLabel))
     }
     New-ModuleManifest @ModuleManifest -ErrorAction 'Stop'
 }
@@ -610,7 +609,7 @@ task UpdateModuleDocumentation ImportModule, {
 task UpdateModulePageHelpVersion SetVersion, UpdateModuleDocumentation, {
     Write-Verbose 'Updating module page help version'
     Update-PlatyPSModulePageHelpVersion `
-        -HelpVersion $global:VersionToRelease `
+        -HelpVersion $Global:BuildVersion `
         -ModulePagePath $Script:ModulePagePath `
         -ErrorAction 'Stop'
     $script:TrackedFiles += $Script:ModulePagePath
@@ -835,7 +834,7 @@ task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, C
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>$ModuleName</id>
-    <version>$global:VersionToRelease</version>
+    <version>$Global:BuildVersion</version>
     <authors>$ModuleAuthor</authors>
     <owners>Brownserve UK</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -876,7 +875,7 @@ task PackNuGetPackage PrepareNuGetPackage, {
                 "$script:NuspecPath",
                 '-NoPackageAnalysis',
                 '-Version',
-                "$global:VersionToRelease",
+                "$Global:BuildVersion",
                 '-OutputDirectory',
                 "$Global:BrownserveRepoBuildOutputDirectory"
             )
@@ -948,10 +947,10 @@ task PublishRelease CheckPreviousReleases, Tests, PackNuGetPackage, CheckForUnco
 
     if ('GitHub' -in $PublishTo)
     {
-        Write-Verbose "Creating GitHub release for $global:VersionToRelease"
+        Write-Verbose "Creating GitHub release for $Global:BuildVersion"
         $ReleaseParams = @{
-            Name        = "v$global:VersionToRelease"
-            Tag         = "v$global:VersionToRelease"
+            Name        = "v$Global:BuildVersion"
+            Tag         = "v$Global:BuildVersion"
             Description = $script:ReleaseNotes
             GitHubToken = $GitHubPAT
             RepoName    = $GitHubRepoName
