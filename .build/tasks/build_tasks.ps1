@@ -638,8 +638,8 @@ task CreateModuleHelp UpdateModuleDocumentation, {
     Therefore some files that are created as part of the build need to have their line endings set to 'LF' to ensure
     consistency.
 
-    This task has no dependencies as it should be run after all other tasks that may modify tracked files so be
-    careful with where you place it in the build.
+    !! This task has no dependencies as it should be run after all other tasks that may modify tracked files so be
+    !! careful with where you place it in the build.
 #>
 task SetLineEndings {
     if ($script:LineEndingFiles.Count -gt 0)
