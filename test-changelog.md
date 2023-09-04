@@ -5,6 +5,30 @@ Version numbering follows the [SemVer v2.0.0 spec](https://semver.org/spec/v2.0.
 
 ## Release
 
+### [v0.16.0-changelogchanges](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.16.0-changelogchanges) (2023-09-04)
+
+
+**Features**  
+These are the changes that have been made since the last release:
+
+- Add Get-GitHubIssues cmdlet in [#65](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/65) by [@shoddyguard](https://github.com/shoddyguard)
+- Generate module help MALM during build in [#63](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/63) by [@shoddyguard](https://github.com/shoddyguard)
+- Documentation Overhaul in [#61](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/61) by [@shoddyguard](https://github.com/shoddyguard)
+- Rework PowerShell-YAML logic in [#60](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/60) by [@shoddyguard](https://github.com/shoddyguard)
+- feat: Add Get-GitHubPullRequests in [#59](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/59) by [@shoddyguard](https://github.com/shoddyguard)
+
+**Bugfixes**  
+The following bugs have been marked as resolved since the last release:
+
+- [#70](https://github.com/Brownserve-UK/Brownserve.PSTools/issues/70) - [Bug]: Testing another workflow
+
+**Known Issues**  
+The following bugs have been raised since the last release and remain unresolved:
+
+- [#69](https://github.com/Brownserve-UK/Brownserve.PSTools/issues/69) - [Bug]: Test Issue for workflow testing
+
+For a full list of current known issues see the project's [issues page](https://github.com/Brownserve-UK/Brownserve.PSTools/issues).
+
 ### [v0.15.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.15.0) (2023-08-10)
 
 **Features**
