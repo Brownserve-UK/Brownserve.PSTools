@@ -346,7 +346,7 @@ task CreateChangelogEntry SetVersion, {
     {
         throw 'Current version and new version are the same, cannot create changelog entry'
     }
-    Write-Build -Object "Creating new changelog entry for '$script:NewVersion'"
+    Write-Build White "Creating new changelog entry for '$script:NewVersion'"
     $NewChangelogEntryParams = @{
         Version         = $script:NewVersion
         RepositoryOwner = $GitHubRepoOwner
