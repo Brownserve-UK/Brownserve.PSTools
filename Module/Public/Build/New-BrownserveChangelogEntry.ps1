@@ -154,9 +154,9 @@ function New-BrownserveChangelogEntry
         if ($Auto)
         {
             <#
-            We'll get a list of all the merges since the last release.
-            We use these to form the basis of the "features" section of the changelog entry.
-        #>
+                We'll get a list of all the merges since the last release.
+                We use these to form the basis of the "features" section of the changelog entry.
+            #>
             try
             {
                 $MergesSinceLastRelease = Get-GitMerges `
@@ -164,10 +164,10 @@ function New-BrownserveChangelogEntry
                     -ReferenceBranch "v$($LastReleasedVersion.Version)" `
                     -ErrorAction 'Stop'
                 <#
-                We raise an error if there are no merges since the last release.
-                This is because the "features" section should contain a list of all changes since the last release.
-                Even if this only contains bugfixes, we still want to list them here.
-            #>
+                    We raise an error if there are no merges since the last release.
+                    This is because the "features" section should contain a list of all changes since the last release.
+                    Even if this only contains bugfixes, we still want to list them here.
+                #>
                 if (!$MergesSinceLastRelease)
                 {
                     throw 'No merges found since last release'
