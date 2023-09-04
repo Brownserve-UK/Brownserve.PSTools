@@ -13,6 +13,7 @@ function Add-GitChanges
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
+            ValueFromPipeline = $true,
             Position = 1
         )]
         [string[]]
