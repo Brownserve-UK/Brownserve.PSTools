@@ -351,7 +351,7 @@ task CreateChangelogEntry SetVersion, {
         Version         = $script:NewVersion
         RepositoryOwner = $GitHubRepoOwner
         RepositoryName  = $GitHubRepoName
-        Changelog       = $script:Changelog
+        ChangelogObject = $script:Changelog
     }
     if ($GitHubPAT)
     {
