@@ -9,7 +9,6 @@ schema: 2.0.0
 
 ## SYNOPSIS
 Adds the various requirements to build a PowerShell module to a given project/repo.
-**This cmdlet is still in development**
 
 ## SYNTAX
 

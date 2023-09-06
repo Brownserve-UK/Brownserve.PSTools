@@ -13,7 +13,7 @@ Gets the issues for a given GitHub repository
 ## SYNTAX
 
 ```
-Get-GitHubIssues [-GitHubToken] <String> [-RepositoryOwner] <String> [-RepositoryName] <String>
+Get-GitHubIssues [-Token] <String> [-RepositoryOwner] <String> [-RepositoryName] <String>
  [[-State] <GitHubIssueState>] [<CommonParameters>]
 ```
 
@@ -30,21 +30,6 @@ PS C:\> Get-GitHubIssues -GitHubToken $GitHubToken -RepositoryOwner 'Brownserve-
 This will return all _open_ issues for the Brownserve.PSTools repository
 
 ## PARAMETERS
-
-### -GitHubToken
-The GitHub token to use for authentication
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 0
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
 
 ### -RepositoryName
 The name of the repository to get the issues for
@@ -88,6 +73,21 @@ Accepted values: Open, Closed, All
 Required: False
 Position: 3
 Default value: Open
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Token
+The GitHub token to use for authentication
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: GitHubToken, GitHubPAT
+
+Required: True
+Position: 0
+Default value: None
 Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```

@@ -8,6 +8,7 @@ schema: 2.0.0
 # New-PullRequest
 
 ## SYNOPSIS
+**This cmdlet is deprecated. Please use New-GitHubPullRequest instead.**
 Creates a new pull request in GitHub
 
 ## SYNTAX

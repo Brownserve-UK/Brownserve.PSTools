@@ -1,27 +1,29 @@
 ---
 name: builds
-on: 
+on:
   pull_request:
-    
+    branches:
+      - main
 
 jobs:
-  build-and-test:
+  BuildTestAndCheck:
     runs-on: ubuntu-latest
-    # Checkout this repo
     steps:
+      # Step 1: Checkout the repo
       - name: checkout-module
         uses: actions/checkout@v3
-        with: 
+        with:
           path: Brownserve.PSTools
-    # Run the build script
+      # Step 2: Run the build script
       - name: run-build-script
         shell: pwsh
         run: |
             ./Brownserve.PSTools/.build/build.ps1 `
               -GitHubRepoName 'Brownserve.PSTools' `
               -BranchName $env:GITHUB_REF `
-              -Build 'BuildImportGenerateDocsTest' `
+              -Build 'BuildTestAndCheck' `
               -Verbose
+      # Step 3: Send a notification to Slack
       - name: notify-slack
         shell: pwsh
         if: ${{ always() }}
@@ -36,4 +38,3 @@ jobs:
               -Webhook $env:BUILD_NOTIFICATION_WEBHOOK `
               -RepoBranch $env:BUILD_BRANCH `
               -RepoName $global:BrownserveRepoName
-          

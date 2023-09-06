@@ -2,16 +2,31 @@
 name: release
 on:
   workflow_dispatch:
-    
+    inputs:
+      release_type:
+        description: 'The type of release to perform'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+          - republish
+      publish_to:
+        description: 'Where to publish the release to'
+        required: true
+        default: '"nuget", "PSGallery", "GitHub"'
+        type: string
 
-jobs: 
+jobs:
   release:
     runs-on: windows-latest
     # Checkout this repo
     steps:
       - name: checkout-module
         uses: actions/checkout@v3
-        with: 
+        with:
           path: Brownserve.PSTools
     # Run the build script
       - name: run-build-script
@@ -25,6 +40,7 @@ jobs:
               -BranchName $env:GITHUB_REF `
               -GitHubRepoName 'Brownserve.PSTools' `
               -Build 'release' `
+              -GitHubPAT $env:GitHubPAT `
               -NugetFeedAPIKey $env:NugetFeedAPIKey `
               -PSGalleryAPIKey $env:PSGalleryAPIKey `
               -Verbose

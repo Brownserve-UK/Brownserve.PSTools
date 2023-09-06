@@ -36,13 +36,11 @@ function Build-ModuleDocumentation
         # The help version number to use
         [Parameter(
             Mandatory = $false,
-            ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true
         )]
-        [SemVer]
+        [System.Management.Automation.SemanticVersion]
         $HelpVersion
     )
-    
     begin
     {
         # Ensure the documentation directory is indeed a dir
@@ -53,7 +51,6 @@ function Build-ModuleDocumentation
 
         $Return = @()
     }
-    
     process
     {
         # We'll encapsulate everything in one big try/catch block so we can unload the module if we have to.
@@ -80,7 +77,6 @@ function Build-ModuleDocumentation
             # If we need to bring this back in the future we can make a param like -GenerateVersion or something
             # if (!$HelpVersion)
             # {
-                
             #     $HelpVersion = ($ModuleDetails | Select-Object -ExpandProperty Version).ToString()
             #     if ($ModuleDetails.PrivateData.PSData.Prerelease)
             #     {
@@ -128,7 +124,6 @@ function Build-ModuleDocumentation
                 AlphabeticParamsOrder = $true
                 ModulePagePath        = $ModulePagePath
             }
-    
             if (!$IncludeDontShow)
             {
                 $PlatyParams.Add('ExcludeDontShow', $true)
@@ -167,58 +162,47 @@ function Build-ModuleDocumentation
             }
 
             <#
-                Currently PlatyPS expects the Module page to be in the same directory as the help files and as such hard-codes the links :(
-                To get around this we'll import the page content and then adjust the links using regex to point them at the right place.
-                We may be able to remove the below once this issue is resolved: https://github.com/PowerShell/platyPS/issues/451
+                Deal with the module page which has some quirks that we need to work around.
+                These were originally part of this cmdlet but have been moved to their own cmdlets to make it easier to
+                update the module page without having to rebuild the help for the module.
+                Especially useful during CI/CD pipelines.
             #>
-            $ErrorStep = "Failed to retrieve module page content from '$ModulePagePath'."
-            $ModulePageContent = Get-Content $ModulePagePath -ErrorAction 'Stop' -Raw
-            if (!$ModulePageContent)
-            {
-                throw 'Module page content appears to be blank'
-            }
-            $ModulePageAdjustment = Split-Path $PublicCmdletDocPath -Leaf
-            $SanitizedModulePageContent = $ModulePageContent -replace '\(([\w|\d]*-[\w|\d]*.md)\)', "(./$ModulePageAdjustment/`$1)"
+
+            # First ensure the links are correct
+            Update-PlatyPSModulePageLinks `
+                -CmdletDocumentationPath $PublicCmdletDocPath `
+                -ModulePagePath $ModulePagePath `
+                -ErrorAction 'Stop'
 
             # If we've passed in a GUID for the module then update the module page with that.
             if ($ModuleGUID)
             {
-                $SanitizedModulePageContent = $SanitizedModulePageContent -replace 'Module Guid: (.*)', "Module Guid: $ModuleGUID"
+                Update-PlatyPSModulePageGUID `
+                    -ModuleGUID $ModuleGUID `
+                    -ModulePagePath $ModulePagePath `
+                    -ErrorAction 'Stop'
             }
             <#
-                We only update the help version number if it has been passed in, this is so that our build pipelines can handle it without creating merge conflicts etc.
+                We only update the help version number if it has been passed in
+                this is mostly because it's handled by our build pipelines so we'll rarely (if ever) need to
+                update it manually.
             #>
             if ($HelpVersion)
             {
-                $NewHelpVersion = $HelpVersion.Value
-                Write-Verbose "New help version: $NewHelpVersion"
-                # We match on any character due to the fact that the help version header could be {{ update help version }}
-                # as well as a genuine version number
-                if ($SanitizedModulePageContent -imatch 'Help Version: (?<version>.*)\n')
-                {
-                    $CurrentHelpVersion = $Matches['version']
-                    if ($NewHelpVersion -ne $CurrentHelpVersion)
-                    {
-                        Write-Verbose 'Updating help version'
-                        $SanitizedModulePageContent = $SanitizedModulePageContent.Replace("Help Version: $CurrentHelpVersion", "Help Version: $NewHelpVersion")
-                    }
-                }
-                else
-                {
-                    Write-Warning "Couldn't find help version number in the module page content."
-                }
+                Update-PlatyPSModulePageHelpVersion `
+                    -HelpVersion $HelpVersion `
+                    -ModulePagePath $ModulePagePath `
+                    -ErrorAction 'Stop'
             }
 
+            # If we've passed in a module description then update the module page with that.
             if ($ModuleDescription)
             {
-                if ($SanitizedModulePageContent -imatch '## Description[\s\n]*{{ Fill in the Description }}')
-                {
-                    # .Replace method doesn't work 🤷‍♀️ so use the -replace param instead.
-                    $SanitizedModulePageContent = $SanitizedModulePageContent -Replace '## Description[\s\n]*{{ Fill in the Description }}', "## Description`r`n$ModuleDescription"
-                }
+                Update-PlatyPSModulePageDescription `
+                    -ModuleDescription $ModuleDescription `
+                    -ModulePagePath $ModulePagePath `
+                    -ErrorAction 'Stop'
             }
-            $ErrorStep = "Failed to update module page with sanitized content at '$ModulePagePath'"
-            Set-Content $ModulePagePath -Value $SanitizedModulePageContent -ErrorAction 'Stop' -NoNewline
 
             # Create some sensible return so that we can pipe it into a cmdlet to update the MALM
             $Return += [pscustomobject]@{

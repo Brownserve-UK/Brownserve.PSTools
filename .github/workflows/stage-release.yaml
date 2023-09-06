@@ -1,0 +1,52 @@
+---
+name: stage-release
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'The type of release to perform'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+jobs:
+  stage-release:
+    runs-on: ubuntu-latest
+    # Step 1: Checkout the repo
+    steps:
+      - name: checkout-module
+        uses: actions/checkout@v3
+        with:
+          path: Brownserve.PSTools
+    # Step 2: Call the build script
+      - name: run-build-script
+        shell: pwsh
+        env:
+          GitHubPAT: ${{ secrets.AUTOMATED_BUILD_GITHUB_PAT }}
+        run: |
+            ./Brownserve.PSTools/.build/build.ps1 `
+              -BranchName $env:GITHUB_REF `
+              -GitHubRepoName 'Brownserve.PSTools' `
+              -Build 'StageRelease' `
+              -GitHubPAT $env:GitHubPAT `
+              -ReleaseType '${{ inputs.release_type}}' `
+              -Verbose
+    # Step 3: Push a notification to Slack
+      - name: notify-slack
+        shell: pwsh
+        if: ${{ always() }}
+        env:
+          BUILD_NOTIFICATION_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          BUILD_BRANCH: ${{ github.ref }}
+        run: |
+            ./Brownserve.PSTools/.build/_init.ps1
+            Send-BuildNotification `
+              -BuildName ${{ github.job }} `
+              -BuildStatus ${{ job.status }} `
+              -Webhook $env:BUILD_NOTIFICATION_WEBHOOK `
+              -RepoBranch $env:BUILD_BRANCH `
+              -RepoName $global:BrownserveRepoName

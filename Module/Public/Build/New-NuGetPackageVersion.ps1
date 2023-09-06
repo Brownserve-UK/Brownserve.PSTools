@@ -28,6 +28,7 @@ function New-NuGetPackageVersion
     $Prerelease
   )
 
+  Write-Warning "This function is deprecated and will be removed in a future release, please use Format-NuGetPackageVersion instead."
   # Just return the version if we're on a production release
   if ($false -eq $Prerelease)
   {
@@ -36,7 +37,7 @@ function New-NuGetPackageVersion
 
   # Otherwise establish the pre-release suffix from the branch name.
   $PreReleaseSuffix = $BranchName
-    
+
   # Remove invalid characters from the suffix.
   $PreReleaseSuffix = $PreReleaseSuffix -replace '[/]', '-'
   $PreReleaseSuffix = $PreReleaseSuffix -replace '[^0-9A-Za-z-]', ''

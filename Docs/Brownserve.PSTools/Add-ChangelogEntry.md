@@ -8,6 +8,7 @@ schema: 2.0.0
 # Add-ChangelogEntry
 
 ## SYNOPSIS
+**This cmdlet is deprecated. Please use Add-BrownserveChangelogEntry instead.**
 Inserts a new changelog entry into a given changelog file
 
 ## SYNTAX

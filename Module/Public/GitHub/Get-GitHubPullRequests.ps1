@@ -7,8 +7,9 @@ function Get-GitHubPullRequests
         [Parameter(
             Mandatory = $true
         )]
+        [Alias('GitHubToken','GitHubPAT')]
         [string]
-        $GitHubToken,
+        $Token,
 
         # The org name from GitHub
         [Parameter(
@@ -16,9 +17,9 @@ function Get-GitHubPullRequests
             ValueFromPipelineByPropertyName = $true,
             Position = 2
         )]
-        [Alias('GitHubOrganisation','GitHubOrganization')]
+        [Alias('GitHubOrganisation','GitHubOrganization','GitHubOrg')]
         [string]
-        $GitHubOrg,
+        $RepositoryOwner,
 
         # The repo name to check for PR's
         [Parameter(
@@ -26,8 +27,9 @@ function Get-GitHubPullRequests
             ValueFromPipelineByPropertyName = $true,
             Position = 1
         )]
+        [Alias('GitHubRepo','RepoName')]
         [string]
-        $RepoName,
+        $RepositoryName,
 
         # Pull request state
         [Parameter(
@@ -38,13 +40,13 @@ function Get-GitHubPullRequests
         [GitHubIssueState]
         $State = 'open'
     )
-    $Header = @{                                                                                                                                         
-        Authorization = "token $GitHubToken"
+    $Header = @{
+        Authorization = "token $token"
         Accept        = 'application/vnd.github.v3+json'
     }
     # The GitHub API requires the state to be lowercase, our enum is uppercase
     $StateStr = ($State | Out-String).ToLower()
-    $URI = "https://api.github.com/repos/$GitHubOrg/$RepoName/pulls?state=$StateStr"
+    $URI = "https://api.github.com/repos/$RepositoryOwner/$RepositoryName/pulls?state=$StateStr"
     Write-Verbose "Attempting to get open pull requests from $URI"
     try
     {

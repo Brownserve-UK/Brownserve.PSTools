@@ -11,8 +11,15 @@ Locale: en-US
 A collection of PowerShell tools used in various projects.
 
 ## Brownserve.PSTools Cmdlets
-### [Add-ChangelogEntry](./Brownserve.PSTools/Add-ChangelogEntry.md)
+### [Add-BrownserveChangelogEntry](./Brownserve.PSTools/Add-BrownserveChangelogEntry.md)
 Inserts a new changelog entry into a given changelog file
+
+### [Add-ChangelogEntry](./Brownserve.PSTools/Add-ChangelogEntry.md)
+**This cmdlet is deprecated. Please use Add-BrownserveChangelogEntry instead.**
+Inserts a new changelog entry into a given changelog file
+
+### [Add-GitChanges](./Brownserve.PSTools/Add-GitChanges.md)
+This cmdlet is a wrapper for the git command 'git add \<path\>'.
 
 ### [Add-ModuleHelp](./Brownserve.PSTools/Add-ModuleHelp.md)
 Creates XML MALM help for a PowerShell module
@@ -41,6 +48,9 @@ Converts a given hashtable to an alphabetically sorted hashtable
 ### [Copy-GitRemoteRepository](./Brownserve.PSTools/Copy-GitRemoteRepository.md)
 Clones a given git repository to the local machine
 
+### [Format-NuGetPackageVersion](./Brownserve.PSTools/Format-NuGetPackageVersion.md)
+Formats a version number to ensure compatibility with NuGet and nuget.org
+
 ### [Format-TerraformResourceName](./Brownserve.PSTools/Format-TerraformResourceName.md)
 Strips out illegal characters from Terraform resource names
 
@@ -64,6 +74,9 @@ Gets a list of releases from a given GitHub repo
 
 ### [Get-GitHubTags](./Brownserve.PSTools/Get-GitHubTags.md)
 Gets a list of tags for a given GitHub repository
+
+### [Get-GitMerges](./Brownserve.PSTools/Get-GitMerges.md)
+Returns a list of merge commits for a given GitHub repository
 
 ### [Get-GitRemoteOriginURL](./Brownserve.PSTools/Get-GitRemoteOriginURL.md)
 Gets the remote origin URL for a given repository
@@ -129,12 +142,14 @@ Performs a 'terraform validate'
 ### [Merge-Hashtable](./Brownserve.PSTools/Merge-Hashtable.md)
 Merges two hashtables together
 
+### [New-BrownserveChangelogEntry](./Brownserve.PSTools/New-BrownserveChangelogEntry.md)
+Creates a new changelog entry for a given version in the standard Brownserve format.
+
 ### [New-BrownservePowerShellModule](./Brownserve.PSTools/New-BrownservePowerShellModule.md)
 Creates a new PowerShell module using the standard Brownserve format
 
 ### [New-BrownservePowerShellModuleBuild](./Brownserve.PSTools/New-BrownservePowerShellModuleBuild.md)
 Adds the various requirements to build a PowerShell module to a given project/repo.
-**This cmdlet is still in development**
 
 ### [New-BrownserveTemporaryDirectory](./Brownserve.PSTools/New-BrownserveTemporaryDirectory.md)
 Creates a temporary directory
@@ -145,13 +160,18 @@ Creates a temporary file in a known good location.
 ### [New-GitBranch](./Brownserve.PSTools/New-GitBranch.md)
 Creates a new branch in a given git repository
 
+### [New-GitHubPullRequest](./Brownserve.PSTools/New-GitHubPullRequest.md)
+Creates a new GitHub pull request
+
 ### [New-GitHubRelease](./Brownserve.PSTools/New-GitHubRelease.md)
 Creates a release on GitHub
 
 ### [New-NuGetPackageVersion](./Brownserve.PSTools/New-NuGetPackageVersion.md)
+*This cmdlet has been deprecated and will be removed in a future release, please use Format-NuGetPackageVersion instead*
 Obtains a NuGet package version based on the build version number and branch name.
 
 ### [New-PullRequest](./Brownserve.PSTools/New-PullRequest.md)
+**This cmdlet is deprecated. Please use New-GitHubPullRequest instead.**
 Creates a new pull request in GitHub
 
 ### [New-TerraformResourceBlock](./Brownserve.PSTools/New-TerraformResourceBlock.md)
@@ -160,11 +180,21 @@ Creates a Terraform resource block that can easily be inserted into Terraform co
 ### [Publish-TeamcityArtifact](./Brownserve.PSTools/Publish-TeamcityArtifact.md)
 Tells Teamcity to export a given file/folder as an artifact.
 
+### [Push-GitChanges](./Brownserve.PSTools/Push-GitChanges.md)
+Pushes local git changes to the remote repository.
+
+### [Read-BrownserveChangelog](./Brownserve.PSTools/Read-BrownserveChangelog.md)
+Reads in a changelog file and returns the contents as a custom object.
+
 ### [Read-Changelog](./Brownserve.PSTools/Read-Changelog.md)
+**This cmdlet is deprecated and will be removed in a future release, please use Read-BrownserveChangelog instead.**
 Retrieves version information and release notes from a CHANGELOG.md file.
 
 ### [Read-ConfigurationFromFile](./Brownserve.PSTools/Read-ConfigurationFromFile.md)
 Reads values from a configuration file
+
+### [Remove-Markdown](./Brownserve.PSTools/Remove-Markdown.md)
+This cmdlet removes markdown from a string.
 
 ### [Search-FileContent](./Brownserve.PSTools/Search-FileContent.md)
 Searches a file for a given set of regex and returns any text between them.
@@ -187,6 +217,9 @@ Provides an easy way to set the Terraform log level.
 ### [Split-URI](./Brownserve.PSTools/Split-URI.md)
 Takes a given URI and splits it into its constituent parts.
 
+### [Submit-GitChanges](./Brownserve.PSTools/Submit-GitChanges.md)
+This cmdlet is a wrapper for \<git commit\>.
+
 ### [Switch-GitBranch](./Brownserve.PSTools/Switch-GitBranch.md)
 Checks out a given branch.
 
@@ -204,6 +237,21 @@ Updates a given repository to use the latest tooling and settings
 
 ### [Update-Changelog](./Brownserve.PSTools/Update-Changelog.md)
 Updates a repo's changelog according to the semver v1.0.0 spec.
+
+### [Update-PlatyPSModulePageDescription](./Brownserve.PSTools/Update-PlatyPSModulePageDescription.md)
+Updates the PlatyPS module page module description field.
+
+### [Update-PlatyPSModulePageGUID](./Brownserve.PSTools/Update-PlatyPSModulePageGUID.md)
+Updates the module GUID in the PlatyPS module page.
+
+### [Update-PlatyPSModulePageHelpVersion](./Brownserve.PSTools/Update-PlatyPSModulePageHelpVersion.md)
+Updates the help version in the PlatyPS module page.
+
+### [Update-PlatyPSModulePageLinks](./Brownserve.PSTools/Update-PlatyPSModulePageLinks.md)
+Updates the links to cmdlet documentation in the PlatyPS module page.
+
+### [Update-Version](./Brownserve.PSTools/Update-Version.md)
+A simple function to increment a semantic version number.
 
 ### [Write-TeamcityBuildProblem](./Brownserve.PSTools/Write-TeamcityBuildProblem.md)
 Writes a Teamcity build problem to StdOut and the same message to StdErr.

@@ -8,13 +8,14 @@ schema: 2.0.0
 # Read-Changelog
 
 ## SYNOPSIS
+**This cmdlet is deprecated and will be removed in a future release, please use Read-BrownserveChangelog instead.**
 Retrieves version information and release notes from a CHANGELOG.md file.
 
 ## SYNTAX
 
 ```
 Read-Changelog [-ChangelogPath] <String> [[-VersionPattern] <String>] [[-RepoURLPattern] <String>]
- [<CommonParameters>]
+ [[-LastReleaseDatePattern] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -45,6 +46,22 @@ Position: 0
 Default value: None
 Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: True
+```
+
+### -LastReleaseDatePattern
+The regex pattern for matching the date of the last release.
+It should always contain a capture group named "date" and this what the regex searched will use to extract your date
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: 3
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
 ```
 
 ### -RepoURLPattern

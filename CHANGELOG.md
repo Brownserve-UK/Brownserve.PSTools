@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-This changelog follows the [SemVer v1.0.0 spec](https://semver.org/spec/v1.0.0.html)
+This project conforms to the [SemVer v2.0.0 spec](https://semver.org/spec/v2.0.0.html)
 
 ## Release
 

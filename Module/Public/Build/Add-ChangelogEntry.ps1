@@ -29,6 +29,7 @@ function Add-ChangelogEntry
         [string]
         $NewContent
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release, please use the Add-BrownserveChangelogEntry cmdlet instead"
     if (!(Test-Path $ChangelogPath))
     {
         throw "$ChangelogPath does not appear to be a valid path to a changelog"
