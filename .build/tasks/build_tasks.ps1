@@ -692,7 +692,7 @@ task CreateStagingBranch SetVersion, {
     We want to commit those changes so they get included in the release. (and don't fail the build later on)
 #>
 task CommitTrackedChanges UpdateChangelog, UpdateModuleDocumentation, CreateStagingBranch, SetLineEndings, {
-    $CommitMessage = "auto: Prepare for $script:PrefixedVersion`n`nThis commit was automatically generated."
+    $CommitMessage = "docs: Prepare for $script:PrefixedVersion`n`nThis commit was automatically generated."
     if ($script:TrackedFiles.Count -gt 0)
     {
         Write-Build White 'Committing tracked changes'
