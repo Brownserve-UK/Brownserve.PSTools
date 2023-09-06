@@ -1,5 +1,5 @@
-name: 'Feature Request'
-description: 'Request a new feature or an enhancement'
+name: 'Documentation Issue'
+description: 'Issues with documentation'
 title: '[DOCS]: '
 labels:
   - 'documentation'

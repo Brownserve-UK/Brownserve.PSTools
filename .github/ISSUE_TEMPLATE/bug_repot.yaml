@@ -12,7 +12,7 @@ body:
     id: cmdlet
     attributes:
       label: Function/Cmdlet
-      description: Which cmdlet/function was the bug found in?
+      description: Which cmdlet/function was the bug found in? (or N/A if not applicable)
       placeholder: Please enter the name of the cmdlet/function (eg Invoke-NativeCommand)
     validations:
       required: true
@@ -33,7 +33,7 @@ body:
     attributes:
       label: Steps to reproduce
       description: What are the steps to reproduce this issue?
-      render: powershell
+      render: PowerShell
     validations:
       required: true
   - type: textarea
