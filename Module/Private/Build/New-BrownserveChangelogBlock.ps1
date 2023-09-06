@@ -87,7 +87,7 @@ function New-BrownserveChangelogBlock
         {
             $FeaturesBlock = $FeaturesBlock + "- $Feature`n"
         }
-        $BugfixBlock = "**Bugfixes**  `nThe following bugs have been marked as resolved since the last release:`n`n"
+        $BugfixBlock = "**Bugfixes**  `nThe following bugs have been closed since the last release:`n`n"
         # If we've got some bug fixes, list them out otherwise simply add and N/A
         if ($Bugfixes)
         {
