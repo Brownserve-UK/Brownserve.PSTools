@@ -1,29 +1,29 @@
 # Performing a release
-Releasing the module is done in two parts. First, the release is staged, then it is published.  
-We do this to ensure the release has been reviewed by a human before it is published.
-
 ## Staging the release
-To stage a release you'll need to run the `stage-release` GitHub action.
-You'll to choose a [release type](#choosing-a-release-type) before the workflow will start.
-The workflow will then create a new `release/v<version>` branch and on that branch it will determine the new version number, update the changelog with the changes/bugfixes/known issues since the last release, then finally update the module documentation version with the new version number.  
-A pull request will then be created for the release, this will need to be reviewed and approved before the release can be published.  
-If there's any issues with the changelog or documentation, you can make any adjustments necessary and push them to the branch that was created during the build.  
-Once you're happy with the release, you can approve the pull request and merge it into the `main` branch, then you'll be able to publish the release.
+To perform a new release of the module it must first be staged using the `stage-release` GitHub action.
+You'll be prompted to choose a [release type](#choosing-a-release-type) and a branch/tag to create the release from.  
+If the release is staged from a branch that isn't `main` then the release will be created as a [pre-release](#creating-a-pre-release).  
 
+This workflow will update the [changelog](../CHANGELOG.md) automatically with all the changes since the last release so it is no longer necessary to manually update this before performing a release.  
+The [module documentation page](./Brownserve.PSTools.md) will also get updated to ensure the `help version` matches the version of the module being released.  
+As we don't allow direct pushes to `main` a pull request will then be created which will require review and approval before the release can be published.  
+This ensures that all releases are reviewed by at least one person before being published.  
+
+If you need to make any changes/adjustments then you can do so on the branch that was created by the workflow.
 ## Publishing the release
 Once the release has been staged, you can publish it by running the `publish-release` GitHub action.
-This workflow will build and test the module, then all being will, publishes the module to the endpoints specified in the `$PublishTo` variable.
+This workflow will build and test the module, then all being will, will publish the module to the endpoints specified in the `publish_to` input.
 
 ## Choosing a release type
-When staging a release, you will be prompted to choose a release type, this will be used to determine the version number of the release.  
-The release type can be one of the following:
+The release type you choose will be used to determine the version number of the new release.  
+Release type's can be one of the following:
 * `major` - A major release, this will increment the major version number, and reset the minor and patch version numbers to 0.
 * `minor` - A minor release, this will increment the minor version number, and reset the patch version number to 0.
 * `patch` - A patch release, this will increment the patch version number.
 
 ### Major releases
 Major releases are used for releases that contain breaking/non-backwards compatible changes.  
-Some examples of breaking changes are:
+Some examples of breaking changes would include:
 * Substantially changing the behaviour of a cmdlet.
 * Changing the output of a cmdlet such that it is no longer compatible with previous versions.
 * Removing a previously deprecated cmdlet.
@@ -33,7 +33,7 @@ Some examples of breaking changes are:
 
 ### Minor releases
 Minor releases are used for releases that contain new features or backwards compatible changes.
-Some examples of backwards compatible changes are:
+Some examples of backwards compatible changes might include:
 * Adding a new cmdlet.
 * Adding a new return value to a cmdlet without changing the existing return values.
 * Adding a new parameter to a cmdlet without changing the existing ones.
@@ -43,21 +43,25 @@ Some examples of backwards compatible changes are:
 
 ### Patch releases
 Patch releases are used for releases that contain bug fixes or other minor changes.
-Some examples of patch changes are:
+Some examples of patch changes might include:
 * Fixing a bug in a cmdlet while not changing the behaviour.
 * Fixing typos.
 * Documentation changes.
-* CI/CD changes.
+* CI/CD/Build changes.
 * Style/formatting changes that do not affect the behaviour of the cmdlet.
 
 ## Creating a Pre-release
-Sometimes you may want to create a pre-release when you're moving between major versions or introducing sweeping changes to the module.  
-To do this you'll need to create a new branch from the `main` branch and then run the `stage-release` GitHub action.  
-This will detect that you're creating a release from a branch that isn't `main` and will create a pre-release instead of a full release.
+Sometimes you may want to create a pre-release when you're moving between major versions, rolling out a specific bug fix or introducing new features/changes that require some broader testing before being released to the general public.  
+
+To perform a pre-release first create a new branch from `main` and give it a sensible name as this will be used in the version number of the pre-release (e.g. `rc1`, `preview`, `myFix` etc)  
+Then simply run the `stage-release` GitHub action, choose the release type as normal and make sure you select the branch you created as the branch to build from.  
+The build will detect that the release is being staged from a branch and will automatically create a pre-release. (e.g. `v2.0.0-rc1`)  
+Once the release has been staged you can publish it as normal.
 
 ## Re-publishing a previous release
-Most of the endpoints we publish to will not allow you to re-publish a release with the same version number (for good reason!) so we actively check-for and prevent this from happening in the builds.
-If there's an issue with a release that requires you to re-publish it, you'll need to increment the version number of the release and perform a new release. (If the issue is serious enough you should also pull the faulty release from the endpoints you've published to.)  
+Most of the repositories we publish to will not allow you to re-publish a release with the same version number (for good reason!) so we actively check-for and prevent this from happening in the builds.  
 
-The only exception to this is when either adding a new release endpoint or when a push to an endpoint fails (for example if the endpoint is down at the time of publishing, or an API key is expired etc).
-In these cases you can run the `publish-release` GitHub action again while giving the `PublishTo` variable only only the new/failed endpoint(s).
+If there's an issue with a release that requires you to re-publish it, you'll need to increment the version number of the release and perform a new release. (If the issue is serious enough you should also consider pulling the faulty release from the endpoints you've previously published to.)  
+
+The only exception to this is when either adding a new release repository or when a push to an existing repository fails (for example if the repository is down at the time of publishing, or an API key is expired etc).
+In these cases you can run the `publish-release` GitHub action again _making sure to select the branch tag_ of the version you wish to re-publish. You should then set the `publish_to` input to only include the endpoints that don't already have the release published to them.
