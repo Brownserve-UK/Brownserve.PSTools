@@ -43,6 +43,7 @@ jobs:
               -GitHubPAT $env:GitHubPAT `
               -NugetFeedAPIKey $env:NugetFeedAPIKey `
               -PSGalleryAPIKey $env:PSGalleryAPIKey `
+              -UseWorkingCopy `
               -Verbose
     # Do a Slack notification
       - name: notify-slack

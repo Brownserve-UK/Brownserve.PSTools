@@ -34,6 +34,7 @@ jobs:
               -Build 'StageRelease' `
               -GitHubPAT $env:GitHubPAT `
               -ReleaseType '${{ inputs.release_type}}' `
+              -UseWorkingCopy `
               -Verbose
     # Step 3: Push a notification to Slack
       - name: notify-slack
