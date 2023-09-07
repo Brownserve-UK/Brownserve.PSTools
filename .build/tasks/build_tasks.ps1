@@ -124,7 +124,7 @@ $global:BrownserveBuiltModuleDirectory = Join-Path $global:BrownserveRepoBuildOu
 # Depending on how we got the branch name we may need to remove the full ref
 $BranchName = $BranchName -replace 'refs\/heads\/', ''
 $script:CurrentCommitHash = & git rev-parse HEAD
-$script:ChangelogPath = Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'test-changelog.md' # TODO: replace this with the real changelog path
+$script:ChangelogPath = Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'CHANGELOG.md'
 $script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'NuGetPackage'
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
 $script:GitHubRepoURI = "https://github.com/$GitHubRepoOwner/$GitHubRepoName"
