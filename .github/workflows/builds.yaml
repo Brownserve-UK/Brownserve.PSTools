@@ -22,6 +22,7 @@ jobs:
               -GitHubRepoName 'Brownserve.PSTools' `
               -BranchName $env:GITHUB_REF `
               -Build 'BuildTestAndCheck' `
+              -UseWorkingCopy `
               -Verbose
       # Step 3: Send a notification to Slack
       - name: notify-slack
