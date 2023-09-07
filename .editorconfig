@@ -10,7 +10,7 @@ indent_size = 2
 end_of_line = lf
 indent_style = space
 
-[{*.ps1,*.psm1,*.psd1}]
+[{*.ps1,*.psm1,*.psd1,*.ps1.template}]
 end_of_line = lf
 charset = utf-8
 indent_style = space
