@@ -2,13 +2,25 @@
 .SYNOPSIS
     Initializes this repository
 .NOTES
-    THIS FILE IS MAINTAINED BY A TOOL.
-    MANUAL CHANGES WILL BE LOST UNLESS ADDED TO THE "user defined _init" SECTION.
+    !!! THIS FILE IS MAINTAINED BY A TOOL !!!
+    !!! MANUAL CHANGES WILL BE LOST UNLESS IN THE "user defined _init steps" SECTION  BELOW !!!
+    !!! YOU CAN UPDATE THIS FILE BY RUNNING `Update-BrownserveRepository` IN THE ROOT OF THE REPOSITORY !!!
+
+    This script is responsible for setting up the repository for use, it will:
+        - Set up various well-known global variables to store important paths for the repository
+        - Ensure ephemeral paths are recreated on each run
+        - Install paket dependencies
+        - Install the Brownserve.PSTools module
+        - Install any external tooling
+        - Set up any package aliases
+        - Run any custom init steps
+        - Output a list of commands that are now available to the user along with their synopsis
 #>
 #Requires -Version 6.0
 [CmdletBinding()]
-param (
-    # If set will disable the compatible/incompatible cmdlet output at the end of the script
+param
+(
+    # If set will disable the cmdlet output at the end of the script
     [Parameter(
         Mandatory = $false
     )]
@@ -29,7 +41,7 @@ if ($env:TEAMCITY_VERSION)
     Write-Verbose 'Running on Teamcity, setting $env:CI'
     $env:CI = $true
 }
-    
+
 # Suppress output on CI/CD - it's noisy
 if ($env:CI)
 {
@@ -41,12 +53,12 @@ if ($env:CI)
 $Global:BrownserveRepoRootDirectory = (Resolve-Path (Get-Item $PSScriptRoot -Force).PSParentPath) | Convert-Path # -Force flag is needed to find dot folders on *.nix
 ###PERMANENT_PATHS###
 
-# Get the name of the repo
+# Guess the name of the repo by it's name on disk
 $Global:BrownserveRepoName = Split-Path $Global:BrownserveRepoRootDirectory -Leaf
 
 # Set-up our ephemeral paths, that is those that will be destroyed and then recreated each time this script is called
 # EphemeralDirectories are destroyed and recreated by this script
-# EphemeralPaths are destroyed but are not recreated, we assume whatever created them in the first place will do so again (e.g. paket.lock)
+# EphemeralFiles are destroyed but are not recreated, we assume whatever created them in the first place will do so again (e.g. paket.lock)
 $EphemeralDirectories = @(
 ###EPHEMERAL_DIRECTORIES###
 )
@@ -88,22 +100,22 @@ catch
 # We use paket for managing our dependencies and we get that via dotnet
 Push-Location
 Set-Location $Global:BrownserveRepoRootDirectory
-Write-Verbose "Restoring dotnet tools"
+Write-Verbose 'Restoring dotnet tools'
 $DotnetOutput = & dotnet tool restore
 if ($LASTEXITCODE -ne 0)
 {
     Pop-Location
     $DotnetOutput
-    throw "dotnet tool restore failed"
+    throw 'dotnet tool restore failed'
 }
 
-Write-Verbose "Installing paket dependencies"
+Write-Verbose 'Installing paket dependencies'
 $PaketOutput = & dotnet paket install
 if ($LASTEXITCODE -ne 0)
 {
     Pop-Location
     $PaketOutput
-    throw "Failed to install paket dependencies"
+    throw 'Failed to install paket dependencies'
 }
 Pop-Location
 
@@ -113,8 +125,8 @@ if ((Get-Module 'Brownserve.PSTools'))
 {
     try
     {
-        Write-Warning "The Brownserve.PSTools module is already loaded in this PSSession, this will be unloaded to Ensure the correct version for this repository is used"
-        Write-Verbose "Unloading Brownserve.PSTools"
+        Write-Warning 'The Brownserve.PSTools module is already loaded in this PSSession, this will be unloaded to Ensure the correct version for this repository is used'
+        Write-Verbose 'Unloading Brownserve.PSTools'
         Remove-Module 'Brownserve.PSTools' -Force -Confirm:$false -Verbose:$False
     }
     catch
@@ -125,7 +137,7 @@ if ((Get-Module 'Brownserve.PSTools'))
 # Import the downloaded version of Brownserve.PSTools
 try
 {
-    Write-Verbose "Importing Brownserve.PSTools module"
+    Write-Verbose 'Importing Brownserve.PSTools module'
     Import-Module (Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Brownserve.PSTools' 'tools', 'Brownserve.PSTools.psd1') -Force -Verbose:$false
 }
 catch
@@ -133,7 +145,7 @@ catch
     throw "Failed to import Brownserve.PSTools.`n$($_.Exception.Message)"
 }
 ###MODULE_LOADER######EXTERNAL_TOOLING######PACKAGE_ALIASES###
-# Place any custom code below, this will be preserved whenever you update your _init script
+# Place any custom code below, this will be preserved whenever you update your _init script (DO NOT REMOVE THIS SECTION)
 ### Start user defined _init steps
 ###CUSTOM_INIT_STEPS###
 ### End user defined _init steps
