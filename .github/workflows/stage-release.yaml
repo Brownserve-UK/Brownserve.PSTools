@@ -32,7 +32,7 @@ jobs:
               -BranchName $env:GITHUB_REF `
               -GitHubRepoName 'Brownserve.PSTools' `
               -Build 'StageRelease' `
-              -GitHubPAT $env:GitHubPAT `
+              -GitHubStageReleaseToken $env:GitHubPAT `
               -ReleaseType '${{ inputs.release_type}}' `
               -UseWorkingCopy `
               -Verbose

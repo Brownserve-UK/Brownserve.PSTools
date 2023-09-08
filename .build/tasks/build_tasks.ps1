@@ -91,13 +91,22 @@ param
     [string]
     $GitHubRepoName,
 
-    # The PAT for pushing to GitHub
+    # GitHub token used during the StageRelease build, must have the following permissions:
+    #   * Read/Write pull requests
+    #   * Read issues
     [Parameter(
-        Mandatory = $False
+        Mandatory = $false
     )]
-    [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubPAT,
+    $GitHubStageReleaseToken,
+
+    # GitHub token used during the Release build, must have the following permissions:
+    #   * Read/write releases
+    [Parameter(
+        Mandatory = $false
+    )]
+    [string]
+    $GitHubReleaseToken,
 
     # The API key to use when publishing to a NuGet feed
     [Parameter(
@@ -183,9 +192,9 @@ task CheckPublishingParameters {
 
     if ('GitHub' -in $PublishTo)
     {
-        if (!$GitHubPAT)
+        if (!$GitHubReleaseToken)
         {
-            throw 'GitHub PAT not provided'
+            throw 'GitHubReleaseToken not provided'
         }
     }
 }
@@ -195,9 +204,9 @@ task CheckPublishingParameters {
     Ensures all the parameters required to stage a release have been provided
 #>
 task CheckStagingParameters {
-    if (!$GitHubPAT)
+    if (!$GitHubStageReleaseToken)
     {
-        throw 'GitHub PAT not provided'
+        throw 'GitHubStageReleaseToken must be set when performing a release'
     }
 }
 
@@ -353,10 +362,10 @@ task CreateChangelogEntry SetVersion, {
         RepositoryName  = $GitHubRepoName
         ChangelogObject = $script:Changelog
     }
-    if ($GitHubPAT)
+    if ($GitHubStageReleaseToken)
     {
         $NewChangelogEntryParams.Add('Auto', $true)
-        $NewChangelogEntryParams.Add('GitHubToken', $GitHubPAT)
+        $NewChangelogEntryParams.Add('GitHubToken', $GitHubStageReleaseToken)
     }
     else
     {
@@ -441,7 +450,7 @@ task CheckPreviousReleases SetVersion, {
     {
         Write-Verbose 'Checking for previous releases in GitHub'
         $CurrentReleases = Get-GitHubRelease `
-            -GitHubToken $GitHubPAT `
+            -GitHubToken $GitHubReleaseToken `
             -RepoName $GitHubRepoName `
             -GitHubOrg $GitHubRepoOwner
         if ($CurrentReleases.tag_name -contains "$script:PrefixedVersion")
@@ -775,7 +784,7 @@ Please review the changes and merge if they look good.
             HeadBranch      = $script:StagingBranchName
             Title           = "Prepare for $script:PrefixedVersion"
             Body            = $Body
-            GitHubToken     = $GitHubPAT
+            GitHubToken     = $GitHubStageReleaseToken
             RepositoryName  = $GitHubRepoName
             RepositoryOwner = $GitHubRepoOwner
         }
@@ -946,7 +955,7 @@ task PublishRelease CheckPreviousReleases, Tests, PackNuGetPackage, CheckForUnco
             Name        = "v$Global:BuildVersion"
             Tag         = "v$Global:BuildVersion"
             Description = $script:ReleaseNotes
-            GitHubToken = $GitHubPAT
+            GitHubToken = $GitHubReleaseToken
             RepoName    = $GitHubRepoName
             GitHubOrg   = $GitHubRepoOwner
         }
