@@ -47,11 +47,15 @@ function Initialize-BrownserveRepository
         # The config file that stores any package aliases we'd like to create
         [Parameter(Mandatory = $false, DontShow)]
         [string]
-        $PackageAliasConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'package_aliases_config.json')
+        $PackageAliasConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'package_aliases_config.json'),
+
+        # The config file that stores any editorconfig settings we'd like to create
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $EditorConfigConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'editorconfig_config.json')
 
         #TODO: Create a changelog and licence automagically?
     )
-    
     begin
     {
         # Ensure that dotnet is available for us to use, we need it to instal tooling and make our nuget.config
@@ -75,13 +79,13 @@ function Initialize-BrownserveRepository
             $DevcontainerConfig = Read-ConfigurationFromFile $DevcontainerConfigFile
             $PackageAliasConfig = Read-ConfigurationFromFile $PackageAliasConfigFile
             $VSCodeExtensionsConfig = Read-ConfigurationFromFile $VSCodeExtensionsConfigFile -AsHashtable
+            $EditorConfigConfig = Read-ConfigurationFromFile $EditorConfigConfigFile -AsHashtable
         }
         catch
         {
             throw "Failed to import configuration data.`n$($_.Exception.Message)"
         }
     }
-    
     process
     {
         Assert-Directory $RepoPath -ErrorAction 'Stop'
@@ -100,9 +104,17 @@ function Initialize-BrownserveRepository
         $DevcontainerDirectoryPath = Join-Path $RepoPath '.devcontainer'
         $DevcontainerPath = Join-Path $DevcontainerDirectoryPath 'devcontainer.json'
         $DockerfilePath = Join-Path $DevcontainerDirectoryPath 'Dockerfile'
+        $EditorConfigPath = Join-Path $RepoPath '.editorconfig'
 
-        # 
-        $PathsToTest = @($InitPath, $GitIgnorePath, $PaketDependenciesPath, $dotnetToolsPath, $NugetConfigPath)
+        # Check to see if we've already initialized this repository
+        $PathsToTest = @(
+            $InitPath,
+            $GitIgnorePath,
+            $PaketDependenciesPath,
+            $dotnetToolsPath,
+            $NugetConfigPath,
+            $EditorConfigPath
+        )
         if (!$Force)
         {
             $FailedPaths = @()
@@ -239,7 +251,7 @@ However please note this will overwrite the files listed above!
             throw "Failed to get existing VSCode settings.`n$($_.Exception.Message)"
         }
 
-        <# 
+        <#
             We may already have a .gitignore in the repo it's unlikely to be in the format we expect it to be in.
             We'll try to read it anyways and just in case.
         #>
@@ -267,7 +279,6 @@ However please note this will overwrite the files listed above!
                 }
             }
         }
-        
         # Similarly for paket packages
         if (Test-Path $PaketDependenciesPath)
         {
@@ -293,7 +304,6 @@ However please note this will overwrite the files listed above!
                 }
             }
         }
-        
         # And for any custom _init.ps1 steps
         if (Test-Path $InitPath)
         {
@@ -320,7 +330,6 @@ However please note this will overwrite the files listed above!
                 }
             }
         }
-        
         # Build up our default list of gitignore's that we always want to use
         # TODO: Do we want to make ignoring paket.lock optional?
         $DefaultGitIgnores = $GitIgnoreConfig.Defaults
@@ -333,9 +342,11 @@ However please note this will overwrite the files listed above!
 
         $DefaultPackageAliases = $PackageAliasConfig.Defaults
 
+        $DefaultEditorConfig = $EditorConfigConfig.Defaults
+
         switch ($ProjectType)
         {
-            <# 
+            <#
                     For a repo that houses a PowerShell module we'll want to include:
                         - The logic for loading the module as part of the _init script
                         - PlatyPS for building module documentation
@@ -353,7 +364,7 @@ However please note this will overwrite the files listed above!
                 $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
                 $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
-                
+                $ExtraEditorConfig = $EditorConfigConfig.PowerShellModule
                 $InitParams = @{
                     IncludeModuleLoader   = $true
                     IncludePowerShellYaml = $true
@@ -369,7 +380,7 @@ However please note this will overwrite the files listed above!
             'BrownservePSTools'
             {
                 Write-Debug 'BrownservePSTools selected'
-                # For now we use the same basic config as all our other PowerShell modules
+                # For now we use the same basic config as all our other PowerShell modules except in the params below
                 $DockerfileName = $DevcontainerConfig.PowerShellModule.Dockerfile
                 $ExtraPermanentPaths = $RepositoryPathsConfig.PowerShellModule.PermanentPaths
                 $ExtraEphemeralPaths = $RepositoryPathsConfig.PowerShellModule.EphemeralPaths
@@ -377,9 +388,9 @@ However please note this will overwrite the files listed above!
                 $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
                 $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
-                
+                $ExtraEditorConfig = $EditorConfigConfig.PowerShellModule
                 $InitParams = @{
-                    IncludeModuleLoader   = $false # With the exception that we don't load the module locally (as it will conflict)
+                    IncludeModuleLoader   = $false # we don't want to load the module locally, we want the stable version from nuget
                     IncludePowerShellYaml = $true
                     IncludePlatyPS        = $true
                     IncludeBuildTestTools = $true
@@ -430,7 +441,6 @@ However please note this will overwrite the files listed above!
         $FinalPackageAliases = $DefaultPackageAliases + $ExtraPackageAliases
         if ($FinalPackageAliases)
         {
-            Write-Host "Final Pack: $($FinalPackageAliases | Out-String)`nCount: $($FinalPackageAliases.Count)"
             $InitParams.Add('PackageAliases',$FinalPackageAliases)
         }
 
@@ -458,6 +468,19 @@ However please note this will overwrite the files listed above!
             $PaketParams.Add('ManualDependencies', $ManualPaketEntries)
         }
 
+        if ($ExtraEditorConfig)
+        {
+            $FinalEditorConfig = $DefaultEditorConfig + $ExtraEditorConfig
+        }
+        else
+        {
+            $FinalEditorConfig = $DefaultEditorConfig
+        }
+        $EditorConfigParams = @{
+            IncludeRoot = $true
+            Section = $FinalEditorConfig
+        }
+
         if ($CustomInitSteps)
         {
             $InitParams.Add('CustomInitSteps', $CustomInitSteps)
@@ -471,7 +494,6 @@ However please note this will overwrite the files listed above!
         {
             $VSCodeExtensions = $DefaultVSCodeExtensions
         }
-        
         if ($VSCodeExtensions.Count -gt 0)
         {
             # Extract the list of extension ID's we want to install in this repo and clean up any duplicates
@@ -625,6 +647,18 @@ However please note this will overwrite the files listed above!
             catch
             {
                 throw "Failed to create devcontainer.`n$($_.Exception.Message)"
+            }
+        }
+
+        if ($EditorConfigParams)
+        {
+            try
+            {
+                $EditorConfigContent = New-EditorConfig @EditorConfigParams -ErrorAction 'Stop'
+            }
+            catch
+            {
+                throw "Failed to create .editorconfig file.`n$($_.Exception.Message)"
             }
         }
 
@@ -816,10 +850,31 @@ However please note this will overwrite the files listed above!
                 throw "Failed to create '$DockerfilePath'.`n$($_.Exception.Message)"
             }
         }
+
+        if ($EditorConfigContent)
+        {
+            try
+            {
+                # We have to do this in two parts as New-Item doesn't support passing -NoNewLine 😬
+                New-Item `
+                    -Path $EditorConfigPath `
+                    -ItemType File `
+                    -ErrorAction 'Stop' `
+                    -Force:$Force | Out-Null
+
+                Set-Content `
+                    -Path $EditorConfigPath `
+                    -Value $EditorConfigContent `
+                    -NoNewline `
+                    -ErrorAction 'Stop'
+            }
+            catch
+            {
+                throw "Failed to create '$EditorConfigPath'.`n$($_.Exception.Message)"
+            }
+        }
     }
-    
     end
     {
-        
     }
 }
