@@ -13,8 +13,8 @@ Adds a comment to a given pull request
 ## SYNTAX
 
 ```
-Add-PullRequestComment -GitHubToken <String> -GitHubOrg <String> [-PullRequestID] <String>
- [-PullRequestComment] <String> -RepoName <String> [<CommonParameters>]
+Add-PullRequestComment -Token <String> -RepositoryOwner <String> [-PullRequestID] <String>
+ [-PullRequestComment] <String> -RepositoryName <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -37,36 +37,6 @@ This would add the comment 'Hello, world!' to pull request \`1122\` on the repo 
 
 ## PARAMETERS
 
-### -GitHubOrg
-The GitHub org/user that owns the repository you wish to submit the comment against.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases: GitHubOrganisation, GitHubOrganization
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -GitHubToken
-The GitHub PAT that has permissions to add comments to PR's
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
 ### -PullRequestComment
 The comment to be added to the PR
 
@@ -76,7 +46,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 2
+Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
@@ -91,19 +61,49 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 1
+Position: 0
 Default value: None
 Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -RepoName
-The name of the repo
+### -RepositoryName
+The name of the repository that the pull request belongs to
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: RepoName
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -RepositoryOwner
+The owner of the repository that the pull request belongs to
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: GitHubOrganisation, GitHubOrganization, GitHubOrg
+
+Required: True
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Token
+The GitHub Personal Access Token to use for authentication
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: GitHubToken, GitHubPAT
 
 Required: True
 Position: Named
