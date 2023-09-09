@@ -148,6 +148,7 @@ $script:LineEndingFiles = @()
     This should ensure that:
         * Main can never be used a prerelease tag
         * Feature branches cannot ever create a production release
+    NOTE: this does not affect releases - there is different logic for that later on.
 #>
 $PreRelease = $true
 if ($DefaultBranch -eq $BranchName)
@@ -307,6 +308,15 @@ task SetVersion GetReleaseHistory, {
         Write-Verbose 'Release flag set, skipping updating version number'
         $script:NewVersion = $script:CurrentVersion
         $NugetPackageVersion = $script:CurrentVersion
+        <#
+            When performing releases we always do so from the main branch so the $PreRelease flag will always be false.
+            However we do want to ensure that if we're releasing a pre-release version that we set the $PreRelease flag
+            so we check for the pre-release label and set the flag accordingly.
+        #>
+        if ($script:NewVersion.PreReleaseLabel)
+        {
+            $script:PreRelease = $true
+        }
     }
     else
     {
