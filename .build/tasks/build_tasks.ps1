@@ -423,15 +423,14 @@ task UpdateChangelog CreateChangelogEntry, {
 #>
 task FormatReleaseNotes SetVersion, {
     Write-Build White 'Formatting release notes.'
-    $script:ReleaseNotes = $script:LastRelease.ReleaseNotes
+    $script:ReleaseNotes = $script:LastRelease.ReleaseNotes | Out-String
     if (!$script:ReleaseNotes)
     {
         throw 'Release notes missing'
     }
     try
     {
-        $script:CleanReleaseNotes = Remove-Markdown -String ($script:ReleaseNotes | Out-String) -ErrorAction 'Stop'
-        # $script:CleanReleaseNotes = $script:ReleaseNotes | Out-String
+        $script:CleanReleaseNotes = Remove-Markdown -String $script:ReleaseNotes -ErrorAction 'Stop'
     }
     catch
     {
