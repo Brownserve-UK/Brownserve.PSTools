@@ -7,23 +7,24 @@ function Add-PullRequestComment
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true
         )]
+        [Alias('GitHubToken', 'GitHubPAT')]
         [string]
-        $GitHubToken,
+        $Token,
 
-        # The GitHub Organization to check
+        # The owner of the repository
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true
         )]
-        [Alias('GitHubOrganisation','GitHubOrganization')]
+        [Alias('GitHubOrganisation', 'GitHubOrganization', 'GitHubOrg')]
         [string]
-        $GitHubOrg,
+        $RepositoryOwner,
 
         # The ID of the Pull Request
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
-            Position = 1
+            Position = 0
         )]
         [string]
         $PullRequestID,
@@ -32,43 +33,59 @@ function Add-PullRequestComment
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
-            Position = 2
+            Position = 1
         )]
         [string]
         $PullRequestComment,
 
-        # The name of the repo
+        # The repository name
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true
         )]
+        [Alias('RepoName')]
         [string]
-        $RepoName
+        $RepositoryName
     )
-    $Header = @{                                                                                                                                         
-        Authorization = "token $GitHubToken"
-        Accept        = 'application/vnd.github.v3+json'
-    }
-    $URI = "https://api.github.com/repos/$GitHubOrg/$RepoName/issues/$PullRequestID/comments"
-    $Body = @{
-        body = $PullRequestComment
-    }
-    try
+    begin
+    {}
+    process
     {
-        $BodyJSON = $Body | ConvertTo-Json
+        $Header = @{
+            Authorization = "token $Token"
+            Accept        = 'application/vnd.github.v3+json'
+        }
+        $URI = "https://api.github.com/repos/$RepositoryOwner/$RepositoryName/issues/$PullRequestID/comments"
+        $Body = @{
+            body = $PullRequestComment
+        }
+        try
+        {
+            $BodyJSON = $Body | ConvertTo-Json
+        }
+        catch
+        {
+            throw $_.Exception.Message
+        }
+        Write-Verbose "Attempting to add comment to pull request $PullRequestID"
+        try
+        {
+            $Update = Invoke-RestMethod -Headers $Header -Uri $URI -Body $BodyJSON -Method Post
+        }
+        catch
+        {
+            throw $_.Exception.Message
+        }
     }
-    catch
+    end
     {
-        Write-Error $_.Exception.Message
+        if ($Update)
+        {
+            Return $Update
+        }
+        else
+        {
+            Return $null
+        }
     }
-    Write-Verbose "Attempting to add comment to pull request $PullRequestID"
-    try
-    {
-        $Update = Invoke-RestMethod -Headers $Header -Uri $URI -Body $BodyJSON -Method Post
-    }
-    catch
-    {
-        Write-Error $_.Exception.Message
-    }
-    Return $Update
 }

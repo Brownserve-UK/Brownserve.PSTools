@@ -62,6 +62,7 @@ function New-PullRequest
         [string]
         $RepoName
     )
+    Write-Warning "This function is deprecated and will be removed in a future release. Please use New-GitHubPullRequest instead."
     $Header = @{                                                                                                                                         
         Authorization = "token $GitHubToken"
         Accept        = 'application/vnd.github.v3+json'

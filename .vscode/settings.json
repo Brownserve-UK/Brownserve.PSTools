@@ -1,6 +1,7 @@
 {
   "cSpell.language": "en,en-GB",
   "cSpell.words": [
+    "ACDMTRU",
     "Allman",
     "awscli",
     "Brownserve",
@@ -14,6 +15,7 @@
     "hashtable",
     "hashtables",
     "imatch",
+    "isnot",
     "LASTEXITCODE",
     "MAML",
     "Mddhhmm",
@@ -33,6 +35,7 @@
     "teamcity",
     "Teamcity",
     "TMPDIR",
+    "wontfix",
     "yzhang"
   ],
   "markdown.extension.toc.omittedFromToc": {

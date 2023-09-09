@@ -29,10 +29,21 @@ function Read-Changelog
             Position = 2
         )]
         [string]
-        $RepoURLPattern = '(?<url>http(?:.*))\/tree'
+        $RepoURLPattern = '(?<url>http(?:.*))\/tree',
+
+        # The regex pattern for matching the date of the last release.
+        # It should always contain a capture group named "date" and this what the regex searched will use to extract your date
+        [Parameter(
+            Mandatory = $false,
+            Position = 3
+        )]
+        [string]
+        $LastReleaseDatePattern = '\((?<date>[\d|-]*)\)'
     )
 
-    # Import the changelog
+    Write-Warning 'This cmdlet is deprecated and will be removed in a future release, please use Read-BrownserveChangelog instead.'
+
+    # Import the changelog, we don't use the -Raw switch as we want to read the file line by line
     try
     {
         $Changelog = Get-Content $ChangelogPath
@@ -41,7 +52,7 @@ function Read-Changelog
     {
         throw "Failed to get changelog content.$($_.Exception.Message)"
     }
-    
+
     # We'll store all the lines after the headers in this array so we can get the ChangelogText if we want it
     $ChangelogText = @()
 
@@ -56,7 +67,10 @@ function Read-Changelog
 
     # We'll also look for the line that we can insert a new entry into (if we want)
     $NewChangelogLine = $null
-    
+
+    # We'll also look for the date of the last release
+    $LastReleaseDate = $null
+
     # Go through each line until we find what we need
     $Changelog | ForEach-Object {
         $Line = $_.Trim()
@@ -86,6 +100,13 @@ function Read-Changelog
                 # It will be the line _before_ our line with the version number on
                 $NewChangelogLine = $LineCount - 1
                 Write-Verbose "Current version determined to be $CurrentVersion"
+                # Now we've got our current version we can also extract the date of the last release
+                $LastReleaseDateMatch = [regex]::Match($Line, $LastReleaseDatePattern)
+                if ($LastReleaseDateMatch.Success)
+                {
+                    $LastReleaseDate = Get-Date $LastReleaseDateMatch.Groups['date'].Value -ErrorAction 'Stop'
+                    Write-Verbose "Last release date determined to be $LastReleaseDate"
+                }
             }
         }
         # If we've found our current version number then from here on out the rest of the document will be our changelog, start capturing it!
@@ -115,7 +136,7 @@ function Read-Changelog
         # Finally increase the line count for the next loop
         $LineCount++
     }
-    
+
     # If we haven't got our release notes ending line _and_ a previous version it likely means that we don't have one! (i.e. we are still on the first release!)
     # So just read until the end of the file
     if ((-not $ReleaseNotesEndOn) -and (-not $PreviousVersion))
@@ -144,7 +165,7 @@ function Read-Changelog
     }
     if (!$ReleaseNotes)
     {
-        throw "Unable to work out current release notes."
+        throw 'Unable to work out current release notes.'
     }
 
     return [pscustomobject]@{
@@ -153,6 +174,7 @@ function Read-Changelog
         Content        = $Changelog # Return the whole changelog in all it's gory detail
         VersionHistory = $ChangelogText # The version history of the changelog
         CurrentVersion = $CurrentVersion # The latest version according to the changelog
+        ReleasedOn     = $LastReleaseDate # The date of the last release
         ReleaseNotes   = $ReleaseNotes -join [System.Environment]::NewLine # The release notes for the latest version only
         InsertLine     = $NewChangelogLine # This will be the line that we can start inserting new entries into
     }

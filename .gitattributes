@@ -1,0 +1,7 @@
+# Tell git to manage line endings
+* text=auto
+# Ensure our generated docs have sensible line endings
+/Docs/Brownserve.PSTools/* eol=lf
+/Docs/Brownserve.PSTools.md eol=lf
+/Module/en-US/Brownserve.PSTools-help.xml eol=lf
+CHANGELOG.md eol=lf

@@ -18,12 +18,10 @@ function New-GitBranch
         [bool]
         $Checkout = $true
     )
-    
     begin
     {
         Assert-Directory $RepositoryPath -ErrorAction 'Stop'
     }
-    
     process
     {
         try
@@ -63,9 +61,7 @@ function New-GitBranch
             }
         }
     }
-    
     end
     {
-        
     }
 }

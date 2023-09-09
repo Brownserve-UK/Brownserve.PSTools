@@ -48,6 +48,8 @@ function New-ChangelogBlock
         [array]
         $KnownIssues
     )
+
+    Write-Warning "This function is deprecated and will be removed in a future release. Please use the New-BrownserveChangelogBlock function instead."
     # Make sure our repo URL doesn't have a trailing slash
     $RepoURL = $RepoURL -replace '\/$', ''
 
