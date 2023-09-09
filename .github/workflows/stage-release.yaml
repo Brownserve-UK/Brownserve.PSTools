@@ -33,6 +33,7 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
           trust_level: 5
+          workdir: Brownserve.PSTools
     # Step 3: Call the build script
       - name: run-build-script
         shell: pwsh
