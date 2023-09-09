@@ -945,10 +945,15 @@ task PublishRelease CheckPreviousReleases, Tests, PackNuGetPackage, CheckForUnco
     if ('PSGallery' -in $PublishTo)
     {
         Write-Build White 'Pushing to PSGallery'
-        # For PSGallery the module needs to be in a directory named after itself... -_- (PowerShellGet is awful)
+        <# 
+            For PSGallery the module needs to be in a directory named after itself... -_- (PowerShellGet is awful)
+            2023-09-09: It gets EVEN MORE awful!
+            It looks like PowerShellGet will automatically tag EVERY cmdlet which takes you over the 4000 NuGet character limit!!!
+        #>
         $PSGalleryParams = @{
-            Path        = $global:BrownserveBuiltModuleDirectory
-            NuGetAPIKey = $PSGalleryAPIKey
+            Path              = $global:BrownserveBuiltModuleDirectory
+            NuGetAPIKey       = $PSGalleryAPIKey
+            SkipAutomaticTags = $true
         }
         Publish-Module @PSGalleryParams
     }
