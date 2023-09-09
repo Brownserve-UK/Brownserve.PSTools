@@ -3,16 +3,6 @@ name: release
 on:
   workflow_dispatch:
     inputs:
-      release_type:
-        description: 'The type of release to perform'
-        required: true
-        default: 'minor'
-        type: choice
-        options:
-          - major
-          - minor
-          - patch
-          - republish
       publish_to:
         description: 'Where to publish the release to'
         required: true

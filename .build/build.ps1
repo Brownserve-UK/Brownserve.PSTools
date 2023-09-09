@@ -42,7 +42,8 @@ param
         'Build',
         'BuildAndTest',
         'BuildTestAndCheck',
-        'StageRelease'
+        'StageRelease',
+        'Release'
     )]
     [AllowEmptyString()]
     [string]
