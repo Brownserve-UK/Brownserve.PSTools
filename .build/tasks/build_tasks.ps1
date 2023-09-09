@@ -263,11 +263,20 @@ task GetReleaseHistory {
         automatically as part of the build (so for example 2.0.0-rc1 -> 2.0.1)
         Also if we had to do an emergency release of the latest stable version (e.g 1.0.0 -> 1.1.0) to patch a security
         issue then we wouldn't want to select our 2.0.0-rc1 pre-release version to base the new patch release off of.
-        Therefore we select the last "stable" release which should always be what we want to work with
+        Therefore we select the last "stable" release which should always be what we want to work with.
+        The exception to this is when we're performing a release, in which case we want to use the latest version regardless
     #>
-    $script:LastRelease = $script:Changelog.VersionHistory |
-        Where-Object { $_.PreRelease -eq $false } |
+    if ($script:Release -ne $true)
+    {
+        $script:LastRelease = $script:Changelog.VersionHistory |
+            Where-Object { $_.PreRelease -eq $false } |
+                Select-Object -First 1
+    }
+    else
+    {
+        $script:LastRelease = $script:Changelog.VersionHistory |
             Select-Object -First 1
+    }
 }
 <#
 .SYNOPSIS
