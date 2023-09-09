@@ -900,7 +900,7 @@ task PackNuGetPackage PrepareNuGetPackage, {
             }
             & $NugetCommand $NugetArguments
         }
-        $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$global:NugetPackageVersion.nupkg" | Convert-Path
+        $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$global:BuildVersion.nupkg" | Convert-Path
     }
     else
     {
@@ -961,8 +961,8 @@ task PublishRelease CheckPreviousReleases, Tests, PackNuGetPackage, CheckForUnco
     {
         Write-Build White "Creating GitHub release for $Global:BuildVersion"
         $ReleaseParams = @{
-            Name        = "v$Global:BuildVersion"
-            Tag         = "v$Global:BuildVersion"
+            Name        = $script:PrefixedVersion
+            Tag         = $script:PrefixedVersion
             Description = $script:ReleaseNotes
             GitHubToken = $GitHubReleaseToken
             RepoName    = $GitHubRepoName
