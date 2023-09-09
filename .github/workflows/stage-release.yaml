@@ -16,13 +16,24 @@ on:
 jobs:
   stage-release:
     runs-on: ubuntu-latest
-    # Step 1: Checkout the repo
     steps:
+      # Step 1: Setup commit signing
+      # The key used here should be considered "public" as anyone with admin access to the repo can see it
+      # and we're using a third-party action to import it. This is fine as the key is only used to sign
+      # our staged release commits and not for any other purpose.
+      - name: setup-commit-signing
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.AUTOMATED_BUILD_GPG }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          trust_level: 5
+      # Step 2: Checkout the repo
       - name: checkout-module
         uses: actions/checkout@v3
         with:
           path: Brownserve.PSTools
-    # Step 2: Call the build script
+    # Step 3: Call the build script
       - name: run-build-script
         shell: pwsh
         env:
@@ -36,7 +47,7 @@ jobs:
               -ReleaseType '${{ inputs.release_type}}' `
               -UseWorkingCopy `
               -Verbose
-    # Step 3: Push a notification to Slack
+    # Step 4: Push a notification to Slack
       - name: notify-slack
         shell: pwsh
         if: ${{ always() }}
