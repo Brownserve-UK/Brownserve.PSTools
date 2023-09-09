@@ -17,7 +17,12 @@ jobs:
   stage-release:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Setup commit signing
+      # Step 1: Checkout the repo
+      - name: checkout-module
+        uses: actions/checkout@v3
+        with:
+          path: Brownserve.PSTools
+      # Step 2: Setup commit signing
       # The key used here should be considered "public" as anyone with admin access to the repo can see it
       # and we're using a third-party action to import it. This is fine as the key is only used to sign
       # our staged release commits and not for any other purpose.
@@ -28,11 +33,6 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
           trust_level: 5
-      # Step 2: Checkout the repo
-      - name: checkout-module
-        uses: actions/checkout@v3
-        with:
-          path: Brownserve.PSTools
     # Step 3: Call the build script
       - name: run-build-script
         shell: pwsh
