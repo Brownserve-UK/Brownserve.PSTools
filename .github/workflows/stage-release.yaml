@@ -22,6 +22,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: Brownserve.PSTools
+          fetch-depth: 0
       # Step 2: Setup commit signing
       # The key used here should be considered "public" as anyone with admin access to the repo can see it
       # and we're using a third-party action to import it. This is fine as the key is only used to sign
