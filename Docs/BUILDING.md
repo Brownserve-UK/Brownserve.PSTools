@@ -25,7 +25,7 @@ This will:
 
 When you're ready to test your changes properly you can run the `BuildAndTest` task which will run the unit tests as well as the above tasks.
 
-## Dependencies
+## Building locally
 There are two ways to get all the dependencies you need to build locally, either using the included `.devcontainer` or manually installing them.
 ### .devcontainer
 By far the easiest way to test things locally is to use the included `.devcontainer` within VS Code or other compatible IDE/editor.

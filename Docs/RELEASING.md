@@ -65,3 +65,18 @@ If there's an issue with a release that requires you to re-publish it, you'll ne
 
 The only exception to this is when either adding a new release repository or when a push to an existing repository fails (for example if the repository is down at the time of publishing, or an API key is expired etc).
 In these cases you can run the `publish-release` GitHub action again _making sure to select the branch tag_ of the version you wish to re-publish. You should then set the `publish_to` input to only include the endpoints that don't already have the release published to them.
+
+## Running release process locally
+It's entirely possible to run through the release process locally if you need to.  
+See the section on [building locally](BUILDING.md#building-locally) for information on how to get the required dependencies installed.  
+Once you're ready to release you can run the `StageRelease` and `Release` tasks from the `.build/build.ps1` script.  
+
+You'll need to provide the following parameters to the `StageRelease` task:
+* `ReleaseType` - The type of release to perform, this can be one of `Major`, `Minor` or `Patch`.
+* `GitHubStageReleaseToken` - A GitHub personal access token with enough permissions to read/write pull requests and read issues.
+
+You'll need to provide the following parameters to the `Release` task:
+* `PublishTo` - A comma separated list of endpoints to publish the release to, this can be one or more of `PSGallery`, `GitHub` and `NuGet`
+* `GitHubReleaseToken` - A GitHub personal access token with enough permissions to read/write releases (if publishing to GitHub).
+* `NugetFeedApiKey` - An API key for the NuGet feed to publish to (if publishing to NuGet).
+* `PSGalleryApiKey` - An API key for the PowerShell Gallery to publish to (if publishing to PSGallery).
