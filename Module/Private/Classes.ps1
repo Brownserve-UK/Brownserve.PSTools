@@ -310,3 +310,219 @@ class BrownserveChangelog
         $this.Content = $Changelog.Content
     }
 }
+
+## IDE related classes
+
+<#
+    This class helps us format editorconfig properties
+#>
+class EditorConfigProperty
+{
+    [string]$Name
+    $Value
+
+    EditorConfigProperty([string]$Name, $Value)
+    {
+        $this.Name = $Name
+        $this.Value = $Value
+        $this.ValidityCheck()
+    }
+
+    EditorConfigProperty([hashtable]$Property)
+    {
+        $this.Value = $Property.Value
+        $this.Name = $Property.Name
+        $this.ValidityCheck()
+    }
+
+    EditorConfigProperty([System.Collections.DictionaryEntry]$Property)
+    {
+        $this.Value = $Property.Value
+        $this.Name = $Property.Name
+        $this.ValidityCheck()
+    }
+
+    [string] ToString()
+    {
+        return ("$($this.Name) = $($this.Value)").ToLower()
+    }
+
+    hidden ValidityCheck()
+    {
+        # Ensure that the property name is valid as per the editorconfig spec (https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties)
+        $ValidPropertyNames = @(
+            'indent_style',
+            'indent_size',
+            'tab_width',
+            'end_of_line',
+            'charset',
+            'trim_trailing_whitespace',
+            'insert_final_newline',
+            'max_line_length'
+        )
+        if ($this.Name -notin $ValidPropertyNames)
+        {
+            throw "Invalid editorconfig property name: '$($this.Name)'"
+        }
+
+        # Ensure that the property value is valid as per the editorconfig spec
+        switch ($this.Name)
+        {
+            'indent_style'
+            {
+                $ValidValues = @('tab', 'space')
+                if ($this.Value -notin $ValidValues)
+                {
+                    throw "Invalid indent_style value: '$($this.Value)'"
+                }
+            }
+            'indent_size'
+            {
+                (($this.Value -isnot [int]) -or ($this.Value -isnot [Int64]))
+                {
+                    if ($this.Value -ne 'tab')
+                    {
+                        throw "Invalid indent_size value: '$($this.Value)'"
+                    }
+                }
+            }
+            'tab_width'
+            {
+                (($this.Value -isnot [int]) -or ($this.Value -isnot [Int64]))
+                {
+                    throw "Invalid tab_width value: '$($this.Value)'"
+                }
+            }
+            'end_of_line'
+            {
+                $ValidValues = @('lf', 'cr', 'crlf')
+                if ($this.Value -notin $ValidValues)
+                {
+                    throw "Invalid end_of_line value: '$($this.Value)'"
+                }
+            }
+            'charset'
+            {
+                $ValidValues = @('latin1', 'utf-8', 'utf-8-bom', 'utf-16be', 'utf-16le')
+                if ($this.Value -notin $ValidValues)
+                {
+                    throw "Invalid charset value: '$($this.Value)'"
+                }
+            }
+            'trim_trailing_whitespace'
+            {
+                if ($this.Value -isnot [bool])
+                {
+                    throw "Invalid trim_trailing_whitespace value: '$($this.Value)'"
+                }
+            }
+            'insert_final_newline'
+            {
+                if ($this.Value -isnot [bool])
+                {
+                    throw "Invalid insert_final_newline value: '$($this.Value)'"
+                }
+            }
+            'max_line_length'
+            {
+                if (($this.Value -isnot [int]) -or ($this.Value -isnot [Int64]))
+                {
+                    if ($this.Value -ne 'off')
+                    {
+                        throw "Invalid max_line_length value: '$($this.Value)'"
+                    }
+                }
+            }
+        }
+    }
+}
+
+<#
+    This class helps us format editorconfig sections
+#>
+class EditorConfigSection
+{
+    [string]$FilePath
+    [EditorConfigProperty[]]$Properties
+    [string[]]$Comment
+
+    EditorConfigSection([string]$FilePath, [EditorConfigProperty[]]$Properties)
+    {
+        $this.FilePath = $FilePath
+        $this.Properties = $Properties
+    }
+
+    EditorConfigSection([string]$FilePath, [EditorConfigProperty[]]$Properties, [string[]]$Comment)
+    {
+        $this.FilePath = $FilePath
+        $this.Properties = $Properties
+        $this.Comment = $Comment
+    }
+
+    EditorConfigSection([hashtable]$Section)
+    {
+        if (!$Section.FilePath)
+        {
+            throw 'Cannot create EditorConfigSection object without FilePath'
+        }
+        if (!$Section.Properties)
+        {
+            throw 'Cannot create EditorConfigSection object without Properties'
+        }
+        if ($Section.Comment)
+        {
+            $this.Comment = $Section.Comment
+        }
+        $this.FilePath = $Section.FilePath
+        if ($Section.Properties -is [hashtable])
+        {
+            $this.ExpandProperties($Section.Properties)
+        }
+        else
+        {
+            $this.Properties = $Section.Properties
+        }
+    }
+
+    # It's much more convenient to be able to pass in a hash of all the properties
+    # but we need to expand them all first
+    hidden ExpandProperties([hashtable]$Properties)
+    {
+        $ExpandedProps = @()
+        $Properties.GetEnumerator() | ForEach-Object {
+            $ExpandedProps += [EditorConfigProperty]$_
+        }
+        $this.Properties = $ExpandedProps
+    }
+
+    # Override the default ToString method, let's output exactly what we want!
+    [string] ToString()
+    {
+        $Return = ''
+        if ($this.Comment)
+        {
+            $this.Comment | ForEach-Object {
+                if ($_.StartsWith('#'))
+                {
+                    $Return += "$_`n"
+                }
+                else
+                {
+                    $Return += "# $_`n"
+                }
+            }
+        }
+        if ($this.FilePath -notmatch '^\[.*\]$')
+        {
+            $Return += "[$($this.FilePath)]`n"
+        }
+        else
+        {
+            $Return += "$($this.FilePath)`n"
+        }
+        $this.Properties | ForEach-Object {
+            $Return += "$($_)`n"
+        }
+        return $Return
+    }
+}

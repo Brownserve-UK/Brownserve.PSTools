@@ -40,9 +40,10 @@ jobs:
               -BranchName $env:GITHUB_REF `
               -GitHubRepoName 'Brownserve.PSTools' `
               -Build 'release' `
-              -GitHubPAT $env:GitHubPAT `
+              -GitHubReleaseToken $env:GitHubPAT `
               -NugetFeedAPIKey $env:NugetFeedAPIKey `
               -PSGalleryAPIKey $env:PSGalleryAPIKey `
+              -PublishTo ${{ inputs.publish_to }} `
               -UseWorkingCopy `
               -Verbose
     # Do a Slack notification

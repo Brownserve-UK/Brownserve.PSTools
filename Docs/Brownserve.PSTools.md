@@ -157,6 +157,9 @@ Creates a temporary directory
 ### [New-BrownserveTemporaryFile](./Brownserve.PSTools/New-BrownserveTemporaryFile.md)
 Creates a temporary file in a known good location.
 
+### [New-EditorConfig](./Brownserve.PSTools/New-EditorConfig.md)
+Creates a new editorconfig configuration.
+
 ### [New-GitBranch](./Brownserve.PSTools/New-GitBranch.md)
 Creates a new branch in a given git repository
 

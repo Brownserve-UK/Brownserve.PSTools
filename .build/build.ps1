@@ -85,13 +85,22 @@ param
     [string]
     $GitHubRepoName = 'Brownserve.PSTools',
 
-    # The PAT for pushing to GitHub
+    # GitHub token used during the StageRelease build, must have the following permissions:
+    #   * Read/Write pull requests
+    #   * Read issues
     [Parameter(
         Mandatory = $false
     )]
-    [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubPAT,
+    $GitHubStageReleaseToken,
+
+    # GitHub token used during the Release build, must have the following permissions:
+    #   * Read/write releases
+    [Parameter(
+        Mandatory = $false
+    )]
+    [string]
+    $GitHubReleaseToken,
 
     # The API key to use when publishing to a NuGet feed, this is always needed but may not always be used
     [Parameter(
@@ -196,9 +205,13 @@ try
     {
         $BuildParams.Add('PSGalleryAPIKey', $PSGalleryAPIKey)
     }
-    if ($GitHubPAT)
+    if ($GitHubStageReleaseToken)
     {
-        $BuildParams.Add('GitHubPAT', $GitHubPAT)
+        $BuildParams.Add('GitHubStageReleaseToken', $GitHubStageReleaseToken)
+    }
+    if ($GitHubReleaseToken)
+    {
+        $BuildParams.Add('GitHubReleaseToken', $GitHubReleaseToken)
     }
     if ($PublishTo)
     {
