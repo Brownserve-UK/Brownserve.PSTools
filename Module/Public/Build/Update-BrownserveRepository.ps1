@@ -87,7 +87,6 @@ function Update-BrownserveRepository
     {
         Assert-Directory $RepoPath -ErrorAction 'Stop'
 
-        # The below paths will always need to exist and we should check for them to avoid causing any mishaps even if we are going to do this on a branch
         $BuildDirectory = Join-Path $RepoPath '.build'
         $InitPath = Join-Path $BuildDirectory '_init.ps1'
         $PaketDependenciesPath = Join-Path $RepoPath 'paket.dependencies'
@@ -101,7 +100,10 @@ function Update-BrownserveRepository
         $DevcontainerDirectoryPath = Join-Path $RepoPath '.devcontainer'
         $DevcontainerPath = Join-Path $DevcontainerDirectoryPath 'devcontainer.json'
         $DockerfilePath = Join-Path $DevcontainerDirectoryPath 'Dockerfile'
+        $EditorConfigPath = Join-Path $RepoPath '.editorconfig'
 
+        # Not all the files above will always exist but the below paths will always need to exist
+        # if they don't then either it hasn't been initialised yet or someones done something bad. 😬
         $PathsToTest = @($InitPath, $PaketDependenciesPath, $dotnetToolsPath, $NugetConfigPath)
 
         $PathsToTest | ForEach-Object {
