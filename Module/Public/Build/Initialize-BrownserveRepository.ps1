@@ -78,7 +78,9 @@ function Initialize-BrownserveRepository
             $RepositoryPathsConfig = Read-ConfigurationFromFile $RepositoryPathsConfigFile
             $DevcontainerConfig = Read-ConfigurationFromFile $DevcontainerConfigFile
             $PackageAliasConfig = Read-ConfigurationFromFile $PackageAliasConfigFile
+            # Load VS code extensions as a hashtable so we can easily merge things later on
             $VSCodeExtensionsConfig = Read-ConfigurationFromFile $VSCodeExtensionsConfigFile -AsHashtable
+            # Load EditorConfig as a hashtable as our [EditorConfigSection] type cannot process psobject's
             $EditorConfigConfig = Read-ConfigurationFromFile $EditorConfigConfigFile -AsHashtable
         }
         catch
@@ -652,13 +654,30 @@ However please note this will overwrite the files listed above!
 
         if ($EditorConfigParams)
         {
+            # Try to preserve any manual changes that may have been made to the editorconfig file
+            if (Test-Path $EditorConfigPath)
+            {
+                try
+                {
+                    $ManualEditorConfig = Read-BrownserveEditorConfig -Path $EditorConfigPath -ErrorAction 'Stop'
+                }
+                catch
+                {
+                    # Let this silently fail and just try and create the editorconfig anyways
+                    # (If we've got here then -Force has been passed so we should overwrite any existing editorconfig file)
+                }
+            }
+            if ($ManualEditorConfig)
+            {
+                $EditorConfigParams.Add('ManualSection', $ManualEditorConfig)
+            }
             try
             {
-                $EditorConfigContent = New-EditorConfig @EditorConfigParams -ErrorAction 'Stop'
+                $EditorConfigContent = New-BrownserveEditorConfig @EditorConfigParams -ErrorAction 'Stop'
             }
             catch
             {
-                throw "Failed to create .editorconfig file.`n$($_.Exception.Message)"
+                throw "Failed to create .editorconfig file content.`n$($_.Exception.Message)"
             }
         }
 
