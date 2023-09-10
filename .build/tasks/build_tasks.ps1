@@ -859,9 +859,11 @@ task Tests ImportModule, UpdateModuleDocumentation, {
     Creates a NuGet package for the module
 .DESCRIPTION
     This prepares all the files required to ship a NuGet package.
+    Because we upload a NuGet package to both nuget.org _and_ GitHub we need to ensure we run this task if either of
+    those endpoints are targetted.
 #>
 task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, CreateModuleHelp, {
-    if ('nuget' -in $PublishTo)
+    if (('nuget' -in $PublishTo) -or ('GitHub' -in $PublishTo))
     {
         # We'll copy our build module to the nuget package and rename it to 'tools' 
         # as that seems to be the right way to do things
