@@ -660,6 +660,9 @@ task CreateModuleHelp UpdateModuleDocumentation, {
 .SYNOPSIS
     Compress the module so it can be uploaded to GitHub
 .DESCRIPTION
+    We don't use Compress-Archive as it doesn't behave consistently across platforms.
+    On Linux it will ignore "hidden" dot files and on Windows it will include them.
+    See (https://stackoverflow.com/q/53551418/10843454)
 #>
 task CompressModule CreateModuleHelp, {
     if ('GitHub' -in $PublishTo)
