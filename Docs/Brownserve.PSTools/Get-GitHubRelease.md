@@ -13,7 +13,7 @@ Gets a list of releases from a given GitHub repo
 ## SYNTAX
 
 ```
-Get-GitHubRelease [-RepoName] <String> [-GitHubOrg] <String> -GitHubToken <String> [<CommonParameters>]
+Get-GitHubRelease [-RepositoryOwner] <String> [-RepositoryName] <String> [-Token] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -33,48 +33,48 @@ Would get all releases from the `Acme/MyRepo` repository
 
 ## PARAMETERS
 
-### -GitHubOrg
-The GitHub org/user that owns the repository
+### -RepositoryName
+The name of the repository to query for releases
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: GitHubOrganisation, GitHubOrganization
+Aliases: RepoName
 
 Required: True
 Position: 1
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -GitHubToken
-The PAT to access the repo
+### -RepositoryOwner
+The owner of the repository
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -RepoName
-The GitHub repo to create the release against
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
+Aliases: GitHubOrganisation, GitHubOrganization, GitHubOrg
 
 Required: True
 Position: 0
 Default value: None
-Accept pipeline input: False
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Token
+GitHub access token
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: GitHubToken, GitHubPAT
+
+Required: True
+Position: 0
+Default value: None
+Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
@@ -83,7 +83,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### None
+### System.String
 ## OUTPUTS
 
 ### System.Object
