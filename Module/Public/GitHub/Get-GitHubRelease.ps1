@@ -3,44 +3,65 @@ function Get-GitHubRelease
     [CmdletBinding()]
     param
     (
-        # The GitHub repo to create the release against
+        # The org name from GitHub
         [Parameter(
             Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true,
             Position = 0
         )]
+        [Alias('GitHubOrganisation', 'GitHubOrganization', 'GitHubOrg')]
         [string]
-        $RepoName,
+        $RepositoryOwner,
 
-        # The organisation that the repo lives in
+        # The repository name to check for issues
         [Parameter(
             Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true,
             Position = 1
         )]
-        [Alias('GitHubOrganisation','GitHubOrganization')]
+        [Alias('RepoName')]
         [string]
-        $GitHubOrg,
+        $RepositoryName,
 
-        # The PAT to access the repo
+        # The GitHub PAT
         [Parameter(
-            Mandatory = $true
+            Mandatory = $true,
+            ValueFromPipelineByPropertyName = $true,
+            Position = 0
         )]
+        [Alias('GitHubToken', 'GitHubPAT')]
         [string]
-        $GitHubToken
+        $Token
     )
-    $Header = @{                                                                                                                                         
-        Authorization = "token $GitHubToken"
-        Accept        = 'application/vnd.github.v3+json'
-    }
-    $URI = "https://api.github.com/repos/$GitHubOrg/$RepoName/releases"
+    begin
+    {}
+    process
+    {
+        $Header = @{                                                                                                                                         
+            Authorization = "token $Token"
+            Accept        = 'application/vnd.github.v3+json'
+        }
+        $URI = "https://api.github.com/repos/$RepositoryOwner/$RepositoryName/releases"
 
-    Write-Verbose "Attempting to fetch releases from $URI"
-    try
-    {
-        $Request = Invoke-RestMethod -Headers $Header -Uri $URI -Method Get -FollowRelLink | Foreach-Object { $_ } # Needed because of https://github.com/PowerShell/PowerShell/issues/5526
+        Write-Verbose "Attempting to fetch releases from $URI"
+        try
+        {
+            $Request = Invoke-RestMethod -Headers $Header -Uri $URI -Method Get -FollowRelLink | ForEach-Object { $_ } # Needed because of https://github.com/PowerShell/PowerShell/issues/5526
+        }
+        catch
+        {
+            Write-Error $_.Exception.Message
+        }
     }
-    catch
+    end
     {
-        Write-Error $_.Exception.Message
+        if ($Request)
+        {
+            Return $Request
+        }
+        else
+        {
+            return $null
+        }
     }
-    Return $Request
 }
