@@ -21,6 +21,9 @@ Inserts a new changelog entry into a given changelog file
 ### [Add-GitChanges](./Brownserve.PSTools/Add-GitChanges.md)
 This cmdlet is a wrapper for the git command 'git add \<path\>'.
 
+### [Add-GitHubReleaseAsset](./Brownserve.PSTools/Add-GitHubReleaseAsset.md)
+Uploads a file to a GitHub release.
+
 ### [Add-ModuleHelp](./Brownserve.PSTools/Add-ModuleHelp.md)
 Creates XML MALM help for a PowerShell module
 
