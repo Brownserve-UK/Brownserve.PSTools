@@ -658,6 +658,31 @@ task CreateModuleHelp UpdateModuleDocumentation, {
 
 <#
 .SYNOPSIS
+    Compress the module so it can be uploaded to GitHub
+.DESCRIPTION
+#>
+task CompressModule CreateModuleHelp, {
+    if ('GitHub' -in $PublishTo)
+    {
+        $script:CompressedModule = Join-Path $global:BrownserveRepoBuildOutputDirectory "Brownserve.PSTools-$($Global:BuildVersion).tgz"
+        Write-Build White 'Compressing PowerShell module'
+        try
+        {
+            [System.IO.Compression.ZipFile]::CreateFromDirectory($global:BrownserveBuiltModuleDirectory, $script:CompressedModule)
+        }
+        catch
+        {
+            throw "Failed to compress module.`n$($_.Exception.Message)"
+        }
+    }
+    else
+    {
+        Write-Verbose 'GitHub not targetted, skipping creation of compressed module asset'
+    }
+}
+
+<#
+.SYNOPSIS
     Ensures line endings for tracked files are set to 'LF'
 .DESCRIPTION
     PowerShell seems to insist on doing inconsistent things with line endings when running on different OSes.
@@ -884,10 +909,12 @@ task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, C
 .SYNOPSIS
     Packs the nuget package ready for shipping off to nuget.org (or a private feed)
 .DESCRIPTION
-    Runs `nuget pack` to create a NuGet package of the module (but only if we're publishing to a NuGet feed)
+    Runs `nuget pack` to create a NuGet package of the module.
+    We upload this to both nuget.org _and_ GitHub as a release asset so we need to make sure we do this if either is
+    targetted
 #>
 task PackNuGetPackage PrepareNuGetPackage, {
-    if ('nuget' -in $PublishTo)
+    if (('nuget' -in $PublishTo) -or ('GitHub' -in $PublishTo))
     {
         Write-Build White 'Creating NuGet package'
         exec {
@@ -909,11 +936,11 @@ task PackNuGetPackage PrepareNuGetPackage, {
             }
             & $NugetCommand $NugetArguments
         }
-        $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName.$global:BuildVersion.nupkg" | Convert-Path
+        $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName-$global:BuildVersion.nupkg" | Convert-Path
     }
     else
     {
-        Write-Verbose 'Nuget not targeted, skipping...'
+        Write-Verbose 'Nuget and GitHub not targeted, skipping...'
     }
 }
 
@@ -924,7 +951,7 @@ task PackNuGetPackage PrepareNuGetPackage, {
     This task pushes the release up to the various endpoints we target.
     Endpoints can be configured in the $PublishTo parameter
 #>
-task PublishRelease CheckPreviousReleases, Tests, PackNuGetPackage, CheckForUncommittedChanges, {
+task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPackage, CheckForUncommittedChanges, {
     # Only push to nuget if we want to
     if ('nuget' -in $PublishTo)
     {
@@ -987,7 +1014,26 @@ task PublishRelease CheckPreviousReleases, Tests, PackNuGetPackage, CheckForUnco
             $ReleaseParams.Add('Prerelease', $true)
             $ReleaseParams.Add('TargetCommit', $script:CurrentCommitHash)
         }
-        New-GitHubRelease @ReleaseParams | Out-Null
+        $ReleaseResponse = New-GitHubRelease @ReleaseParams
+        
+        if ($script:CompressedModule)
+        {
+            Write-Build White 'Uploading compressed module as release asset'
+            Add-GitHubReleaseAsset `
+                -UploadURL = $ReleaseResponse.upload_url `
+                -Token $GitHubReleaseToken `
+                -FilePath $script:CompressedModule `
+                -ErrorAction 'Stop'
+        }
+        if ($script:nupkgPath)
+        {
+            Write-Build White 'Uploading nupkg as release asset'
+            Add-GitHubReleaseAsset `
+                -UploadURL = $ReleaseResponse.upload_url `
+                -Token $GitHubReleaseToken `
+                -FilePath $script:nupkgPath `
+                -ErrorAction 'Stop'
+        }
     }
     else
     {
