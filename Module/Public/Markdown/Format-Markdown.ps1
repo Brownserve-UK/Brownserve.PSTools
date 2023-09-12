@@ -384,7 +384,7 @@ function Format-Markdown
         else
         {
             Write-Verbose 'No changes made to markdown file.'
-            return $Markdown
+            return [string]$Markdown
         }
     }
 }
