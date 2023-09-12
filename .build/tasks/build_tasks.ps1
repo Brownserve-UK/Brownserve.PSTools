@@ -643,13 +643,15 @@ task UpdateModuleDocumentation ImportModule, {
 task FormatMarkdown UpdateModuleDocumentation, {
     Write-Build White 'Formatting markdown documentation'
     $script:ModuleDocFiles | ForEach-Object {
-        $FormattedModuleDocFiles += Format-Markdown `
-            -Path $_ `
+        $Path = $_
+        Write-Verbose "Formatting $Path"
+        $FormattedMarkdown = Format-Markdown `
+            -Path $Path `
             -ErrorAction 'Stop'
-        if ($FormattedModuleDocFiles)
-        {
-            $FormattedModuleDocFiles | Out-File -FilePath $_ -NoNewline -ErrorAction 'Stop'
-        }
+        Set-Content `
+            -Path $Path `
+            -Value $FormattedMarkdown `
+            -ErrorAction 'Stop'
     }
 }
 
