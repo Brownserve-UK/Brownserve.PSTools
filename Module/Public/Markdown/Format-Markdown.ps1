@@ -196,7 +196,7 @@ function Format-Markdown
                     }
                 }
                 # Match any lists
-                '^(\*|\-|\+|\d+\.)(\s|\w)+[^*]$'
+                '^(\*|\-|\+|\d+\.)(?!\*)(.*)*$'
                 {
                     Write-Verbose "Line $LineCount is a list."
                     # Ensure there is a space between the list marker and the list item text.
@@ -205,13 +205,19 @@ function Format-Markdown
                         Write-Debug "Adding space after list marker on line $LineCount"
                         $Line = $Line -replace '^(\*|\-|\+|\d+\.)', '$0 '
                     }
+                    # Ensure there is no more than one space between the list marker and the list item text.
+                    if ($Line -match '^(\*|\-|\+|\d+\.)(\s){2,}')
+                    {
+                        Write-Debug "Removing extra space after list marker on line $LineCount"
+                        $Line = $Line -replace '^(\*|\-|\+|\d+\.)(\s){2,}', '$1 '
+                    }
                     # Ensure there are blank lines before and after the list.
-                    if (($Return[-1] -ne '') -or ($Return[-1] -notmatch '^(\*|\-|\+|\d+\.)(\s|\w)+[^*]$'))
+                    if (($Return[-1] -ne '') -and ($Return[-1] -notmatch '^(\*|\-|\+|\d+\.)(?!\*)(.*)*$'))
                     {
                         Write-Debug "Adding blank line before list on line $LineCount"
                         $Return += ''
                     }
-                    if (($Markdown[$LineCount + 1] -ne '') -or ($Markdown[$LineCount + 1] -notmatch '^(\*|\-|\+|\d+\.)(\s|\w)+[^*]$'))
+                    if (($Markdown[$LineCount + 1] -ne '') -and ($Markdown[$LineCount + 1] -notmatch '^(\*|\-|\+|\d+\.)(?!\*)(.*)*$'))
                     {
                         Write-Debug "Adding blank line after list on line $LineCount"
                         $Return += $Line
@@ -240,7 +246,7 @@ function Format-Markdown
                             # Replace them with the correct header level (we increment the header level by 1)
                             Write-Debug "Converting emphasis-as-headers to header on line $LineCount"
                             $Line = $Line -replace '^(\*|_){1,}', ('#' * ($CurrentHeaderLevel + 1) + ' ')
-                            $Line = $Line -replace '(\*|_){1,}$', ('')
+                            $Line = $Line -replace '((\*|_){1,}(\s)*)', ''
                         }
                         'List'
                         {
