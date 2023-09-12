@@ -52,6 +52,13 @@ param
     [string]
     $ReleaseType,
 
+    # An optional release notice to include in the release
+    [Parameter(
+        Mandatory = $false
+    )]
+    [string]
+    $ReleaseNotice,
+
     # The branch this is being built from
     [Parameter(
         Mandatory = $true
@@ -381,6 +388,10 @@ task CreateChangelogEntry SetVersion, {
         RepositoryName  = $GitHubRepoName
         ChangelogObject = $script:Changelog
     }
+    if ($ReleaseNotice)
+    {
+        $NewChangelogEntryParams.Add('Notice', $ReleaseNotice)
+    }
     if ($GitHubStageReleaseToken)
     {
         $NewChangelogEntryParams.Add('Auto', $true)
@@ -611,11 +622,35 @@ task UpdateModuleDocumentation ImportModule, {
         Resolve-Path to fail.
     #>
     $Script:ModulePagePath = Join-Path $Global:BrownserveRepoDocsDirectory "$ModuleName.md" | Resolve-Path
-    $script:LineEndingFiles += (Get-ChildItem `
-            -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath $ModuleName)  `
-            -Filter *.md `
-            -Recurse | Select-Object -ExpandProperty 'FullName')
+    $script:ModuleDocFiles = Get-ChildItem `
+        -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath $ModuleName)  `
+        -Filter *.md `
+        -Recurse | Select-Object -ExpandProperty 'FullName'
+    $script:ModuleDocFiles += (Get-Item -Path $Script:ModulePagePath)
+    $script:LineEndingFiles += $script:ModuleDocFiles
     $script:LineEndingFiles += (Get-Item -Path $Script:ModulePagePath)
+}
+
+<#
+.SYNOPSIS
+    Formats the module documentation Markdown files.
+.DESCRIPTION
+    For now we only do this on our module documentation because it's the only thing we have that generates poorly
+    formatted markdown due to PlatyPS.
+    This results in a lot of false positives when linting the markdown files and also makes them harder to read.
+    This task will format the markdown files to be compliant with markdownlint.
+#>
+task FormatMarkdown UpdateModuleDocumentation, {
+    Write-Build White 'Formatting markdown documentation'
+    $script:ModuleDocFiles | ForEach-Object {
+        $FormattedModuleDocFiles += Format-Markdown `
+            -Path $_ `
+            -ErrorAction 'Stop'
+        if ($FormattedModuleDocFiles)
+        {
+            $FormattedModuleDocFiles | Out-File -FilePath $_ -NoNewline -ErrorAction 'Stop'
+        }
+    }
 }
 
 <#
@@ -986,7 +1021,7 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
     if ('PSGallery' -in $PublishTo)
     {
         Write-Build White 'Pushing to PSGallery'
-        <# 
+        <#
             For PSGallery the module needs to be in a directory named after itself... -_- (PowerShellGet is awful)
             2023-09-09: It gets EVEN MORE awful!
             It looks like PowerShellGet will automatically tag EVERY cmdlet which takes you over the 4000 NuGet character limit!!!
@@ -1020,7 +1055,7 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
             $ReleaseParams.Add('TargetCommit', $script:CurrentCommitHash)
         }
         $ReleaseResponse = New-GitHubRelease @ReleaseParams
-        
+
         if ($script:CompressedModule)
         {
             Write-Build White 'Uploading compressed module as release asset'
@@ -1057,19 +1092,43 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
 .SYNOPSIS
     Meta task for building the module.
 .DESCRIPTION
-    This task will run all the tasks required to build the module.
-    This task is useful for local development as it allows you to import the module and test cmdlets etc.
+    This task will run all the tasks required to build just the module.
+    It doesn't build the documentation, NuGet package or perform any tests.
+    This task is mostly here just to serve as a base for other tasks.
 #>
-task Build UseWorkingCopy, CreateModuleManifest, UpdateModuleDocumentation, CreateModuleHelp, SetLineEndings, {}
+task Build UseWorkingCopy, CreateModuleManifest, {}
+
+<#
+.SYNOPSIS
+    Meta task for building the module and importing it.
+.DESCRIPTION
+    This task will run all the tasks required to build the module and import it.
+    It does not build the documentation, NuGet package or perform any tests as these can take some time to complete.
+    This task is best used when developing new features locally as it allows you to quickly test your changes
+    interactively.
+#>
+task BuildAndImport Build, ImportModule, {}
+
+<#
+.SYNOPSIS
+    Meta task for building the module along with the documentation.
+.DESCRIPTION
+    This task will run all the tasks required to build the module and generate the documentation.
+    The documentation can take some time to generate, especially as it currently requires us to run a separate process
+    to replace the line endings and format the markdown.
+    This task is best ran after any local changes have largely been finalised as it will generate any documentation
+    required.
+#>
+task BuildWithDocs BuildAndImport, FormatMarkdown, CreateModuleHelp, SetLineEndings, {}
 
 <#
 .SYNOPSIS
     Meta task for building and testing the module.
 .DESCRIPTION
-    This task will build the module and perform unit tests on it.
-    This task is useful for completing more thorough testing of the module when developing locally.
+    This task performs the same actions as the previous tasks but also performs unit tests on the module.
+    This task is best used to thoroughly test any changes before committing them.
 #>
-task BuildAndTest Build, Tests, {}
+task BuildAndTest BuildWithDocs, Tests, {}
 
 <#
 .SYNOPSIS
@@ -1077,7 +1136,7 @@ task BuildAndTest Build, Tests, {}
 .DESCRIPTION
     This task will build the module, perform unit tests on it and then ensure there are no uncommitted changes
     resulting from the build.
-    This is the build we use for our pull_request CI pipeline.
+    This is the build we use for our pull_request CI pipeline and as such must pass before we can merge any changes.
 #>
 task BuildTestAndCheck BuildAndTest, CheckForUncommittedChanges, {}
 
