@@ -69,6 +69,17 @@ function Format-Markdown
         {
             $AddToReturn = $true
             Write-Verbose "Processing line $LineCount"
+
+            <#
+                Use regex to parse the line.
+                This isn't the prettiest and here be dragons.
+                At the moment we're quite liberal with what we match as it's easier to write simpler regex and then
+                try to catch the edge cases later.
+                For example writing regex to match all possible list types might accidentally catch a horizontal rule
+                so instead of trying to filter that out in the regex we just check for it later with more specific
+                regex and move on if it's a match.
+                We also don't fully support every case in markdownlint yet, PR's are very much welcome.
+            #>
             switch -Regex ($Line)
             {
                 # Match any horizontal rules or metadata
@@ -198,6 +209,21 @@ function Format-Markdown
                 # Match any lists
                 '^(\*|\-|\+|\d+\.)(?!\*)(.*)*$'
                 {
+                    Write-Debug "Checking if line $LineCount is a list."
+                    # Ensure we've definitely got a list and not and not something that's been caught by the regex.
+                    if ($Line -match '^---$')
+                    {
+                        # This is a horizontal rule/metadata header, not a list.
+                        Write-Debug "Line $LineCount is a horizontal rule/metadata header."
+                        continue
+                    }
+                    # Ensure we're not matching any emphasis
+                    if ($Line -match '^(\*){1,}(\w)(.*)(\w)(\*){1,}$')
+                    {
+                        # This is emphasis, not a list.
+                        Write-Debug "Line $LineCount is emphasis."
+                        continue
+                    }
                     Write-Verbose "Line $LineCount is a list."
                     # Ensure there is a space between the list marker and the list item text.
                     if ($Line -notmatch '^(\*|\-|\+|\d+\.) ')
