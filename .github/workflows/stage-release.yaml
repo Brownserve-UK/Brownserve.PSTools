@@ -12,6 +12,10 @@ on:
           - major
           - minor
           - patch
+      notice:
+        description: 'An optional notice to display on this release'
+        required: false
+        type: string
 
 jobs:
   stage-release:
@@ -41,15 +45,21 @@ jobs:
         shell: pwsh
         env:
           GitHubPAT: ${{ secrets.AUTOMATED_BUILD_GITHUB_PAT }}
+          ReleaseNotice: ${{ inputs.notice }}
         run: |
-            ./Brownserve.PSTools/.build/build.ps1 `
-              -BranchName $env:GITHUB_REF `
-              -GitHubRepoName 'Brownserve.PSTools' `
-              -Build 'StageRelease' `
-              -GitHubStageReleaseToken $env:GitHubPAT `
-              -ReleaseType '${{ inputs.release_type}}' `
-              -UseWorkingCopy `
-              -Verbose
+            $Params = @{
+              BranchName = $env:GITHUB_REF
+              GitHubRepoName = 'Brownserve.PSTools'
+              Build = 'StageRelease'
+              GitHubStageReleaseToken = $env:GitHubPAT
+              ReleaseType = '${{ inputs.release_type}}'
+              UseWorkingCopy = $true
+              Verbose = $true
+            }
+            if ($env:ReleaseNotice) {
+              $Params.Add('ReleaseNotice', $env:ReleaseNotice)
+            }
+            ./Brownserve.PSTools/.build/build.ps1 @Params
     # Step 4: Push a notification to Slack
       - name: notify-slack
         shell: pwsh
