@@ -13,9 +13,9 @@ Creates a release on GitHub
 
 ## SYNTAX
 
-```text
-New-GitHubRelease [-Name] <String> [-Tag] <String> [-Description] <String> [-RepoName] <String>
- [-GitHubOrg] <String> -GitHubToken <String> [-Prerelease] [-TargetCommit <String>] [<CommonParameters>]
+```
+New-GitHubRelease [-Name] <String> [-Tag] <String> [-Description] <String> [-RepositoryName] <String>
+ [-RepositoryOwner] <String> -Token <String> [-Prerelease] [-TargetCommit <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -56,40 +56,7 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -GitHubOrg
-
-The GitHub org/user that owns the repository
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases: GitHubOrganisation, GitHubOrganization
-
-Required: True
-Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -GitHubToken
-
-The PAT to access the repo
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Name
-
 The name of the release
 
 ```yaml
@@ -105,7 +72,6 @@ Accept wildcard characters: False
 ```
 
 ### -Prerelease
-
 Set if this is a prerelease
 
 ```yaml
@@ -120,14 +86,13 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -RepoName
-
-The GitHub repo to create the release against
+### -RepositoryName
+The name of the repository to create the release in
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: RepoName
 
 Required: True
 Position: 3
@@ -136,8 +101,22 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -Tag
+### -RepositoryOwner
+The owner of the repository to create the release in
 
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: GitHubOrganisation, GitHubOrganization, GitHubOrg
+
+Required: True
+Position: 4
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Tag
 The tag to use for the release, should not contain any whitespace.
 
 ```yaml
@@ -153,7 +132,6 @@ Accept wildcard characters: False
 ```
 
 ### -TargetCommit
-
 The target commitish to use (if any)
 
 ```yaml
@@ -162,6 +140,21 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Token
+The GitHub PAT
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: GitHubToken, GitHubPAT
+
+Required: True
 Position: Named
 Default value: None
 Accept pipeline input: False

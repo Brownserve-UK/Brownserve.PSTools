@@ -32,24 +32,26 @@ function New-GitHubRelease
             Mandatory = $true,
             Position = 3
         )]
+        [Alias('RepoName')]
         [string]
-        $RepoName,
+        $RepositoryName,
 
         # The Organization that the repo lives in
         [Parameter(
             Mandatory = $true,
             Position = 4
         )]
-        [Alias('GitHubOrganisation','GitHubOrganization')]
+        [Alias('GitHubOrganisation', 'GitHubOrganization', 'GitHubOrg')]
         [string]
-        $GitHubOrg,
+        $RepositoryOwner,
 
         # The PAT to access the repo
         [Parameter(
             Mandatory = $true
         )]
+        [Alias('GitHubToken', 'GitHubPAT')]
         [string]
-        $GitHubToken,
+        $Token,
 
         # Set if this is a prerelease
         [Parameter(
@@ -65,44 +67,51 @@ function New-GitHubRelease
         [string]
         $TargetCommit
     )
-    if ($Tag -match '\s')
+    begin {}
+    process
     {
-        throw "Tag $Tag contains whitespace"
+        if ($Tag -match '\s')
+        {
+            throw "Tag $Tag contains whitespace"
+        }
+        $Header = @{
+            Authorization = "token $Token"
+            Accept        = 'application/vnd.github.v3+json'
+        }
+        $URI = "https://api.github.com/repos/$RepositoryOwner/$RepositoryName/releases"
+        $Body = @{
+            tag_name = $Tag
+            name     = $Name
+            body     = $Description
+        }
+        if ($Prerelease)
+        {
+            $Body.Add('prerelease', $true)
+        }
+        if ($TargetCommit)
+        {
+            $Body.Add('target_commitish', $TargetCommit)
+        }
+        try
+        {
+            $BodyJSON = $Body | ConvertTo-Json
+        }
+        catch
+        {
+            Write-Error "Failed to convert PR body to JSON.`n$_.Exception.Message"
+        }
+        Write-Verbose "Attempting to create release $Tag at $URI"
+        try
+        {
+            $Request = Invoke-RestMethod -Headers $Header -Uri $URI -Body $BodyJSON -Method Post
+        }
+        catch
+        {
+            Write-Error $_.Exception.Message
+        }
     }
-    $Header = @{                                                                                                                                         
-        Authorization = "token $GitHubToken"
-        Accept        = 'application/vnd.github.v3+json'
-    }
-    $URI = "https://api.github.com/repos/$GitHubOrg/$RepoName/releases"
-    $Body = @{
-        tag_name = $Tag
-        name = $Name
-        body = $Description
-    }
-    if ($Prerelease)
+    end
     {
-        $Body.Add('prerelease',$true)
+        Return $Request
     }
-    if ($TargetCommit)
-    {
-        $Body.Add('target_commitish',$TargetCommit)
-    }
-    try
-    {
-        $BodyJSON = $Body | ConvertTo-Json
-    }
-    catch
-    {
-        Write-Error "Failed to convert PR body to JSON.`n$_.Exception.Message"
-    }
-    Write-Verbose "Attempting to create release $Tag at $URI"
-    try
-    {
-        $Request = Invoke-RestMethod -Headers $Header -Uri $URI -Body $BodyJSON -Method Post
-    }
-    catch
-    {
-        Write-Error $_.Exception.Message
-    }
-    Return $Request
 }

@@ -37,7 +37,7 @@ function Get-GitHubRelease
     {}
     process
     {
-        $Header = @{                                                                                                                                         
+        $Header = @{
             Authorization = "token $Token"
             Accept        = 'application/vnd.github.v3+json'
         }

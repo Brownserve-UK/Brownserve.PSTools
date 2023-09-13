@@ -7,7 +7,7 @@ function Get-GitHubPullRequests
         [Parameter(
             Mandatory = $true
         )]
-        [Alias('GitHubToken','GitHubPAT')]
+        [Alias('GitHubToken', 'GitHubPAT')]
         [string]
         $Token,
 
@@ -17,7 +17,7 @@ function Get-GitHubPullRequests
             ValueFromPipelineByPropertyName = $true,
             Position = 2
         )]
-        [Alias('GitHubOrganisation','GitHubOrganization','GitHubOrg')]
+        [Alias('GitHubOrganisation', 'GitHubOrganization', 'GitHubOrg')]
         [string]
         $RepositoryOwner,
 
@@ -27,7 +27,7 @@ function Get-GitHubPullRequests
             ValueFromPipelineByPropertyName = $true,
             Position = 1
         )]
-        [Alias('GitHubRepo','RepoName')]
+        [Alias('GitHubRepo', 'RepoName')]
         [string]
         $RepositoryName,
 
@@ -40,34 +40,42 @@ function Get-GitHubPullRequests
         [GitHubIssueState]
         $State = 'open'
     )
-    $Header = @{
-        Authorization = "token $token"
-        Accept        = 'application/vnd.github.v3+json'
-    }
-    # The GitHub API requires the state to be lowercase, our enum is uppercase
-    $StateStr = ($State | Out-String).ToLower()
-    $URI = "https://api.github.com/repos/$RepositoryOwner/$RepositoryName/pulls?state=$StateStr"
-    Write-Verbose "Attempting to get open pull requests from $URI"
-    try
+    begin
+    {}
+    process
     {
-        # FollowReLink should give free pagination! 🎉
-        $Response = Invoke-RestMethod `
-            -Headers $Header `
-            -Uri $URI `
-            -FollowRelLink `
-            -ErrorAction 'Stop' | 
-            ForEach-Object {$_} # Needed cos https://github.com/PowerShell/PowerShell/issues/5526
+        $Header = @{
+            Authorization = "token $token"
+            Accept        = 'application/vnd.github.v3+json'
+        }
+        # The GitHub API requires the state to be lowercase, our enum is uppercase
+        $StateStr = ($State | Out-String).ToLower()
+        $URI = "https://api.github.com/repos/$RepositoryOwner/$RepositoryName/pulls?state=$StateStr"
+        Write-Verbose "Attempting to get open pull requests from $URI"
+        try
+        {
+            # FollowReLink should give free pagination! 🎉
+            $Response = Invoke-RestMethod `
+                -Headers $Header `
+                -Uri $URI `
+                -FollowRelLink `
+                -ErrorAction 'Stop' | 
+                ForEach-Object { $_ } # Needed cos https://github.com/PowerShell/PowerShell/issues/5526
+        }
+        catch
+        {
+            throw "RestMethod failed: $($_.Exception.Message)"
+        }
     }
-    catch
+    end
     {
-        throw "RestMethod failed: $($_.Exception.Message)"
-    }
-    if ($Response)
-    {
-        Return $Response
-    }
-    else
-    {
-        Return $null
+        if ($Response)
+        {
+            Return $Response
+        }
+        else
+        {
+            Return $null
+        }
     }
 }

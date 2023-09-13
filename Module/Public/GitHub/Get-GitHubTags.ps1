@@ -8,39 +8,49 @@ function Get-GitHubTags
             Mandatory = $true,
             Position = 0
         )]
+        [Alias('RepoName')]
         [string]
-        $RepoName,
+        $RepositoryName,
 
         # The organisation that the repo lives in
         [Parameter(
             Mandatory = $true,
             Position = 1
         )]
-        [Alias('GitHubOrganisation','GitHubOrganization')]
+        [Alias('GitHubOrganisation', 'GitHubOrganization', 'GitHubOrg')]
         [string]
-        $GitHubOrg,
+        $RepositoryOwner,
 
         # The PAT to access the repo
         [Parameter(
             Mandatory = $true
         )]
+        [Alias('GitHubToken', 'GitHubPAT')]
         [string]
-        $GitHubToken
+        $Token
     )
-    $Header = @{                                                                                                                                         
-        Authorization = "token $GitHubToken"
-        Accept        = 'application/vnd.github.v3+json'
-    }
-    $URI = "https://api.github.com/repos/$GitHubOrg/$RepoName/tags"
+    begin
+    {}
+    process
+    {
+        $Header = @{
+            Authorization = "token $Token"
+            Accept        = 'application/vnd.github.v3+json'
+        }
+        $URI = "https://api.github.com/repos/$RepositoryOwner/$RepositoryName/tags"
 
-    Write-Verbose "Attempting to fetch tags from $URI"
-    try
-    {
-        $Request = Invoke-RestMethod -Headers $Header -Uri $URI -Method Get -FollowRelLink | Foreach-Object { $_ } # Needed because of https://github.com/PowerShell/PowerShell/issues/5526
+        Write-Verbose "Attempting to fetch tags from $URI"
+        try
+        {
+            $Request = Invoke-RestMethod -Headers $Header -Uri $URI -Method Get -FollowRelLink | ForEach-Object { $_ } # Needed because of https://github.com/PowerShell/PowerShell/issues/5526
+        }
+        catch
+        {
+            Write-Error $_.Exception.Message
+        }
     }
-    catch
+    end
     {
-        Write-Error $_.Exception.Message
+        Return $Request
     }
-    Return $Request
 }

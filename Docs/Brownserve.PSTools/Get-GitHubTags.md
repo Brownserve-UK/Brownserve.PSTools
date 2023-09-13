@@ -13,8 +13,9 @@ Gets a list of tags for a given GitHub repository
 
 ## SYNTAX
 
-```text
-Get-GitHubTags [-RepoName] <String> [-GitHubOrg] <String> -GitHubToken <String> [<CommonParameters>]
+```
+Get-GitHubTags [-RepositoryName] <String> [-RepositoryOwner] <String> -Token <String> [<CommonParameters>]
+
 ```
 
 ## DESCRIPTION
@@ -33,14 +34,28 @@ This would fetch all the tags for the repository "myRepo" which lives in the Git
 
 ## PARAMETERS
 
-### -GitHubOrg
-
-The organisation/owner that houses the repository you wish to query
+### -RepositoryName
+The name of the repository to query
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases: GitHubOrganisation, GitHubOrganization
+Aliases: RepoName
+
+Required: True
+Position: 0
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -RepositoryOwner
+The owner of the repository to query
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: GitHubOrganisation, GitHubOrganization, GitHubOrg
 
 Required: True
 Position: 1
@@ -49,33 +64,16 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -GitHubToken
-
-The token with the relevant permissions to access the repository
+### -Token
+The GitHub PAT
 
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: GitHubToken, GitHubPAT
 
 Required: True
 Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -RepoName
-
-The name of the repo to query
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
