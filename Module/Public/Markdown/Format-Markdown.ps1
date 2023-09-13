@@ -85,38 +85,42 @@ function Format-Markdown
                 # Match any horizontal rules or metadata
                 '^---'
                 {
-                    <#
+                    # Ignore anything in a code block.
+                    if (!$CodeBlockStart)
+                    {
+                        <#
                         Ensure that any metadata is only at the start of the file.
                         We don't perform any formatting on the metadata itself as most tools don't seem to care about it.
                     #>
-                    # If the line count is 0 then we are at the start of the file.
-                    if ($LineCount -eq 0)
-                    {
-                        $Metadata = $true
-                    }
-                    else
-                    {
-                        # If the metadata variable is set to true then we have already seen metadata's start
-                        # this line is probably the end of the metadata.
-                        if ($Metadata -eq $true)
+                        # If the line count is 0 then we are at the start of the file.
+                        if ($LineCount -eq 0)
                         {
-                            Write-Debug "Metadata runs between lines 0 and $($LineCount)"
-                            # Set the start of the document to the line after the metadata.
-                            $StartOfDocument = $LineCount + 1
-                            # Set back to false so we don't keep looking for metadata - it should only be at the start of the file.
-                            $Metadata = $false
+                            $Metadata = $true
                         }
                         else
                         {
-                            # If the previous line was blank then this line is probably actually a horizontal rule.
-                            if ($Markdown[$LineCount - 1] -eq '')
+                            # If the metadata variable is set to true then we have already seen metadata's start
+                            # this line is probably the end of the metadata.
+                            if ($Metadata -eq $true)
                             {
-                                # Do nothing
+                                Write-Debug "Metadata runs between lines 0 and $($LineCount)"
+                                # Set the start of the document to the line after the metadata.
+                                $StartOfDocument = $LineCount + 1
+                                # Set back to false so we don't keep looking for metadata - it should only be at the start of the file.
+                                $Metadata = $false
                             }
                             else
                             {
-                                # Just warn, this requires manual intervention.
-                                Write-Warning "Metadata should only be at the start of the file. Some potential metadata was found starting at line $($LineCount)"
+                                # If the previous line was blank then this line is probably actually a horizontal rule.
+                                if ($Markdown[$LineCount - 1] -eq '')
+                                {
+                                    # Do nothing
+                                }
+                                else
+                                {
+                                    # Just warn, this requires manual intervention.
+                                    Write-Warning "Metadata should only be at the start of the file. Some potential metadata was found starting at line $($LineCount)"
+                                }
                             }
                         }
                     }
@@ -124,172 +128,191 @@ function Format-Markdown
                 # Match any "title: " metadata lines
                 '^title\: .*'
                 {
-                    <#
-                        Ensure the metadata does not include a title.
-                        (we enforce the use of the first heading as the title instead)
-                    #>
-                    if ($Metadata -eq $true)
+                    if (!$CodeBlockStart)
                     {
-                        Write-Warning 'Do not use title in metadata. Use the first heading instead.'
+                        <#
+                            Ensure the metadata does not include a title.
+                            (we enforce the use of the first heading as the title instead)
+                        #>
+                        if ($Metadata -eq $true)
+                        {
+                            Write-Warning 'Do not use title in metadata. Use the first heading instead.'
+                        }
                     }
                 }
                 # Match any headings
                 '^#{1,6}'
                 {
-                    $Header = $Matches[0]
-                    # Ensure we're not jumping more than one header level at a time.
-                    if ($Header.Length -gt ($CurrentHeaderLevel + 1))
+                    if (!$CodeBlockStart)
                     {
-                        Write-Debug "Header level mismatch on line $LineCount.`nExpected: $($CurrentHeaderLevel + 1)`nGot: $($Header.Length)"
-                        $Line = $Line -replace '^#{1,6}', ('#' * ($CurrentHeaderLevel + 1))
-                        $CurrentHeaderLevel++
-                    }
-                    else
-                    {
-                        # We might be going back up a header level so ensure we set the current header level correctly.
-                        $CurrentHeaderLevel = $Header.Length
-                    }
-
-                    # Ensure there is a space between the last hash and the heading text.
-                    if ($Line -notmatch '^#{1,6} ')
-                    {
-                        Write-Debug "Adding space after header on line $LineCount"
-                        $Line = $Line -replace '^#{1,6}', '$0 '
-                    }
-
-                    # Special case for the first header aka the title.
-                    if ($CurrentHeaderLevel -eq 1)
-                    {
-                        <#
-                            The title should be on the first line of the document.
-                            It would be nice to move it but I couldn't figure out how to do that while maintaining the
-                            new lines around it.
-                            So just warn the user and let them fix it for now.
-                        #>
-                        if ($LineCount -ne $StartOfDocument)
+                        $Header = $Matches[0]
+                        # Ensure we're not jumping more than one header level at a time.
+                        if ($Header.Length -gt ($CurrentHeaderLevel + 1))
                         {
-                            Write-Warning "Title appears on line $LineCount. It should be on line $StartOfDocument."
-                        }
-                        if (!$Title)
-                        {
-                            $Title = $Line
+                            Write-Debug "Header level mismatch on line $LineCount.`nExpected: $($CurrentHeaderLevel + 1)`nGot: $($Header.Length)"
+                            $Line = $Line -replace '^#{1,6}', ('#' * ($CurrentHeaderLevel + 1))
+                            $CurrentHeaderLevel++
                         }
                         else
                         {
-                            Write-Debug "Title already set on line $StartOfDocument. New title found on line $LineCount. Convert to heading."
-                            # Always use ## to replace the title.
-                            $Line = $Line -replace '^#{1,6}', '##'
-                            $CurrentHeaderLevel = 2
+                            # We might be going back up a header level so ensure we set the current header level correctly.
+                            $CurrentHeaderLevel = $Header.Length
                         }
-                    }
 
-                    # Ensure there are blank lines before and after the heading.
-                    if ($Return[-1] -ne '')
-                    {
-                        Write-Debug "Adding blank line before header on line $LineCount"
-                        $Return += ''
-                    }
-                    if ($Markdown[$LineCount + 1] -ne '')
-                    {
-                        Write-Debug "Adding blank line after header on line $LineCount"
-                        $Return += $Line
-                        $Line = ''
+                        # Ensure there is a space between the last hash and the heading text.
+                        if ($Line -notmatch '^#{1,6} ')
+                        {
+                            Write-Debug "Adding space after header on line $LineCount"
+                            $Line = $Line -replace '^#{1,6}', '$0 '
+                        }
+
+                        # Special case for the first header aka the title.
+                        if ($CurrentHeaderLevel -eq 1)
+                        {
+                            <#
+                                The title should be on the first line of the document.
+                                It would be nice to move it but I couldn't figure out how to do that while maintaining the
+                                new lines around it.
+                                So just warn the user and let them fix it for now.
+                            #>
+                            if ($LineCount -ne $StartOfDocument)
+                            {
+                                # Disabled for now as I couldn't figure out how to make this work with whitespace
+                                # Write-Warning "Title appears on line $LineCount. It should be on line $StartOfDocument."
+                            }
+                            if (!$Title)
+                            {
+                                $Title = $Line
+                            }
+                            else
+                            {
+                                Write-Debug "Title already set on line $StartOfDocument. New title found on line $LineCount. Convert to heading."
+                                # Always use ## to replace the title.
+                                $Line = $Line -replace '^#{1,6}', '##'
+                                $CurrentHeaderLevel = 2
+                            }
+                        }
+
+                        # Ensure there are blank lines before and after the heading.
+                        if ($Return[-1] -ne '')
+                        {
+                            Write-Debug "Adding blank line before header on line $LineCount"
+                            $Return += ''
+                        }
+                        if ($Markdown[$LineCount + 1] -ne '')
+                        {
+                            Write-Debug "Adding blank line after header on line $LineCount"
+                            $Return += $Line
+                            $Line = ''
+                        }
                     }
                 }
                 # Match whitespace at the end of a line
                 '\s+$'
                 {
-                    # Ensure that there is no more than 2 spaces at the end of a line.
-                    if ($Line -match '\s{3,}$')
+                    if (!$CodeBlockStart)
                     {
-                        Write-Debug "Removing whitespace at the end of line $LineCount"
-                        $Line = $Line -replace '\s{3,}$', '  '
+                        # Ensure that there is no more than 2 spaces at the end of a line.
+                        if ($Line -match '\s{3,}$')
+                        {
+                            Write-Debug "Removing whitespace at the end of line $LineCount"
+                            $Line = $Line -replace '\s{3,}$', '  '
+                        }
                     }
                 }
                 # Match any lists
                 '^(\*|\-|\+|\d+\.)(?!\*)(.*)*$'
                 {
-                    Write-Debug "Checking if line $LineCount is a list."
-                    # Ensure we've definitely got a list and not and not something that's been caught by the regex.
-                    if ($Line -match '^---$')
+                    if (!$CodeBlockStart)
                     {
-                        # This is a horizontal rule/metadata header, not a list.
-                        Write-Debug "Line $LineCount is a horizontal rule/metadata header."
-                        continue
-                    }
-                    # Ensure we're not matching any emphasis
-                    if ($Line -match '^(\*){1,}(\w)(.*)(\w)(\*){1,}$')
-                    {
-                        # This is emphasis, not a list.
-                        Write-Debug "Line $LineCount is emphasis."
-                        continue
-                    }
-                    Write-Verbose "Line $LineCount is a list."
-                    # Ensure there is a space between the list marker and the list item text.
-                    if ($Line -notmatch '^(\*|\-|\+|\d+\.) ')
-                    {
-                        Write-Debug "Adding space after list marker on line $LineCount"
-                        $Line = $Line -replace '^(\*|\-|\+|\d+\.)', '$0 '
-                    }
-                    # Ensure there is no more than one space between the list marker and the list item text.
-                    if ($Line -match '^(\*|\-|\+|\d+\.)(\s){2,}')
-                    {
-                        Write-Debug "Removing extra space after list marker on line $LineCount"
-                        $Line = $Line -replace '^(\*|\-|\+|\d+\.)(\s){2,}', '$1 '
-                    }
-                    # Ensure there are blank lines before and after the list.
-                    if (($Return[-1] -ne '') -and ($Return[-1] -notmatch '^(\*|\-|\+|\d+\.)(?!\*)(.*)*$'))
-                    {
-                        Write-Debug "Adding blank line before list on line $LineCount"
-                        $Return += ''
-                    }
-                    if (($Markdown[$LineCount + 1] -ne '') -and ($Markdown[$LineCount + 1] -notmatch '^(\*|\-|\+|\d+\.)(?!\*)(.*)*$'))
-                    {
-                        Write-Debug "Adding blank line after list on line $LineCount"
-                        $Return += $Line
-                        $Line = ''
+                        Write-Debug "Checking if line $LineCount is a list."
+                        # Ensure we've definitely got a list and not and not something that's been caught by the regex.
+                        if ($Line -match '^---$')
+                        {
+                            # This is a horizontal rule/metadata header, not a list.
+                            Write-Debug "Line $LineCount is a horizontal rule/metadata header."
+                            continue
+                        }
+                        # Ensure we're not matching any emphasis
+                        if ($Line -match '^(\*){1,}(\w)(.*)(\w)(\*){1,}$')
+                        {
+                            # This is emphasis, not a list.
+                            Write-Debug "Line $LineCount is emphasis."
+                            continue
+                        }
+                        Write-Verbose "Line $LineCount is a list."
+                        # Ensure there is a space between the list marker and the list item text.
+                        if ($Line -notmatch '^(\*|\-|\+|\d+\.) ')
+                        {
+                            Write-Debug "Adding space after list marker on line $LineCount"
+                            $Line = $Line -replace '^(\*|\-|\+|\d+\.)', '$0 '
+                        }
+                        # Ensure there is no more than one space between the list marker and the list item text.
+                        if ($Line -match '^(\*|\-|\+|\d+\.)(\s){2,}')
+                        {
+                            Write-Debug "Removing extra space after list marker on line $LineCount"
+                            $Line = $Line -replace '^(\*|\-|\+|\d+\.)(\s){2,}', '$1 '
+                        }
+                        # Ensure there are blank lines before and after the list.
+                        if (($Return[-1] -ne '') -and ($Return[-1] -notmatch '^(\*|\-|\+|\d+\.)(?!\*)(.*)*$'))
+                        {
+                            Write-Debug "Adding blank line before list on line $LineCount"
+                            $Return += ''
+                        }
+                        if (($Markdown[$LineCount + 1] -ne '') -and ($Markdown[$LineCount + 1] -notmatch '^(\*|\-|\+|\d+\.)(?!\*)(.*)*$'))
+                        {
+                            Write-Debug "Adding blank line after list on line $LineCount"
+                            $Return += $Line
+                            $Line = ''
+                        }
                     }
                 }
                 # Match any emphasis-as-headers
                 '^(\*|_){1,}(\w{1,})((\*|_){1,}(\s)*)$'
                 {
-                    <#
-                        We actually match more aggressively than most markdownlint rules.
-                        This is because sometimes we have 
-                    #>
-                    switch ($EmphasisAsHeaderConversion)
+                    if (!$CodeBlockStart)
                     {
                         <#
-                            Let the user set what kind of replacement they want,
-                            it's pretty hard to guess what they want.
+                            We actually match more aggressively than most markdownlint rules.
+                            This is because sometimes we have 
                         #>
-                        'Header'
+                        switch ($EmphasisAsHeaderConversion)
                         {
-                            if ($CurrentHeaderLevel -ge 6)
+                            <#
+                                Let the user set what kind of replacement they want,
+                                it's pretty hard to guess what they want.
+                            #>
+                            'Header'
                             {
-                                throw "Cannot convert emphasis-as-headers to header.`nHeader level is too deep. The maximum header level is 6."
+                                if ($CurrentHeaderLevel -ge 6)
+                                {
+                                    throw "Cannot convert emphasis-as-headers to header.`nHeader level is too deep. The maximum header level is 6."
+                                }
+                                # Replace them with the correct header level (we increment the header level by 1)
+                                Write-Debug "Converting emphasis-as-headers to header on line $LineCount"
+                                $Line = $Line -replace '^(\*|_){1,}', ('#' * ($CurrentHeaderLevel + 1) + ' ')
+                                $Line = $Line -replace '((\*|_){1,}(\s)*)', ''
                             }
-                            # Replace them with the correct header level (we increment the header level by 1)
-                            Write-Debug "Converting emphasis-as-headers to header on line $LineCount"
-                            $Line = $Line -replace '^(\*|_){1,}', ('#' * ($CurrentHeaderLevel + 1) + ' ')
-                            $Line = $Line -replace '((\*|_){1,}(\s)*)', ''
+                            'List'
+                            {
+                                Write-Debug "Converting emphasis-as-headers to list heading on line $LineCount"
+                                $Line = $Line -replace '^(\*|_){1,}', '$0:'
+                            }
+                            Default {}
                         }
-                        'List'
-                        {
-                            Write-Debug "Converting emphasis-as-headers to list heading on line $LineCount"
-                            $Line = $Line -replace '^(\*|_){1,}', '$0:'
-                        }
-                        Default {}
                     }
                 }
                 # Match any empty lines
                 '^$'
                 {
-                    # Ensure there is only one blank line between content.
-                    if ($Markdown[$LineCount - 1] -eq '')
+                    if (!$CodeBlockStart)
                     {
-                        Write-Debug "Removing blank line on line $LineCount"
-                        $AddToReturn = $false
+                        # Ensure there is only one blank line between content.
+                        if ($Markdown[$LineCount - 1] -eq '')
+                        {
+                            Write-Debug "Removing blank line on line $LineCount"
+                            $AddToReturn = $false
+                        }
                     }
                 }
                 # Match code blocks
