@@ -79,7 +79,14 @@ function Add-BrownserveChangelogEntry
         # Set the content of the changelog
         try
         {
-            Set-Content $ChangelogPath -Value $NewText
+            Set-Content $ChangelogPath -Value $NewText -ErrorAction 'Stop'
+            <#
+                PowerShell seems to insist on doing inconsistent things with line endings when running on different OSes.
+                This results in constant line ending change diffs in git which no amount of gitattributes seems to fix.
+                Therefore we'll just force the line endings to be LF.
+                This helps to keep the git history clean and avoid breaking builds.
+            #>
+            Set-LineEndings -Path $ChangelogPath -LineEnding LF -ErrorAction 'Stop'
         }
         catch
         {

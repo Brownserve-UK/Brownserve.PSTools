@@ -146,7 +146,6 @@ $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec
 $script:GitHubRepoURI = "https://github.com/$GitHubRepoOwner/$GitHubRepoName"
 $Script:BuiltModulePath = (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1")
 $script:TrackedFiles = @()
-$script:LineEndingFiles = @()
 
 <#
     Work out if this is a production release depending on the branch we're building from
@@ -430,7 +429,6 @@ task UpdateChangelog CreateChangelogEntry, {
     {
         throw "Failed to update changelog. `n$($_.Exception.Message)"
     }
-    $script:LineEndingFiles += $script:ChangelogPath
     $script:TrackedFiles += ($script:ChangelogPath | Convert-Path)
 }
 
@@ -622,37 +620,6 @@ task UpdateModuleDocumentation ImportModule, {
         Resolve-Path to fail.
     #>
     $Script:ModulePagePath = Join-Path $Global:BrownserveRepoDocsDirectory "$ModuleName.md" | Resolve-Path
-    $script:ModuleDocFiles = Get-ChildItem `
-        -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath $ModuleName)  `
-        -Filter *.md `
-        -Recurse | Select-Object -ExpandProperty 'FullName'
-    $script:ModuleDocFiles += (Get-Item -Path $Script:ModulePagePath)
-    $script:LineEndingFiles += $script:ModuleDocFiles
-    $script:LineEndingFiles += (Get-Item -Path $Script:ModulePagePath)
-}
-
-<#
-.SYNOPSIS
-    Formats the module documentation Markdown files.
-.DESCRIPTION
-    For now we only do this on our module documentation because it's the only thing we have that generates poorly
-    formatted markdown due to PlatyPS.
-    This results in a lot of false positives when linting the markdown files and also makes them harder to read.
-    This task will format the markdown files to be compliant with markdownlint.
-#>
-task FormatMarkdown UpdateModuleDocumentation, {
-    Write-Build White 'Formatting markdown documentation'
-    $script:ModuleDocFiles | ForEach-Object {
-        $Path = $_
-        Write-Verbose "Formatting $Path"
-        $FormattedMarkdown = Format-Markdown `
-            -Path $Path `
-            -ErrorAction 'Stop'
-        Set-Content `
-            -Path $Path `
-            -Value $FormattedMarkdown `
-            -ErrorAction 'Stop'
-    }
 }
 
 <#
@@ -723,33 +690,6 @@ task CompressModule CreateModuleHelp, {
 
 <#
 .SYNOPSIS
-    Ensures line endings for tracked files are set to 'LF'
-.DESCRIPTION
-    PowerShell seems to insist on doing inconsistent things with line endings when running on different OSes.
-    This results in constant line ending change diffs in git which fails the build.
-    Therefore some files that are created as part of the build need to have their line endings set to 'LF' to ensure
-    consistency.
-
-    !! This task has no dependencies as it should be run after all other tasks that may modify tracked files so be
-    !! careful with where you place it in the build.
-#>
-task SetLineEndings {
-    if ($script:LineEndingFiles.Count -gt 0)
-    {
-        Write-Build White 'Ensuring line endings are consistent'
-        Set-LineEndings `
-            -Path $script:LineEndingFiles `
-            -LineEnding 'LF' `
-            -ErrorAction 'Stop'
-    }
-    else
-    {
-        Write-Warning 'No tracked files were specified for line ending checks'
-    }
-}
-
-<#
-.SYNOPSIS
     Creates a new branch for staging the release
 .DESCRIPTION
     Before we perform a release we need to ensure the changelog and help files are updated.
@@ -783,7 +723,7 @@ task CreateStagingBranch SetVersion, {
     For example when we update the changelog or module documentation before a release.
     We want to commit those changes so they get included in the release. (and don't fail the build later on)
 #>
-task CommitTrackedChanges UpdateChangelog, UpdateModuleDocumentation, CreateStagingBranch, SetLineEndings, {
+task CommitTrackedChanges UpdateChangelog, UpdateModuleDocumentation, CreateStagingBranch, {
     $CommitMessage = "docs: Prepare for $script:PrefixedVersion`n`nThis commit was automatically generated."
     if ($script:TrackedFiles.Count -gt 0)
     {
@@ -1121,7 +1061,7 @@ task BuildAndImport Build, ImportModule, {}
     This task is best ran after any local changes have largely been finalised as it will generate any documentation
     required.
 #>
-task BuildWithDocs BuildAndImport, FormatMarkdown, CreateModuleHelp, SetLineEndings, {}
+task BuildWithDocs BuildAndImport, CreateModuleHelp, {}
 
 <#
 .SYNOPSIS
@@ -1151,7 +1091,7 @@ task BuildTestAndCheck BuildAndTest, CheckForUncommittedChanges, {}
     This allows us to review the changes and make any adjustments before we actually release them.
     We use this task in the stage_release CI pipeline.
 #>
-task StageRelease CheckStagingParameters, UseWorkingCopy, CreateChangelogEntry, UpdateChangelog, UpdateModuleDocumentation, UpdateModulePageHelpVersion, SetLineEndings, CreatePullRequest, {
+task StageRelease CheckStagingParameters, UseWorkingCopy, CreateChangelogEntry, UpdateChangelog, UpdateModuleDocumentation, UpdateModulePageHelpVersion, CreatePullRequest, {
     $BuildMessage = @"
 The release has been successfully staged and a pull request has been created.
 Please review the changes at $script:PRLink and merge if they look good.
