@@ -67,6 +67,10 @@ Converts a given hashtable to an alphabetically sorted hashtable
 
 Clones a given git repository to the local machine
 
+### [Format-Markdown](./Brownserve.PSTools/Format-Markdown.md)
+
+Formats a markdown file to ensure it follows the markdownlint rules.
+
 ### [Format-NuGetPackageVersion](./Brownserve.PSTools/Format-NuGetPackageVersion.md)
 
 Formats a version number to ensure compatibility with NuGet and nuget.org
