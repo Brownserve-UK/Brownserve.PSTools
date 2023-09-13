@@ -8,20 +8,23 @@ schema: 2.0.0
 # Add-GitChanges
 
 ## SYNOPSIS
+
 This cmdlet is a wrapper for the git command 'git add \<path\>'.
 
 ## SYNTAX
 
-```
+```text
 Add-GitChanges [-Path] <String[]> [[-RepositoryPath] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This command selects the git changes from the working tree to prepare the content staged for the next commit.
 
 ## EXAMPLES
 
 ### Example 1
+
 ```powershell
 Set-Location -Path C:\MyGitRepo
 Add-GitChanges -Path .\CHANGELOG.md
@@ -32,6 +35,7 @@ Would add the file CHANGELOG.md to the next commit in the git repository located
 ## PARAMETERS
 
 ### -Path
+
 The path(s) to the file(s) to be added to the next commit
 
 ```yaml
@@ -47,6 +51,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryPath
+
 The path to the git repository
 
 ```yaml
@@ -62,6 +67,7 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS

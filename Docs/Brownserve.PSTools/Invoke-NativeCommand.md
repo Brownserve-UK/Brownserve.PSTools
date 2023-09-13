@@ -8,17 +8,19 @@ schema: 2.0.0
 # Invoke-NativeCommand
 
 ## SYNOPSIS
+
 Invokes a native command while gracefully handling the output and error streams.
 
 ## SYNTAX
 
-```
+```text
 Invoke-NativeCommand [-FilePath] <String> [[-ArgumentList] <Array>] [[-WorkingDirectory] <String>]
  [[-ExitCodes] <Array>] [-PassThru] [-SuppressOutput] [-LogOutput] [-LogOutputPath <String>]
  [-LogOutputPrefix <String>] [-LogOutputSuffix <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This cmdlet will call a native process (e.g `ping`) and will allow for writing the commands output to host while also returning the output after the command completes successfully if desired.  
 This is useful when you want to monitor a commands output while also capturing it for processing later on.  
 If you only want the output of the command and not the stream output you can pass the `-SuppressOutput` parameter.  
@@ -27,6 +29,7 @@ As many native commands can write verbose/logging information to stderr this cmd
 ## EXAMPLES
 
 ### Example 1: Standard usage
+
 ```powershell
 $Ping = Invoke-NativeCommand `
     -FilePath 'ping' `
@@ -37,6 +40,7 @@ $Ping = Invoke-NativeCommand `
 In this example the `ping` command would be run with the argument `192.168.1.1`, as the `PassThru` parameter has been provided the command's output would returned and stored in the `$Ping` variable as well as being streamed to host
 
 ### Example 2: Suppressing output
+
 ```powershell
 Invoke-NativeCommand `
     -FilePath 'ping' `
@@ -49,6 +53,7 @@ In this example the `ping` command would be run with the argument `192.168.1.1`,
 ## PARAMETERS
 
 ### -ArgumentList
+
 An optional list of arguments to be passed to the command
 
 ```yaml
@@ -64,6 +69,7 @@ Accept wildcard characters: False
 ```
 
 ### -ExitCodes
+
 The exit codes expected from this command when it has been successful
 
 ```yaml
@@ -79,6 +85,7 @@ Accept wildcard characters: False
 ```
 
 ### -FilePath
+
 The path to the command to be run
 
 ```yaml
@@ -94,6 +101,7 @@ Accept wildcard characters: False
 ```
 
 ### -LogOutput
+
 If set will log the output of the command to disk
 
 ```yaml
@@ -109,6 +117,7 @@ Accept wildcard characters: False
 ```
 
 ### -LogOutputPath
+
 The path to where the output should be logged (must be a directory)
 
 ```yaml
@@ -124,6 +133,7 @@ Accept wildcard characters: False
 ```
 
 ### -LogOutputPrefix
+
 An optional prefix to add to the log file(s), if none is set then the name of the command being run is used
 
 ```yaml
@@ -139,6 +149,7 @@ Accept wildcard characters: False
 ```
 
 ### -LogOutputSuffix
+
 The file extension to use for the log file (defaults to .log)
 
 ```yaml
@@ -154,6 +165,7 @@ Accept wildcard characters: False
 ```
 
 ### -PassThru
+
 Pass this parameter if you want the cmdlet to return a PowerShell object of the native commands output stream
 
 ```yaml
@@ -169,6 +181,7 @@ Accept wildcard characters: False
 ```
 
 ### -SuppressOutput
+
 If specified will stop the command outputting to host, useful when running very verbose commands that can quickly fill up build logs etc.
 
 ```yaml
@@ -184,6 +197,7 @@ Accept wildcard characters: False
 ```
 
 ### -WorkingDirectory
+
 If set will set the working directory for the called command, defaults to the current directory.
 
 ```yaml
@@ -199,15 +213,19 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.String
+
 ### System.Array
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

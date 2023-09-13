@@ -8,23 +8,26 @@ schema: 2.0.0
 # Read-Changelog
 
 ## SYNOPSIS
+
 **This cmdlet is deprecated and will be removed in a future release, please use Read-BrownserveChangelog instead.**
 Retrieves version information and release notes from a CHANGELOG.md file.
 
 ## SYNTAX
 
-```
+```text
 Read-Changelog [-ChangelogPath] <String> [[-VersionPattern] <String>] [[-RepoURLPattern] <String>]
  [[-LastReleaseDatePattern] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Retrieves version information and release notes from a CHANGELOG.md file.
 This is done by searching for a regex match (defaults to semver 1.0.0) and extracting all information between the current release and the previous release
 
 ## EXAMPLES
 
 ### EXAMPLE 1
+
 ```powershell
 Read-Changelog -ChangelogPath C:\repos\MyRepo\CHANGELOG.md
 ```
@@ -34,6 +37,7 @@ Returns version number and release notes from the changelog at 'C:\repos\MyRepo\
 ## PARAMETERS
 
 ### -ChangelogPath
+
 The path of the release notes.md file to read from, wildcards are permitted.
 
 ```yaml
@@ -49,6 +53,7 @@ Accept wildcard characters: True
 ```
 
 ### -LastReleaseDatePattern
+
 The regex pattern for matching the date of the last release.
 It should always contain a capture group named "date" and this what the regex searched will use to extract your date
 
@@ -65,6 +70,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepoURLPattern
+
 The regex pattern for matching the repo URL.
 It should always contain a capture group named "url" and this what the regex searched will use to extract your url
 
@@ -81,6 +87,7 @@ Accept wildcard characters: False
 ```
 
 ### -VersionPattern
+
 The regex to use for version matching.
 It should always contain a capture group named "version" as this is what the regex matcher will use to extract the version number
 
@@ -97,15 +104,19 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.String
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
+
 The resulting object from this cmdlet can be piped into Add-ChangelogEntry for convenience.
 
 ## RELATED LINKS

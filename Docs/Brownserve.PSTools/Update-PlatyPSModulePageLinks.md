@@ -8,16 +8,18 @@ schema: 2.0.0
 # Update-PlatyPSModulePageLinks
 
 ## SYNOPSIS
+
 Updates the links to cmdlet documentation in the PlatyPS module page.
 
 ## SYNTAX
 
-```
+```text
 Update-PlatyPSModulePageLinks [-CmdletDocumentationPath] <String> [-ModulePagePath] <String>
  [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 When PlatyPS creates a module page the links it creates assume that the cmdlet documentation is in the same directory
 as the module page.
 This cmdlet will update the links to point to the correct location.
@@ -26,6 +28,7 @@ We may be able to remove the below once this issue is resolved: https://github.c
 ## EXAMPLES
 
 ### Example 1
+
 ```powershell
 Update-PlatyPSModulePageLinks -CmdletDocumentationPath 'C:\MyModule\docs\en-US\Cmdlets' -ModulePagePath 'C:\MyModule\docs\en-US\MyModule.md'
 ```
@@ -36,6 +39,7 @@ documentation located at `C:\MyModule\docs\en-US\Cmdlets`
 ## PARAMETERS
 
 ### -CmdletDocumentationPath
+
 The path to where the cmdlet documentation is stored
 
 ```yaml
@@ -51,6 +55,7 @@ Accept wildcard characters: False
 ```
 
 ### -ModulePagePath
+
 The path to the module page
 
 ```yaml
@@ -66,6 +71,7 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS

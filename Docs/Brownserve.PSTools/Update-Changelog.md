@@ -8,16 +8,18 @@ schema: 2.0.0
 # Update-Changelog
 
 ## SYNOPSIS
+
 Updates a repo's changelog according to the semver v1.0.0 spec.
 
 ## SYNTAX
 
-```
+```text
 Update-Changelog [-ChangelogPath] <String> [-ReleaseType <String>] [-Features <Array>] [-Bugfixes <Array>]
  [-KnownIssues <Array>] [-RepoUrl <String>] [-AutoGenerateFeatures] [-SkipOptionalPrompts] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Updates a repo's changelog according to the semver v1.0.0 spec.
 
 This is a completely guided cmdlet and the user will be prompted to provide all necessary information, the cmdlet can also be run programmatically by passing in the required parameters.
@@ -25,6 +27,7 @@ This is a completely guided cmdlet and the user will be prompted to provide all 
 ## EXAMPLES
 
 ### EXAMPLE 1: Guided input
+
 ```powershell
 Update-Changelog -ChangelogPath C:\CHANGELOG.md
 ```
@@ -32,6 +35,7 @@ Update-Changelog -ChangelogPath C:\CHANGELOG.md
 This would prompt the user for all information and then update the changelog at 'C:\CHANGELOG.md'
 
 ### EXAMPLE 2: Providing all information in parameters
+
 ```powershell
 Update-Changelog `
     -ChangelogPath C:\CHANGELOG.md `
@@ -44,6 +48,7 @@ Update-Changelog `
 As all required and optional information has been provided the changelog at 'C:\CHANGELOG.md' would be updated with the provided information
 
 ### EXAMPLE 3: Skipping optional prompts and auto generating feature list
+
 ```powershell
 Update-Changelog `
     -ChangelogPath C:\CHANGELOG.md `
@@ -59,6 +64,7 @@ As `AutoGenerateFeatures` was also passed the feature list will be generated fro
 ## PARAMETERS
 
 ### -AutoGenerateFeatures
+
 If set will attempt to auto-generate features from the commit history (ignored if $Features are passed into the cmdlet)
 
 ```yaml
@@ -74,6 +80,7 @@ Accept wildcard characters: False
 ```
 
 ### -Bugfixes
+
 Any bugfixes in this release
 
 ```yaml
@@ -89,6 +96,7 @@ Accept wildcard characters: False
 ```
 
 ### -ChangelogPath
+
 The path to the changelog file
 
 ```yaml
@@ -104,6 +112,7 @@ Accept wildcard characters: True
 ```
 
 ### -Features
+
 The feature list for this release
 
 ```yaml
@@ -119,6 +128,7 @@ Accept wildcard characters: False
 ```
 
 ### -KnownIssues
+
 Any known issues in this release
 
 ```yaml
@@ -134,6 +144,7 @@ Accept wildcard characters: False
 ```
 
 ### -ReleaseType
+
 The type of release (major, minor, patch)
 
 ```yaml
@@ -150,6 +161,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepoUrl
+
 The URL of the repo that the changelog belongs to
 If none is provided the cmdlet will attempt to work it out from the current changelog and prompt if needed
 
@@ -166,6 +178,7 @@ Accept wildcard characters: False
 ```
 
 ### -SkipOptionalPrompts
+
 Skip optional prompts
 
 ```yaml
@@ -181,14 +194,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.String
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

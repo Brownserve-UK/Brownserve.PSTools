@@ -8,21 +8,24 @@ schema: 2.0.0
 # Publish-TeamcityArtifact
 
 ## SYNOPSIS
+
 Tells Teamcity to export a given file/folder as an artifact.
 
 ## SYNTAX
 
-```
+```text
 Publish-TeamcityArtifact [-ArtifactPath] <String> [[-TargetDirectory] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Tells Teamcity to export a given file/folder as an artifact.
 This is achieved by piping a message to StdOut to tell Teamcity where to grab the files and (optionally) where to store them
 
 ## EXAMPLES
 
 ### EXAMPLE 1: Publish an artifact
+
 ```powershell
 Publish-TeamcityArtifact C:\Temp\MyFile.txt
 ```
@@ -30,6 +33,7 @@ Publish-TeamcityArtifact C:\Temp\MyFile.txt
 Will export C:\Temp\MyFile.txt as an artifact in Teamcity
 
 ### EXAMPLE 2: Publish an artifact to a directory
+
 ```powershell
 Publish-TeamcityArtifact C:\Temp\MyFile.txt -TargetDirectory MyDir
 ```
@@ -39,6 +43,7 @@ Will export C:\Temp\MyFile.txt as an artifact in Teamcity to the MyDir folder
 ## PARAMETERS
 
 ### -ArtifactPath
+
 The artifact you wish to publish
 
 ```yaml
@@ -54,6 +59,7 @@ Accept wildcard characters: False
 ```
 
 ### -TargetDirectory
+
 The target directory to publish the artifact to (optional)
 
 ```yaml
@@ -69,15 +75,19 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
+
 See https://www.jetbrains.com/help/teamcity/configuring-general-settings.html#Artifact+Paths for more information
 
 ## RELATED LINKS

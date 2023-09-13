@@ -8,15 +8,17 @@ schema: 2.0.0
 # Merge-Hashtable
 
 ## SYNOPSIS
+
 Merges two hashtables together
 
 ## SYNTAX
 
-```
+```text
 Merge-Hashtable [-BaseObject] <Hashtable> [-InputObject] <Hashtable[]> [-Deep] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Merges two hashtables together.
 If a key exists in both the `BaseObject` and `InputObject` then the value from `InputObject` will be used.
 If `-Deep` is specified then when a value is an array or another hashtable then the cmdlet will attempt to merge them.
@@ -24,6 +26,7 @@ If `-Deep` is specified then when a value is an array or another hashtable then 
 ## EXAMPLES
 
 ### Example 1: Simple merge
+
 ```powershell
 > $hash = @{ 
 key1 = 'value1'
@@ -46,6 +49,7 @@ key1                           value1
 Performs a simple merge, as key2 exists in both hashtables its value is replaced by the value of the `InputObject` hashtable.
 
 ### Example 2: Deep merge
+
 ```powershell
 > $hash1 = @{
 key1 = 'value1'
@@ -75,6 +79,7 @@ The values of `arr1` are merged together and duplicates removed.
 ## PARAMETERS
 
 ### -BaseObject
+
 The base object to be used as part of the merge.
 
 ```yaml
@@ -90,6 +95,7 @@ Accept wildcard characters: False
 ```
 
 ### -Deep
+
 Whether or not to perform a deep merge.
 This will inspect each value and if they are another object that can be merged (arrays/hashes) then they will be merged.
 
@@ -106,6 +112,7 @@ Accept wildcard characters: False
 ```
 
 ### -InputObject
+
 The object that should be merged with the `BaseObject`
 
 ```yaml
@@ -121,14 +128,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

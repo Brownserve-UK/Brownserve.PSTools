@@ -8,21 +8,24 @@ schema: 2.0.0
 # New-TerraformResourceBlock
 
 ## SYNOPSIS
+
 Creates a Terraform resource block that can easily be inserted into Terraform code.
 
 ## SYNTAX
 
-```
+```text
 New-TerraformResourceBlock [-ResourceType] <String> [-ResourceName] <String> [-ResourceArgs] <PSObject>
  [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This cmdlet is designed to make it easy to programmatically create Terraform resource blocks for insertion into Terraform configuration files.
 
 ## EXAMPLES
 
 ### Example 1: Simple resource
+
 ```powershell
 PS C:\> New-TerraformResourceBlock `
     -ResourceType 'github_repository' `
@@ -43,6 +46,7 @@ resource "github_repository" "Brownserve_PSTools" {
 This example shows a fairly simple GitHub repository resource.
 
 ### Example 2: Complex resources
+
 ```powershell
 PS C:\> New-TerraformResourceBlock `
     -ResourceType 'github_repository' `
@@ -81,6 +85,7 @@ resource "github_repository" "Brownserve_PSTools" {
 This more advanced example includes a nested hashtable, an array and a boolean value.
 
 ### Example 3: Interpolation example
+
 ```powershell
 PS C:\> New-TerraformResourceBlock `
     -ResourceType 'github_branch_default' `
@@ -102,6 +107,7 @@ This cmdlet will automatically remove the quotes for these data sources to ensur
 ## PARAMETERS
 
 ### -ResourceArgs
+
 The arguments to be processed for this resource, these must be in the PSCustomObject format.
 
 ```yaml
@@ -117,6 +123,7 @@ Accept wildcard characters: False
 ```
 
 ### -ResourceName
+
 The name of the resource
 
 ```yaml
@@ -132,6 +139,7 @@ Accept wildcard characters: False
 ```
 
 ### -ResourceType
+
 The type of resource to be created
 
 ```yaml
@@ -147,16 +155,21 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.String
+
 ### System.Management.Automation.PSObject
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
+
 Currently this cmdlet does not format nested maps very well.
 
 ## RELATED LINKS

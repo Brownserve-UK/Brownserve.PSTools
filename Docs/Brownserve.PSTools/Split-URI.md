@@ -8,20 +8,23 @@ schema: 2.0.0
 # Split-URI
 
 ## SYNOPSIS
+
 Takes a given URI and splits it into its constituent parts.
 
 ## SYNTAX
 
-```
+```text
 Split-URI [-InputObject] <String[]> [-AsHashtable] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This will split a given URI into its relevant parts, protocol/domain/subdomain/hostname and the full URI.
 
 ## EXAMPLES
 
 ### Example 1: Split URL
+
 ```powershell
 'https://www.example.com/' | Split-URI
 
@@ -37,6 +40,7 @@ Splits the given URL into the parts listed above.
 ## PARAMETERS
 
 ### -AsHashtable
+
 Returns a hashtable instead of a PS object
 
 ```yaml
@@ -52,6 +56,7 @@ Accept wildcard characters: False
 ```
 
 ### -InputObject
+
 The URI to be split
 
 ```yaml
@@ -67,14 +72,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.String[]
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

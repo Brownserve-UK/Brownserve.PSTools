@@ -8,20 +8,23 @@ schema: 2.0.0
 # New-GitBranch
 
 ## SYNOPSIS
+
 Creates a new branch in a given git repository
 
 ## SYNTAX
 
-```
+```text
 New-GitBranch [[-RepositoryPath] <String>] [-BranchName] <String> [[-Checkout] <Boolean>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Creates a new branch in a given git repository, you can optionally checkout the new branch after creation.
 
 ## EXAMPLES
 
 ### Example 1: Create a new branch
+
 ```powershell
 New-GitBranch -RepositoryPath 'C:\myRepo' -BranchName 'new_branch'
 ```
@@ -32,6 +35,7 @@ Upon successful creation it would be checked out.
 ## PARAMETERS
 
 ### -BranchName
+
 The name of the branch to create
 
 ```yaml
@@ -47,6 +51,7 @@ Accept wildcard characters: False
 ```
 
 ### -Checkout
+
 If set to `$true` will checkout the branch after creation
 
 ```yaml
@@ -62,6 +67,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryPath
+
 The path to the repository
 
 ```yaml
@@ -77,14 +83,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

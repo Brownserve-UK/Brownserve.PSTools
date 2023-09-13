@@ -8,15 +8,17 @@ schema: 2.0.0
 # Update-PlatyPSModulePageGUID
 
 ## SYNOPSIS
+
 Updates the module GUID in the PlatyPS module page.
 
 ## SYNTAX
 
-```
+```text
 Update-PlatyPSModulePageGUID [-ModuleGUID] <Guid> [-ModulePagePath] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 The Update-MarkdownHelpModule cmdlet in the PlatyPS module doesn't support updating the module GUID in the module
 page.
 This cmdlet will check the module manifest for the GUID and update the module GUID in the module page.
@@ -24,6 +26,7 @@ This cmdlet will check the module manifest for the GUID and update the module GU
 ## EXAMPLES
 
 ### Example 1
+
 ```powershell
 Update-PlatyPSModulePageGUID -ModuleGUID '00000000-0000-0000-0000-000000000000' -ModulePagePath 'C:\MyModule\docs\en-US\MyModule.md'
 ```
@@ -33,6 +36,7 @@ This would update the module GUID in the module page located at `C:\MyModule\doc
 ## PARAMETERS
 
 ### -ModuleGUID
+
 The GUID of the module
 
 ```yaml
@@ -48,6 +52,7 @@ Accept wildcard characters: False
 ```
 
 ### -ModulePagePath
+
 The path to the module page
 
 ```yaml
@@ -63,6 +68,7 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS

@@ -8,15 +8,17 @@ schema: 2.0.0
 # Set-TerraformLogLevel
 
 ## SYNOPSIS
+
 Provides an easy way to set the Terraform log level.
 
 ## SYNTAX
 
-```
+```text
 Set-TerraformLogLevel [[-LogLevel] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Provides an easy way to set the Terraform log level.
 Valid options are:
     * DEBUG
@@ -29,6 +31,7 @@ The default value is "none"
 ## EXAMPLES
 
 ### EXAMPLE 1: Set Terraform's log level to DEBUG
+
 ```powershell
 Set-TerraformLogLevel -LogLevel 'DEBUG'
 ```
@@ -36,6 +39,7 @@ Set-TerraformLogLevel -LogLevel 'DEBUG'
 Would set the Terraform log level to DEBUG
 
 ### EXAMPLE 2: Set Terraform's log level to WARN
+
 ```powershell
 Set-TerraformLogLevel -LogLevel 'WARN'
 ```
@@ -43,6 +47,7 @@ Set-TerraformLogLevel -LogLevel 'WARN'
 Would set the Terraform log level to WARN
 
 ### EXAMPLE 3: Set Terraform's log level to none
+
 ```powershell
 Set-TerraformLogLevel -LogLevel 'none'
 ```
@@ -52,6 +57,7 @@ Would set the Terraform log level to none
 ## PARAMETERS
 
 ### -LogLevel
+
 The log level to set
 
 ```yaml
@@ -68,14 +74,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

@@ -5,54 +5,38 @@ online version:
 schema: 2.0.0
 ---
 
-# Add-ModuleHelp
+# Format-Markdown
 
 ## SYNOPSIS
 
-Creates XML MALM help for a PowerShell module
+Formats a markdown file to ensure it follows the markdownlint rules.
 
 ## SYNTAX
 
 ```text
-Add-ModuleHelp [-ModuleDirectory] <String> [[-HelpLanguage] <String>] [-DocumentationPath] <String>
- [<CommonParameters>]
+Format-Markdown [-Path] <String> [-CodeBlockLanguage <String>] [-EmphasisAsHeaderConversion <Object>]
+ [-Markdown <Array>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-This cmdlet acts as a wrapper for PlatyPS that will take generated markdown help for a module and convert it into MALM based XML help within the module itself meaning it will work with things like `Get-Help`
+Formats a markdown file to ensure it follows the markdownlint rules.
 
 ## EXAMPLES
 
 ### Example 1
 
 ```powershell
-Add-ModuleHelp -ModuleDirectory './Module' -DocumentationPath './.docs/Brownserve.PSTools'
+PS C:\> {{ Add example code here }}
 ```
 
-Would convert the markdown documentation located in `./.docs/Brownserve.PSTools` and convert it to MALM based help for the module located in `./Module`
+{{ Add example description here }}
 
 ## PARAMETERS
 
-### -DocumentationPath
+### -CodeBlockLanguage
 
-The path to where the markdown based documentation lives
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
-Position: 2
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -HelpLanguage
-
-The language of the documentation
+The language to use for code blocks.
 
 ```yaml
 Type: String
@@ -60,15 +44,47 @@ Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 1
-Default value: en-US
+Position: Named
+Default value: Text
 Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -ModuleDirectory
+### -EmphasisAsHeaderConversion
 
-The path to where the module is located
+The conversion to use for emphasis-as-headers.
+
+```yaml
+Type: Object
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: Header
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Markdown
+
+Special hidden parameter to pass in markdown from the pipeline.
+
+```yaml
+Type: Array
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -Path
+
+The path to the markdown file to format.
 
 ```yaml
 Type: String
@@ -76,7 +92,7 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
-Position: 0
+Position: 1
 Default value: None
 Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
@@ -88,11 +104,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## INPUTS
 
-### System.String
-
 ## OUTPUTS
-
-### System.Object
 
 ## NOTES
 

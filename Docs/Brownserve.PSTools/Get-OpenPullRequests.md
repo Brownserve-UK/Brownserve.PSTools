@@ -8,21 +8,24 @@ schema: 2.0.0
 # Get-OpenPullRequests
 
 ## SYNOPSIS
+
 *This cmdlet is deprecated. Please use Get-GitHubOpenPullRequests instead*
 Gets the open Pull requests for a given repository
 
 ## SYNTAX
 
-```
+```text
 Get-OpenPullRequests -GitHubToken <String> [-GitHubOrg] <String> [-RepoName] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Gets the open Pull requests for a given repository
 
 ## EXAMPLES
 
 ### EXAMPLE 1
+
 ```powershell
 Get-OpenPullRequests
     -GitHubUsername 'a_user' `
@@ -36,6 +39,7 @@ This would fetch a list of open pull requests for the repo 'myRepo' belonging to
 ## PARAMETERS
 
 ### -GitHubOrg
+
 The GitHub org/user that owns the repository
 
 ```yaml
@@ -51,6 +55,7 @@ Accept wildcard characters: False
 ```
 
 ### -GitHubToken
+
 The GitHub PAT
 
 ```yaml
@@ -66,6 +71,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepoName
+
 The repo name to check for PR's
 
 ```yaml
@@ -81,14 +87,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.String
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

@@ -8,21 +8,24 @@ schema: 2.0.0
 # New-BrownservePowerShellModule
 
 ## SYNOPSIS
+
 Creates a new PowerShell module using the standard Brownserve format
 
 ## SYNTAX
 
-```
+```text
 New-BrownservePowerShellModule [-Path] <String> [-ModuleName] <String> [[-ModuleGUID] <Guid>]
  [[-ModuleTags] <String[]>] [-Description] <String> [[-Customisations] <String>] [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This cmdlet creates a new custom PowerShell module using the standard format we use across our repos.
 
 ## EXAMPLES
 
 ### Example 1
+
 ```powershell
 PS C:\> New-BrownservePowerShellModule `
     -Path c:\temp\TestModule `
@@ -36,6 +39,7 @@ This would create a new module in the C:\temp\TestModule folder called `TestModu
 ## PARAMETERS
 
 ### -Customisations
+
 Any custom code you want to provide to the module, of course this can always be added later.
 
 ```yaml
@@ -51,6 +55,7 @@ Accept wildcard characters: False
 ```
 
 ### -Description
+
 The description of the module, used to fill out the synopsis heading.
 
 ```yaml
@@ -66,6 +71,7 @@ Accept wildcard characters: False
 ```
 
 ### -Force
+
 If the module already exists then this will forcefully overwrite the module.
 
 ```yaml
@@ -81,6 +87,7 @@ Accept wildcard characters: False
 ```
 
 ### -ModuleGUID
+
 The GUID to use for the module, if none provided one will be generated automatically
 
 ```yaml
@@ -96,6 +103,7 @@ Accept wildcard characters: False
 ```
 
 ### -ModuleName
+
 The name of the module to be created.
 
 ```yaml
@@ -111,6 +119,7 @@ Accept wildcard characters: False
 ```
 
 ### -ModuleTags
+
 Optional set of tags to use for the module
 
 ```yaml
@@ -126,6 +135,7 @@ Accept wildcard characters: False
 ```
 
 ### -Path
+
 The path to where the module will be saved (must be a directory)
 
 ```yaml
@@ -141,14 +151,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS
