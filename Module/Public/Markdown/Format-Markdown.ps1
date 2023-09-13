@@ -34,13 +34,15 @@ function Format-Markdown
             ValueFromPipelineByPropertyName = $true
         )]
         [ValidateSet('Header', 'List')]
+        [MarkdownEmphasisAsHeaderConversion]
         $EmphasisAsHeaderConversion = 'Header',
 
         # Special hidden parameter to pass in markdown from the pipeline.
         [Parameter(
             Mandatory = $false,
             ValueFromPipeline = $true,
-            ValueFromPipelineByPropertyName = $true
+            ValueFromPipelineByPropertyName = $true,
+            DontShow
         )]
         [ValidateNotNullOrEmpty()]
         [array]

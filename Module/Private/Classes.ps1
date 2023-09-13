@@ -526,3 +526,11 @@ class EditorConfigSection
         return $Return
     }
 }
+
+## Markdown related classes
+
+enum MarkdownEmphasisAsHeaderConversion
+{
+    List
+    Header
+}
