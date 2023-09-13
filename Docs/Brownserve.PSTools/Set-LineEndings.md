@@ -19,7 +19,9 @@ Set-LineEndings [-Path] <String[]> [[-LineEnding] <String>] [<CommonParameters>]
 
 ## DESCRIPTION
 
-Due to the way PowerShell handles line endings when creating/updating files it can be difficult to ensure that the line endings are correct. This function will set the line endings of a file to either CRLF or LF.
+Currently PowerShell does not have a built in way to set the line endings of a file when using `Set-Content`, `New-Item` etc.
+This cmdlet provides a way to post-process a file to force the line endings to be a single desired type.
+This cmdlet can likely be retired once [PowerShell#2872](https://github.com/PowerShell/PowerShell/issues/2872) is resolved.
 
 ## EXAMPLES
 
