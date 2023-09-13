@@ -13,7 +13,7 @@ Creates a release on GitHub
 
 ## SYNTAX
 
-```
+```text
 New-GitHubRelease [-Name] <String> [-Tag] <String> [-Description] <String> [-RepositoryName] <String>
  [-RepositoryOwner] <String> -Token <String> [-Prerelease] [-TargetCommit <String>] [<CommonParameters>]
 ```
@@ -57,6 +57,7 @@ Accept wildcard characters: False
 ```
 
 ### -Name
+
 The name of the release
 
 ```yaml
@@ -72,6 +73,7 @@ Accept wildcard characters: False
 ```
 
 ### -Prerelease
+
 Set if this is a prerelease
 
 ```yaml
@@ -87,6 +89,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryName
+
 The name of the repository to create the release in
 
 ```yaml
@@ -102,6 +105,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryOwner
+
 The owner of the repository to create the release in
 
 ```yaml
@@ -117,6 +121,7 @@ Accept wildcard characters: False
 ```
 
 ### -Tag
+
 The tag to use for the release, should not contain any whitespace.
 
 ```yaml
@@ -132,6 +137,7 @@ Accept wildcard characters: False
 ```
 
 ### -TargetCommit
+
 The target commitish to use (if any)
 
 ```yaml
@@ -147,6 +153,7 @@ Accept wildcard characters: False
 ```
 
 ### -Token
+
 The GitHub PAT
 
 ```yaml

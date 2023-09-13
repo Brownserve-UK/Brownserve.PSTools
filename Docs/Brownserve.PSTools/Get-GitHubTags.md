@@ -13,9 +13,8 @@ Gets a list of tags for a given GitHub repository
 
 ## SYNTAX
 
-```
+```text
 Get-GitHubTags [-RepositoryName] <String> [-RepositoryOwner] <String> -Token <String> [<CommonParameters>]
-
 ```
 
 ## DESCRIPTION
@@ -35,6 +34,7 @@ This would fetch all the tags for the repository "myRepo" which lives in the Git
 ## PARAMETERS
 
 ### -RepositoryName
+
 The name of the repository to query
 
 ```yaml
@@ -50,6 +50,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryOwner
+
 The owner of the repository to query
 
 ```yaml
@@ -65,6 +66,7 @@ Accept wildcard characters: False
 ```
 
 ### -Token
+
 The GitHub PAT
 
 ```yaml
