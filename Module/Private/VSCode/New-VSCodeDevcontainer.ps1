@@ -42,16 +42,16 @@ function New-VSCodeDevcontainer
     {
         $DevcontainerObject = [ordered]@{
             name = 'Ubuntu'
-            build = @{
-                dockerfile = "Dockerfile"
+            build = [ordered]@{
                 args = @{
                     VARIANT = 'focal'
                 }
+                dockerfile = "Dockerfile"
             }
-            customizations = @{
-                vscode = @{
-                    settings = @{}
+            customizations = [ordered]@{
+                vscode = [ordered]@{
                     extensions = @()
+                    settings = [ordered]@{}
                 }
             }
             remoteUser = 'vscode'

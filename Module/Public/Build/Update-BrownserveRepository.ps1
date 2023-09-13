@@ -700,6 +700,7 @@ function Update-BrownserveRepository
                     Set-Content `
                         -Path $VSCodeExtensionsFilePath `
                         -Value $VSCodeWorkspaceExtensionIDsJSON `
+                        -NoNewline `
                         -ErrorAction 'Stop' | Out-Null
                 }
             }
@@ -724,6 +725,7 @@ function Update-BrownserveRepository
                     Set-Content `
                         -Path $VSCodeWorkspaceSettingsFilePath `
                         -Value $VSCodeWorkspaceSettingsJSON `
+                        -NoNewline `
                         -ErrorAction 'Stop' | Out-Null
                 }
             }
