@@ -14,8 +14,8 @@ Formats a markdown file to ensure it follows the markdownlint rules.
 ## SYNTAX
 
 ```text
-Format-Markdown [-Path] <String> [-CodeBlockLanguage <String>] [-EmphasisAsHeaderConversion <Object>]
- [-Markdown <Array>] [<CommonParameters>]
+Format-Markdown [-Path] <String> [-CodeBlockLanguage <String>]
+ [-EmphasisAsHeaderConversion <MarkdownEmphasisAsHeaderConversion>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -56,31 +56,15 @@ Accept wildcard characters: False
 The conversion to use for any emphasis-as-headers.
 
 ```yaml
-Type: Object
+Type: MarkdownEmphasisAsHeaderConversion
 Parameter Sets: (All)
 Aliases:
-Accepted values: Header, List
+Accepted values: List, Header
 
 Required: False
 Position: Named
 Default value: Header
 Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -Markdown
-
-Special hidden parameter to pass in markdown from the pipeline.
-
-```yaml
-Type: Array
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
