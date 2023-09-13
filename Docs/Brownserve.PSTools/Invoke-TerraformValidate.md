@@ -8,21 +8,24 @@ schema: 2.0.0
 # Invoke-TerraformValidate
 
 ## SYNOPSIS
+
 Performs a 'terraform validate'
 
 ## SYNTAX
 
-```
+```text
 Invoke-TerraformValidate [[-TerraformConfigPath] <String>] [-TerraformPath <String>] [-EnableColor <Boolean>]
  [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Performs a 'terraform validate'
 
 ## EXAMPLES
 
 ### EXAMPLE 1
+
 ```powershell
 Invoke-TerraformValidate
 ```
@@ -32,6 +35,7 @@ Would validate the Terraform configuration in the present directory
 ## PARAMETERS
 
 ### -EnableColor
+
 Whether or not to enable color output, defaults to false so as not to break CI/CD tools
 
 ```yaml
@@ -47,6 +51,7 @@ Accept wildcard characters: False
 ```
 
 ### -TerraformConfigPath
+
 Path to the Terraform configuration files (defaults to current working directory)
 
 ```yaml
@@ -62,6 +67,7 @@ Accept wildcard characters: False
 ```
 
 ### -TerraformPath
+
 The Path to the Terraform binary
 
 ```yaml
@@ -77,15 +83,19 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.String
+
 ### System.Boolean
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

@@ -8,21 +8,24 @@ schema: 2.0.0
 # Push-GitChanges
 
 ## SYNOPSIS
+
 Pushes local git changes to the remote repository.
 
 ## SYNTAX
 
-```
+```text
 Push-GitChanges [-BranchName] <String> [[-RepositoryPath] <String>] [[-RemoteName] <String>]
  [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This cmdlet pushes local git changes to the remote repository.
 
 ## EXAMPLES
 
 ### Example 1
+
 ```powershell
 Set-Location -Path C:\MyGitRepo
 Push-GitChanges -BranchName main
@@ -33,6 +36,7 @@ Would push the local changes to the main branch of the remote repository located
 ## PARAMETERS
 
 ### -BranchName
+
 The name of the branch to push
 
 ```yaml
@@ -48,6 +52,7 @@ Accept wildcard characters: False
 ```
 
 ### -RemoteName
+
 The name of the remote repository (defaults to 'origin')
 
 ```yaml
@@ -63,6 +68,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryPath
+
 The path to the repository
 
 ```yaml
@@ -78,6 +84,7 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS

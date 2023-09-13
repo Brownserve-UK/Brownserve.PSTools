@@ -8,21 +8,24 @@ schema: 2.0.0
 # Add-PullRequestComment
 
 ## SYNOPSIS
+
 Adds a comment to a given pull request
 
 ## SYNTAX
 
-```
+```text
 Add-PullRequestComment -Token <String> -RepositoryOwner <String> [-PullRequestID] <String>
  [-PullRequestComment] <String> -RepositoryName <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Adds a comment to a given pull request
 
 ## EXAMPLES
 
 ### EXAMPLE 1
+
 ```powershell
 Add-PullRequestComment `
     -GitHubUsername 'a_user' `
@@ -38,6 +41,7 @@ This would add the comment 'Hello, world!' to pull request \`1122\` on the repo 
 ## PARAMETERS
 
 ### -PullRequestComment
+
 The comment to be added to the PR
 
 ```yaml
@@ -53,6 +57,7 @@ Accept wildcard characters: False
 ```
 
 ### -PullRequestID
+
 The ID of the Pull Request
 
 ```yaml
@@ -68,6 +73,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryName
+
 The name of the repository that the pull request belongs to
 
 ```yaml
@@ -83,6 +89,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryOwner
+
 The owner of the repository that the pull request belongs to
 
 ```yaml
@@ -98,6 +105,7 @@ Accept wildcard characters: False
 ```
 
 ### -Token
+
 The GitHub Personal Access Token to use for authentication
 
 ```yaml
@@ -113,14 +121,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.String
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

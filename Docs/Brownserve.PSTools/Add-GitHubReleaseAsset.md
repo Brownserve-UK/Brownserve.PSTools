@@ -8,21 +8,24 @@ schema: 2.0.0
 # Add-GitHubReleaseAsset
 
 ## SYNOPSIS
+
 Uploads a file to a GitHub release.
 
 ## SYNTAX
 
-```
+```text
 Add-GitHubReleaseAsset [-FilePath] <String> [[-AssetName] <String>] [[-AssetLabel] <String>]
  [-UploadUrl] <String> [-Token] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This will upload a local file to a given GitHub release.
 
 ## EXAMPLES
 
 ### Example 1: Upload a file
+
 ```powershell
 $ReleaseInfo = Get-GitHubRelease `
   -RepositoryOwner 'Brownserve-UK' `
@@ -37,6 +40,7 @@ Add-GitHubReleaseAsset `
 This would upload the release asset `myFile.zip` to the latest release on the `Brownserve.PSTools` repository
 
 ### Example 2: Use a custom name for the release asset
+
 ```powershell
 $ReleaseInfo = Get-GitHubRelease `
   -RepositoryOwner 'Brownserve-UK' `
@@ -52,6 +56,7 @@ Add-GitHubReleaseAsset `
 This would upload the release asset `myFile.zip` as `PowerShellModule.zip` to the latest release on the `Brownserve.PSTools` repository
 
 ### Example 3: Use a label for the asset name
+
 ```powershell
 $ReleaseInfo = Get-GitHubRelease `
   -RepositoryOwner 'Brownserve-UK' `
@@ -69,6 +74,7 @@ This would upload the release asset `myFile.zip` as `Compressed PowerShell modul
 ## PARAMETERS
 
 ### -AssetLabel
+
 An optional label for the asset, used in place of the file name when displaying the asset on the GitHub release page however the name of the downloaded file remains the same as passed to the `-AssetName` parameter.
 
 ```yaml
@@ -84,6 +90,7 @@ Accept wildcard characters: False
 ```
 
 ### -AssetName
+
 Determines the name of the asset on GitHub.  
 Defaults to the name of the file passed to `-FilePath`
 **Remember to include the file extension if setting this manually**
@@ -101,6 +108,7 @@ Accept wildcard characters: False
 ```
 
 ### -FilePath
+
 The path to the file to upload.
 
 ```yaml
@@ -116,6 +124,7 @@ Accept wildcard characters: False
 ```
 
 ### -Token
+
 The GitHub API token to use.
 
 ```yaml
@@ -131,6 +140,7 @@ Accept wildcard characters: False
 ```
 
 ### -UploadUrl
+
 The upload URL for the release.  
 This can be acquired via `Get-GitHubRelease`
 
@@ -147,6 +157,7 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS

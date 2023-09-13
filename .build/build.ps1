@@ -40,6 +40,8 @@ param
     )]
     [ValidateSet(
         'Build',
+        'BuildAndImport',
+        'BuildWithDocs',
         'BuildAndTest',
         'BuildTestAndCheck',
         'StageRelease',
@@ -47,7 +49,7 @@ param
     )]
     [AllowEmptyString()]
     [string]
-    $Build = 'Build',
+    $Build = 'BuildWithDocs',
 
     # When preparing a release this denotes the type of changes that have been made.
     # This is used to determine the version number to use for the release.
@@ -62,6 +64,13 @@ param
     )]
     [string]
     $ReleaseType = 'minor',
+
+    # An optional release notice to include in the release
+    [Parameter(
+        Mandatory = $false
+    )]
+    [string]
+    $ReleaseNotice,
 
     # Where the module should be published to
     [Parameter(

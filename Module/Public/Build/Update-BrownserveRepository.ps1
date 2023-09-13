@@ -37,11 +37,20 @@ function Update-BrownserveRepository
         # The config file that stores VS Code extension configuration
         [Parameter(Mandatory = $false, DontShow)]
         [string]
-        $VSCodeExtensionsConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'repository_vscode_extensions.json')
+        $VSCodeExtensionsConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'repository_vscode_extensions.json'),
+
+        # The config file that stores any package aliases we'd like to create
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $PackageAliasConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'package_aliases_config.json'),
+
+        # The config file that stores any editorconfig settings we'd like to create
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $EditorConfigConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'editorconfig_config.json')
 
         #TODO: Create a changelog and licence automagically?
     )
-    
     begin
     {
         # Ensure that dotnet is available for us to use, we need it to instal tooling and make our nuget.config
@@ -63,19 +72,21 @@ function Update-BrownserveRepository
             $PaketDependenciesConfig = Read-ConfigurationFromFile $PaketDependenciesConfigFile
             $RepositoryPathsConfig = Read-ConfigurationFromFile $RepositoryPathsConfigFile
             $DevcontainerConfig = Read-ConfigurationFromFile $DevcontainerConfigFile
+            $PackageAliasConfig = Read-ConfigurationFromFile $PackageAliasConfigFile
+            # Load VS code extensions as a hashtable so we can easily merge things later on
             $VSCodeExtensionsConfig = Read-ConfigurationFromFile $VSCodeExtensionsConfigFile -AsHashtable
+            # Load EditorConfig as a hashtable as our [EditorConfigSection] type cannot process psobject's
+            $EditorConfigConfig = Read-ConfigurationFromFile $EditorConfigConfigFile -AsHashtable
         }
         catch
         {
             throw "Failed to import configuration data.`n$($_.Exception.Message)"
         }
     }
-    
     process
     {
         Assert-Directory $RepoPath -ErrorAction 'Stop'
 
-        # The below paths will always need to exist and we should check for them to avoid causing any mishaps even if we are going to do this on a branch
         $BuildDirectory = Join-Path $RepoPath '.build'
         $InitPath = Join-Path $BuildDirectory '_init.ps1'
         $PaketDependenciesPath = Join-Path $RepoPath 'paket.dependencies'
@@ -89,7 +100,10 @@ function Update-BrownserveRepository
         $DevcontainerDirectoryPath = Join-Path $RepoPath '.devcontainer'
         $DevcontainerPath = Join-Path $DevcontainerDirectoryPath 'devcontainer.json'
         $DockerfilePath = Join-Path $DevcontainerDirectoryPath 'Dockerfile'
+        $EditorConfigPath = Join-Path $RepoPath '.editorconfig'
 
+        # Not all the files above will always exist but the below paths will always need to exist
+        # if they don't then either it hasn't been initialised yet or someones done something bad. 😬
         $PathsToTest = @($InitPath, $PaketDependenciesPath, $dotnetToolsPath, $NugetConfigPath)
 
         $PathsToTest | ForEach-Object {
@@ -105,7 +119,7 @@ function Update-BrownserveRepository
         # And our list of ephemeral paths that are gitignored and recreated between init's
         $DefaultEphemeralPaths = $RepositoryPathsConfig.Defaults.EphemeralPaths
 
-        <# 
+        <#
             We preform updates on a branch so we can avoid causing havoc, we do that now so we can ensure when 
             we read from the various files in the repository we know what branch we are on!
         #>
@@ -247,7 +261,7 @@ function Update-BrownserveRepository
         {
             throw "Failed to search '$InitPath' for custom init steps.`n$($_.Exception.Message)"
         }
-        
+
         # Build up our default list of gitignore's that we always want to use
         # TODO: Do we want to make ignoring paket.lock optional?
         $DefaultGitIgnores = $GitIgnoreConfig.Defaults
@@ -258,13 +272,17 @@ function Update-BrownserveRepository
         # Careful -AsHashtable makes key names case sensitive when converted from JSON! (defaults != Defaults)
         $DefaultVSCodeExtensions = $VSCodeExtensionsConfig.Defaults
 
+        $DefaultPackageAliases = $PackageAliasConfig.Defaults
+
+        $DefaultEditorConfig = $EditorConfigConfig.Defaults
+
         <#
-            Our repos can house various different things, each with their own unique VS code extensions, paths, 
+            Our repos can house various different things, each with their own unique VS code extensions, paths,
             gitignore contents etc
         #>
         switch ($ProjectType)
         {
-            <# 
+            <#
                     For a repo that houses a PowerShell module we'll want to include:
                         - The logic for loading the module as part of the _init script
                         - PlatyPS for building module documentation
@@ -280,8 +298,9 @@ function Update-BrownserveRepository
                 $ExtraEphemeralPaths = $RepositoryPathsConfig.PowerShellModule.EphemeralPaths
                 $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
                 $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
+                $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
-                
+                $ExtraEditorConfig = $EditorConfigConfig.PowerShellModule
                 $InitParams = @{
                     IncludeModuleLoader   = $true
                     IncludePowerShellYaml = $true
@@ -303,8 +322,9 @@ function Update-BrownserveRepository
                 $ExtraEphemeralPaths = $RepositoryPathsConfig.PowerShellModule.EphemeralPaths
                 $ExtraPaketDeps = $PaketDependenciesConfig.PowerShellModule
                 $ExtraGitIgnores = $GitIgnoreConfig.PowerShellModule
+                $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
-                
+                $ExtraEditorConfig = $EditorConfigConfig.PowerShellModule
                 $InitParams = @{
                     IncludeModuleLoader   = $false # With the exception that we don't load the module locally (as it will conflict)
                     IncludePowerShellYaml = $true
@@ -344,7 +364,7 @@ function Update-BrownserveRepository
 
         $InitParams.Add('PermanentPaths', $FinalPermanentPaths)
         $InitParams.Add('EphemeralPaths', $FinalEphemeralPaths)
-        
+
         if ($ExtraGitIgnores)
         {
             $FinalGitIgnores = $DefaultGitIgnores + $ExtraGitIgnores
@@ -382,6 +402,25 @@ function Update-BrownserveRepository
             $InitParams.Add('CustomInitSteps', $CustomInitSteps)
         }
 
+        $FinalPackageAliases = $DefaultPackageAliases + $ExtraPackageAliases
+        if ($FinalPackageAliases)
+        {
+            $InitParams.Add('PackageAliases', $FinalPackageAliases)
+        }
+
+        if ($ExtraEditorConfig)
+        {
+            $FinalEditorConfig = $DefaultEditorConfig + $ExtraEditorConfig
+        }
+        else
+        {
+            $FinalEditorConfig = $DefaultEditorConfig
+        }
+        $EditorConfigParams = @{
+            IncludeRoot = $true
+            Section     = $FinalEditorConfig
+        }
+
         if ($ExtraVSCodeExtensions)
         {
             $VSCodeExtensions = $DefaultVSCodeExtensions + $ExtraVSCodeExtensions
@@ -391,7 +430,6 @@ function Update-BrownserveRepository
             $VSCodeExtensions = $DefaultVSCodeExtensions
         }
 
-        
         if ($VSCodeExtensions.Count -gt 0)
         {
             # Extract the list of extension ID's we want to install in this repo and clean up any duplicates
@@ -416,7 +454,7 @@ function Update-BrownserveRepository
             catch
             {
                 throw "Failed to convert VS Code extension settings to hashtable.`n$($_.Exception.Message)"
-            } 
+            }
             <#
                 If we've already got VS Code settings in the repository then merge in any of our custom settings.
             #>
@@ -445,8 +483,6 @@ function Update-BrownserveRepository
             # Order the resulting settings hashtable, it makes it easier to find settings if they are grouped together.
             $VSCodeWorkspaceSettings = ConvertTo-SortedHashtable $VSCodeWorkspaceSettings
         }
-
-        
 
         # Create the _init script as that will always be required
         try
@@ -491,6 +527,33 @@ function Update-BrownserveRepository
             catch
             {
                 throw "Failed to create devcontainer.`n$($_.Exception.Message)"
+            }
+        }
+
+        if ($EditorConfigParams)
+        {
+            if (Test-Path $EditorConfigPath)
+            {
+                try
+                {
+                    $ManualEditorConfig = Read-BrownserveEditorConfig -Path $EditorConfigPath -ErrorAction 'Stop'
+                }
+                catch
+                {
+                    throw "Failed to read existing editorconfig file.`n$($_.Exception.Message)"
+                }
+            }
+            if ($ManualEditorConfig)
+            {
+                $EditorConfigParams.Add('ManualSection', $ManualEditorConfig)
+            }
+            try
+            {
+                $EditorConfigContent = New-BrownserveEditorConfig @EditorConfigParams -ErrorAction 'Stop'
+            }
+            catch
+            {
+                throw "Failed to create .editorconfig file content.`n$($_.Exception.Message)"
             }
         }
 
@@ -620,7 +683,6 @@ function Update-BrownserveRepository
                 throw "Failed to convert JSON for $File.`n$($_.Exception.Message)"
             }
 
-            
             try
             {
                 if (!(Test-Path $VSCodeExtensionsFilePath))
@@ -673,7 +735,6 @@ function Update-BrownserveRepository
 
         if ($PaketDependenciesContent)
         {
-            
             try
             {
                 if (!(Test-Path $PaketDependenciesPath))
@@ -769,8 +830,30 @@ function Update-BrownserveRepository
                     throw "Failed to update '$DockerfilePath'.`n$($_.Exception.Message)"
                 }
             }
+        }
 
-            
+        if ($EditorConfigContent)
+        {
+            try
+            {
+                if (!(Test-Path $EditorConfigPath))
+                {
+                    # Don't write the content here, New-Item doesn't support -NoNewLine 😬
+                    New-Item `
+                        -Path $EditorConfigPath `
+                        -ItemType File `
+                        -ErrorAction 'Stop' | Out-Null
+                }
+                Set-Content `
+                    -Path $EditorConfigPath `
+                    -Value $EditorConfigContent `
+                    -NoNewline `
+                    -ErrorAction 'Stop'
+            }
+            catch
+            {
+                throw "Failed to create '$EditorConfigPath'.`n$($_.Exception.Message)"
+            }
         }
 
         # Update the version of Paket we are using
@@ -785,12 +868,10 @@ function Update-BrownserveRepository
         }
         catch
         {
-            throw "Failed to generate dotnet tools manifest.`n$($_.Exception.Message)"
+            throw "Failed to update paket in dotnet tools manifest.`n$($_.Exception.Message)"
         }
     }
-    
     end
     {
-        
     }
 }

@@ -8,20 +8,23 @@ schema: 2.0.0
 # Submit-GitChanges
 
 ## SYNOPSIS
+
 This cmdlet is a wrapper for \<git commit\>.
 
 ## SYNTAX
 
-```
+```text
 Submit-GitChanges [-Message] <String> [[-RepositoryPath] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This cmdlet will commit all staged changes to the local repository.
 
 ## EXAMPLES
 
 ### Example 1
+
 ```powershell
 Set-Location -Path C:\MyGitRepo
 Submit-GitChanges -Message "This is a test commit"
@@ -32,6 +35,7 @@ Would commit all staged changes to the local repository located at C:\MyGitRepo 
 ## PARAMETERS
 
 ### -Message
+
 The message to use for the commit.
 
 ```yaml
@@ -47,6 +51,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryPath
+
 The path to the local repository.
 
 ```yaml
@@ -62,6 +67,7 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS

@@ -8,20 +8,23 @@ schema: 2.0.0
 # Invoke-ConvertToYaml
 
 ## SYNOPSIS
+
 Wrapper cmdlet for ConvertTo-YAML
 
 ## SYNTAX
 
-```
+```text
 Invoke-ConvertToYaml [-InputObject] <Object> [[-Parameters] <Hashtable>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This is a wrapper cmdlet for calling `ConvertTo-YAML` to get around the issue of loading the powershell-yaml and PlatyPS modules at the same time (https://github.com/PowerShell/platyPS/issues/592). This cmdlet allows you to pass parameters through to ConvertTo-YAML via a hashtable.
 
 ## EXAMPLES
 
 ### Example 1: Convert with parameters
+
 ```powershell
 $Params = @{KeepArray = $true}
 $Data = @("hello, world!")
@@ -33,6 +36,7 @@ Would convert the data in `$String` to YAML, retaining the array.
 ## PARAMETERS
 
 ### -InputObject
+
 The object to be converted into YAML.
 
 ```yaml
@@ -48,6 +52,7 @@ Accept wildcard characters: False
 ```
 
 ### -Parameters
+
 Any parameters to pass through to ConvertTo-YAML
 
 ```yaml
@@ -63,14 +68,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.Object
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

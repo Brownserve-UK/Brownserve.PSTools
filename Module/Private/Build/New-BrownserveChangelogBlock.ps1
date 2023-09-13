@@ -18,6 +18,15 @@ function New-BrownserveChangelogBlock
         [semver]
         $Version,
 
+        # Optional notice to be displayed at the top of the changelog
+        [Parameter(
+            Mandatory = $false,
+            Position = 2,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [string]
+        $Notice,
+
         # The new features that have been added in this version
         [Parameter(
             Mandatory = $true,
@@ -81,13 +90,21 @@ function New-BrownserveChangelogBlock
         $RepoURL = $RepoURL -replace '\/$', ''
 
         # Start by creating each header
-        $VersionHeader = "### [v$($Version.ToString())](https://$RepositoryHost/$RepositoryOwner/$RepositoryName/tree/v$($Version.ToString())) ($(Get-Date -Format yyyy-MM-dd))`n`n"
-        $FeaturesBlock = "**Features**  `nThese are the changes that have been made since the last release:`n`n"
+        $VersionHeader = "## [v$($Version.ToString())](https://$RepositoryHost/$RepositoryOwner/$RepositoryName/tree/v$($Version.ToString())) ($(Get-Date -Format yyyy-MM-dd))`n"
+        if ($Notice)
+        {
+            if ($Notice -notmatch ('^_(.*)_$'))
+            {
+                $Notice = "_$($Notice)_"
+            }
+            $VersionHeader = $VersionHeader + "`n$Notice`n"
+        }
+        $FeaturesBlock = "### Features`n`nThese are the changes that have been made since the last release:`n`n"
         foreach ($Feature in $Features)
         {
             $FeaturesBlock = $FeaturesBlock + "- $Feature`n"
         }
-        $BugfixBlock = "**Bugfixes**  `nThe following bugs have been closed since the last release:`n`n"
+        $BugfixBlock = "### Bugfixes`n`nThe following bugs have been closed since the last release:`n`n"
         # If we've got some bug fixes, list them out otherwise simply add and N/A
         if ($Bugfixes)
         {
@@ -98,10 +115,10 @@ function New-BrownserveChangelogBlock
         }
         else
         {
-            $BugfixBlock = $BugfixBlock + "*N/A*`n"
+            $BugfixBlock = $BugfixBlock + "- *N/A*`n"
         }
         # Same for known issues
-        $KnownIssueBlock = "**Known Issues**  `nThe following bugs have been raised since the last release and remain unresolved:`n`n"
+        $KnownIssueBlock = "### Known Issues`n`nThe following bugs have been raised since the last release and remain unresolved:`n`n"
         if ($KnownIssues)
         {
             foreach ($KnownIssue in $KnownIssues)
@@ -111,7 +128,7 @@ function New-BrownserveChangelogBlock
         }
         else
         {
-            $KnownIssueBlock = $KnownIssueBlock + "*N/A*`n"
+            $KnownIssueBlock = $KnownIssueBlock + "- *N/A*`n"
         }
         $KnownIssueBlock += "`nFor a full list of current known issues see the project's [issues page](https://$RepositoryHost/$($RepositoryOwner)/$($RepositoryName)/issues)."
         # Now concatenate all the bits together with some spacers and return it

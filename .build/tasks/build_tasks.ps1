@@ -52,6 +52,13 @@ param
     [string]
     $ReleaseType,
 
+    # An optional release notice to include in the release
+    [Parameter(
+        Mandatory = $false
+    )]
+    [string]
+    $ReleaseNotice,
+
     # The branch this is being built from
     [Parameter(
         Mandatory = $true
@@ -139,7 +146,6 @@ $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec
 $script:GitHubRepoURI = "https://github.com/$GitHubRepoOwner/$GitHubRepoName"
 $Script:BuiltModulePath = (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1")
 $script:TrackedFiles = @()
-$script:LineEndingFiles = @()
 
 <#
     Work out if this is a production release depending on the branch we're building from
@@ -381,6 +387,10 @@ task CreateChangelogEntry SetVersion, {
         RepositoryName  = $GitHubRepoName
         ChangelogObject = $script:Changelog
     }
+    if ($ReleaseNotice)
+    {
+        $NewChangelogEntryParams.Add('Notice', $ReleaseNotice)
+    }
     if ($GitHubStageReleaseToken)
     {
         $NewChangelogEntryParams.Add('Auto', $true)
@@ -419,7 +429,6 @@ task UpdateChangelog CreateChangelogEntry, {
     {
         throw "Failed to update changelog. `n$($_.Exception.Message)"
     }
-    $script:LineEndingFiles += $script:ChangelogPath
     $script:TrackedFiles += ($script:ChangelogPath | Convert-Path)
 }
 
@@ -611,11 +620,6 @@ task UpdateModuleDocumentation ImportModule, {
         Resolve-Path to fail.
     #>
     $Script:ModulePagePath = Join-Path $Global:BrownserveRepoDocsDirectory "$ModuleName.md" | Resolve-Path
-    $script:LineEndingFiles += (Get-ChildItem `
-            -Path (Join-Path $Global:BrownserveRepoDocsDirectory -ChildPath $ModuleName)  `
-            -Filter *.md `
-            -Recurse | Select-Object -ExpandProperty 'FullName')
-    $script:LineEndingFiles += (Get-Item -Path $Script:ModulePagePath)
 }
 
 <#
@@ -686,33 +690,6 @@ task CompressModule CreateModuleHelp, {
 
 <#
 .SYNOPSIS
-    Ensures line endings for tracked files are set to 'LF'
-.DESCRIPTION
-    PowerShell seems to insist on doing inconsistent things with line endings when running on different OSes.
-    This results in constant line ending change diffs in git which fails the build.
-    Therefore some files that are created as part of the build need to have their line endings set to 'LF' to ensure
-    consistency.
-
-    !! This task has no dependencies as it should be run after all other tasks that may modify tracked files so be
-    !! careful with where you place it in the build.
-#>
-task SetLineEndings {
-    if ($script:LineEndingFiles.Count -gt 0)
-    {
-        Write-Build White 'Ensuring line endings are consistent'
-        Set-LineEndings `
-            -Path $script:LineEndingFiles `
-            -LineEnding 'LF' `
-            -ErrorAction 'Stop'
-    }
-    else
-    {
-        Write-Warning 'No tracked files were specified for line ending checks'
-    }
-}
-
-<#
-.SYNOPSIS
     Creates a new branch for staging the release
 .DESCRIPTION
     Before we perform a release we need to ensure the changelog and help files are updated.
@@ -746,7 +723,7 @@ task CreateStagingBranch SetVersion, {
     For example when we update the changelog or module documentation before a release.
     We want to commit those changes so they get included in the release. (and don't fail the build later on)
 #>
-task CommitTrackedChanges UpdateChangelog, UpdateModuleDocumentation, CreateStagingBranch, SetLineEndings, {
+task CommitTrackedChanges UpdateChangelog, UpdateModuleDocumentation, CreateStagingBranch, {
     $CommitMessage = "docs: Prepare for $script:PrefixedVersion`n`nThis commit was automatically generated."
     if ($script:TrackedFiles.Count -gt 0)
     {
@@ -986,7 +963,7 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
     if ('PSGallery' -in $PublishTo)
     {
         Write-Build White 'Pushing to PSGallery'
-        <# 
+        <#
             For PSGallery the module needs to be in a directory named after itself... -_- (PowerShellGet is awful)
             2023-09-09: It gets EVEN MORE awful!
             It looks like PowerShellGet will automatically tag EVERY cmdlet which takes you over the 4000 NuGet character limit!!!
@@ -1020,7 +997,7 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
             $ReleaseParams.Add('TargetCommit', $script:CurrentCommitHash)
         }
         $ReleaseResponse = New-GitHubRelease @ReleaseParams
-        
+
         if ($script:CompressedModule)
         {
             Write-Build White 'Uploading compressed module as release asset'
@@ -1057,19 +1034,43 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
 .SYNOPSIS
     Meta task for building the module.
 .DESCRIPTION
-    This task will run all the tasks required to build the module.
-    This task is useful for local development as it allows you to import the module and test cmdlets etc.
+    This task will run all the tasks required to build just the module.
+    It doesn't build the documentation, NuGet package or perform any tests.
+    This task is mostly here just to serve as a base for other tasks.
 #>
-task Build UseWorkingCopy, CreateModuleManifest, UpdateModuleDocumentation, CreateModuleHelp, SetLineEndings, {}
+task Build UseWorkingCopy, CreateModuleManifest, {}
+
+<#
+.SYNOPSIS
+    Meta task for building the module and importing it.
+.DESCRIPTION
+    This task will run all the tasks required to build the module and import it.
+    It does not build the documentation, NuGet package or perform any tests as these can take some time to complete.
+    This task is best used when developing new features locally as it allows you to quickly test your changes
+    interactively.
+#>
+task BuildAndImport Build, ImportModule, {}
+
+<#
+.SYNOPSIS
+    Meta task for building the module along with the documentation.
+.DESCRIPTION
+    This task will run all the tasks required to build the module and generate the documentation.
+    The documentation can take some time to generate, especially as it currently requires us to run a separate process
+    to replace the line endings and format the markdown.
+    This task is best ran after any local changes have largely been finalised as it will generate any documentation
+    required.
+#>
+task BuildWithDocs BuildAndImport, CreateModuleHelp, {}
 
 <#
 .SYNOPSIS
     Meta task for building and testing the module.
 .DESCRIPTION
-    This task will build the module and perform unit tests on it.
-    This task is useful for completing more thorough testing of the module when developing locally.
+    This task performs the same actions as the previous tasks but also performs unit tests on the module.
+    This task is best used to thoroughly test any changes before committing them.
 #>
-task BuildAndTest Build, Tests, {}
+task BuildAndTest BuildWithDocs, Tests, {}
 
 <#
 .SYNOPSIS
@@ -1077,7 +1078,7 @@ task BuildAndTest Build, Tests, {}
 .DESCRIPTION
     This task will build the module, perform unit tests on it and then ensure there are no uncommitted changes
     resulting from the build.
-    This is the build we use for our pull_request CI pipeline.
+    This is the build we use for our pull_request CI pipeline and as such must pass before we can merge any changes.
 #>
 task BuildTestAndCheck BuildAndTest, CheckForUncommittedChanges, {}
 
@@ -1090,7 +1091,7 @@ task BuildTestAndCheck BuildAndTest, CheckForUncommittedChanges, {}
     This allows us to review the changes and make any adjustments before we actually release them.
     We use this task in the stage_release CI pipeline.
 #>
-task StageRelease CheckStagingParameters, UseWorkingCopy, CreateChangelogEntry, UpdateChangelog, UpdateModuleDocumentation, UpdateModulePageHelpVersion, SetLineEndings, CreatePullRequest, {
+task StageRelease CheckStagingParameters, UseWorkingCopy, CreateChangelogEntry, UpdateChangelog, UpdateModuleDocumentation, UpdateModulePageHelpVersion, CreatePullRequest, {
     $BuildMessage = @"
 The release has been successfully staged and a pull request has been created.
 Please review the changes at $script:PRLink and merge if they look good.

@@ -8,21 +8,24 @@ schema: 2.0.0
 # New-GitHubRelease
 
 ## SYNOPSIS
+
 Creates a release on GitHub
 
 ## SYNTAX
 
-```
+```text
 New-GitHubRelease [-Name] <String> [-Tag] <String> [-Description] <String> [-RepositoryName] <String>
  [-RepositoryOwner] <String> -Token <String> [-Prerelease] [-TargetCommit <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Creates a release on GitHub
 
 ## EXAMPLES
 
 ### EXAMPLE 1
+
 ```powershell
 New-GitHubRelease `
     -Name "Version 1.0.0" `
@@ -38,6 +41,7 @@ This would create a release called "Version 1.0.0" with a tag of "v1.0.0"
 ## PARAMETERS
 
 ### -Description
+
 The description for this release
 
 ```yaml
@@ -53,6 +57,7 @@ Accept wildcard characters: False
 ```
 
 ### -Name
+
 The name of the release
 
 ```yaml
@@ -68,6 +73,7 @@ Accept wildcard characters: False
 ```
 
 ### -Prerelease
+
 Set if this is a prerelease
 
 ```yaml
@@ -83,6 +89,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryName
+
 The name of the repository to create the release in
 
 ```yaml
@@ -98,6 +105,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepositoryOwner
+
 The owner of the repository to create the release in
 
 ```yaml
@@ -113,6 +121,7 @@ Accept wildcard characters: False
 ```
 
 ### -Tag
+
 The tag to use for the release, should not contain any whitespace.
 
 ```yaml
@@ -128,6 +137,7 @@ Accept wildcard characters: False
 ```
 
 ### -TargetCommit
+
 The target commitish to use (if any)
 
 ```yaml
@@ -143,6 +153,7 @@ Accept wildcard characters: False
 ```
 
 ### -Token
+
 The GitHub PAT
 
 ```yaml
@@ -158,14 +169,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

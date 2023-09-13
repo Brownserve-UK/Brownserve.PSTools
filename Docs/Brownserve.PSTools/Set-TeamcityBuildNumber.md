@@ -8,21 +8,24 @@ schema: 2.0.0
 # Set-TeamcityBuildNumber
 
 ## SYNOPSIS
+
 Sets the build number in Teamcity.
 
 ## SYNTAX
 
-```
+```text
 Set-TeamcityBuildNumber [-BuildNumber] <String> [-AppendCurrentBuildNumber] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Sets the build number in Teamcity by outputting a Teamcity service message to host.
 If the 'AppendCurrentBuildNumber' switch is passed the current build number is appended to the new build number
 
 ## EXAMPLES
 
 ### EXAMPLE 1
+
 ```powershell
 Set-TeamcityBuildNumber -BuildNumber '1.0.0'
 ```
@@ -30,6 +33,7 @@ Set-TeamcityBuildNumber -BuildNumber '1.0.0'
 This would output the message ##teamcity[buildNumber '1.0.0'] which would set the Teamcity build number to 1.0.0
 
 ### EXAMPLE 2
+
 ```powershell
 Set-TeamcityBuildNumber -BuildNumber '1.0.0' AppendCurrentBuildNumber
 ```
@@ -40,6 +44,7 @@ Which would set the Teamcity build number to 1.0.0_69
 ## PARAMETERS
 
 ### -AppendCurrentBuildNumber
+
 If set this will append the current Teamcity build number
 
 ```yaml
@@ -55,6 +60,7 @@ Accept wildcard characters: False
 ```
 
 ### -BuildNumber
+
 The build number to be set
 
 ```yaml
@@ -70,14 +76,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

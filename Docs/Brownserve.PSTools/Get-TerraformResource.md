@@ -8,21 +8,24 @@ schema: 2.0.0
 # Get-TerraformResource
 
 ## SYNOPSIS
+
 Searches for and returns a given Terraform resource block.
 
 ## SYNTAX
 
-```
+```text
 Get-TerraformResource [-ResourceType] <String> [-ResourceName] <String> [[-TerraformConfigPath] <String>]
  [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Searches a given directory or file for a terraform resource block matching the criteria specified.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
+
 ```powershell
 Get-TerraformResource `
     -ResourceType 'github_team' `
@@ -34,6 +37,7 @@ This would search for the 'resource "github_team" "dashboard"' in the C:\terrafo
 ## PARAMETERS
 
 ### -ResourceName
+
 The resource name
 
 ```yaml
@@ -49,6 +53,7 @@ Accept wildcard characters: False
 ```
 
 ### -ResourceType
+
 The resource type as defined in the Terraform modules documentation
 
 ```yaml
@@ -64,6 +69,7 @@ Accept wildcard characters: False
 ```
 
 ### -TerraformConfigPath
+
 Specifies a path to look for the resource block in.  
 Can be a file or a directory.
 
@@ -80,14 +86,17 @@ Accept wildcard characters: True
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.String
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

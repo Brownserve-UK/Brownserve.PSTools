@@ -8,20 +8,23 @@ schema: 2.0.0
 # Get-GitRemoteOriginURL
 
 ## SYNOPSIS
+
 Gets the remote origin URL for a given repository
 
 ## SYNTAX
 
-```
+```text
 Get-GitRemoteOriginURL [[-RepositoryPath] <String[]>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Gets the remote origin URL for a given repository
 
 ## EXAMPLES
 
 ### Example 1
+
 ```powershell
 Get-GitRemoteOriginURL 'C:\myRepo'
 ```
@@ -31,6 +34,7 @@ Would return the remote origin URL for the repo at `C:\myRepo`
 ## PARAMETERS
 
 ### -RepositoryPath
+
 The path to the repository
 
 ```yaml
@@ -46,14 +50,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

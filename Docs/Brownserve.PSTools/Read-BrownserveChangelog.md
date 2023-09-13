@@ -8,21 +8,24 @@ schema: 2.0.0
 # Read-BrownserveChangelog
 
 ## SYNOPSIS
+
 Reads in a changelog file and returns the contents as a custom object.
 
 ## SYNTAX
 
-```
+```text
 Read-BrownserveChangelog [-ChangelogPath] <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This cmdlet will read in a changelog file and return the contents as a custom object.
 The changelog file must be in the standard Brownserve format.
 
 ## EXAMPLES
 
 ### Example 1
+
 ```powershell
 Read-BrownserveChangelog -ChangelogPath C:\myRepo\Changelog.md
 ```
@@ -32,6 +35,7 @@ Would read in the changelog file and return a PowerShell object containing the v
 ## PARAMETERS
 
 ### -ChangelogPath
+
 The path to the changelog file
 
 ```yaml
@@ -47,6 +51,7 @@ Accept wildcard characters: True
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS

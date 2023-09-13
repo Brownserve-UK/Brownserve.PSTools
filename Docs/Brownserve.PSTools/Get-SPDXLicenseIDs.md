@@ -8,20 +8,23 @@ schema: 2.0.0
 # Get-SPDXLicenseIDs
 
 ## SYNOPSIS
+
 Attempts to get the latest SPDX license short ID list.
 
 ## SYNTAX
 
-```
+```text
 Get-SPDXLicenseIDs [[-Uri] <Uri>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 This cmdlet will attempt to get the latest available list of the SPDX license short ID's from GitHub.
 
 ## EXAMPLES
 
 ### Example 1
+
 ```powershell
 PS C:\> Get-SPDXLicenseIDs
 ```
@@ -31,6 +34,7 @@ Would return a list of all the currently available SPDX license short ID's.
 ## PARAMETERS
 
 ### -Uri
+
 The URI to use to get the list from, expects JSON.
 
 ```yaml
@@ -46,14 +50,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

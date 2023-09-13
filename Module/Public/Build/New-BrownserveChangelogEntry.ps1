@@ -59,6 +59,14 @@ function New-BrownserveChangelogEntry
         [string]
         $GitHubToken,
 
+        # An optional notice to attach to this release, it will appear between the release header and the features section.
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [string]
+        $Notice,
+
         # An optional list of features to add to the changelog (these will be added alongside the auto-generated features)
         [Parameter(
             Mandatory = $false,
@@ -270,6 +278,10 @@ function New-BrownserveChangelogEntry
             RepositoryOwner = $RepositoryOwner
             RepositoryName  = $RepositoryName
             Features        = $Features
+        }
+        if ($Notice)
+        {
+            $ChangelogBlockParams.Add('Notice', $Notice)
         }
         if ($KnownIssues)
         {

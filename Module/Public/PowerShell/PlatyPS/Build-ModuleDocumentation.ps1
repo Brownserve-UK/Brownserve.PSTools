@@ -129,9 +129,15 @@ function Build-ModuleDocumentation
                 $PlatyParams.Add('ExcludeDontShow', $true)
             }
 
-            $ExistingDocs = Get-Item $ModulePagePath -ErrorAction 'SilentlyContinue'
+            # Check for the presence of either a module page or existing markdown documentation
+            # If either exist then we should run the update command instead of the new command.
+            $ExistingDocs = Get-ChildItem `
+                -Path $ModuleDocumentationDirectory `
+                -Filter '*.md' `
+                -Recurse
+            $ExistingModulePage = Get-Item $ModulePagePath -ErrorAction 'SilentlyContinue'
 
-            if (!$ExistingDocs)
+            if (!$ExistingDocs -and !$ExistingModulePage)
             {
                 $NewDocsParams = $PlatyParams
                 $NewDocsParams.Add('OutputFolder', $PublicCmdletDocPath)
@@ -147,6 +153,7 @@ function Build-ModuleDocumentation
                 }
                 $ErrorStep = "Failed to build new module documentation for $ModuleName."
                 # Mute warnings as cmdlets that are not yet documented will cause complaints 🙄
+                # Out-Null as we get a bunch of File returns from what I assume is New-Item
                 New-MarkdownHelp @NewDocsParams -ErrorAction 'Stop' -WarningAction 'SilentlyContinue' | Out-Null
             }
             else
@@ -157,6 +164,7 @@ function Build-ModuleDocumentation
                 $UpdateDocsParams.Add('UpdateInputOutput', $true)
                 $UpdateDocsParams.Add('Force', $true) # This is a poorly named parameter it actually just deletes cmdlets that have been removed.
                 # For some reason we get a lot of warnings when using the update cmdlet that make no sense, so just mute them for now.
+                # Out-Null as we get a bunch of File returns from what I assume is New-Item for any new documentation
                 $ErrorStep = 'Failed to update module documentation'
                 Update-MarkdownHelpModule @UpdateDocsParams -ErrorAction 'Stop' -WarningAction 'SilentlyContinue' | Out-Null
             }
@@ -203,6 +211,43 @@ function Build-ModuleDocumentation
                     -ModulePagePath $ModulePagePath `
                     -ErrorAction 'Stop'
             }
+
+            # Get the documentation paths
+            $MarkdownDocs = Get-ChildItem `
+                -Path $PublicCmdletDocPath `
+                -Filter '*.md' `
+                -Recurse `
+                -ErrorAction 'Stop' | Select-Object -ExpandProperty FullName
+
+            $ModulePage = Get-Item $ModulePagePath -ErrorAction 'Stop' | Select-Object -ExpandProperty FullName
+
+            <#
+                PlatyPS doesn't format the markdown files correctly and breaks Markdownlint, it's also inconsistent with whitespace on Linux and Windows
+                So we'll run them through a formatter to fix them up.
+                This helps to keep the markdown files consistent so they don't pollute the git history and makes it easier to read.
+            #>
+            $ErrorStep = 'Failed to format markdown files.'
+            $MarkdownDocs | ForEach-Object {
+                $Path = $_
+                $FormattedMarkdown = Format-Markdown `
+                    -Path $Path `
+                    -ErrorAction 'Stop'
+                Set-Content -Path $Path -Value $FormattedMarkdown -ErrorAction 'Stop'
+                <#
+                    PowerShell seems to insist on doing inconsistent things with line endings when running on different OSes.
+                    This results in constant line ending change diffs in git which no amount of gitattributes seems to fix.
+                    Therefore we'll just force the line endings to be LF.
+                #>
+                Set-LineEndings -Path $Path -LineEnding 'LF' -ErrorAction 'Stop'
+            }
+
+            # Do the same for the module page
+            $ErrorStep = 'Failed to format module page.'
+            $FormattedModulePage = Format-Markdown `
+                -Path $ModulePage `
+                -ErrorAction 'Stop'
+            Set-Content -Path $ModulePage -Value $FormattedModulePage -ErrorAction 'Stop'
+            Set-LineEndings -Path $ModulePage -LineEnding 'LF' -ErrorAction 'Stop'
 
             # Create some sensible return so that we can pipe it into a cmdlet to update the MALM
             $Return += [pscustomobject]@{

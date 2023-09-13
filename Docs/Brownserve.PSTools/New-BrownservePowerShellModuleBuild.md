@@ -8,21 +8,24 @@ schema: 2.0.0
 # New-BrownservePowerShellModuleBuild
 
 ## SYNOPSIS
+
 Adds the various requirements to build a PowerShell module to a given project/repo.
 
 ## SYNTAX
 
-```
+```text
 New-BrownservePowerShellModuleBuild [-CICDProvider] <BrownserveCICD> [-ModuleInfo] <BrownservePowerShellModule>
  [-RepoPath] <String> [[-RepoName] <String>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Adds the various requirements to build a PowerShell module to a given project/repo
 
 ## EXAMPLES
 
 ### Example 1
+
 ```powershell
 New-BrownservePowerShellModuleBuild -CICDProvider 'GitHubActions' -RepoPath 'C:\myPowerShellModule' -ModuleInfo 'C:\myPowerShellModule\ModuleInfo.json'
 ```
@@ -32,6 +35,7 @@ Would create the various files require to build a PowerShell module at the given
 ## PARAMETERS
 
 ### -CICDProvider
+
 The CICD provider that will be used with this project.
 
 ```yaml
@@ -48,6 +52,7 @@ Accept wildcard characters: False
 ```
 
 ### -ModuleInfo
+
 The modules info
 
 ```yaml
@@ -63,6 +68,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepoName
+
 The name of the repo (if different to the directory provided to -RepoPath)
 
 ```yaml
@@ -78,6 +84,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepoPath
+
 The path to the repository
 
 ```yaml
@@ -93,14 +100,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### None
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS

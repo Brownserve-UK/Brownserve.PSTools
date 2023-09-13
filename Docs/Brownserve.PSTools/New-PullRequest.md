@@ -8,22 +8,25 @@ schema: 2.0.0
 # New-PullRequest
 
 ## SYNOPSIS
+
 **This cmdlet is deprecated. Please use New-GitHubPullRequest instead.**
 Creates a new pull request in GitHub
 
 ## SYNTAX
 
-```
+```text
 New-PullRequest -GitHubToken <String> -GitHubOrg <String> [-PRBody] <String> [-PRTitle] <String>
  [-BaseBranch] <String> [-HeadBranch] <String> -RepoName <String> [<CommonParameters>]
 ```
 
 ## DESCRIPTION
+
 Creates a new pull request in GitHub
 
 ## EXAMPLES
 
 ### EXAMPLE 1
+
 ```powershell
 New-PullRequest
     -GitHubUsername 'a_user' `
@@ -42,6 +45,7 @@ The PR would be titled 'Add new feature' and would contain a comment of 'This ad
 ## PARAMETERS
 
 ### -BaseBranch
+
 The branch you want to pull changes into
 
 ```yaml
@@ -57,6 +61,7 @@ Accept wildcard characters: False
 ```
 
 ### -GitHubOrg
+
 The GitHub org/user that owns the repository
 
 ```yaml
@@ -72,6 +77,7 @@ Accept wildcard characters: False
 ```
 
 ### -GitHubToken
+
 The GitHub PAT
 
 ```yaml
@@ -87,6 +93,7 @@ Accept wildcard characters: False
 ```
 
 ### -HeadBranch
+
 Your feature branch that you want to merge into your base branch
 
 ```yaml
@@ -102,6 +109,7 @@ Accept wildcard characters: False
 ```
 
 ### -PRBody
+
 The body of the pull request
 
 ```yaml
@@ -117,6 +125,7 @@ Accept wildcard characters: False
 ```
 
 ### -PRTitle
+
 The title of the pull request
 
 ```yaml
@@ -132,6 +141,7 @@ Accept wildcard characters: False
 ```
 
 ### -RepoName
+
 The name of the repo
 
 ```yaml
@@ -147,14 +157,17 @@ Accept wildcard characters: False
 ```
 
 ### CommonParameters
+
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
 ### System.String
+
 ## OUTPUTS
 
 ### System.Object
+
 ## NOTES
 
 ## RELATED LINKS
