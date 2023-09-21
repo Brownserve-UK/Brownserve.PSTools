@@ -1,10 +1,13 @@
 <#
 .SYNOPSIS
-    Returns the text between two strings.
+    Selects text from a given file
 .DESCRIPTION
-    Returns the text between two strings.
+    This cmdlet will select text from a given file.
+    You can specify a `After` and/or `Before` parameter to select text between two points
+    these can be either a line number or a string/regex.
+    You can pipe content from Get-BrownserveContent into this cmdlet.
 #>
-function Select-Content
+function Select-BrownserveContent
 {
     [CmdletBinding(
         DefaultParameterSetName = 'Default'
@@ -26,10 +29,11 @@ function Select-Content
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
+            ValueFromPipeline = $true,
             Position = 0,
             ParameterSetName = 'Content'
         )]
-        [string[]]
+        [BrownserveContent[]]
         $Content,
 
         # The text to search for
@@ -50,11 +54,6 @@ function Select-Content
         [psobject]
         $Before,
 
-        # Returns a string instead of an array
-        [Parameter(Mandatory = $false)]
-        [switch]
-        $AsString,
-
         # If specified will raise an exception if no text is found
         [Parameter(Mandatory = $false)]
         [switch]
@@ -62,23 +61,28 @@ function Select-Content
     )
     begin
     {
-
+        $Return = @()
     }
     process
     {
         <#
             If we don't have any content, then we need to get it from the file.
-            Both of these parameters are mandatory for their respective parameter sets so we should have at least one.
+            Both of these parameters are mandatory for their respective parameter sets so we should end up with at least one.
         #>
         if (!$Content)
         {
-            $Path | ForEach-Object {
-                Write-Verbose "Loading content from $_"
-                $Content += Get-Content -Path $_ -Raw
+            try
+            {
+                $Path | ForEach-Object {
+                    Write-Verbose "Loading content from $_"
+                    $Content += Get-BrownserveContent -Path $_ -ErrorAction 'Stop'
+                }
+            }
+            catch
+            {
+                throw "Failed to get content from path '$_'.`n$($_.Exception.Message)"
             }
         }
-
-        Write-Verbose $Content.Count
 
         foreach ($Item in $Content)
         {
@@ -87,12 +91,11 @@ function Select-Content
             $BeginTextLine = $null
             $EndTextLine = $null
             <#
-                We split the content into an array of lines.
-                This makes it easier to extract the text we want.
+                The content returned from Get-BrownserveContent is an array of strings
+                so we don't need to worry about splitting it.
             #>
-            $SplitContent = $Item -split "`n"
+            $SplitContent = $Item.Content
             $LastLine = $SplitContent.Count
-            Write-Debug "Total Lines: $LastLine"
 
             <#
                 We only bother trying to extract text if we have more than one line.
@@ -200,19 +203,23 @@ function Select-Content
 
             if ($TextToReturn)
             {
-                if ($AsString)
-                {
-                    Write-Output $TextToReturn | Out-String
-                }
-                else
-                {
-                    $TextToReturn = ,$TextToReturn
-                    Write-Output $TextToReturn -NoEnumerate
+                $Return += [BrownserveContent]@{
+                    Content = $TextToReturn
+                    Path = $Item.Path
+                    LineEnding = $Item.LineEnding
                 }
             }
         }
     }
     end
     {
+        if ($Return.Count -gt 0)
+        {
+            return $Return
+        }
+        else
+        {
+            return $null
+        }
     }
 }
