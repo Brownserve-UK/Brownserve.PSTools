@@ -4,6 +4,106 @@
     Previously the module used to have a lot of private classes spread across various files, this is an attempt to consolidate them into one file.
 #>
 
+
+## Common classes
+
+<#
+.SYNOPSIS
+    This enum performs some simple validation for line endings.
+#>
+enum BrownserveLineEnding
+{
+    LF
+    CRLF
+    CR
+}
+
+<#
+.SYNOPSIS
+    This class helps us format the content returned by Get-Content.
+#>
+class BrownserveContent
+{
+    [string[]]$Content
+    hidden [string]$Path
+    hidden [BrownserveLineEnding]$LineEnding
+
+    BrownserveContent([string[]]$Content, [string]$Path, [string]$LineEnding)
+    {
+        $this.Content = $Content
+        $this.Path = $Path
+        $this.LineEnding = $LineEnding
+    }
+
+    BrownserveContent([pscustomobject]$Content)
+    {
+        if (!$Content.Content)
+        {
+            throw 'Cannot create BrownserveContent object without Content'
+        }
+        if (!$Content.Path)
+        {
+            throw 'Cannot create BrownserveContent object without Path'
+        }
+        if (!$Content.LineEnding)
+        {
+            throw 'Cannot create BrownserveContent object without LineEnding'
+        }
+        $this.Content = $Content.Content
+        $this.Path = $Content.Path
+        $this.LineEnding = $Content.LineEnding
+    }
+
+    BrownserveContent([hashtable]$Content)
+    {
+        if (!$Content.Content)
+        {
+            throw 'Cannot create BrownserveContent object without Content'
+        }
+        if (!$Content.Path)
+        {
+            throw 'Cannot create BrownserveContent object without Path'
+        }
+        if (!$Content.LineEnding)
+        {
+            throw 'Cannot create BrownserveContent object without LineEnding'
+        }
+        $this.Content = $Content.Content
+        $this.Path = $Content.Path
+        $this.LineEnding = $Content.LineEnding
+    }
+
+    [string] ToString()
+    {
+        return $this.Content -join $this.NewLine()
+    }
+
+    # Void method for setting the NewLine static property
+    [string] NewLine()
+    {
+        switch ($this.LineEnding)
+        {
+            'LF'
+            {
+                return "`n"
+            }
+            'CRLF'
+            {
+                return "`r`n"
+            }
+            'CR'
+            {
+                return "`r"
+            }
+            default
+            {
+                throw "Unsupported line ending '$($this.LineEnding)'"
+            }
+        }
+        throw "Unsupported line ending '$($this.LineEnding)'"
+    }
+}
+
 ## Git related classes
 
 <#
@@ -533,4 +633,13 @@ enum MarkdownEmphasisAsHeaderConversion
 {
     List
     Header
+}
+
+## PowerShell related classes
+
+
+enum BrownservePowerShellModuleType
+{
+    Standalone
+    Tool
 }
