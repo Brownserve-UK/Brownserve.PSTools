@@ -78,7 +78,7 @@ class BrownserveContent
         return $this.Content -join $this.NewLine()
     }
 
-    # Void method for setting the NewLine static property
+    # We can call this method to easily get the line ending for the file
     [string] NewLine()
     {
         switch ($this.LineEnding)

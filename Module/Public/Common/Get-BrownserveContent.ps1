@@ -2,8 +2,10 @@
 .SYNOPSIS
     Wrapper for Get-Content that returns the content in a format that is easier to work with.
 .DESCRIPTION
-    TODO: Elaborate on the description.
     This cmdlet ensures that any content is returned in a format that is easy to work with in pipelines.
+    It stores the content as a string array so it can be easily iterated over while stripping any line breaks.
+    It also detects the line endings of the file and stores that information in the returned object so the file can
+    be saved with the same line endings.
 #>
 function Get-BrownserveContent
 {
@@ -35,6 +37,8 @@ function Get-BrownserveContent
                 # Store the content without line breaks, it's easier to work with
                 $Content = Get-Content -Path $_ -ErrorAction 'Stop' -ReadCount 0
                 # Read the content as a byte stream so we can properly detect the line endings
+                # TODO: do we do this before getting the content without line breaks?
+                # If we do it before then we can ensure the delimiter is set to the correct line ending?
                 $ByteStreamContent = Get-Content -Path $_ -ErrorAction 'Stop' -Raw -AsByteStream
                 $LFCount = 0
                 $CRCount = 0
