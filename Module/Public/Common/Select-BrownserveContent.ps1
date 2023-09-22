@@ -25,18 +25,17 @@ function Select-BrownserveContent
         [string[]]
         $Path,
 
-        # The content to search
+        # The BrownserveContent object
         [Parameter(
             Mandatory = $true,
-            ValueFromPipelineByPropertyName = $true,
             ValueFromPipeline = $true,
             Position = 0,
             ParameterSetName = 'Content'
         )]
         [BrownserveContent[]]
-        $Content,
+        $InputObject,
 
-        # The text to search for
+        # If passed then only content after this line will be returned
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
@@ -45,7 +44,7 @@ function Select-BrownserveContent
         [psobject]
         $After,
 
-        # The text to search for
+        # If passed then only content before this line will be returned
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
@@ -54,7 +53,7 @@ function Select-BrownserveContent
         [psobject]
         $Before,
 
-        # If specified will raise an exception if no text is found
+        # If specified will raise an exception if no results are found
         [Parameter(Mandatory = $false)]
         [switch]
         $FailIfNotFound
@@ -69,13 +68,13 @@ function Select-BrownserveContent
             If we don't have any content, then we need to get it from the file.
             Both of these parameters are mandatory for their respective parameter sets so we should end up with at least one.
         #>
-        if (!$Content)
+        if (!$InputObject)
         {
             try
             {
                 $Path | ForEach-Object {
                     Write-Verbose "Loading content from $_"
-                    $Content += Get-BrownserveContent -Path $_ -ErrorAction 'Stop'
+                    $InputObject += Get-BrownserveContent -Path $_ -ErrorAction 'Stop'
                 }
             }
             catch
@@ -84,7 +83,7 @@ function Select-BrownserveContent
             }
         }
 
-        foreach ($Item in $Content)
+        foreach ($Item in $InputObject)
         {
             $NotFoundError = @()
             $TextToReturn = $null
@@ -198,14 +197,40 @@ function Select-BrownserveContent
 
             if ($BeginTextLine -and $EndTextLine)
             {
-                $TextToReturn = $SplitContent[$BeginTextLine..$EndTextLine]
+                <#
+                    Due to the way we work out the start and end of the text block we want to return we can end up in a couple
+                    of undesirable situations:
+
+                    - We can end up with a BeginTextLine that is >= the EndTextLine this can happen when there is no
+                    text or whitespace between the start and stop strings. (e.g ##Start`n##Stop)
+                    - We can end up with a BeginTextLine that is the same as the EndTextLine, this can happen when
+                    there is no text or only whitespace after the start string. (e.g. ##Start`n`n##Stop)
+
+                    We don't count these as errors as we've actually found both the start and stop strings it's just
+                    that there is no content to extract.
+                    So we'll just return an empty string (which is distinct from $null)
+                #>
+                if ($BeginTextLine -ge $EndTextLine)
+                {
+                    Write-Verbose 'BeginTextLine is greater than or equal to EndTextLine, returning empty string'
+                    $TextToReturn = ''
+                }
+                if ($BeginTextLine -eq $EndTextLine)
+                {
+                    Write-Verbose 'BeginTextLine is equal to EndTextLine, returning empty string'
+                    $TextToReturn = ''
+                }
+                if ($null -eq $TextToReturn)
+                {
+                    $TextToReturn = $SplitContent[$BeginTextLine..$EndTextLine]
+                }
             }
 
             if ($TextToReturn)
             {
                 $Return += [BrownserveContent]@{
-                    Content = $TextToReturn
-                    Path = $Item.Path
+                    Content    = $TextToReturn
+                    Path       = $Item.Path
                     LineEnding = $Item.LineEnding
                 }
             }
