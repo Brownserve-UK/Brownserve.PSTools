@@ -1,7 +1,11 @@
 <#
 .DESCRIPTION
     Special private classes for the module.
-    Previously the module used to have a lot of private classes spread across various files, this is an attempt to consolidate them into one file.
+    Previously the module used to have a lot of private classes spread across various files
+    this is an attempt to consolidate them into one file.
+    It's important that classes remain in one file as when they are in individual files they can be loaded in the wrong
+    order which can cause 'type not found' errors.
+    It also breaks IDE's as they can't find the type definition.
 #>
 
 
