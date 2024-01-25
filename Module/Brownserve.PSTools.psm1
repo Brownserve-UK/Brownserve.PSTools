@@ -9,6 +9,34 @@ $ErrorActionPreference = 'Stop'
 
 $PublicCmdlets = @()
 
+<#
+    We often store complex default values in JSON config files as this makes them easier to read and maintain, plus it allows users to easily override them using their own config files with their own values.
+    While our standard configuration files containing our sensible defaults are included with the module(s) that reference them we need a place to store any user defined config files.
+    We've chosen to store these in the users PowerShell profile directory as this is a well known location and is easy to get to.
+    We perform this early so that if it fails we can stop the module from loading.
+#>
+$BrownserveProfileDirectory = Join-Path (Split-Path $PROFILE) 'Brownserve'
+if (-not (Test-Path $BrownserveProfileDirectory))
+{
+    New-Item -Path $BrownserveProfileDirectory -ItemType Directory -Force | Out-Null
+}
+$BrownserveConfigsDirectory = Join-Path $BrownserveProfileDirectory 'Config'
+if (-not (Test-Path $BrownserveConfigsDirectory))
+{
+    New-Item -Path $BrownserveConfigsDirectory -ItemType Directory -Force | Out-Null
+}
+$BrownservePSToolsUserConfigDirectory = Join-Path $BrownserveConfigsDirectory 'PSTools'
+if (-not (Test-Path $BrownservePSToolsUserConfigDirectory))
+{
+    New-Item -Path $BrownservePSToolsUserConfigDirectory -ItemType Directory -Force | Out-Null
+}
+
+<#
+    Once the user config directory has been created we can export it - we use a global variable so it's available to all cmdlets and other Brownserve modules.
+    It's up to the cmdlets to perform the logic of checking for and using any user defined config files.
+#>
+$Global:BrownservePSToolsUserConfigDirectory = $BrownservePSToolsUserConfigDirectory
+
 # Dot source our private functions so they are available for our public functions to use
 $PrivatePath = Join-Path $PSScriptRoot -ChildPath 'Private'
 $PrivatePath |
@@ -39,8 +67,8 @@ if ($Global:BrownserveCmdlets -is 'System.Array')
     }
 }
 
-<# 
-    Some cmdlets will need to make use of temporary files so we need somewhere to store them. 
+<#
+    Some cmdlets will need to make use of temporary files so we need somewhere to store them.
     _If_ we're in a repository then store them in the repositories temp location, otherwise use the system temp drive.
     (This allows us to easily get at temp files created during builds etc and means we don't have to override them in each cmdlet)
 #>
@@ -57,8 +85,7 @@ if ($Global:BrownserveRepoTempDirectory)
         Write-Warning "The `$global:sBrownserveRepoTempDirectory path '$($global:BrownserveRepoTempDirectory)' does not appear to be a valid path and therefore will be ignored."
     }
 }
-
 <#
-    The config directory is used to store various default configurations for our cmdlets to reference
+    Always set the default config directory to the one in the module directory.
 #>
 $Script:BrownservePSToolsConfigDirectory = Join-Path $PrivatePath '.config'
