@@ -10,7 +10,7 @@
 function Format-BrownserveContent
 {
     [CmdletBinding(
-        DefaultParameterSetName = 'Path'
+        DefaultParameterSetName = 'Default'
     )]
     param
     (
@@ -42,7 +42,7 @@ function Format-BrownserveContent
             Position = 1
         )]
         [bool]
-        $InsertFinalNewline = $false,
+        $InsertFinalNewline = $true,
 
         # The line ending to use, if not specified will use the current line ending from the file
         [Parameter(
@@ -65,6 +65,7 @@ function Format-BrownserveContent
         {
             try
             {
+                Write-Verbose 'Loading content from files'
                 $Path | ForEach-Object {
                     $InputObject += Get-BrownserveContent -Path $_ -ErrorAction 'Stop'
                 }
@@ -77,19 +78,18 @@ function Format-BrownserveContent
 
         foreach ($item in $InputObject)
         {
+            $Content = $Item.Content
             # The content should be an array of strings so we can add a $null to the end
-            if ($InsertFinalNewline -and ($null -ne $item.Content[-1]))
+            if ($InsertFinalNewline -and ($null -ne $Content[-1]))
             {
-                $item.Content += $null
+                $Content += $null
             }
 
-            # Override the line ending if specified and if different from the current line ending
-            if ($Item.LineEnding -ne $LineEnding)
-            {
-                $Item.LineEnding = $LineEnding
+            $Return += [BrownserveContent]@{
+                Content    = $Content
+                LineEnding = $LineEnding
+                Path       = $Item.Path
             }
-
-            $Return += $Item
         }
     }
 
