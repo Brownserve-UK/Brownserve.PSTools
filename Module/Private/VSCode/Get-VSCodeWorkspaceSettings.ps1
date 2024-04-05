@@ -19,6 +19,7 @@ function Get-VSCodeWorkspaceSettings
 
         if (Test-Path $RepoVSCodeSettingsPath)
         {
+            Write-Verbose "Getting VSCode settings from '$RepoVSCodeSettingsPath'."
             try
             {
                 $CurrentSettings = Get-Content $RepoVSCodeSettingsPath -Raw | ConvertFrom-Json -AsHashtable

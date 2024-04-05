@@ -18,6 +18,7 @@ function Get-VSCodeWorkspaceExtensions
         $RepoVSCodeExtensionsPath = Join-Path $RepoVSCodePath 'extensions.json'
         if (Test-Path $RepoVSCodeExtensionsPath)
         {
+            Write-Verbose "Getting current extensions list from '$RepoVSCodeExtensionsPath'."
             try
             {
                 $CurrentExtensions = Get-Content $RepoVSCodeExtensionsPath -Raw |
