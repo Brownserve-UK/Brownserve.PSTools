@@ -11,16 +11,14 @@ function Assert-Directory
         [string]
         $Path
     )
-    
     begin
     {
-        
     }
-    
     process
     {
         try
         {
+            Write-Verbose "Ensuring path '$Path' is a directory."
             $PathDetails = Get-Item $Path -Force -ErrorAction Stop
             if (!$PathDetails.PSIsContainer)
             {
@@ -32,9 +30,7 @@ function Assert-Directory
             throw "Path '$Path' does not exist or is not a valid directory.`n$($_.Exception.Message)"
         }
     }
-    
     end
     {
-        
     }
 }
