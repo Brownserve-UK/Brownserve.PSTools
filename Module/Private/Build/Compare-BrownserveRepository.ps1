@@ -8,9 +8,9 @@ function Compare-BrownserveRepository
     param
     (
         # The path to the repository
-        [Parameter(Mandatory = $true, Position = 0)]
+        [Parameter(Mandatory = $false, Position = 0)]
         [string]
-        $RepoPath,
+        $RepoPath = (Get-Location),
 
         # The type of build that should be installed in this repo
         [Parameter(Mandatory = $false)]
@@ -91,7 +91,12 @@ function Compare-BrownserveRepository
         Assert-Directory $RepoPath -ErrorAction 'Stop'
 
         <#
-            TODO: Explain this
+            The point of this cmdlet is to check the state of a given repository and ensure it's configured correctly.
+            Therefore we can end up in a few different states:
+                - The repository is already configured correctly
+                - The repository is missing some files
+                - Some managed files exist but require updating/changing
+                - Some managed files already exist but are in a format we can't parse (likely manually created or modified)
         #>
         $UnParsableFiles = @()
         $MissingFiles = @()
@@ -183,10 +188,10 @@ function Compare-BrownserveRepository
         }
 
         <#
-            Check for the presence of some files that may already exist in the repo.
+            Check for the presence of any managed files in the repo, they may already exist if this repo has been configured before.
             They may contain manual entries that we should try and preserve.
             However it's also entirely possible that these files were created before we started using this cmdlet and
-            they may not be in a format we can read.
+            they may not be in a format we can parse, if this is the case we'll add them to the list of unparsable files.
         #>
         if (Test-Path $GitIgnorePath)
         {
@@ -302,9 +307,15 @@ function Compare-BrownserveRepository
             {}
         }
 
-        if ($UnParsableFiles.Count -gt 0)
+        if ($UnParsableFiles.Count -gt 0 -and !$Force)
         {
-            # TODO: What do we do here?
+            {
+                <#
+                    Throw here, this allows us to give the user a list of files that need to be manually checked.
+                    Then the user can either modify the files themselves or pass -Force to this cmdlet to overwrite them.
+                #>
+                throw "The following files already exist in the repository but are in a format that can't be parsed:`n$($UnParsableFiles -join "`n")"
+            }
         }
 
         if ($DockerfileName)
@@ -968,6 +979,13 @@ function Compare-BrownserveRepository
     }
     end
     {
+        # Return an object that contains all the information we've gathered
+        $Return = [pscustomobject]@{
+            MissingFiles       = $MissingFiles
+            ChangedFiles       = $ChangedFiles
+            MissingDirectories = $MissingDirectories
+        }
+        Return $Return
     }
 }
 
