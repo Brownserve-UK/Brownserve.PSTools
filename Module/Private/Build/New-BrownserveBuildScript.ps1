@@ -3,14 +3,10 @@ function New-BrownserveBuildScript
     [CmdletBinding()]
     param
     (
-        
     )
-    
     begin
     {
-        
     }
-    
     process
     {
         # Import the template
@@ -25,7 +21,6 @@ function New-BrownserveBuildScript
 
         # Right now our build script is completely static and has no customisations so we can just return it as is
     }
-    
     end
     {
         Return $ScriptTemplate
