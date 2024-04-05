@@ -35,11 +35,11 @@ function Get-BrownserveContent
         {
             $Path | ForEach-Object {
                 # Store the content without line breaks, it's easier to work with
-                $Content = Get-Content -Path $_ -ErrorAction 'Stop' -ReadCount 0
+                $Content = Get-Content -Path $_ -ErrorAction 'Stop' -ReadCount 0 -Force
                 # Read the content as a byte stream so we can properly detect the line endings
                 # TODO: do we do this before getting the content without line breaks?
                 # If we do it before then we can ensure the delimiter is set to the correct line ending?
-                $ByteStreamContent = Get-Content -Path $_ -ErrorAction 'Stop' -Raw -AsByteStream
+                $ByteStreamContent = Get-Content -Path $_ -ErrorAction 'Stop' -Raw -AsByteStream -Force
                 $LFCount = 0
                 $CRCount = 0
                 foreach ($Byte in $ByteStreamContent)
@@ -100,7 +100,7 @@ function Get-BrownserveContent
                         $LineEnding = 'LF'
                     }
                 }
-                $Path = Get-Item -Path $_ -ErrorAction 'Stop'
+                $Path = Get-Item -Path $_ -ErrorAction 'Stop' -Force
                 $Return += [BrownserveContent]@{
                     Content    = $Content
                     Path       = $Path
