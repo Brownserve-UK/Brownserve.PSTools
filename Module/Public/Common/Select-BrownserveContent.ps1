@@ -37,7 +37,7 @@ function Select-BrownserveContent
 
         # If passed then only content after this line will be returned
         [Parameter(
-            Mandatory = $true,
+            Mandatory = $false,
             ValueFromPipelineByPropertyName = $true,
             Position = 1
         )]
@@ -46,7 +46,7 @@ function Select-BrownserveContent
 
         # If passed then only content before this line will be returned
         [Parameter(
-            Mandatory = $true,
+            Mandatory = $false,
             ValueFromPipelineByPropertyName = $true,
             Position = 2
         )]
@@ -226,13 +226,20 @@ function Select-BrownserveContent
                 }
             }
 
-            if ($TextToReturn)
+            if ($null -ne $TextToReturn)
             {
                 $Return += [BrownserveContent]@{
-                    Content    = $TextToReturn
                     Path       = $Item.Path
+                    Content    = $TextToReturn
                     LineEnding = $Item.LineEnding
                 }
+            }
+            else
+            {
+                <#
+                    If we've not found anything then don't return anything.
+                    This follows the behaviour of Select-String which will return $null if the string is not found
+                #>
             }
         }
     }
