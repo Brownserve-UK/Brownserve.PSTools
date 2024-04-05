@@ -8,12 +8,9 @@ function Get-VSCodeWorkspaceExtensions
         [string]
         $WorkspacePath
     )
-    
     begin
     {
-        
     }
-    
     process
     {
         Assert-Directory $WorkspacePath -ErrorAction 'stop'
@@ -23,7 +20,7 @@ function Get-VSCodeWorkspaceExtensions
         {
             try
             {
-                $CurrentExtensions = Get-Content $RepoVSCodeExtensionsPath -Raw | 
+                $CurrentExtensions = Get-Content $RepoVSCodeExtensionsPath -Raw |
                     ConvertFrom-Json -AsHashtable |
                         Select-Object -ExpandProperty 'recommendations'
                 if (!$CurrentExtensions)
@@ -44,7 +41,6 @@ function Get-VSCodeWorkspaceExtensions
             $CurrentExtensions = $null
         }
     }
-    
     end
     {
         if ($CurrentExtensions)
