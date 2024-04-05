@@ -135,18 +135,19 @@ function Compare-BrownserveRepository
         {
             throw "Failed to create temporary directory.`n$($_.Exception.Message)"
         }
-
         <#
             Our config file contains a list of permanent paths that should always be created in a repository.
             They survive between init's and are not gitignored.
         #>
         $DefaultPermanentPaths = $RepositoryPathsConfig.Defaults.PermanentPaths
+        Write-Debug "DefaultPermanentPaths: $($DefaultPermanentPaths | Out-String)"
 
         <#
             Our config file may contain a list of ephemeral paths that get created when the _init script is run.
             They are deleted between init's and are commonly gitignored.
         #>
         $DefaultEphemeralPaths = $RepositoryPathsConfig.Defaults.EphemeralPaths
+        Write-Debug "DefaultEphemeralPaths: $($DefaultEphemeralPaths | Out-String)"
 
         <#
             We often recommend the use of various VS Code extensions with our projects. There may already
@@ -195,6 +196,7 @@ function Compare-BrownserveRepository
         #>
         if (Test-Path $GitIgnorePath)
         {
+            Write-Verbose "Parsing existing .gitignore file."
             try
             {
                 $CurrentGitIgnores = Get-BrownserveContent -Path $GitIgnorePath -ErrorAction 'Stop'
@@ -209,6 +211,7 @@ function Compare-BrownserveRepository
         # Similarly for paket packages
         if (Test-Path $PaketDependenciesPath)
         {
+            Write-Verbose "Parsing existing paket.dependencies file."
             try
             {
                 $ManualPaketEntries = Get-BrownserveContent -Path $PaketDependenciesPath |
@@ -222,6 +225,7 @@ function Compare-BrownserveRepository
         # And for any custom _init.ps1 steps
         if (Test-Path $InitPath)
         {
+            Write-Verbose "Parsing existing _init.ps1 file."
             try
             {
                 $CurrentInitContent = Get-BrownserveContent -Path $InitPath -ErrorAction 'Stop'
@@ -304,7 +308,16 @@ function Compare-BrownserveRepository
                 }
             }
             Default
-            {}
+            {
+                Write-Debug "Generic project type selected"
+                # We always need the $InitParams hashtable otherwise we'll get a null-valued expression error
+                $InitParams = @{
+                    IncludeModuleLoader   = $false
+                    IncludePowerShellYaml = $false
+                    IncludePlatyPS        = $false
+                    IncludeBuildTestTools = $false
+                }
+            }
         }
 
         if ($UnParsableFiles.Count -gt 0 -and !$Force)
@@ -354,13 +367,18 @@ function Compare-BrownserveRepository
         {
             $FinalGitIgnores = $DefaultGitIgnores
         }
-
-        $FinalPackageAliases = $DefaultPackageAliases + $ExtraPackageAliases
+        if ($ExtraPackageAliases)
+        {
+            $FinalPackageAliases = $DefaultPackageAliases + $ExtraPackageAliases
+        }
+        else
+        {
+            $FinalPackageAliases = $DefaultPackageAliases
+        }
         if ($FinalPackageAliases)
         {
             $InitParams.Add('PackageAliases', $FinalPackageAliases)
         }
-
         $GitIgnoreParams = @{
             GitIgnores = $FinalGitIgnores
         }
@@ -402,7 +420,6 @@ function Compare-BrownserveRepository
         {
             $InitParams.Add('CustomInitSteps', $CustomInitSteps)
         }
-
         if ($ExtraVSCodeExtensions)
         {
             $VSCodeExtensions = $DefaultVSCodeExtensions + $ExtraVSCodeExtensions
