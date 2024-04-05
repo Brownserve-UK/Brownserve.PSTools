@@ -35,12 +35,16 @@ function New-BrownservePowerShellModule
         [string]
         $Customisations,
 
+        # The type of module to create
+        [Parameter(Mandatory = $false)]
+        [BrownservePowerShellModuleType]
+        $ModuleType = 'Standalone',
+
         # Forces overwriting of files
         [Parameter(Mandatory = $false)]
         [switch]
         $Force
     )
-    
     begin
     {
         if ($ModuleName -match '\.psm1$')
@@ -69,7 +73,6 @@ function New-BrownservePowerShellModule
             throw $_.Exception.Message
         }
     }
-    
     process
     {
         # Create the JSON we'll use to store the module info
@@ -130,10 +133,9 @@ function New-BrownservePowerShellModule
         }
         catch
         {
-            throw "Failed to created module public/private directories.`n$($_.Exception.Message)"
+            throw "Failed to create module public/private directories.`n$($_.Exception.Message)"
         }
     }
-    
     end
     {
         return [BrownservePowerShellModule]@{
