@@ -8,12 +8,9 @@ function Get-VSCodeWorkspaceSettings
         [string]
         $WorkspacePath
     )
-    
     begin
     {
-        
     }
-    
     process
     {
         Assert-Directory $WorkspacePath -ErrorAction 'stop'
@@ -43,7 +40,6 @@ function Get-VSCodeWorkspaceSettings
             $CurrentSettings = $null
         }
     }
-    
     end
     {
         if ($CurrentSettings)
