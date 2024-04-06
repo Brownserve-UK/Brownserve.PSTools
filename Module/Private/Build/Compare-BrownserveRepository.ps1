@@ -13,6 +13,7 @@ function Compare-BrownserveRepository
         $RepoPath = (Get-Location),
 
         # The type of build that should be installed in this repo
+        # TODO: Rename to RepositoryType
         [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
         [BrownserveRepoProjectType]
@@ -106,6 +107,7 @@ function Compare-BrownserveRepository
         <#
             The below paths will always be required regardless of the type of repository we're working with.
         #>
+        $ManifestPath = Join-Path $RepoPath '.brownserve_repository_manifest'
         $BuildDirectory = Join-Path $RepoPath '.build'
         $InitPath = Join-Path $BuildDirectory '_init.ps1'
         $PaketDependenciesPath = Join-Path $RepoPath 'paket.dependencies'
@@ -122,6 +124,35 @@ function Compare-BrownserveRepository
         $DevcontainerPath = Join-Path $DevcontainerDirectoryPath 'devcontainer.json'
         $DockerfilePath = Join-Path $DevcontainerDirectoryPath 'Dockerfile'
         $EditorConfigPath = Join-Path $RepoPath '.editorconfig'
+
+        <#
+            To help with consistency we store a special manifest file in the repository that contains some basic information
+            about the repository. (Right now we just use it to store the type of repository we're working with.)
+        #>
+        if ((Test-Path $ManifestPath))
+        {
+            try
+            {
+                $CurrentManifest = Get-Content -Path $ManifestPath -ErrorAction 'Stop' | ConvertFrom-Json -Depth 100
+            }
+            catch
+            {
+                throw "Failed to read repository manifest file.`n$($_.Exception.Message)"
+            }
+
+            # Check to see if the repository type is the same as the one we're trying to configure, if it's not
+            # then fail unless -Force has been passed.
+            if ($CurrentManifest.RepositoryType -ne $ProjectType -and !$Force)
+            {
+                throw "Repository type mismatch. Expected '$ProjectType' but found '$($CurrentManifest.RepositoryType)'"
+            }
+            # Fail if the repository type is not present in the manifest file
+            if (!$CurrentManifest.RepositoryType)
+            {
+                throw "Repository type not found in manifest file."
+            }
+        }
+
 
         <#
             Because we don't want to make any changes to the repository until we're sure we can do so safely,
@@ -196,7 +227,7 @@ function Compare-BrownserveRepository
         #>
         if (Test-Path $GitIgnorePath)
         {
-            Write-Verbose "Parsing existing .gitignore file."
+            Write-Verbose 'Parsing existing .gitignore file.'
             try
             {
                 $CurrentGitIgnores = Get-BrownserveContent -Path $GitIgnorePath -ErrorAction 'Stop'
@@ -211,7 +242,7 @@ function Compare-BrownserveRepository
         # Similarly for paket packages
         if (Test-Path $PaketDependenciesPath)
         {
-            Write-Verbose "Parsing existing paket.dependencies file."
+            Write-Verbose 'Parsing existing paket.dependencies file.'
             try
             {
                 $ManualPaketEntries = Get-BrownserveContent -Path $PaketDependenciesPath |
@@ -225,7 +256,7 @@ function Compare-BrownserveRepository
         # And for any custom _init.ps1 steps
         if (Test-Path $InitPath)
         {
-            Write-Verbose "Parsing existing _init.ps1 file."
+            Write-Verbose 'Parsing existing _init.ps1 file.'
             try
             {
                 $CurrentInitContent = Get-BrownserveContent -Path $InitPath -ErrorAction 'Stop'
@@ -254,6 +285,12 @@ function Compare-BrownserveRepository
         $DefaultPackageAliases = $PackageAliasConfig.Defaults
 
         $DefaultEditorConfig = $EditorConfigConfig.Defaults
+
+        # We don't use a config file to create the manifest file as it's a simple object
+        $NewManifest = @{
+            RepositoryType = $ProjectType
+            ManifestVersion = '1.0.0'
+        }
 
         switch ($ProjectType)
         {
@@ -309,7 +346,7 @@ function Compare-BrownserveRepository
             }
             Default
             {
-                Write-Debug "Generic project type selected"
+                Write-Debug 'Generic project type selected'
                 # We always need the $InitParams hashtable otherwise we'll get a null-valued expression error
                 $InitParams = @{
                     IncludeModuleLoader   = $false
@@ -669,6 +706,29 @@ function Compare-BrownserveRepository
 
         try
         {
+            if (($CurrentManifest))
+            {
+                $ManifestCompare = Compare-Object `
+                    -ReferenceObject $CurrentManifest `
+                    -DifferenceObject $NewManifest `
+                    -SyncWindow 1 `
+                    -ErrorAction 'Stop'
+                if ($ManifestCompare)
+                {
+                    $ChangedFiles += [pscustomobject]@{
+                        Path       = $ManifestPath
+                        Content    = $NewManifest
+                        Comparison = $ManifestCompare
+                    }
+                }
+            }
+            else
+            {
+                $MissingFiles += [pscustomobject]@{
+                    Path    = $ManifestPath
+                    Content = $NewManifest
+                }
+            }
             if ((Test-Path $NugetConfigPath))
             {
                 $CurrentNugetConfig = Get-BrownserveContent -Path $NugetConfigPath -ErrorAction 'Stop'
