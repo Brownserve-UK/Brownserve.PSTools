@@ -8,12 +8,11 @@ function Compare-BrownserveRepository
     param
     (
         # The path to the repository
-        [Parameter(Mandatory = $false, Position = 0)]
+        [Parameter(Mandatory = $true, Position = 0)]
         [string]
-        $RepoPath = (Get-Location),
+        $RepositoryPath,
 
         # The type of build that should be installed in this repo
-        # TODO: Rename to RepositoryType
         [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
         [BrownserveRepoProjectType]
@@ -89,7 +88,7 @@ function Compare-BrownserveRepository
     process
     {
         # Ensure we have a valid repository path
-        Assert-Directory $RepoPath -ErrorAction 'Stop'
+        Assert-Directory $RepositoryPath -ErrorAction 'Stop'
 
         <#
             The point of this cmdlet is to check the state of a given repository and ensure it's configured correctly.
@@ -107,23 +106,23 @@ function Compare-BrownserveRepository
         <#
             The below paths will always be required regardless of the type of repository we're working with.
         #>
-        $ManifestPath = Join-Path $RepoPath '.brownserve_repository_manifest'
-        $BuildDirectory = Join-Path $RepoPath '.build'
+        $ManifestPath = Join-Path $RepositoryPath '.brownserve_repository_manifest'
+        $BuildDirectory = Join-Path $RepositoryPath '.build'
         $InitPath = Join-Path $BuildDirectory '_init.ps1'
-        $PaketDependenciesPath = Join-Path $RepoPath 'paket.dependencies'
-        $dotnetToolsConfigPath = Join-Path $RepoPath '.config'
+        $PaketDependenciesPath = Join-Path $RepositoryPath 'paket.dependencies'
+        $dotnetToolsConfigPath = Join-Path $RepositoryPath '.config'
         $dotnetToolsPath = Join-Path $dotnetToolsConfigPath 'dotnet-tools.json'
-        $NugetConfigPath = Join-Path $RepoPath 'nuget.config'
-        $GitIgnorePath = Join-Path $RepoPath '.gitignore'
+        $NugetConfigPath = Join-Path $RepositoryPath 'nuget.config'
+        $GitIgnorePath = Join-Path $RepositoryPath '.gitignore'
 
         # These paths may or may not be required depending on the type of repository we're working with
-        $VSCodePath = Join-Path $RepoPath '.vscode'
+        $VSCodePath = Join-Path $RepositoryPath '.vscode'
         $VSCodeExtensionsFilePath = Join-Path $VSCodePath 'extensions.json'
         $VSCodeWorkspaceSettingsFilePath = Join-Path $VSCodePath 'settings.json'
-        $DevcontainerDirectoryPath = Join-Path $RepoPath '.devcontainer'
+        $DevcontainerDirectoryPath = Join-Path $RepositoryPath '.devcontainer'
         $DevcontainerPath = Join-Path $DevcontainerDirectoryPath 'devcontainer.json'
         $DockerfilePath = Join-Path $DevcontainerDirectoryPath 'Dockerfile'
-        $EditorConfigPath = Join-Path $RepoPath '.editorconfig'
+        $EditorConfigPath = Join-Path $RepositoryPath '.editorconfig'
 
         <#
             To help with consistency we store a special manifest file in the repository that contains some basic information
@@ -186,7 +185,7 @@ function Compare-BrownserveRepository
         #>
         try
         {
-            $VSCodeWorkspaceExtensionIDs = Get-VSCodeWorkspaceExtensions -WorkspacePath $RepoPath -ErrorAction 'Stop'
+            $VSCodeWorkspaceExtensionIDs = Get-VSCodeWorkspaceExtensions -WorkspacePath $RepositoryPath -ErrorAction 'Stop'
         }
         catch [BrownserveFileNotFound]
         {
@@ -203,7 +202,7 @@ function Compare-BrownserveRepository
 
         try
         {
-            $VSCodeWorkspaceSettings = Get-VSCodeWorkspaceSettings -WorkspacePath $RepoPath -ErrorAction 'Stop'
+            $VSCodeWorkspaceSettings = Get-VSCodeWorkspaceSettings -WorkspacePath $RepositoryPath -ErrorAction 'Stop'
         }
         catch [BrownserveFileNotFound]
         {
@@ -662,7 +661,7 @@ function Compare-BrownserveRepository
             if ($_.ChildPaths)
             {
                 $JoinPathParams = @{
-                    Path                = $RepoPath
+                    Path                = $RepositoryPath
                     ChildPath           = $_.Path
                     AdditionalChildPath = $_.ChildPaths
                 }
@@ -670,7 +669,7 @@ function Compare-BrownserveRepository
             else
             {
                 $JoinPathParams = @{
-                    Path      = $RepoPath
+                    Path      = $RepositoryPath
                     ChildPath = $_.Path
                 }
             }
