@@ -41,7 +41,8 @@ class BrownserveContent
 
     BrownserveContent([pscustomobject]$Content)
     {
-        if (!$Content.Content)
+        # Compare against $null, content may end up as an empty string in certain cases which is expected
+        if ($null -eq $Content.Content)
         {
             throw 'Cannot create BrownserveContent object without Content'
         }
@@ -49,7 +50,7 @@ class BrownserveContent
         {
             throw 'Cannot create BrownserveContent object without Path'
         }
-        if (!$Content.LineEnding)
+        if ($null -eq $Content.LineEnding)
         {
             throw 'Cannot create BrownserveContent object without LineEnding'
         }
@@ -60,7 +61,8 @@ class BrownserveContent
 
     BrownserveContent([hashtable]$Content)
     {
-        if (!$Content.Content)
+        # Compare against $null, content may end up as an empty string in certain cases which is expected
+        if ($null -eq $Content.Content)
         {
             throw 'Cannot create BrownserveContent object without Content'
         }
@@ -68,7 +70,7 @@ class BrownserveContent
         {
             throw 'Cannot create BrownserveContent object without Path'
         }
-        if (!$Content.LineEnding)
+        if ($null -eq $Content.LineEnding)
         {
             throw 'Cannot create BrownserveContent object without LineEnding'
         }
