@@ -717,6 +717,7 @@ function Compare-BrownserveRepository
 
         try
         {
+            $NewManifestJSON = (ConvertTo-Json $NewManifest -Depth 100 -ErrorAction 'Stop').Split("`n") -replace "`r",''
             if ($CurrentManifest)
             {
                 Write-Verbose 'Checking for changes to repository manifest'
@@ -727,19 +728,20 @@ function Compare-BrownserveRepository
                     -ErrorAction 'Stop'
                 if ($ManifestCompare)
                 {
-                    $ChangedFiles += [pscustomobject]@{
+                    $ChangedFiles += [BrownserveContent]@{
                         Path       = $ManifestPath
-                        Content    = ($NewManifest | ConvertTo-Json)
-                        Comparison = $ManifestCompare
+                        Content    = $NewManifestJSON
+                        LineEnding = 'LF'
                     }
                 }
             }
             else
             {
                 Write-Verbose 'No existing repository manifest found, will create a new one.'
-                $MissingFiles += [pscustomobject]@{
-                    Path    = $ManifestPath
-                    Content = ($NewManifest | ConvertTo-Json)
+                $MissingFiles += [BrownserveContent]@{
+                    Path       = $ManifestPath
+                    Content    = $NewManifestJSON
+                    LineEnding = 'LF'
                 }
             }
         }
@@ -749,11 +751,11 @@ function Compare-BrownserveRepository
         }
         try
         {
+            $NewNugetConfig = Get-BrownserveContent -Path $NugetConfigTempPath -ErrorAction 'Stop'
             if ((Test-Path $NugetConfigPath))
             {
                 Write-Verbose 'Checking for changes to nuget.config'
                 $CurrentNugetConfig = Get-BrownserveContent -Path $NugetConfigPath -ErrorAction 'Stop'
-                $NewNugetConfig = Get-BrownserveContent -Path $NugetConfigTempPath -ErrorAction 'Stop'
                 $NugetConfigCompare = Compare-Object `
                     -ReferenceObject $CurrentNugetConfig `
                     -DifferenceObject $NewNugetConfig `
@@ -761,19 +763,20 @@ function Compare-BrownserveRepository
                     -ErrorAction 'Stop'
                 if ($NugetConfigCompare)
                 {
-                    $ChangedFiles += [pscustomobject]@{
+                    $ChangedFiles += [BrownserveContent]@{
                         Path       = $NugetConfigPath
-                        Content    = $NewNugetConfig
-                        Comparison = $NugetConfigCompare
+                        Content    = $NewNugetConfig.Content
+                        LineEnding = 'LF'
                     }
                 }
             }
             else
             {
                 Write-Verbose 'No existing nuget.config found, will create a new one.'
-                $MissingFiles += [pscustomobject]@{
-                    Path    = $NugetConfigPath
-                    Content = $NugetConfigTempPath
+                $MissingFiles += [BrownserveContent]@{
+                    Path       = $NugetConfigPath
+                    Content    = $NewNugetConfig.Content
+                    LineEnding = 'LF'
                 }
             }
         }
@@ -792,10 +795,19 @@ function Compare-BrownserveRepository
         }
         if (!(Test-Path $dotnetToolsPath))
         {
+            try
+            {
+                $dotnetToolsContent = Get-Content $dotnetToolsTempPath -ErrorAction 'Stop'
+            }
+            catch
+            {
+                throw "Failed to read dotnet-tools.json content.`n$($_.Exception.Message)"
+            }
             Write-Verbose 'No existing dotnet-tools.json found, will create a new one.'
-            $MissingFiles += [pscustomobject]@{
-                Path    = $dotnetToolsPath
-                Content = $dotnetToolsTempPath
+            $MissingFiles += [BrownserveContent]@{
+                Path       = $dotnetToolsPath
+                Content    = $dotnetToolsContent
+                LineEnding = 'LF'
             }
         }
 
@@ -809,19 +821,20 @@ function Compare-BrownserveRepository
                 -ErrorAction 'Stop'
             if ($InitCompare)
             {
-                $ChangedFiles += [pscustomobject]@{
+                $ChangedFiles += [BrownserveContent]@{
                     Path       = $InitPath
                     Content    = $InitScriptContent
-                    Comparison = $InitCompare
+                    LineEnding = 'LF'
                 }
             }
         }
         else
         {
             Write-Verbose 'No existing _init.ps1 found, will create a new one.'
-            $MissingFiles += [pscustomobject]@{
-                Path    = $InitPath
-                Content = $InitScriptContent
+            $MissingFiles += [BrownserveContent]@{
+                Path       = $InitPath
+                Content    = $InitScriptContent
+                LineEnding = 'LF'
             }
         }
 
@@ -835,19 +848,20 @@ function Compare-BrownserveRepository
                 -ErrorAction 'Stop'
             if ($GitIgnoreCompare)
             {
-                $ChangedFiles += [pscustomobject]@{
+                $ChangedFiles += [BrownserveContent]@{
                     Path       = $GitIgnorePath
                     Content    = $GitIgnoresContent
-                    Comparison = $GitIgnoreCompare
+                    LineEnding = 'LF'
                 }
             }
         }
         else
         {
             Write-Verbose 'No existing .gitignore found, will create a new one.'
-            $MissingFiles += [pscustomobject]@{
-                Path    = $GitIgnorePath
-                Content = $GitIgnoresContent
+            $MissingFiles += [BrownserveContent]@{
+                Path       = $GitIgnorePath
+                Content    = $GitIgnoresContent
+                LineEnding = 'LF'
             }
         }
 
@@ -865,6 +879,7 @@ function Compare-BrownserveRepository
                 -InputObject @{ recommendations = $VSCodeWorkspaceExtensionIDs } `
                 -Depth 100 `
                 -ErrorAction 'Stop'
+            $VSCodeWorkspaceExtensionIDsJSON = $VSCodeWorkspaceExtensionIDsJSON.Split("`n") -replace "`r",''
             if ((Test-Path $VSCodeExtensionsFilePath))
             {
                 Write-Verbose 'Checking for changes to VS Code extensions.json'
@@ -876,19 +891,20 @@ function Compare-BrownserveRepository
                     -ErrorAction 'Stop'
                 if ($VSCodeExtensionsCompare)
                 {
-                    $ChangedFiles += [pscustomobject]@{
+                    $ChangedFiles += [BrownserveContent]@{
                         Path       = $VSCodeExtensionsFilePath
                         Content    = $VSCodeWorkspaceExtensionIDsJSON
-                        Comparison = $VSCodeExtensionsCompare
+                        LineEnding = 'LF'
                     }
                 }
             }
             else
             {
                 Write-Verbose 'No existing extensions.json found, will create a new one.'
-                $MissingFiles += [pscustomobject]@{
-                    Path    = $VSCodeExtensionsFilePath
-                    Content = $VSCodeWorkspaceExtensionIDsJSON
+                $MissingFiles += [BrownserveContent]@{
+                    Path       = $VSCodeExtensionsFilePath
+                    Content    = $VSCodeWorkspaceExtensionIDsJSON
+                    LineEnding = 'LF'
                 }
             }
         }
@@ -903,6 +919,7 @@ function Compare-BrownserveRepository
                 -InputObject $VSCodeWorkspaceSettings `
                 -Depth 100 `
                 -ErrorAction 'Stop'
+            $VSCodeWorkspaceSettingsJSON = $VSCodeWorkspaceSettingsJSON.Split("`n") -replace "`r",''
             if ((Test-Path $VSCodeWorkspaceSettingsFilePath))
             {
                 Write-Verbose 'Checking for changes to VS Code settings.json'
@@ -914,19 +931,20 @@ function Compare-BrownserveRepository
                     -ErrorAction 'Stop'
                 if ($VSCodeWorkspaceSettingsCompare)
                 {
-                    $ChangedFiles += [pscustomobject]@{
+                    $ChangedFiles += [BrownserveContent]@{
                         Path       = $VSCodeWorkspaceSettingsFilePath
                         Content    = $VSCodeWorkspaceSettingsJSON
-                        Comparison = $VSCodeWorkspaceSettingsCompare
+                        LineEnding = 'LF'
                     }
                 }
             }
             else
             {
                 Write-Verbose 'No existing settings.json found, will create a new one.'
-                $MissingFiles += [pscustomobject]@{
-                    Path    = $VSCodeWorkspaceSettingsFilePath
-                    Content = $VSCodeWorkspaceSettingsJSON
+                $MissingFiles += [BrownserveContent]@{
+                    Path       = $VSCodeWorkspaceSettingsFilePath
+                    Content    = $VSCodeWorkspaceSettingsJSON
+                    LineEnding = 'LF'
                 }
             }
         }
@@ -950,19 +968,20 @@ function Compare-BrownserveRepository
                         -ErrorAction 'Stop'
                     if ($PaketDependenciesCompare)
                     {
-                        $ChangedFiles += [pscustomobject]@{
+                        $ChangedFiles += [BrownserveContent]@{
                             Path       = $PaketDependenciesPath
                             Content    = $PaketDependenciesContent
-                            Comparison = $PaketDependenciesCompare
+                            LineEnding = 'LF'
                         }
                     }
                 }
                 else
                 {
                     Write-Verbose 'No existing paket.dependencies found, will create a new one.'
-                    $MissingFiles += [pscustomobject]@{
-                        Path    = $PaketDependenciesPath
-                        Content = $PaketDependenciesContent
+                    $MissingFiles += [BrownserveContent]@{
+                        Path       = $PaketDependenciesPath
+                        Content    = $PaketDependenciesContent
+                        LineEnding = 'LF'
                     }
                 }
             }
@@ -990,18 +1009,19 @@ function Compare-BrownserveRepository
                             -ErrorAction 'Stop'
                         if ($DevcontainerCompare)
                         {
-                            $ChangedFiles += [pscustomobject]@{
+                            $ChangedFiles += [BrownserveContent]@{
                                 Path       = $DevcontainerPath
                                 Content    = $Devcontainer.Devcontainer
-                                Comparison = $DevcontainerCompare
+                                LineEnding = 'LF'
                             }
                         }
                     }
                     else
                     {
-                        $MissingFiles += [pscustomobject]@{
-                            Path    = $DevcontainerPath
-                            Content = $Devcontainer.Devcontainer
+                        $MissingFiles += [BrownserveContent]@{
+                            Path       = $DevcontainerPath
+                            Content    = $Devcontainer.Devcontainer
+                            LineEnding = 'LF'
                         }
                     }
                 }
@@ -1011,9 +1031,10 @@ function Compare-BrownserveRepository
                     $MissingDirectories += [pscustomobject]@{
                         Path = $DevcontainerDirectoryPath
                     }
-                    $MissingFiles += [pscustomobject]@{
-                        Path    = $DevcontainerPath
-                        Content = $Devcontainer.Devcontainer
+                    $MissingFiles += [BrownserveContent]@{
+                        Path       = $DevcontainerPath
+                        Content    = $Devcontainer.Devcontainer
+                        LineEnding = 'LF'
                     }
                 }
             }
@@ -1035,19 +1056,20 @@ function Compare-BrownserveRepository
                         -ErrorAction 'Stop'
                     if ($DockerfileCompare)
                     {
-                        $ChangedFiles += [pscustomobject]@{
+                        $ChangedFiles += [BrownserveContent]@{
                             Path       = $DockerfilePath
                             Content    = $Devcontainer.Dockerfile
-                            Comparison = $DockerfileCompare
+                            LineEnding = 'LF'
                         }
                     }
                 }
                 else
                 {
                     Write-Verbose 'No existing Dockerfile found, will create a new one.'
-                    $MissingFiles += [pscustomobject]@{
-                        Path    = $DockerfilePath
-                        Content = $Devcontainer.Dockerfile
+                    $MissingFiles += [BrownserveContent]@{
+                        Path       = $DockerfilePath
+                        Content    = $Devcontainer.Dockerfile
+                        LineEnding = 'LF'
                     }
                 }
             }
@@ -1074,10 +1096,10 @@ function Compare-BrownserveRepository
                             -ErrorAction 'Stop'
                         if ($EditorConfigCompare)
                         {
-                            $ChangedFiles += [pscustomobject]@{
+                            $ChangedFiles += [BrownserveContent]@{
                                 Path       = $EditorConfigPath
                                 Content    = $EditorConfigContent
-                                Comparison = $EditorConfigCompare
+                                LineEnding = 'LF'
                             }
                         }
                     }
@@ -1089,9 +1111,10 @@ function Compare-BrownserveRepository
                 else
                 {
                     Write-Verbose 'No existing .editorconfig found, will create a new one.'
-                    $MissingFiles += [pscustomobject]@{
-                        Path    = $EditorConfigPath
-                        Content = $EditorConfigContent
+                    $MissingFiles += [BrownserveContent]@{
+                        Path       = $EditorConfigPath
+                        Content    = $EditorConfigContent
+                        LineEnding = 'LF'
                     }
                 }
             }
