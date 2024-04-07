@@ -36,7 +36,7 @@ function Set-BrownserveContent
                 #>
                 Set-Content `
                     -Path $Object.Path `
-                    -Value $Object.Content.ToString() `
+                    -Value $Object.ToString() `
                     -ErrorAction 'Stop'
             }
             catch
