@@ -18,6 +18,11 @@ function Compare-BrownserveRepository
         [BrownserveRepoProjectType]
         $ProjectType = 'generic',
 
+        # Forces the recreation of files even if they already exist
+        [Parameter(Mandatory = $false)]
+        [switch]
+        $Force,
+
         # The config file to use for setting our .gitignore content
         [Parameter(Mandatory = $false, DontShow)]
         [string]
@@ -104,6 +109,14 @@ function Compare-BrownserveRepository
         $MissingDirectories = @()
 
         <#
+            We type constrain these variables to ensure that we can easily add to them later on.
+            In the past certain operations had a tendency to return a single string rather than an array of strings
+            Which would cause issues when we converted them to JSON.
+        #>
+        [array]$VSCodeWorkspaceExtensionIDs = @()
+        $VSCodeWorkspaceSettings = [ordered]@{}
+
+        <#
             The below paths will always be required regardless of the type of repository we're working with.
         #>
         $ManifestPath = Join-Path $RepositoryPath '.brownserve_repository_manifest'
@@ -143,12 +156,12 @@ function Compare-BrownserveRepository
             # then fail unless -Force has been passed.
             if ($CurrentManifest.RepositoryType -ne $ProjectType -and !$Force)
             {
-                throw "Repository type mismatch. Expected '$ProjectType' but found '$($CurrentManifest.RepositoryType)'"
+                throw "Repository type mismatch. Expected '$ProjectType' but repository was previously configured as '$($CurrentManifest.RepositoryType)'"
             }
             # Fail if the repository type is not present in the manifest file
             if (!$CurrentManifest.RepositoryType)
             {
-                throw "Repository type not found in manifest file."
+                throw 'Repository type not found in manifest file.'
             }
         }
 
@@ -170,30 +183,30 @@ function Compare-BrownserveRepository
             They survive between init's and are not gitignored.
         #>
         $DefaultPermanentPaths = $RepositoryPathsConfig.Defaults.PermanentPaths
-        Write-Debug "DefaultPermanentPaths: $($DefaultPermanentPaths | Out-String)"
 
         <#
             Our config file may contain a list of ephemeral paths that get created when the _init script is run.
             They are deleted between init's and are commonly gitignored.
         #>
         $DefaultEphemeralPaths = $RepositoryPathsConfig.Defaults.EphemeralPaths
-        Write-Debug "DefaultEphemeralPaths: $($DefaultEphemeralPaths | Out-String)"
 
         <#
             We often recommend the use of various VS Code extensions with our projects. There may already
             be some settings in the repo as well, we should try and preserve those as best we can.
+            N.B If the extensions.json file only contains a single key then it will be read as a string rather than an array
+            so we use the += operator to ensure that we always end up adding any items to the array we created above.
         #>
         try
         {
-            $VSCodeWorkspaceExtensionIDs = Get-VSCodeWorkspaceExtensions -WorkspacePath $RepositoryPath -ErrorAction 'Stop'
+            $VSCodeWorkspaceExtensionIDs += Get-VSCodeWorkspaceExtensions -WorkspacePath $RepositoryPath -ErrorAction 'Stop'
         }
         catch [BrownserveFileNotFound]
         {
             <#
                 Repo probably doesn't have the extensions.json file yet
-                so we'll create an empty array for storing any extension ID's we might need later.
+                Don't terminate as this is expected behaviour.
             #>
-            $VSCodeWorkspaceExtensionIDs = @()
+            Write-Verbose 'No VS Code extensions.json file found, using the empty array'
         }
         catch
         {
@@ -206,12 +219,11 @@ function Compare-BrownserveRepository
         }
         catch [BrownserveFileNotFound]
         {
-            Write-Verbose 'No VS Code settings.json file found, creating an empty list'
+            Write-Verbose 'No VS Code settings.json file found, using the empty dictionary'
             <#
-                Repo probably doesn't have the settings.json file yet, so we'll create an empty hashtable
-                that we can add any VS Code settings to later.
+                Repo probably doesn't have the settings.json file yet, We'll use the empty dictionary
+                we created above.
             #>
-            $VSCodeWorkspaceSettings = [ordered]@{}
         }
         catch
         {
@@ -287,7 +299,7 @@ function Compare-BrownserveRepository
 
         # We don't use a config file to create the manifest file as it's a simple object
         $NewManifest = @{
-            RepositoryType = $ProjectType
+            RepositoryType  = $ProjectType.ToString()
             ManifestVersion = '1.0.0'
         }
 
@@ -705,8 +717,9 @@ function Compare-BrownserveRepository
 
         try
         {
-            if (($CurrentManifest))
+            if ($CurrentManifest)
             {
+                Write-Verbose 'Checking for changes to repository manifest'
                 $ManifestCompare = Compare-Object `
                     -ReferenceObject $CurrentManifest `
                     -DifferenceObject $NewManifest `
@@ -716,20 +729,29 @@ function Compare-BrownserveRepository
                 {
                     $ChangedFiles += [pscustomobject]@{
                         Path       = $ManifestPath
-                        Content    = $NewManifest
+                        Content    = ($NewManifest | ConvertTo-Json)
                         Comparison = $ManifestCompare
                     }
                 }
             }
             else
             {
+                Write-Verbose 'No existing repository manifest found, will create a new one.'
                 $MissingFiles += [pscustomobject]@{
                     Path    = $ManifestPath
-                    Content = $NewManifest
+                    Content = ($NewManifest | ConvertTo-Json)
                 }
             }
+        }
+        catch
+        {
+            throw "Failed to process '$ManifestPath'.`n$($_.Exception.Message)"
+        }
+        try
+        {
             if ((Test-Path $NugetConfigPath))
             {
+                Write-Verbose 'Checking for changes to nuget.config'
                 $CurrentNugetConfig = Get-BrownserveContent -Path $NugetConfigPath -ErrorAction 'Stop'
                 $NewNugetConfig = Get-BrownserveContent -Path $NugetConfigTempPath -ErrorAction 'Stop'
                 $NugetConfigCompare = Compare-Object `
@@ -748,6 +770,7 @@ function Compare-BrownserveRepository
             }
             else
             {
+                Write-Verbose 'No existing nuget.config found, will create a new one.'
                 $MissingFiles += [pscustomobject]@{
                     Path    = $NugetConfigPath
                     Content = $NugetConfigTempPath
@@ -769,6 +792,7 @@ function Compare-BrownserveRepository
         }
         if (!(Test-Path $dotnetToolsPath))
         {
+            Write-Verbose 'No existing dotnet-tools.json found, will create a new one.'
             $MissingFiles += [pscustomobject]@{
                 Path    = $dotnetToolsPath
                 Content = $dotnetToolsTempPath
@@ -777,6 +801,7 @@ function Compare-BrownserveRepository
 
         if ($CurrentInitContent)
         {
+            Write-Verbose 'Checking for changes to _init.ps1'
             $InitCompare = Compare-Object `
                 -ReferenceObject $CurrentInitContent `
                 -DifferenceObject $InitScriptContent `
@@ -793,14 +818,16 @@ function Compare-BrownserveRepository
         }
         else
         {
+            Write-Verbose 'No existing _init.ps1 found, will create a new one.'
             $MissingFiles += [pscustomobject]@{
                 Path    = $InitPath
                 Content = $InitScriptContent
             }
         }
 
-        if ($GitIgnoresContent)
+        if ($CurrentGitIgnores)
         {
+            Write-Verbose 'Checking for changes to .gitignore'
             $GitIgnoreCompare = Compare-Object `
                 -ReferenceObject $CurrentGitIgnores `
                 -DifferenceObject $GitIgnoresContent `
@@ -817,9 +844,18 @@ function Compare-BrownserveRepository
         }
         else
         {
+            Write-Verbose 'No existing .gitignore found, will create a new one.'
             $MissingFiles += [pscustomobject]@{
                 Path    = $GitIgnorePath
                 Content = $GitIgnoresContent
+            }
+        }
+
+        # Ensure the VS Code directory exists
+        if (!(Test-Path $VSCodePath))
+        {
+            $MissingDirectories += [pscustomobject]@{
+                Path = $VSCodePath
             }
         }
 
@@ -831,6 +867,7 @@ function Compare-BrownserveRepository
                 -ErrorAction 'Stop'
             if ((Test-Path $VSCodeExtensionsFilePath))
             {
+                Write-Verbose 'Checking for changes to VS Code extensions.json'
                 $CurrentVSCodeExtensions = Get-BrownserveContent -Path $VSCodeExtensionsFilePath -ErrorAction 'Stop'
                 $VSCodeExtensionsCompare = Compare-Object `
                     -ReferenceObject $CurrentVSCodeExtensions `
@@ -848,6 +885,7 @@ function Compare-BrownserveRepository
             }
             else
             {
+                Write-Verbose 'No existing extensions.json found, will create a new one.'
                 $MissingFiles += [pscustomobject]@{
                     Path    = $VSCodeExtensionsFilePath
                     Content = $VSCodeWorkspaceExtensionIDsJSON
@@ -867,6 +905,7 @@ function Compare-BrownserveRepository
                 -ErrorAction 'Stop'
             if ((Test-Path $VSCodeWorkspaceSettingsFilePath))
             {
+                Write-Verbose 'Checking for changes to VS Code settings.json'
                 $CurrentVSCodeWorkspaceSettings = Get-BrownserveContent -Path $VSCodeWorkspaceSettingsFilePath -ErrorAction 'Stop'
                 $VSCodeWorkspaceSettingsCompare = Compare-Object `
                     -ReferenceObject $CurrentVSCodeWorkspaceSettings `
@@ -884,6 +923,7 @@ function Compare-BrownserveRepository
             }
             else
             {
+                Write-Verbose 'No existing settings.json found, will create a new one.'
                 $MissingFiles += [pscustomobject]@{
                     Path    = $VSCodeWorkspaceSettingsFilePath
                     Content = $VSCodeWorkspaceSettingsJSON
@@ -901,6 +941,7 @@ function Compare-BrownserveRepository
             {
                 if ((Test-Path $PaketDependenciesPath))
                 {
+                    Write-Verbose 'Checking for changes to paket.dependencies'
                     $CurrentPaketDependencies = Get-BrownserveContent -Path $PaketDependenciesPath -ErrorAction 'Stop'
                     $PaketDependenciesCompare = Compare-Object `
                         -ReferenceObject $CurrentPaketDependencies `
@@ -918,6 +959,7 @@ function Compare-BrownserveRepository
                 }
                 else
                 {
+                    Write-Verbose 'No existing paket.dependencies found, will create a new one.'
                     $MissingFiles += [pscustomobject]@{
                         Path    = $PaketDependenciesPath
                         Content = $PaketDependenciesContent
@@ -939,6 +981,7 @@ function Compare-BrownserveRepository
                 {
                     if ((Test-Path $DevcontainerPath))
                     {
+                        Write-Verbose 'Checking for changes to devcontainer.json'
                         $CurrentDevcontainer = Get-BrownserveContent -Path $DevcontainerPath -ErrorAction 'Stop'
                         $DevcontainerCompare = Compare-Object `
                             -ReferenceObject $CurrentDevcontainer `
@@ -964,6 +1007,7 @@ function Compare-BrownserveRepository
                 }
                 else
                 {
+                    Write-Verbose 'No existing .devcontainer directory found, will create a new one.'
                     $MissingDirectories += [pscustomobject]@{
                         Path = $DevcontainerDirectoryPath
                     }
@@ -982,6 +1026,7 @@ function Compare-BrownserveRepository
             {
                 if ((Test-Path $DockerfilePath))
                 {
+                    Write-Verbose 'Checking for changes to Dockerfile'
                     $CurrentDockerfile = Get-BrownserveContent -Path $DockerfilePath -ErrorAction 'Stop'
                     $DockerfileCompare = Compare-Object `
                         -ReferenceObject $CurrentDockerfile `
@@ -999,6 +1044,7 @@ function Compare-BrownserveRepository
                 }
                 else
                 {
+                    Write-Verbose 'No existing Dockerfile found, will create a new one.'
                     $MissingFiles += [pscustomobject]@{
                         Path    = $DockerfilePath
                         Content = $Devcontainer.Dockerfile
@@ -1019,6 +1065,7 @@ function Compare-BrownserveRepository
                 {
                     try
                     {
+                        Write-Verbose 'Checking for changes to .editorconfig'
                         $CurrentEditorConfig = Get-BrownserveContent -Path $EditorConfigPath -ErrorAction 'Stop'
                         $EditorConfigCompare = Compare-Object `
                             -ReferenceObject $CurrentEditorConfig `
@@ -1041,6 +1088,7 @@ function Compare-BrownserveRepository
                 }
                 else
                 {
+                    Write-Verbose 'No existing .editorconfig found, will create a new one.'
                     $MissingFiles += [pscustomobject]@{
                         Path    = $EditorConfigPath
                         Content = $EditorConfigContent
