@@ -45,9 +45,13 @@ function New-GitIgnoresFile
             $IgnoresTemplate += $ManualGitIgnores
         }
     }
-    
     end
     {
+        <#
+            Ensure there are no errant carriage returns in the template.
+            Split the template into an array of strings for easy comparison.
+        #>
+        $IgnoresTemplate = $IgnoresTemplate -replace "`r", '' -split "`n"
         Return $IgnoresTemplate
     }
 }
