@@ -292,8 +292,6 @@ catch
 "@
         }
 
-        
-
         if ($IncludeBuildTestTools)
         {
             $CustomExternalTooling += @"
@@ -320,7 +318,7 @@ catch
         if ($PackageAliases)
         {
             $PackageAliasText += @"
-<# 
+<#
     Sometimes packages we install from Paket/NuGet may already exist on the system, so we set aliases to ensure we only use the local versions
     However aliases are only recognised by _this_ PowerShell session, so if we start another process or call a native command then it won't work.
     Therefore we can choose to set a Global variable that we can use to pass to child processes
@@ -359,9 +357,15 @@ catch
 "@
         }
         $InitTemplate = $InitTemplate.Replace('###PACKAGE_ALIASES###', $PackageAliasText)
-        # Finally we carry over any custom _init steps if the user has given them
+        # Carry over any custom _init steps if the user has given them
         $InitTemplate = $InitTemplate.Replace('###CUSTOM_INIT_STEPS###', $CustomInitSteps)
-    }   
+
+        <#
+            Finally we split the output into an array of lines and remove any carriage return characters
+            to ensure that the file is saved with the correct line endings.
+        #>
+        $InitTemplate = $InitTemplate -replace "`r", '' -split "`n"
+    }
     end
     {
         Return $InitTemplate
