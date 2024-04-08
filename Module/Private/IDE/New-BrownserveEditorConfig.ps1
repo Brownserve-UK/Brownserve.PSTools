@@ -89,6 +89,11 @@ root = true`n`n
     {
         if ($Return -ne $Header)
         {
+            <#
+                Ensure we don't end up with any errant carriage returns in the template.
+                Split the template into an array of strings for easy comparison.
+            #>
+            $Return = $Return -replace "`r", '' -split "`n"
             Return $Return
         }
         else
