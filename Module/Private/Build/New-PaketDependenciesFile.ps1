@@ -13,12 +13,9 @@ function New-PaketDependenciesFile
         [string]
         $ManualDependencies
     )
-    
     begin
     {
-        
     }
-    
     process
     {
         $PaketDependenciesTemplate = "# This file is managed by a tool, manual changes will be lost unless added to the designated section below`n"
@@ -44,9 +41,13 @@ function New-PaketDependenciesFile
             $PaketDependenciesTemplate += $ManualDependencies
         }
     }
-    
     end
     {
+        <#
+            Ensure there are no errant carriage returns in the template.
+            Split the template into an array of strings for easy comparison.
+        #>
+        $PaketDependenciesTemplate = $PaketDependenciesTemplate -replace "`r", '' -split "`n"
         return $PaketDependenciesTemplate
     }
 }
