@@ -35,10 +35,24 @@ function Get-BrownserveContent
         {
             $Path | ForEach-Object {
                 # Store the content without line breaks, it's easier to work with
-                $Content = Get-Content -Path $_ -ErrorAction 'Stop' -ReadCount 0 -Force
+                # $Content = Get-Content -Path $_ -ErrorAction 'Stop' -ReadCount 0 -Force
+                <#
+                    Despite Get-Content supporting delimiting the content on line breaks we end up with a interesting
+                    issue - if the file ends with a string and a new line marker then the subsequent new line is not
+                    included in the content.
+                    (e.g:
+                    "This is the last line`n
+                    "
+                    would return:
+                    "This is the last line"
+                    )
+                    This is especially problematic when we run the Initialize-BrownserveRepository cmdlet that compares
+                    the content of the files in the repository to the content of the auto generated templates.
+                    So instead we read the file in RAW mode and then split the content on the line breaks.
+                    This is basically the same as what Get-Content does but we can ensure that the last line is included.
+                #>
+                $Content = (Get-Content -Path $_ -ErrorAction 'Stop' -Raw -Force -ReadCount 0) -split "`n"
                 # Read the content as a byte stream so we can properly detect the line endings
-                # TODO: do we do this before getting the content without line breaks?
-                # If we do it before then we can ensure the delimiter is set to the correct line ending?
                 $ByteStreamContent = Get-Content -Path $_ -ErrorAction 'Stop' -Raw -AsByteStream -Force
                 $LFCount = 0
                 $CRCount = 0
@@ -57,6 +71,15 @@ function Get-BrownserveContent
                 # Check to see if we have any carriage returns
                 if ($CRCount -gt 0)
                 {
+                    <#
+                        We ALWAYS strip out CR characters from the content.
+                        This is done as if we don't then when writing the file back to disk we end up with a file that has
+                        double CR characters. (e.g. `r`n becomes `r`r`n)
+                        It also makes it easier to work with the content as we don't have to worry about the line endings when
+                        comparing strings, we can just compare the strings directly.
+                        If we care about comparing the line endings then we can use the LineEnding property of the returned object.
+                    #>
+                    $Content = $Content -replace "\r", ''
                     # If we do then check to see if we have any line feeds as well
                     if ($LFCount -gt 0)
                     {
