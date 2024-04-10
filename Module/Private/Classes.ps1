@@ -24,7 +24,8 @@ enum BrownserveLineEnding
 
 <#
 .SYNOPSIS
-    This class helps us format the content returned by Get-Content.
+    The BrownserveContent class is used to aid in formatting file content in a consistent manner.
+    It is used with the *-BrownserveContent cmdlets.
 #>
 class BrownserveContent
 {
