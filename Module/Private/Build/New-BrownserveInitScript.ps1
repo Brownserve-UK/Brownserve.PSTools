@@ -361,10 +361,9 @@ catch
         $InitTemplate = $InitTemplate.Replace('###CUSTOM_INIT_STEPS###', $CustomInitSteps)
 
         <#
-            Finally we split the output into an array of lines and remove any carriage return characters
-            to ensure that the file is saved with the correct line endings.
+            Finally ensure the content is formatted correctly ready to be written to disk.
         #>
-        $InitTemplate = $InitTemplate -replace "`r", '' -split "`n"
+        $InitTemplate = $InitTemplate | Format-BrownserveContent
     }
     end
     {

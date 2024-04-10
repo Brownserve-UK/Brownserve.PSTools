@@ -45,10 +45,9 @@ function New-GitIgnoresFile
     end
     {
         <#
-            Ensure there are no errant carriage returns in the template.
-            Split the template into an array of strings for easy comparison.
+            Ensure that the content is formatted correctly ready for output
         #>
-        $IgnoresTemplate = $IgnoresTemplate -replace "`r", '' -split "`n"
+        $IgnoresTemplate = $IgnoresTemplate | Format-BrownserveContent
         Return $IgnoresTemplate
     }
 }

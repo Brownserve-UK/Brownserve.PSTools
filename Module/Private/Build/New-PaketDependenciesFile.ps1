@@ -47,7 +47,7 @@ function New-PaketDependenciesFile
             Ensure there are no errant carriage returns in the template.
             Split the template into an array of strings for easy comparison.
         #>
-        $PaketDependenciesTemplate = $PaketDependenciesTemplate -replace "`r", '' -split "`n"
+        $PaketDependenciesTemplate = $PaketDependenciesTemplate | Format-BrownserveContent
         return $PaketDependenciesTemplate
     }
 }
