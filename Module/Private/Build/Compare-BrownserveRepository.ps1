@@ -1,6 +1,17 @@
 <#
 .SYNOPSIS
     Checks the current state of a repository to see if it is initialised correctly.
+.DESCRIPTION
+    This cmdlet is pretty complex as we use it to test the state of a given repository on disk to see if it is
+    correctly initialised depending on the type of project the repository houses.
+    We don't want to modify any files on disk until we're sure we won't destroy any manual changes that may have
+    been made.
+    As such this cmdlet will compare the state of the files in the repository to a set of templates that we
+    generate based on the type of project the repository houses, if the repository is missing any files or if
+    the files are different to that of the templates then we'll add them to a list of files that need to be
+    created or updated and return them to the calling process to be handled.
+    Due to the complexities of comparing files with line endings and formatting we make heavy use of the various
+    "*-BrownserveContent" cmdlets to ensure that we can accurately compare the files.
 #>
 function Compare-BrownserveRepository
 {
@@ -63,7 +74,7 @@ function Compare-BrownserveRepository
         # Ensure that dotnet is available for us to use, we need it to instal tooling and make our nuget.config
         try
         {
-            $RequiredTools = @('git', 'dotnet')
+            $RequiredTools = @('dotnet')
             Write-Verbose 'Checking for required tooling'
             Assert-Command $RequiredTools
         }
@@ -143,9 +154,10 @@ function Compare-BrownserveRepository
         #>
         if ((Test-Path $ManifestPath))
         {
+            Write-Verbose "Found existing repository manifest file at '$ManifestPath'"
             try
             {
-                $CurrentManifest = Get-Content -Path $ManifestPath -ErrorAction 'Stop' | ConvertFrom-Json -Depth 100
+                $CurrentManifest = Get-Content -Path $ManifestPath -ErrorAction 'Stop' | ConvertFrom-Json -Depth 100 -AsHashtable
             }
             catch
             {
@@ -154,15 +166,16 @@ function Compare-BrownserveRepository
 
             # Check to see if the repository type is the same as the one we're trying to configure, if it's not
             # then fail unless -Force has been passed.
-            if ($CurrentManifest.RepositoryType -ne $ProjectType -and !$Force)
+            if (($CurrentManifest.RepositoryType -ne $ProjectType) -and !$Force)
             {
-                throw "Repository type mismatch. Expected '$ProjectType' but repository was previously configured as '$($CurrentManifest.RepositoryType)'"
+                throw "Repository type mismatch. Expected '$ProjectType' but repository was previously configured as '$($CurrentManifest.RepositoryType)'.`nUse the '-Force' switch to overwrite the existing configuration."
             }
             # Fail if the repository type is not present in the manifest file
             if (!$CurrentManifest.RepositoryType)
             {
                 throw 'Repository type not found in manifest file.'
             }
+            Write-Debug "Repository type found in manifest file: $($CurrentManifest.RepositoryType)"
         }
 
 
@@ -298,7 +311,7 @@ function Compare-BrownserveRepository
         $DefaultEditorConfig = $EditorConfigConfig.Defaults
 
         # We don't use a config file to create the manifest file as it's a simple object
-        $NewManifest = @{
+        $NewManifest = [System.Management.Automation.OrderedHashtable]@{
             RepositoryType  = $ProjectType.ToString()
             ManifestVersion = '1.0.0'
         }
@@ -333,7 +346,8 @@ function Compare-BrownserveRepository
             }
             <#
                 For the repo that houses this very PowerShell module we want to do things a little differently.
-                We avoid loading the Brownserve.PSTools module locally in _init.ps1 and use nuget as normal to get a stable version (this ensures that we can still get notified of failed builds)
+                We avoid loading the Brownserve.PSTools module locally in _init.ps1 and use nuget as normal to get a stable version
+                (this ensures that we can still get notified of failed builds)
                 We can use our build to load the local version of the module.
             #>
             'BrownservePSTools'
@@ -549,7 +563,7 @@ function Compare-BrownserveRepository
         # Create the _init script as that will always be required
         try
         {
-            $InitScriptContent = New-BrownserveInitScript @InitParams -ErrorAction 'Stop'
+            $NewInitScriptContent = New-BrownserveInitScript @InitParams -ErrorAction 'Stop'
         }
         catch
         {
@@ -559,7 +573,7 @@ function Compare-BrownserveRepository
         # The .gitignore file should always be required too
         try
         {
-            $GitIgnoresContent = New-GitIgnoresFile @GitIgnoreParams -ErrorAction 'Stop'
+            $NewGitIgnoresContent = New-GitIgnoresFile @GitIgnoreParams -ErrorAction 'Stop'
         }
         catch
         {
@@ -615,7 +629,7 @@ function Compare-BrownserveRepository
         {
             try
             {
-                $PaketDependenciesContent = New-PaketDependenciesFile @PaketParams -ErrorAction 'Stop'
+                $NewPaketDependenciesContent = New-PaketDependenciesFile @PaketParams -ErrorAction 'Stop'
             }
             catch
             {
@@ -657,7 +671,7 @@ function Compare-BrownserveRepository
             }
             try
             {
-                $EditorConfigContent = New-BrownserveEditorConfig @EditorConfigParams -ErrorAction 'Stop'
+                $NewEditorConfigContent = New-BrownserveEditorConfig @EditorConfigParams -ErrorAction 'Stop'
             }
             catch
             {
@@ -728,6 +742,7 @@ function Compare-BrownserveRepository
                     -ErrorAction 'Stop'
                 if ($ManifestCompare)
                 {
+                    Write-Verbose 'Changes detected in repository manifest'
                     $ChangedFiles += [BrownserveContent]@{
                         Path       = $ManifestPath
                         Content    = $NewManifestJSON
@@ -757,12 +772,13 @@ function Compare-BrownserveRepository
                 Write-Verbose 'Checking for changes to nuget.config'
                 $CurrentNugetConfig = Get-BrownserveContent -Path $NugetConfigPath -ErrorAction 'Stop'
                 $NugetConfigCompare = Compare-Object `
-                    -ReferenceObject $CurrentNugetConfig `
-                    -DifferenceObject $NewNugetConfig `
+                    -ReferenceObject $CurrentNugetConfig.Content `
+                    -DifferenceObject $NewNugetConfig.Content `
                     -SyncWindow 1 `
                     -ErrorAction 'Stop'
                 if ($NugetConfigCompare)
                 {
+                    Write-Verbose 'Changes detected in nuget.config'
                     $ChangedFiles += [BrownserveContent]@{
                         Path       = $NugetConfigPath
                         Content    = $NewNugetConfig.Content
@@ -815,15 +831,16 @@ function Compare-BrownserveRepository
         {
             Write-Verbose 'Checking for changes to _init.ps1'
             $InitCompare = Compare-Object `
-                -ReferenceObject $CurrentInitContent `
-                -DifferenceObject $InitScriptContent `
+                -ReferenceObject $CurrentInitContent.Content `
+                -DifferenceObject $NewInitScriptContent.Content `
                 -SyncWindow 1 `
                 -ErrorAction 'Stop'
             if ($InitCompare)
             {
+                Write-Verbose 'Changes detected in _init.ps1'
                 $ChangedFiles += [BrownserveContent]@{
                     Path       = $InitPath
-                    Content    = $InitScriptContent
+                    Content    = $NewInitScriptContent.Content
                     LineEnding = 'LF'
                 }
             }
@@ -833,7 +850,7 @@ function Compare-BrownserveRepository
             Write-Verbose 'No existing _init.ps1 found, will create a new one.'
             $MissingFiles += [BrownserveContent]@{
                 Path       = $InitPath
-                Content    = $InitScriptContent
+                Content    = $NewInitScriptContent.Content
                 LineEnding = 'LF'
             }
         }
@@ -842,15 +859,16 @@ function Compare-BrownserveRepository
         {
             Write-Verbose 'Checking for changes to .gitignore'
             $GitIgnoreCompare = Compare-Object `
-                -ReferenceObject $CurrentGitIgnores `
-                -DifferenceObject $GitIgnoresContent `
+                -ReferenceObject $CurrentGitIgnores.Content `
+                -DifferenceObject $NewGitIgnoresContent.Content `
                 -SyncWindow 1 `
                 -ErrorAction 'Stop'
             if ($GitIgnoreCompare)
             {
+                Write-Verbose 'Changes detected in .gitignore'
                 $ChangedFiles += [BrownserveContent]@{
                     Path       = $GitIgnorePath
-                    Content    = $GitIgnoresContent
+                    Content    = $NewGitIgnoresContent.Content
                     LineEnding = 'LF'
                 }
             }
@@ -860,7 +878,7 @@ function Compare-BrownserveRepository
             Write-Verbose 'No existing .gitignore found, will create a new one.'
             $MissingFiles += [BrownserveContent]@{
                 Path       = $GitIgnorePath
-                Content    = $GitIgnoresContent
+                Content    = $NewGitIgnoresContent.Content
                 LineEnding = 'LF'
             }
         }
@@ -885,12 +903,13 @@ function Compare-BrownserveRepository
                 Write-Verbose 'Checking for changes to VS Code extensions.json'
                 $CurrentVSCodeExtensions = Get-BrownserveContent -Path $VSCodeExtensionsFilePath -ErrorAction 'Stop'
                 $VSCodeExtensionsCompare = Compare-Object `
-                    -ReferenceObject $CurrentVSCodeExtensions `
+                    -ReferenceObject $CurrentVSCodeExtensions.Content `
                     -DifferenceObject $VSCodeWorkspaceExtensionIDsJSON `
                     -SyncWindow 1 `
                     -ErrorAction 'Stop'
                 if ($VSCodeExtensionsCompare)
                 {
+                    Write-Verbose 'Changes detected in VS Code extensions.json'
                     $ChangedFiles += [BrownserveContent]@{
                         Path       = $VSCodeExtensionsFilePath
                         Content    = $VSCodeWorkspaceExtensionIDsJSON
@@ -925,12 +944,13 @@ function Compare-BrownserveRepository
                 Write-Verbose 'Checking for changes to VS Code settings.json'
                 $CurrentVSCodeWorkspaceSettings = Get-BrownserveContent -Path $VSCodeWorkspaceSettingsFilePath -ErrorAction 'Stop'
                 $VSCodeWorkspaceSettingsCompare = Compare-Object `
-                    -ReferenceObject $CurrentVSCodeWorkspaceSettings `
+                    -ReferenceObject $CurrentVSCodeWorkspaceSettings.Content `
                     -DifferenceObject $VSCodeWorkspaceSettingsJSON `
                     -SyncWindow 1 `
                     -ErrorAction 'Stop'
                 if ($VSCodeWorkspaceSettingsCompare)
                 {
+                    Write-Verbose 'Changes detected in VS Code settings.json'
                     $ChangedFiles += [BrownserveContent]@{
                         Path       = $VSCodeWorkspaceSettingsFilePath
                         Content    = $VSCodeWorkspaceSettingsJSON
@@ -953,7 +973,7 @@ function Compare-BrownserveRepository
             throw "Failed to process '$VSCodeWorkspaceSettingsFilePath'.`n$($_.Exception.Message)"
         }
 
-        if ($PaketDependenciesContent)
+        if ($NewPaketDependenciesContent)
         {
             try
             {
@@ -962,15 +982,16 @@ function Compare-BrownserveRepository
                     Write-Verbose 'Checking for changes to paket.dependencies'
                     $CurrentPaketDependencies = Get-BrownserveContent -Path $PaketDependenciesPath -ErrorAction 'Stop'
                     $PaketDependenciesCompare = Compare-Object `
-                        -ReferenceObject $CurrentPaketDependencies `
-                        -DifferenceObject $PaketDependenciesContent `
+                        -ReferenceObject $CurrentPaketDependencies.Content `
+                        -DifferenceObject $NewPaketDependenciesContent.Content `
                         -SyncWindow 1 `
                         -ErrorAction 'Stop'
                     if ($PaketDependenciesCompare)
                     {
+                        Write-Verbose 'Changes detected in paket.dependencies'
                         $ChangedFiles += [BrownserveContent]@{
                             Path       = $PaketDependenciesPath
-                            Content    = $PaketDependenciesContent
+                            Content    = $NewPaketDependenciesContent.Content
                             LineEnding = 'LF'
                         }
                     }
@@ -980,7 +1001,7 @@ function Compare-BrownserveRepository
                     Write-Verbose 'No existing paket.dependencies found, will create a new one.'
                     $MissingFiles += [BrownserveContent]@{
                         Path       = $PaketDependenciesPath
-                        Content    = $PaketDependenciesContent
+                        Content    = $NewPaketDependenciesContent.Content
                         LineEnding = 'LF'
                     }
                 }
@@ -1003,12 +1024,13 @@ function Compare-BrownserveRepository
                         Write-Verbose 'Checking for changes to devcontainer.json'
                         $CurrentDevcontainer = Get-BrownserveContent -Path $DevcontainerPath -ErrorAction 'Stop'
                         $DevcontainerCompare = Compare-Object `
-                            -ReferenceObject $CurrentDevcontainer `
+                            -ReferenceObject $CurrentDevcontainer.Content `
                             -DifferenceObject $Devcontainer.Devcontainer `
                             -SyncWindow 1 `
                             -ErrorAction 'Stop'
                         if ($DevcontainerCompare)
                         {
+                            Write-Verbose 'Changes detected in devcontainer.json'
                             $ChangedFiles += [BrownserveContent]@{
                                 Path       = $DevcontainerPath
                                 Content    = $Devcontainer.Devcontainer
@@ -1018,6 +1040,7 @@ function Compare-BrownserveRepository
                     }
                     else
                     {
+                        Write-Verbose 'No existing devcontainer.json found, will create a new one.'
                         $MissingFiles += [BrownserveContent]@{
                             Path       = $DevcontainerPath
                             Content    = $Devcontainer.Devcontainer
@@ -1079,7 +1102,7 @@ function Compare-BrownserveRepository
             }
         }
 
-        if ($EditorConfigContent)
+        if ($NewEditorConfigContent)
         {
             try
             {
@@ -1090,15 +1113,16 @@ function Compare-BrownserveRepository
                         Write-Verbose 'Checking for changes to .editorconfig'
                         $CurrentEditorConfig = Get-BrownserveContent -Path $EditorConfigPath -ErrorAction 'Stop'
                         $EditorConfigCompare = Compare-Object `
-                            -ReferenceObject $CurrentEditorConfig `
-                            -DifferenceObject $EditorConfigContent `
+                            -ReferenceObject $CurrentEditorConfig.Content `
+                            -DifferenceObject $NewEditorConfigContent.Content `
                             -SyncWindow 1 `
                             -ErrorAction 'Stop'
                         if ($EditorConfigCompare)
                         {
+                            Write-Verbose 'Changes detected in .editorconfig'
                             $ChangedFiles += [BrownserveContent]@{
                                 Path       = $EditorConfigPath
-                                Content    = $EditorConfigContent
+                                Content    = $NewEditorConfigContent.Content
                                 LineEnding = 'LF'
                             }
                         }
@@ -1113,7 +1137,7 @@ function Compare-BrownserveRepository
                     Write-Verbose 'No existing .editorconfig found, will create a new one.'
                     $MissingFiles += [BrownserveContent]@{
                         Path       = $EditorConfigPath
-                        Content    = $EditorConfigContent
+                        Content    = $NewEditorConfigContent.Content
                         LineEnding = 'LF'
                     }
                 }
