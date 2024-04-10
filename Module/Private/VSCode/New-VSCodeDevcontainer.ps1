@@ -22,7 +22,6 @@ function New-VSCodeDevcontainer
         [string[]]
         $RequiredExtensions
     )
-        
     # Make sure the snippet path is valid
     if (!(Test-Path $DevcontainerTemplateDirectory))
     {
@@ -75,5 +74,4 @@ function New-VSCodeDevcontainer
         devcontainer = $DevcontainerJSON
         Dockerfile = $DockerfileContent
     }
-    
 }
