@@ -147,6 +147,7 @@ function Compare-BrownserveRepository
         $DevcontainerPath = Join-Path $DevcontainerDirectoryPath 'devcontainer.json'
         $DockerfilePath = Join-Path $DevcontainerDirectoryPath 'Dockerfile'
         $EditorConfigPath = Join-Path $RepositoryPath '.editorconfig'
+        $ChangelogPath = Join-Path $RepositoryPath 'CHANGELOG.md'
 
         <#
             To help with consistency we store a special manifest file in the repository that contains some basic information
@@ -337,6 +338,7 @@ function Compare-BrownserveRepository
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
                 $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
                 $ExtraEditorConfig = $EditorConfigConfig.PowerShellModule
+                $Changelog = $true
                 $InitParams = @{
                     IncludeModuleLoader   = $true
                     IncludePowerShellYaml = $true
@@ -362,6 +364,7 @@ function Compare-BrownserveRepository
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
                 $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
                 $ExtraEditorConfig = $EditorConfigConfig.PowerShellModule
+                $Changelog = $true
                 $InitParams = @{
                     IncludeModuleLoader   = $false # we don't want to load the module locally, we want the stable version from nuget
                     IncludePowerShellYaml = $true
@@ -678,6 +681,7 @@ function Compare-BrownserveRepository
                 throw "Failed to create .editorconfig file content.`n$($_.Exception.Message)"
             }
         }
+
         $FinalPermanentPaths.GetEnumerator() | ForEach-Object {
             <#
                 All paths should be relative to the repository root.
@@ -1145,6 +1149,21 @@ function Compare-BrownserveRepository
             catch
             {
                 throw "Failed to process '$EditorConfigPath'.`n$($_.Exception.Message)"
+            }
+        }
+
+        <#
+            For the changelog we only test to ensure it exists, we don't want to make any changes to it.
+        #>
+        if ($Changelog -eq $true)
+        {
+            if (!(Test-Path $ChangelogPath))
+            {
+                $MissingFiles += [BrownserveContent]@{
+                    Path       = $ChangelogPath
+                    Content    = ''
+                    LineEnding = 'LF'
+                }
             }
         }
     }
