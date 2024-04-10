@@ -1,57 +1,40 @@
 <#
 .SYNOPSIS
-    Formats the contents of a file.
+    Formats a given string to be compatible with the various *-BrownserveContent cmdlets.
 .DESCRIPTION
-    When working with file content sometimes it is necessary to alter the format of the file before it is
-    written to disk. This cmdlet allows you to do that by specifying various options of how the file should
-    be formatted.
-    This cmdlet should typically be used just before calling Set-BrownserveContent to write the file to disk.
+    This cmdlet will take a string and format it so that it can be easily used with the *-BrownserveContent cmdlets.
+    This allows us to ensure files get written with the correct formatting and works around PowerShells inconsistent
+    line ending handling between Windows and Linux.
 #>
 function Format-BrownserveContent
 {
-    [CmdletBinding(
-        DefaultParameterSetName = 'Default'
-    )]
+    [CmdletBinding()]
     param
     (
-        # The path to the file to search
+        # The content to format, should be a single string with each line separated by a newline character
         [Parameter(
             Mandatory = $true,
-            ValueFromPipelineByPropertyName = $true,
             Position = 0,
-            ParameterSetName = 'Path'
+            ValueFromPipeline = $true
         )]
-        [Alias('PSPath')]
-        [string[]]
-        $Path,
-
-        # The content to search
-        [Parameter(
-            Mandatory = $true,
-            ValueFromPipeline = $true,
-            Position = 0,
-            ParameterSetName = 'Content'
-        )]
-        [BrownserveContent[]]
-        $InputObject,
+        [string]
+        $Content,
 
         # If true inserts a final newline if one is not present
         [Parameter(
             Mandatory = $false,
-            ValueFromPipelineByPropertyName = $true,
             Position = 1
         )]
         [bool]
         $InsertFinalNewline = $true,
 
-        # The line ending to use, if not specified will use the current line ending from the file
+        # The line ending to use
         [Parameter(
             Mandatory = $false,
-            ValueFromPipelineByPropertyName = $true,
             Position = 2
         )]
         [BrownserveLineEnding]
-        $LineEnding
+        $LineEnding = 'LF'
     )
 
     begin
@@ -61,35 +44,19 @@ function Format-BrownserveContent
 
     process
     {
-        if (!$InputObject)
+        # Split the content into lines and remove any carriage returns, line endings will be handled
+        # by BrownserveContent class
+        $SplitContent = $Content -split "`n"
+        $SplitContent = $SplitContent -replace "`r", ''
+
+        if ($InsertFinalNewline -and $SplitContent[-1] -ne '')
         {
-            try
-            {
-                Write-Verbose 'Loading content from files'
-                $Path | ForEach-Object {
-                    $InputObject += Get-BrownserveContent -Path $_ -ErrorAction 'Stop'
-                }
-            }
-            catch
-            {
-                throw "Failed to get content from path '$_'.`n$($_.Exception.Message)"
-            }
+            $SplitContent += ''
         }
 
-        foreach ($item in $InputObject)
-        {
-            $Content = $Item.Content
-            # The content should be an array of strings so we can add a $null to the end
-            if ($InsertFinalNewline -and ($null -ne $Content[-1]))
-            {
-                $Content += $null
-            }
-
-            $Return += [BrownserveContent]@{
-                Content    = $Content
-                LineEnding = $LineEnding
-                Path       = $Item.Path
-            }
+        $Return += [pscustomobject]@{
+            Content = $SplitContent
+            LineEnding = $LineEnding
         }
     }
 
