@@ -726,7 +726,7 @@ function Compare-BrownserveRepository
             $NewLicenseContent = New-SPDXLicense `
                 -LicenseType $LicenseType `
                 -Owner $Owner `
-                -ErrorAction 'Stop'
+                -ErrorAction 'Stop' | Format-BrownserveContent
         }
 
         <#
@@ -752,13 +752,14 @@ function Compare-BrownserveRepository
 
         try
         {
-            $NewManifestJSON = (ConvertTo-Json $NewManifest -Depth 100 -ErrorAction 'Stop').Split("`n") -replace "`r",''
+            $NewManifestJSON = ConvertTo-Json $NewManifest -Depth 100 -ErrorAction 'Stop' | Format-BrownserveContent
+            $CurrentManifestJSON = ConvertTo-Json $CurrentManifest -Depth 100 -ErrorAction 'Stop' | Format-BrownserveContent
             if ($CurrentManifest)
             {
                 Write-Verbose 'Checking for changes to repository manifest'
                 $ManifestCompare = Compare-Object `
-                    -ReferenceObject $CurrentManifest `
-                    -DifferenceObject $NewManifest `
+                    -ReferenceObject $CurrentManifestJSON.Content `
+                    -DifferenceObject $NewManifestJSON.Content `
                     -SyncWindow 1 `
                     -ErrorAction 'Stop'
                 if ($ManifestCompare)
@@ -766,7 +767,7 @@ function Compare-BrownserveRepository
                     Write-Verbose 'Changes detected in repository manifest'
                     $ChangedFiles += [BrownserveContent]@{
                         Path       = $ManifestPath
-                        Content    = $NewManifestJSON
+                        Content    = $NewManifestJSON.Content
                         LineEnding = 'LF'
                     }
                 }
@@ -776,7 +777,7 @@ function Compare-BrownserveRepository
                 Write-Verbose 'No existing repository manifest found, will create a new one.'
                 $MissingFiles += [BrownserveContent]@{
                     Path       = $ManifestPath
-                    Content    = $NewManifestJSON
+                    Content    = $NewManifestJSON.Content
                     LineEnding = 'LF'
                 }
             }
@@ -917,15 +918,14 @@ function Compare-BrownserveRepository
             $VSCodeWorkspaceExtensionIDsJSON = ConvertTo-Json `
                 -InputObject @{ recommendations = $VSCodeWorkspaceExtensionIDs } `
                 -Depth 100 `
-                -ErrorAction 'Stop'
-            $VSCodeWorkspaceExtensionIDsJSON = $VSCodeWorkspaceExtensionIDsJSON.Split("`n") -replace "`r",''
+                -ErrorAction 'Stop' | Format-BrownserveContent
             if ((Test-Path $VSCodeExtensionsFilePath))
             {
                 Write-Verbose 'Checking for changes to VS Code extensions.json'
                 $CurrentVSCodeExtensions = Get-BrownserveContent -Path $VSCodeExtensionsFilePath -ErrorAction 'Stop'
                 $VSCodeExtensionsCompare = Compare-Object `
                     -ReferenceObject $CurrentVSCodeExtensions.Content `
-                    -DifferenceObject $VSCodeWorkspaceExtensionIDsJSON `
+                    -DifferenceObject $VSCodeWorkspaceExtensionIDsJSON.Content `
                     -SyncWindow 1 `
                     -ErrorAction 'Stop'
                 if ($VSCodeExtensionsCompare)
@@ -933,7 +933,7 @@ function Compare-BrownserveRepository
                     Write-Verbose 'Changes detected in VS Code extensions.json'
                     $ChangedFiles += [BrownserveContent]@{
                         Path       = $VSCodeExtensionsFilePath
-                        Content    = $VSCodeWorkspaceExtensionIDsJSON
+                        Content    = $VSCodeWorkspaceExtensionIDsJSON.Content
                         LineEnding = 'LF'
                     }
                 }
@@ -943,7 +943,7 @@ function Compare-BrownserveRepository
                 Write-Verbose 'No existing extensions.json found, will create a new one.'
                 $MissingFiles += [BrownserveContent]@{
                     Path       = $VSCodeExtensionsFilePath
-                    Content    = $VSCodeWorkspaceExtensionIDsJSON
+                    Content    = $VSCodeWorkspaceExtensionIDsJSON.Content
                     LineEnding = 'LF'
                 }
             }
@@ -958,15 +958,14 @@ function Compare-BrownserveRepository
             $VSCodeWorkspaceSettingsJSON = ConvertTo-Json `
                 -InputObject $VSCodeWorkspaceSettings `
                 -Depth 100 `
-                -ErrorAction 'Stop'
-            $VSCodeWorkspaceSettingsJSON = $VSCodeWorkspaceSettingsJSON.Split("`n") -replace "`r",''
+                -ErrorAction 'Stop' | Format-BrownserveContent
             if ((Test-Path $VSCodeWorkspaceSettingsFilePath))
             {
                 Write-Verbose 'Checking for changes to VS Code settings.json'
                 $CurrentVSCodeWorkspaceSettings = Get-BrownserveContent -Path $VSCodeWorkspaceSettingsFilePath -ErrorAction 'Stop'
                 $VSCodeWorkspaceSettingsCompare = Compare-Object `
                     -ReferenceObject $CurrentVSCodeWorkspaceSettings.Content `
-                    -DifferenceObject $VSCodeWorkspaceSettingsJSON `
+                    -DifferenceObject $VSCodeWorkspaceSettingsJSON.Content `
                     -SyncWindow 1 `
                     -ErrorAction 'Stop'
                 if ($VSCodeWorkspaceSettingsCompare)
@@ -974,7 +973,7 @@ function Compare-BrownserveRepository
                     Write-Verbose 'Changes detected in VS Code settings.json'
                     $ChangedFiles += [BrownserveContent]@{
                         Path       = $VSCodeWorkspaceSettingsFilePath
-                        Content    = $VSCodeWorkspaceSettingsJSON
+                        Content    = $VSCodeWorkspaceSettingsJSON.Content
                         LineEnding = 'LF'
                     }
                 }
@@ -984,7 +983,7 @@ function Compare-BrownserveRepository
                 Write-Verbose 'No existing settings.json found, will create a new one.'
                 $MissingFiles += [BrownserveContent]@{
                     Path       = $VSCodeWorkspaceSettingsFilePath
-                    Content    = $VSCodeWorkspaceSettingsJSON
+                    Content    = $VSCodeWorkspaceSettingsJSON.Content
                     LineEnding = 'LF'
                 }
             }
@@ -1046,7 +1045,7 @@ function Compare-BrownserveRepository
                         $CurrentDevcontainer = Get-BrownserveContent -Path $DevcontainerPath -ErrorAction 'Stop'
                         $DevcontainerCompare = Compare-Object `
                             -ReferenceObject $CurrentDevcontainer.Content `
-                            -DifferenceObject $Devcontainer.Devcontainer `
+                            -DifferenceObject $Devcontainer.Devcontainer.Content `
                             -SyncWindow 1 `
                             -ErrorAction 'Stop'
                         if ($DevcontainerCompare)
@@ -1054,7 +1053,7 @@ function Compare-BrownserveRepository
                             Write-Verbose 'Changes detected in devcontainer.json'
                             $ChangedFiles += [BrownserveContent]@{
                                 Path       = $DevcontainerPath
-                                Content    = $Devcontainer.Devcontainer
+                                Content    = $Devcontainer.Devcontainer.Content
                                 LineEnding = 'LF'
                             }
                         }
@@ -1064,7 +1063,7 @@ function Compare-BrownserveRepository
                         Write-Verbose 'No existing devcontainer.json found, will create a new one.'
                         $MissingFiles += [BrownserveContent]@{
                             Path       = $DevcontainerPath
-                            Content    = $Devcontainer.Devcontainer
+                            Content    = $Devcontainer.Devcontainer.Content
                             LineEnding = 'LF'
                         }
                     }
@@ -1077,7 +1076,7 @@ function Compare-BrownserveRepository
                     }
                     $MissingFiles += [BrownserveContent]@{
                         Path       = $DevcontainerPath
-                        Content    = $Devcontainer.Devcontainer
+                        Content    = $Devcontainer.Devcontainer.Content
                         LineEnding = 'LF'
                     }
                 }
@@ -1094,15 +1093,15 @@ function Compare-BrownserveRepository
                     Write-Verbose 'Checking for changes to Dockerfile'
                     $CurrentDockerfile = Get-BrownserveContent -Path $DockerfilePath -ErrorAction 'Stop'
                     $DockerfileCompare = Compare-Object `
-                        -ReferenceObject $CurrentDockerfile `
-                        -DifferenceObject $Devcontainer.Dockerfile `
+                        -ReferenceObject $CurrentDockerfile.Content `
+                        -DifferenceObject $Devcontainer.Dockerfile.Content `
                         -SyncWindow 1 `
                         -ErrorAction 'Stop'
                     if ($DockerfileCompare)
                     {
                         $ChangedFiles += [BrownserveContent]@{
                             Path       = $DockerfilePath
-                            Content    = $Devcontainer.Dockerfile
+                            Content    = $Devcontainer.Dockerfile.Content
                             LineEnding = 'LF'
                         }
                     }
@@ -1112,7 +1111,7 @@ function Compare-BrownserveRepository
                     Write-Verbose 'No existing Dockerfile found, will create a new one.'
                     $MissingFiles += [BrownserveContent]@{
                         Path       = $DockerfilePath
-                        Content    = $Devcontainer.Dockerfile
+                        Content    = $Devcontainer.Dockerfile.Content
                         LineEnding = 'LF'
                     }
                 }
@@ -1194,7 +1193,7 @@ function Compare-BrownserveRepository
             {
                 $MissingFiles += [BrownserveContent]@{
                     Path       = $LicensePath
-                    Content    = $NewLicenseContent
+                    Content    = $NewLicenseContent.Content
                     LineEnding = 'LF'
                 }
             }

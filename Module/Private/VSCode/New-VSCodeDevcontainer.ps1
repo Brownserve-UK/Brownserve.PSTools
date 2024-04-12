@@ -30,7 +30,9 @@ function New-VSCodeDevcontainer
 
     try
     {
-        $DockerfileContent = Get-Content (Join-Path $DevcontainerTemplateDirectory $Dockerfile) -Raw -ErrorAction 'Stop'
+        $DockerfileContent = Get-BrownserveContent `
+            -Path (Join-Path $DevcontainerTemplateDirectory $Dockerfile) `
+            -ErrorAction 'Stop'
     }
     catch
     {
@@ -63,7 +65,7 @@ function New-VSCodeDevcontainer
 
         # TODO: Set default shell: https://stackoverflow.com/a/70796646/10843454
 
-        $DevcontainerJSON = $DevcontainerObject | ConvertTo-Json -Depth 100
+        $DevcontainerJSON = $DevcontainerObject | ConvertTo-Json -Depth 100 | Format-BrownserveContent
     }
     catch
     {
