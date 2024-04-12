@@ -23,6 +23,11 @@ function Compare-BrownserveRepository
         [string]
         $RepositoryPath,
 
+        # The owner of the repository
+        [Parameter(Mandatory = $false)]
+        [string]
+        $Owner = 'Brownserve',
+
         # The type of build that should be installed in this repo
         [Parameter(Mandatory = $false)]
         [ValidateNotNullOrEmpty()]
@@ -148,6 +153,7 @@ function Compare-BrownserveRepository
         $DockerfilePath = Join-Path $DevcontainerDirectoryPath 'Dockerfile'
         $EditorConfigPath = Join-Path $RepositoryPath '.editorconfig'
         $ChangelogPath = Join-Path $RepositoryPath 'CHANGELOG.md'
+        $LicensePath = Join-Path $RepositoryPath 'LICENSE'
 
         <#
             To help with consistency we store a special manifest file in the repository that contains some basic information
@@ -345,6 +351,7 @@ function Compare-BrownserveRepository
                     IncludePlatyPS        = $true
                     IncludeBuildTestTools = $true
                 }
+                $LicenseType = 'MIT'
             }
             <#
                 For the repo that houses this very PowerShell module we want to do things a little differently.
@@ -710,6 +717,16 @@ function Compare-BrownserveRepository
                     Path = $PathToCheck
                 }
             }
+        }
+
+        # The type of license we use is dependent on the type of project we're working with
+        # though in the future we may want to allow the user to override this.
+        if ($LicenseType)
+        {
+            $NewLicenseContent = New-SPDXLicense `
+                -LicenseType $LicenseType `
+                -Owner $Owner `
+                -ErrorAction 'Stop'
         }
 
         <#
@@ -1162,6 +1179,22 @@ function Compare-BrownserveRepository
                 $MissingFiles += [BrownserveContent]@{
                     Path       = $ChangelogPath
                     Content    = ''
+                    LineEnding = 'LF'
+                }
+            }
+        }
+
+        <#
+            We don't ever want to overwrite the license file if it already exists, any changes to the license file
+            should be made manually for legal reasons.
+        #>
+        if ($LicenseType)
+        {
+            if (!(Test-Path $LicensePath))
+            {
+                $MissingFiles += [BrownserveContent]@{
+                    Path       = $LicensePath
+                    Content    = $NewLicenseContent
                     LineEnding = 'LF'
                 }
             }
