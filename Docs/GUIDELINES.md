@@ -71,5 +71,5 @@ Ideally it should be kept to a single line but sometimes a slightly more verbose
 
 Unfortunately for files created by PowerShell (such as our documentation) the line endings will always be set to the line endings of the operating system that was in use when they were generated (see <https://github.com/PowerShell/PowerShell/issues/2872>).  
 Therefore to ensure the line endings stay consistent (so we can avoid a messy git history) we require that all documentation is generated with LF line endings.  
-To make this easier we include an editorconfig file in the repository which will automatically set the line endings to LF for those files.  
-For those not using an editor that supports editorconfig then the build tasks will automatically convert the line endings for you.
+To make this easier we include an [editorconfig](https://editorconfig.org/) file in the repository which will automatically set the line endings to LF for those files.
+For those not using an editor that supports editorconfig then the build tasks should automatically convert the line endings for you.
