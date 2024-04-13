@@ -47,6 +47,10 @@ Ensures the given command exists and is available to the current PowerShell sess
 
 Ensures that a directory is valid
 
+### [Assert-Path](./Brownserve.PSTools/Assert-Path.md)
+
+Ensures a given path exists.
+
 ### [Build-ModuleDocumentation](./Brownserve.PSTools/Build-ModuleDocumentation.md)
 
 This will build markdown PowerShell module documentation using PlatyPS
@@ -67,6 +71,10 @@ Converts a given hashtable to an alphabetically sorted hashtable
 
 Clones a given git repository to the local machine
 
+### [Format-BrownserveContent](./Brownserve.PSTools/Format-BrownserveContent.md)
+
+Formats a given string to be compatible with the various *-BrownserveContent cmdlets.
+
 ### [Format-Markdown](./Brownserve.PSTools/Format-Markdown.md)
 
 Formats a markdown file to ensure it follows the markdownlint rules.
@@ -78,6 +86,10 @@ Formats a version number to ensure compatibility with NuGet and nuget.org
 ### [Format-TerraformResourceName](./Brownserve.PSTools/Format-TerraformResourceName.md)
 
 Strips out illegal characters from Terraform resource names
+
+### [Get-BrownserveContent](./Brownserve.PSTools/Get-BrownserveContent.md)
+
+Wrapper for Get-Content that returns the content in a format that is easier to work with.
 
 ### [Get-GitBranches](./Brownserve.PSTools/Get-GitBranches.md)
 
@@ -238,6 +250,10 @@ Obtains a NuGet package version based on the build version number and branch nam
 **This cmdlet is deprecated. Please use New-GitHubPullRequest instead.**
 Creates a new pull request in GitHub
 
+### [New-SPDXLicense](./Brownserve.PSTools/New-SPDXLicense.md)
+
+Creates a new licence using the SPDX format
+
 ### [New-TerraformResourceBlock](./Brownserve.PSTools/New-TerraformResourceBlock.md)
 
 Creates a Terraform resource block that can easily be inserted into Terraform code.
@@ -271,6 +287,10 @@ This cmdlet removes markdown from a string.
 
 Searches a file for a given set of regex and returns any text between them.
 
+### [Select-BrownserveContent](./Brownserve.PSTools/Select-BrownserveContent.md)
+
+Selects text from a given file
+
 ### [Send-BuildNotification](./Brownserve.PSTools/Send-BuildNotification.md)
 
 Sends a standard Brownserve build notification.
@@ -278,6 +298,10 @@ Sends a standard Brownserve build notification.
 ### [Send-SlackNotification](./Brownserve.PSTools/Send-SlackNotification.md)
 
 Sends a notification to a given Slack webhook
+
+### [Set-BrownserveContent](./Brownserve.PSTools/Set-BrownserveContent.md)
+
+Writes the contents of a file to disk.
 
 ### [Set-LineEndings](./Brownserve.PSTools/Set-LineEndings.md)
 
@@ -306,6 +330,10 @@ Checks out a given branch.
 ### [Test-Administrator](./Brownserve.PSTools/Test-Administrator.md)
 
 A simple function for testing if a user is running with administrator/root privileges or not.
+
+### [Test-Numeric](./Brownserve.PSTools/Test-Numeric.md)
+
+Tests if a given object is numeric.
 
 ### [Test-OperatingSystem](./Brownserve.PSTools/Test-OperatingSystem.md)
 
