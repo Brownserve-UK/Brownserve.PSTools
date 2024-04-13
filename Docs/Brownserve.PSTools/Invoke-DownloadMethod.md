@@ -14,7 +14,8 @@ Downloads a file using the best method available depending on operating system.
 ## SYNTAX
 
 ```text
-Invoke-DownloadMethod [-DownloadURI] <String> [-OutFile] <String> [<CommonParameters>]
+Invoke-DownloadMethod [-DownloadURI] <String> [-OutFile] <String>
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -70,7 +71,7 @@ Accept wildcard characters: False
 
 ### CommonParameters
 
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutBuffer, -OutVariable, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

@@ -15,7 +15,8 @@ Returns a list of merge commits for a given GitHub repository
 
 ```text
 Get-GitMerges [[-RepositoryPath] <String>] [[-HeadBranch] <String>] [[-ReferenceBranch] <String>]
- [[-FirstParentOnly] <Boolean>] [[-PrettyOptions] <String>] [-NoCommitHeader] [<CommonParameters>]
+ [[-FirstParentOnly] <Boolean>] [[-PrettyOptions] <String>] [-NoCommitHeader]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -143,7 +144,7 @@ Accept wildcard characters: False
 
 ### CommonParameters
 
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutBuffer, -OutVariable, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

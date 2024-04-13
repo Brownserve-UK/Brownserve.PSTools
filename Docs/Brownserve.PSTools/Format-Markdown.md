@@ -13,9 +13,20 @@ Formats a markdown file to ensure it follows the markdownlint rules.
 
 ## SYNTAX
 
+### Path (Default)
+
 ```text
 Format-Markdown [-Path] <String> [-CodeBlockLanguage <String>]
- [-EmphasisAsHeaderConversion <MarkdownEmphasisAsHeaderConversion>] [<CommonParameters>]
+ [-EmphasisAsHeaderConversion <MarkdownEmphasisAsHeaderConversion>]
+ [<CommonParameters>]
+```
+
+### Pipeline
+
+```text
+Format-Markdown [-CodeBlockLanguage <String>]
+ [-EmphasisAsHeaderConversion <MarkdownEmphasisAsHeaderConversion>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -74,7 +85,7 @@ The path to the markdown file to format.
 
 ```yaml
 Type: String
-Parameter Sets: (All)
+Parameter Sets: Path
 Aliases:
 
 Required: True
@@ -86,7 +97,7 @@ Accept wildcard characters: False
 
 ### CommonParameters
 
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutBuffer, -OutVariable, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

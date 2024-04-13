@@ -16,7 +16,8 @@ Invokes a native command while gracefully handling the output and error streams.
 ```text
 Invoke-NativeCommand [-FilePath] <String> [[-ArgumentList] <Array>] [[-WorkingDirectory] <String>]
  [[-ExitCodes] <Array>] [-PassThru] [-SuppressOutput] [-LogOutput] [-LogOutputPath <String>]
- [-LogOutputPrefix <String>] [-LogOutputSuffix <String>] [<CommonParameters>]
+ [-LogOutputPrefix <String>] [-LogOutputSuffix <String>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -214,7 +215,7 @@ Accept wildcard characters: False
 
 ### CommonParameters
 
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutBuffer, -OutVariable, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

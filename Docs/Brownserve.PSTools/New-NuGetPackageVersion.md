@@ -15,7 +15,8 @@ Obtains a NuGet package version based on the build version number and branch nam
 ## SYNTAX
 
 ```text
-New-NuGetPackageVersion [-Version] <Version> [-BranchName] <String> [-Prerelease] [<CommonParameters>]
+New-NuGetPackageVersion [-Version] <Version> [-BranchName] <String> [-Prerelease]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -100,7 +101,7 @@ Accept wildcard characters: False
 
 ### CommonParameters
 
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutBuffer, -OutVariable, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
