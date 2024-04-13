@@ -22,41 +22,38 @@ function Update-PlatyPSModulePageLinks
         [string]
         $CmdletDocumentationPath,
 
-        # The path to the module page
+        # The content of the module page
         [Parameter(
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
             Position = 1
         )]
         [ValidateNotNullOrEmpty()]
-        [string]
-        $ModulePagePath
+        [BrownserveContent]
+        $ModulePageContent
     )
     begin
     {
     }
     process
     {
-        $ModulePageContent = Get-Content $ModulePagePath -ErrorAction 'Stop' -Raw
-        if (!$ModulePageContent)
-        {
-            throw 'Module page content is empty'
-        }
+        $ModulePageContentString = $ModulePageContent.ToString()
+        <#
+            As it stands we expect the module page path to be one level above the cmdlet documentation path.
+            e.g:
+                | ModulePage.md
+                | CmdletDocumentation
+                    | Cmdlet1.md
+                    | Cmdlet2.md
+                    | Cmdlet3.md
+            We may want to change this assumption in the future.
+        #>
         $ModulePageAdjustment = Split-Path $CmdletDocumentationPath -Leaf
-        $NewModulePageContent = $ModulePageContent -replace '\(([\w|\d]*-[\w|\d]*.md)\)', "(./$ModulePageAdjustment/`$1)"
+        $NewModulePageContent = $ModulePageContentString -replace '\(([\w|\d]*-[\w|\d]*.md)\)', "(./$ModulePageAdjustment/`$1)"
 
-        try
-        {
-            Set-Content `
-                -Path $ModulePagePath `
-                -Value $NewModulePageContent `
-                -NoNewline `
-                -ErrorAction 'Stop'
-        }
-        catch
-        {
-            throw "Failed to update module page links.`n$($_.Exception.Message)"
-        }
+        $ModulePageContent.Content = $NewModulePageContent | Format-BrownserveContent | Select-Object -ExpandProperty Content
+
+        return $ModulePageContent
     }
     end
     {

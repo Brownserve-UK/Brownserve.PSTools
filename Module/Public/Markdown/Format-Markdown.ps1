@@ -6,11 +6,14 @@
 #>
 function Format-Markdown
 {
-    [CmdletBinding()]
+    [CmdletBinding(
+        DefaultParameterSetName = 'Path'
+    )]
     param
     (
         # The path to the markdown file to format.
         [Parameter(
+            ParameterSetName = 'Path',
             Mandatory = $true,
             ValueFromPipelineByPropertyName = $true,
             Position = 0
@@ -39,12 +42,12 @@ function Format-Markdown
 
         # Special hidden parameter to pass in markdown from the pipeline.
         [Parameter(
+            ParameterSetName = 'Pipeline',
             Mandatory = $false,
             ValueFromPipeline = $true,
             ValueFromPipelineByPropertyName = $true,
             DontShow
         )]
-        [ValidateNotNullOrEmpty()]
         [array]
         $Markdown
     )
