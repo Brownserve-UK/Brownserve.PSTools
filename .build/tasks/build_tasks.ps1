@@ -219,6 +219,17 @@ task CheckStagingParameters {
 
 <#
 .SYNOPSIS
+    Sets up additional parameters required for staging a release
+.DESCRIPTION
+    This task should only be called as part of the StageRelease pipeline
+#>
+task SetStagingVariables {
+    Write-Verbose 'Setting staging variables'
+    $script:Stage = $true
+}
+
+<#
+.SYNOPSIS
     Special task for setting up any release specific variables.
 .DESCRIPTION
     This task should only be called as part of the release pipeline
@@ -613,6 +624,11 @@ task UpdateModuleDocumentation ImportModule, {
         DocumentationPath = $Global:BrownserveRepoDocsDirectory
         ModuleGUID        = $ModuleGUID
     }
+    # When we're preparing to release a new version then we should update the help version in the module page
+    if ($script:Stage -eq $true)
+    {
+        $DocsParams.Add('HelpVersion', $script:NewVersion)
+    }
     Build-ModuleDocumentation @DocsParams | Out-Null
     <#
         Store this in a script variable as in certain builds we use it later on. (e.g. setting help version etc)
@@ -620,26 +636,6 @@ task UpdateModuleDocumentation ImportModule, {
         Resolve-Path to fail.
     #>
     $Script:ModulePagePath = Join-Path $Global:BrownserveRepoDocsDirectory "$ModuleName.md" | Resolve-Path
-}
-
-<#
-.SYNOPSIS
-    Update the module page help version to match the version we're releasing
-.DESCRIPTION
-    Due to some quirks of PlatyPS the help version can't currently be updated past it's initial version.
-    So we do this manually, but we only do it as part of the StageRelease build as the version doesn't really matter
-    until we're performing a release.
-    Yes that does mean people coming to the repo may see a mismatched version of the help files vs module version
-    however they should be going straight to the tagged release to get their documentation.
-    This will be mitigated if/when we move our Docs to a static site generator like GitHub pages.
-#>
-task UpdateModulePageHelpVersion SetVersion, UpdateModuleDocumentation, {
-    Write-Build White 'Updating module page help version'
-    Update-PlatyPSModulePageHelpVersion `
-        -HelpVersion $Global:BuildVersion `
-        -ModulePagePath $Script:ModulePagePath `
-        -ErrorAction 'Stop'
-    $script:TrackedFiles += $Script:ModulePagePath
 }
 
 <#
@@ -1091,7 +1087,7 @@ task BuildTestAndCheck BuildAndTest, CheckForUncommittedChanges, {}
     This allows us to review the changes and make any adjustments before we actually release them.
     We use this task in the stage_release CI pipeline.
 #>
-task StageRelease CheckStagingParameters, UseWorkingCopy, CreateChangelogEntry, UpdateChangelog, UpdateModuleDocumentation, UpdateModulePageHelpVersion, CreatePullRequest, {
+task StageRelease CheckStagingParameters, SetStagingVariables, UseWorkingCopy, CreateChangelogEntry, UpdateChangelog, UpdateModuleDocumentation, UpdateModulePageHelpVersion, CreatePullRequest, {
     $BuildMessage = @"
 The release has been successfully staged and a pull request has been created.
 Please review the changes at $script:PRLink and merge if they look good.
