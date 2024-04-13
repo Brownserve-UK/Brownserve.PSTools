@@ -323,22 +323,6 @@ Updates a given repository to use the latest tooling and settings
 
 Updates a repo's changelog according to the semver v1.0.0 spec.
 
-### [Update-PlatyPSModulePageDescription](./Brownserve.PSTools/Update-PlatyPSModulePageDescription.md)
-
-Updates the PlatyPS module page module description field.
-
-### [Update-PlatyPSModulePageGUID](./Brownserve.PSTools/Update-PlatyPSModulePageGUID.md)
-
-Updates the module GUID in the PlatyPS module page.
-
-### [Update-PlatyPSModulePageHelpVersion](./Brownserve.PSTools/Update-PlatyPSModulePageHelpVersion.md)
-
-Updates the help version in the PlatyPS module page.
-
-### [Update-PlatyPSModulePageLinks](./Brownserve.PSTools/Update-PlatyPSModulePageLinks.md)
-
-Updates the links to cmdlet documentation in the PlatyPS module page.
-
 ### [Update-Version](./Brownserve.PSTools/Update-Version.md)
 
 A simple function to increment a semantic version number.

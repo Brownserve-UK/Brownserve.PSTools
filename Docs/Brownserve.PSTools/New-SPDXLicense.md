@@ -5,46 +5,48 @@ online version:
 schema: 2.0.0
 ---
 
-# Update-BrownserveRepository
+# New-SPDXLicense
 
 ## SYNOPSIS
 
-Updates a given repository to use the latest tooling and settings
+Creates a new licence using the SPDX format
 
 ## SYNTAX
 
 ```text
-Update-BrownserveRepository [[-RepositoryPath] <String>] [-Owner <String>] [-Force]
+New-SPDXLicense [-LicenseType] <String> [-Owner] <String> [[-Year] <Int32>]
  [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-This cmdlet can be used after a repository has been initialised using the `Initialize-BrownserveRepository` cmdlet to keep the projects tooling and settings up to date.
+This cmdlet will create a new licence file using the SPDX format. This is a standardised format for licences that can be used in a variety of projects.
+Currently only the MIT licence is supported.
 
 ## EXAMPLES
 
 ### Example 1
 
 ```powershell
-Update-BrownserveRepository -RepositoryPath 'C:\myPowershellModule' -ProjectType 'PowerShellModule'
+New-SPDXLicense -LicenseType 'MIT' -Owner 'Brownserve'
 ```
 
-Would update the project at 'C:\myPowershellModule'
+This would return the MIT licence with the copyright holder set to Brownserve.
 
 ## PARAMETERS
 
-### -Force
+### -LicenseType
 
-Forces an overwrite of any files that already exist
+The type of licence to create. (Currently only MIT is supported)
 
 ```yaml
-Type: SwitchParameter
+Type: String
 Parameter Sets: (All)
 Aliases:
+Accepted values: MIT
 
-Required: False
-Position: Named
+Required: True
+Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -52,31 +54,31 @@ Accept wildcard characters: False
 
 ### -Owner
 
-The owner of the repository, this is used to populate the copyright holder in the licence.
+The owner of the licence, this is used to populate the copyright holder in the licence.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: False
-Position: Named
+Required: True
+Position: 1
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -RepositoryPath
+### -Year
 
-The path to the repository to update
+The year to use in the licence, if not specified the current year will be used.
 
 ```yaml
-Type: String
+Type: Int32
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 0
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False

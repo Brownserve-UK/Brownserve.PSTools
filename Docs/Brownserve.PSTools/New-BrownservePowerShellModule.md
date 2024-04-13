@@ -15,7 +15,9 @@ Creates a new PowerShell module using the standard Brownserve format
 
 ```text
 New-BrownservePowerShellModule [-Path] <String> [-ModuleName] <String> [[-ModuleGUID] <Guid>]
- [[-ModuleTags] <String[]>] [-Description] <String> [[-Customisations] <String>] [-Force] [<CommonParameters>]
+ [[-ModuleTags] <String[]>] [-Description] <String> [[-Customisations] <String>]
+ [[-ModuleType] <BrownservePowerShellModuleType>] [-Force]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -134,6 +136,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -ModuleType
+
+{{ Fill ModuleType Description }}
+
+```yaml
+Type: BrownservePowerShellModuleType
+Parameter Sets: (All)
+Aliases:
+Accepted values: Standalone, Tool
+
+Required: False
+Position: 6
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Path
 
 The path to where the module will be saved (must be a directory)
@@ -152,7 +171,7 @@ Accept wildcard characters: False
 
 ### CommonParameters
 
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutBuffer, -OutVariable, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 
