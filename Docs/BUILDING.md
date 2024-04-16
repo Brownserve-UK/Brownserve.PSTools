@@ -30,6 +30,8 @@ When you're happy with your changes you should run the `BuildWithDocs` task to h
 
 When you're ready to test your changes properly you can run the `BuildAndTest` task which will run the unit tests as well as the above tasks.
 
+>ℹ To ensure stability of builds the `_init.ps1` will always download and use the latest stable version of `Brownserve.PSTools` to build the module. If you want to test how your changes are likely to affect the build process of the module then you can pass the `-UseWorkingCopy` parameter.
+
 ## Building locally
 
 There are two ways to get all the dependencies you need to build locally, either using the included `.devcontainer` or manually installing them.
