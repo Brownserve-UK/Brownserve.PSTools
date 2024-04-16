@@ -30,8 +30,8 @@ Select-BrownserveContent [-Path] <String[]> [[-After] <PSObject>] [[-Before] <PS
 ### Content
 
 ```text
-Select-BrownserveContent [-InputObject] <BrownserveContent[]> [[-After] <PSObject>] [[-Before] <PSObject>]
- [-FailIfNotFound] [<CommonParameters>]
+Select-BrownserveContent [[-After] <PSObject>] [[-Before] <PSObject>] [-FailIfNotFound]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -114,22 +114,6 @@ Required: False
 Position: Named
 Default value: False
 Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -InputObject
-
-Can be piped from Get-BrownserveContent
-
-```yaml
-Type: BrownserveContent[]
-Parameter Sets: Content
-Aliases:
-
-Required: True
-Position: 1
-Default value: None
-Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
