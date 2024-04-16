@@ -30,7 +30,8 @@ function Select-BrownserveContent
             Mandatory = $true,
             ValueFromPipeline = $true,
             Position = 0,
-            ParameterSetName = 'Content'
+            ParameterSetName = 'Content',
+            DontShow = $true
         )]
         [BrownserveContent[]]
         $InputObject,
