@@ -105,7 +105,7 @@ function Initialize-BrownserveRepository
             }
             if (($RepositoryState.ChangedFiles.Count -gt 0) -and !$Force)
             {
-                throw "Repository has already been initialized and contains changes that would be overwritten.`nUse the 'Update-BrownserveRepository' cmdlet to update the repository or use the '-Force' switch to overwrite the changes."
+                throw "Repository has already been initialized and contains changes that would be overwritten.`nUse the 'Update-BrownserveRepository' cmdlet to update the repository or pass the '-Force' switch to re-initialize the repository."
             }
             # Check what branch we are on
             try
@@ -170,7 +170,7 @@ function Initialize-BrownserveRepository
             # Start by creating any missing directories, they may be needed for the files we're about to create
             foreach ($Directory in $RepositoryState.MissingDirectories)
             {
-                Write-Verbose "Creating directory '$Directory.Path)'"
+                Write-Verbose "Creating directory '$($Directory.Path)'"
                 try
                 {
                     New-Item `
