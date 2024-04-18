@@ -133,10 +133,28 @@ function Compare-BrownserveRepository
         $VSCodeWorkspaceSettings = [ordered]@{}
 
         <#
+            Our config file contains a list of permanent paths that should always be created in a repository.
+            They survive between init's and are not gitignored.
+        #>
+        $DefaultPermanentPaths = $RepositoryPathsConfig.Defaults.PermanentPaths
+
+        <#
+            Our config file may contain a list of ephemeral paths that get created when the _init script is run.
+            They are deleted between init's and are commonly gitignored.
+        #>
+        $DefaultEphemeralPaths = $RepositoryPathsConfig.Defaults.EphemeralPaths
+
+        if ($DefaultPermanentPaths.VariableName -notcontains 'BrownserveRepoBuildDirectory')
+        {
+            throw 'BrownserveRepoBuildDirectory path not found in repository paths config file.'
+            #TODO: Should we consider raising this as a warning instead?
+        }
+        $BuildDirectory = Join-Path $RepositoryPath ($DefaultPermanentPaths | Where-Object { $_.VariableName -eq 'BrownserveRepoBuildDirectory' }).Path
+
+        <#
             The below paths will always be required regardless of the type of repository we're working with.
         #>
         $ManifestPath = Join-Path $RepositoryPath '.brownserve_repository_manifest'
-        $BuildDirectory = Join-Path $RepositoryPath '.build'
         $InitPath = Join-Path $BuildDirectory '_init.ps1'
         $PaketDependenciesPath = Join-Path $RepositoryPath 'paket.dependencies'
         $dotnetToolsConfigPath = Join-Path $RepositoryPath '.config'
@@ -198,17 +216,6 @@ function Compare-BrownserveRepository
         {
             throw "Failed to create temporary directory.`n$($_.Exception.Message)"
         }
-        <#
-            Our config file contains a list of permanent paths that should always be created in a repository.
-            They survive between init's and are not gitignored.
-        #>
-        $DefaultPermanentPaths = $RepositoryPathsConfig.Defaults.PermanentPaths
-
-        <#
-            Our config file may contain a list of ephemeral paths that get created when the _init script is run.
-            They are deleted between init's and are commonly gitignored.
-        #>
-        $DefaultEphemeralPaths = $RepositoryPathsConfig.Defaults.EphemeralPaths
 
         <#
             We often recommend the use of various VS Code extensions with our projects. There may already
