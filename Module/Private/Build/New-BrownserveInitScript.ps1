@@ -17,13 +17,13 @@ function New-BrownserveInitScript
         [InitPath[]]
         $EphemeralPaths,
 
-        # If passed will create a block that attempts to load any local/custom PowerShell modules in the code directory
+        # If passed will create a block that attempts to load any local/custom PowerShell modules from the "BuildTools" directory
         [Parameter(
             Mandatory = $false,
             ParameterSetName = 'LocalModule'
         )]
         [switch]
-        $IncludeCodeDirectoryModuleLoader,
+        $IncludeBuildToolsDirectoryModuleLoader,
 
         # If passed will create a block that loads a single module from the "Module" directory
         [Parameter(
@@ -174,19 +174,19 @@ function New-BrownserveInitScript
 
         $ModuleText = ''
         # Here we set up our custom module loader for loading any Powershell modules we may have created in a given repo
-        if ($IncludeCodeDirectoryModuleLoader)
+        if ($IncludeBuildToolsDirectoryModuleLoader)
         {
-            if ($PermanentPaths.VariableName -notcontains 'BrownserveRepoCodeDirectory')
+            if ($PermanentPaths.VariableName -notcontains 'BrownserveRepoBuildToolsDirectory')
             {
-                throw "Cannot use '-IncludeCodeDirectoryModuleLoader' when 'BrownserveRepoCodeDirectory' has not been specified"
+                throw "Cannot use '-IncludeBuildToolsDirectoryModuleLoader' when 'BrownserveRepoBuildToolsDirectory' has not been specified"
             }
             $ModuleText = @'
 
-# Find and load any local PowerShell modules we've written for this repo in the "code" directory
+# Find and load any local PowerShell helper modules/tools that may exist
 try
 {
-    Write-Verbose "Checking '$($global:BrownserveRepoCodeDirectory)' for any PowerShell modules to load'
-    Get-ChildItem $global:BrownserveRepoCodeDirectory -Filter '*.psm1' -Recurse | Foreach-Object {
+    Write-Verbose "Checking '$($global:BrownserveRepoBuildToolsDirectory)' for any PowerShell modules to load'
+    Get-ChildItem $global:BrownserveRepoBuildToolsDirectory -Filter '*.psm1' -Recurse | Foreach-Object {
         Import-Module $_ -Force -Verbose:$false
     }
 }
