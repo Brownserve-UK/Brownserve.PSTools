@@ -103,7 +103,6 @@ function New-BrownservePowerShellModule
         {
             $ModuleTemplate = New-BrownservePoShModuleFromTemplate @ModuleParams -ErrorAction 'Stop'
             $ModuleContent = $ModuleTemplate | Format-BrownserveContent -ErrorAction 'Stop'
-            Write-Debug "Module template:`n$($ModuleTemplate.Content)"
         }
         catch
         {
@@ -126,12 +125,12 @@ function New-BrownservePowerShellModule
             $PublicPath = (Join-Path $Path 'Public')
             if (!(Test-Path $PublicPath))
             {
-                New-Item $PublicPath -ItemType Directory -ErrorAction 'Stop'
+                New-Item $PublicPath -ItemType Directory -ErrorAction 'Stop' | Out-Null
             }
             $PrivatePath = (Join-Path $Path 'Private')
             if (!(Test-Path $PrivatePath))
             {
-                New-Item $PrivatePath -ItemType Directory -ErrorAction 'Stop'
+                New-Item $PrivatePath -ItemType Directory -ErrorAction 'Stop' | Out-Null
             }
         }
         catch
