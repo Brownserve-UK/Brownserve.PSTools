@@ -12,9 +12,23 @@ function New-BrownservePoShModuleFromTemplate
         [Parameter(Mandatory = $false)]
         [Alias('Customizations')]
         [string]
-        $Customisations
+        $Customisations,
+
+        # The version of PowerShell the module requires
+        [Parameter(Mandatory = $false)]
+        [string]
+        $RequirePowerShellVersion,
+
+        # If set will require the Brownserve.PSTools module to be installed
+        [Parameter(Mandatory = $false)]
+        [bool]
+        $RequireBrownservePSTools = $true,
+
+        # If set will include the BrownserveCmdlets logic in the module
+        [Parameter(Mandatory = $false)]
+        [bool]
+        $IncludeBrownserveCmdletsLogic = $true
     )
-    
     begin
     {
         # Import the template
@@ -25,24 +39,42 @@ function New-BrownservePoShModuleFromTemplate
         catch
         {
             throw "Failed to import Module template.`n$($_.Exception.Message)"
-        } 
+        }
     }
-    
     process
     {
+        $ModuleContent = $ModuleTemplate
         if ($Description)
         {
-            $DescriptionHeader = @"
-<#
-.SYNOPSIS
-    $Description
-#>`n
-"@
-            $ModuleContent = $DescriptionHeader + $ModuleTemplate
+            $FormattedDescription = ".DESCRIPTION`n    $Description"
+            $ModuleContent = $ModuleContent.Replace('###DESCRIPTION###', $FormattedDescription)
         }
         else
         {
-            $ModuleContent = $ModuleTemplate
+            $ModuleContent = $ModuleContent.Replace("###DESCRIPTION###`n", '')
+        }
+        if ($RequirePowerShellVersion)
+        {
+            $Requirements = "#Requires -Version $RequirePowerShellVersion`n"
+        }
+        if ($RequireBrownservePSTools)
+        {
+            if ($Requirements)
+            {
+                $Requirements += "#Requires -Module Brownserve.PSTools`n"
+            }
+            else
+            {
+                $Requirements = "#Requires -Module Brownserve.PSTools`n"
+            }
+        }
+        if ($Requirements)
+        {
+            $ModuleContent = $ModuleContent.Replace('###REQUIREMENTS###', $Requirements)
+        }
+        else
+        {
+            $ModuleContent = $ModuleContent.Replace("###REQUIREMENTS###`n", '')
         }
         if ($Customisations)
         {
@@ -52,14 +84,38 @@ function New-BrownservePoShModuleFromTemplate
         {
             $ModuleContent = $ModuleContent.Replace('###CUSTOMISATIONS###', '')
         }
-        $Return = $ModuleContent
-    }
-    
-    end
-    {
-        if ($Return)
+        if ($IncludeBrownserveCmdletsLogic)
         {
-            return $Return
-        }
+            $ModuleContent = $ModuleContent.Replace('###PUBLIC_CMDLET_ARRAY###', "`n`$PublicCmdlets = @()")
+            $ModuleContent = $ModuleContent.Replace('###PUBLIC_CMDLET_HELP###', "`n                `$PublicCmdlets += Get-Help `$_.BaseName")
+            $ModuleContent = $ModuleContent.Replace('###BROWNSERVE_CMDLETS###', @'
+<#
+    "BrownserveCmdlets" is a special variable that can be used to store the cmdlets that have been made available from this module (and indeed _all_ Brownserve modules).
+    This allows us to output a summary of the cmdlets that are available in the module from things like repo _init scripts.
+    Unfortunately just checking for the existence of the variable isn't enough as if it's blank PowerShell seems to treat it as null so we test for it being an array.
+#>
+if ($Global:BrownserveCmdlets -is 'System.Array')
+{
+    $Global:BrownserveCmdlets += @{
+        Module  = "$($MyInvocation.MyCommand)"
+        Cmdlets = $PublicCmdlets
     }
 }
+'@)
+        }
+        else
+        {
+            $ModuleContent = $ModuleContent.Replace("###PUBLIC_CMDLET_ARRAY###`n", '')
+            $ModuleContent = $ModuleContent.Replace("###PUBLIC_CMDLET_HELP###`n", '')
+            $ModuleContent = $ModuleContent.Replace("###BROWNSERVE_CMDLETS###`n", '')
+        }
+            $Return = $ModuleContent
+        }
+        end
+        {
+            if ($Return)
+            {
+                return $Return
+            }
+        }
+    }
