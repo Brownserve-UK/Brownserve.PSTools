@@ -164,7 +164,10 @@ function Select-BrownserveContent
                             So we need to wind back 2 lines, one because of the offset and one because we want to return
                             text from BEFORE the matched line.
                         #>
-                        $EndTextLine = $EndTextLine - 2
+                        if ($null -ne $EndTextLine)
+                        {
+                            $EndTextLine = $EndTextLine - 2
+                        }
 
                         if ($FailIfNotFound -and ($null -eq $EndTextLine))
                         {
@@ -202,7 +205,7 @@ function Select-BrownserveContent
                     Due to the way we work out the start and end of the text block we want to return we can end up in a couple
                     of undesirable situations:
 
-                    - We can end up with a BeginTextLine that is >= the EndTextLine this can happen when there is no
+                    - We can end up with a BeginTextLine that is ahead of the EndTextLine this can happen when there is no
                     text or whitespace between the start and stop strings. (e.g ##Start`n##Stop)
                     - We can end up with a BeginTextLine that is the same as the EndTextLine, this can happen when
                     there is no text or only whitespace after the start string. (e.g. ##Start`n`n##Stop)
@@ -211,16 +214,37 @@ function Select-BrownserveContent
                     that there is no content to extract.
                     So we'll just return an empty string (which is distinct from $null)
                 #>
-                if ($BeginTextLine -ge $EndTextLine)
+
+                if ($BeginTextLine -gt $EndTextLine)
                 {
-                    Write-Verbose 'BeginTextLine is greater than or equal to EndTextLine, returning empty string'
+                    Write-Verbose 'BeginTextLine is greater than EndTextLine'
+                    Write-Verbose 'Returning empty string'
                     $TextToReturn = ''
                 }
                 if ($BeginTextLine -eq $EndTextLine)
                 {
-                    Write-Verbose 'BeginTextLine is equal to EndTextLine, returning empty string'
-                    $TextToReturn = ''
+                    Write-Verbose 'BeginTextLine is equal to EndTextLine'
+                    <#
+                        The BeginTextLine and EndTextLine are on the same line.
+                        It's possible we only have a single line of text, or it's also possible that the
+                        BeginTextLine and EndTextLine are on the same line.
+                        If the BeginTextLine is a match for the After parameter then we return an empty string.
+                        Otherwise we return the content of the line.
+                    #>
+                    $BeginTextLineContent = $SplitContent[$BeginTextLine]
+                    if ($BeginTextLineContent -match $After)
+                    {
+                        Write-Verbose 'BeginTextLine matches After'
+                        Write-Verbose 'Returning empty string'
+                        $TextToReturn = ''
+                    }
+                    else
+                    {
+                        Write-Verbose 'BeginTextLine does not match After'
+                        $TextToReturn = $BeginTextLineContent
+                    }
                 }
+                # Only split the array if we haven't already set the text to return
                 if ($null -eq $TextToReturn)
                 {
                     $TextToReturn = $SplitContent[$BeginTextLine..$EndTextLine]
