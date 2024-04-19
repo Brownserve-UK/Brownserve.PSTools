@@ -641,12 +641,3 @@ enum MarkdownEmphasisAsHeaderConversion
     List
     Header
 }
-
-## PowerShell related classes
-
-
-enum BrownservePowerShellModuleType
-{
-    Standalone
-    Tool
-}
