@@ -5,7 +5,7 @@ function New-BrownservePoShModuleFromTemplate
     (
         # An optional description for the module
         [Parameter(Mandatory = $false)]
-        [string]
+        [string[]]
         $Description,
 
         # Any custom code to include when creating the module
@@ -46,7 +46,22 @@ function New-BrownservePoShModuleFromTemplate
         $ModuleContent = $ModuleTemplate
         if ($Description)
         {
-            $FormattedDescription = ".DESCRIPTION`n    $Description"
+            # Description _might_ be a multi-line string so we need to format it correctly
+            if ($Description -match "`n")
+            {
+                $Description = $Description -split "`n"
+            }
+            # Remove the last line if it's blank
+            if ($Description[-1] -eq '')
+            {
+                $Description = $Description[0..($Description.Length - 2)]
+            }
+            $FormattedDescription = ".DESCRIPTION"
+            foreach ($Line in $Description)
+            {
+                $Line = $Line.Trim()
+                $FormattedDescription += "`n    $Line"
+            }
             $ModuleContent = $ModuleContent.Replace('###DESCRIPTION###', $FormattedDescription)
         }
         else
