@@ -1023,20 +1023,18 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
 
         # First create the nuget.config file in the build output directory, we don't want to commit this to the repo as we'll be storing the password in it
         $newNugetConfig = @(
-            'dotnet',
             'new',
             'nugetconfig',
             '-o',
             $Global:BrownserveRepoBuildOutputDirectory
         )
         exec {
-            & $newNugetConfig
+            & dotnet $newNugetConfig
         }
 
         # Then add the feed to the nuget.config file
         $nugetConfigPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory 'nuget.config'
         $addFeedParams = @(
-            'dotnet',
             'nuget',
             'add',
             'source',
@@ -1054,6 +1052,10 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
         if ($IsWindows -eq $false)
         {
             $addFeedParams += '--store-password-in-clear-text'
+        }
+
+        exec {
+            & dotnet $addFeedParams
         }
     }
     else
