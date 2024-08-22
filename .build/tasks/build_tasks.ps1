@@ -78,7 +78,7 @@ param
         Mandatory = $False
     )]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('nuget', 'PSGallery', 'GitHub', 'AzDo')]
+    [ValidateSet('nuget', 'PSGallery', 'GitHub', 'CustomNugetFeeds')]
     [string[]]
     $PublishTo,
 
@@ -128,26 +128,12 @@ param
     [string]
     $PSGalleryAPIKey,
 
-    # The username to use when publishing to Azure DevOps
+    # Any custom/private NuGet feeds to publish to
     [Parameter(
         Mandatory = $False
     )]
-    [string]
-    $AzDoUsername,
-
-    # The personal access token to use when publishing to Azure DevOps
-    [Parameter(
-        Mandatory = $False
-    )]
-    [string]
-    $AzDoToken,
-
-    # The Azure DevOps feed to publish to
-    [Parameter(
-        Mandatory = $False
-    )]
-    [string]
-    $AzDoFeed,
+    [hashtable[]]
+    $CustomNugetFeeds,
 
     # If set will load the working copy of the module at the start of the build
     [Parameter(
@@ -164,6 +150,9 @@ $script:CurrentCommitHash = & git rev-parse HEAD
 $script:ChangelogPath = Join-Path $Global:BrownserveRepoRootDirectory -ChildPath 'CHANGELOG.md'
 $script:NugetPackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'NuGetPackage'
 $script:NuspecPath = Join-Path $script:NugetPackageDirectory "$ModuleName.nuspec"
+# When pushing to custom NuGet feeds we may wish to package the module as module instead of a NuGet package (more on this later)
+$script:ModulePackageDirectory = Join-Path $global:BrownserveRepoBuildOutputDirectory 'ModulePackage'
+$Script:ModuleNuspecPath = Join-Path $script:ModulePackageDirectory "$ModuleName.nuspec"
 $script:GitHubRepoURI = "https://github.com/$GitHubRepoOwner/$GitHubRepoName"
 $Script:BuiltModulePath = (Join-Path $global:BrownserveBuiltModuleDirectory -ChildPath "$ModuleName.psd1")
 $script:TrackedFiles = @()
@@ -226,19 +215,17 @@ task CheckPublishingParameters {
         }
     }
 
-    if ('AzDo' -in $PublishTo)
+    if ('AdditionalFeeds' -in $PublishTo)
     {
-        if (!$AzDoUsername)
+        if (!$CustomNugetFeeds)
         {
-            throw 'AzDoUsername not provided'
+            throw 'CustomNugetFeeds not provided'
         }
-        if (!$AzDoToken)
-        {
-            throw 'AzDoToken not provided'
-        }
-        if (!$AzDoFeed)
-        {
-            throw 'AzDoFeed not provided'
+        $CustomNugetFeeds | ForEach-Object {
+            if ((-not $_.Name) -or - (not $_.Url) -or (-not $_.Credential) -or (-not $_.PublishAs))
+            {
+                throw 'CustomNugetFeeds must contain Name, Url, Credential and PublishAs'
+            }
         }
     }
 }
@@ -280,10 +267,10 @@ task SetReleaseVariables {
 .SYNOPSIS
     Loads the working copy of the module from the module directory
 .DESCRIPTION
-    By default we pull in the latest _stable_ copy of Brownserve.PSTools via the _init.ps1 script to run this build,
+    By default we pull in the latest _stable_ copy of Brownserve.PSTools from NuGet via the _init.ps1 script to run this build,
     however if we make changes to any of the cmdlets used in this build we won't get the changes until a new release
     is pushed.
-    This task allows us to unload the stable version and reload the copy of this module from the repo's module directory.
+    This task allows us to unload the stable version and reload the working copy of this module from the local copy of the repo.
 #>
 task UseWorkingCopy {
     if ($UseWorkingCopy -eq $true)
@@ -510,16 +497,12 @@ task FormatReleaseNotes SetVersion, {
 
 <#
 .SYNOPSIS
-    Creates a temporary nuget.config for the Azure DevOps feed
+    Creates a temporary nuget.config that contains any custom feeds we want to publish to
 .DESCRIPTION
-    To push the module to a private Azure DevOps feed we need to create a temporary nuget.config file that contains the feed details.
-    This ensures we don't have to store the feed details in the repository with credentials or pollute any other nuget.config files.
-    We opt not to use PSResourceGet to package and push our module as it doesn't support pointing to a temporary configuration.
-    This means we'd have to add the PSRepository to the user's machine (or worse yet, build server) which could result in weirdness.
-.NOTES
-    TODO: If we want to support more feeds in the future (e.g. GitHub packages) then we should consider making this task more generic and iterating over the feeds.
+    In case we want to publish the module to any custom/private NuGet feeds we need to create a temporary nuget.config file.
+    This stops us from polluting the nuget.config file in the repo and avoids any potential issues with committing secrets.
 #>
-task CreateAzDoNugetConfig {
+task CreateTemporaryNugetConfig UseWorkingCopy, CheckPublishingParameters, {
     if ('AzDo' -in $PublishTo)
     {
         Write-Build White 'Creating temporary nuget.config for Azure DevOps feed'
@@ -537,30 +520,36 @@ task CreateAzDoNugetConfig {
         & dotnet $newNugetConfig
     }
 
-    # Then add the feed to the nuget.config file
-    $nugetConfigPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory 'nuget.config'
-    $addFeedParams = @(
-        'nuget',
-        'add',
-        'source',
-        $AzDoFeed,
-        '-n',
-        'AzDoFeed',
-        '-u',
-        $AzDoUsername,
-        '-p',
-        $AzDoToken,
-        '--configfile',
-        $nugetConfigPath
-    )
-    # Encryption is only supported on Windows
-    if ($IsWindows -eq $false)
-    {
-        $addFeedParams += '--store-password-in-clear-text'
-    }
+    # Then go through and add the feeds to the nuget.config file
+    $CustomNugetFeeds | ForEach-Object {
+        $nugetConfigPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory 'nuget.config'
+        $FeedUrl = $_.Url
+        $FeedName = $_.Name
+        $FeedUsername = $_.Credential.UserName
+        $FeedPassword = $_.Credential.GetNetworkCredential().Password
+        $addFeedParams = @(
+            'nuget',
+            'add',
+            'source',
+            $FeedUrl,
+            '-n',
+            $FeedName,
+            '-u',
+            $FeedUsername,
+            '-p',
+            $FeedPassword,
+            '--configfile',
+            $nugetConfigPath
+        )
+        # Encryption is only supported on Windows 😭
+        if ($IsWindows -eq $false)
+        {
+            $addFeedParams += '--store-password-in-clear-text'
+        }
 
-    exec {
-        & dotnet $addFeedParams
+        exec {
+            & dotnet $addFeedParams
+        }
     }
 }
 
@@ -568,10 +557,10 @@ task CreateAzDoNugetConfig {
 .SYNOPSIS
     Checks for previous releases to ensure we're not trying to release a version that already exists
 .DESCRIPTION
-    This task will check for previous releases in GitHub, the PSGallery and NuGet.
+    This task will check for previous releases in GitHub, the PSGallery, Azure DevOps and NuGet.
     If a release is found with the same version number as the one we're trying to release then the build will fail.
     Even if only one of the endpoints has a release with the same version number the build will fail.
-    We should be consistent across all endpoints.
+    We should be consistent across all endpoints after all.
     Checks are performed only against the endpoints defined in $PublishTo so if a new endpoint is added or you want to
     publish to an endpoint that previously failed simply exclude the others.
 #>
@@ -946,7 +935,7 @@ task Tests ImportModule, UpdateModuleDocumentation, {
     those endpoints are targetted.
 #>
 task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, CreateModuleHelp, {
-    if (('nuget' -in $PublishTo) -or ('GitHub' -in $PublishTo) -or ('AzDo' -in $PublishTo))
+    if (('nuget' -in $PublishTo) -or ('GitHub' -in $PublishTo) -or ('CustomNugetFeeds' -in $PublishTo))
     {
         # We'll copy our build module to the nuget package and rename it to 'tools'
         # as that seems to be the right way to do things
@@ -986,7 +975,7 @@ task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, C
     }
     else
     {
-        Write-Verbose 'Nuget not targeted, skipping...'
+        Write-Verbose 'No NuGet feeds targetted, skipping...'
     }
 }
 
