@@ -226,6 +226,22 @@ task CheckPublishingParameters {
             {
                 throw 'CustomNugetFeeds must contain Name, Url, Credential and PublishAs'
             }
+            # Custom feeds can either have the module packaged as a NuGet package or as a module package (more on this later)
+            if (($_.PublishAs -ne 'NugetPackage') -or ($_.PublishAs -ne 'ModulePackage'))
+            {
+                throw 'CustomNugetFeeds PublishAs must be either NugetPackage or ModulePackage'
+            }
+            else
+            {
+                if ($_.PublishAs -eq 'NugetPackage')
+                {
+                    $script:CustomNugetFeedNugetPackage = $true
+                }
+                else
+                {
+                    $script:CustomNugetFeedModulePackage = $true
+                }
+            }
         }
     }
 }
@@ -503,9 +519,9 @@ task FormatReleaseNotes SetVersion, {
     This stops us from polluting the nuget.config file in the repo and avoids any potential issues with committing secrets.
 #>
 task CreateTemporaryNugetConfig UseWorkingCopy, CheckPublishingParameters, {
-    if ('AzDo' -in $PublishTo)
+    if ('CustomNugetFeeds' -in $PublishTo)
     {
-        Write-Build White 'Creating temporary nuget.config for Azure DevOps feed'
+        Write-Build White 'Creating temporary nuget.config for custom feeds'
     }
 
     # First create the nuget.config file in the build output directory, we don't want to commit this to the repo as we'll be storing the password in it
@@ -935,22 +951,15 @@ task Tests ImportModule, UpdateModuleDocumentation, {
     those endpoints are targetted.
 #>
 task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, CreateModuleHelp, {
-    if (('nuget' -in $PublishTo) -or ('GitHub' -in $PublishTo) -or ('CustomNugetFeeds' -in $PublishTo))
-    {
-        # We'll copy our build module to the nuget package and rename it to 'tools'
-        # as that seems to be the right way to do things
-        Write-Build White "Copying built module to $script:NugetPackageDirectory"
-        Copy-Item $global:BrownserveBuiltModuleDirectory -Destination (Join-Path $script:NugetPackageDirectory 'tools') -Recurse
-        # Copy each of the necessary files over to the build output directory
-        $ItemsToCopy = @(
+    # Each of these items will be copied to the root of the NuGet package
+    $ItemsToCopy = @(
         (Join-Path $Global:BrownserveRepoRootDirectory 'CHANGELOG.md'),
         (Join-Path $Global:BrownserveRepoRootDirectory 'LICENSE'),
-        (Join-Path $Global:BrownserveRepoRootDirectory README.md)
-        )
-        Copy-Item $ItemsToCopy -Destination $script:NugetPackageDirectory -Force
-        # Now we'll generate a nuspec file and pop it in the root of NuGet package
-        # TODO: Create an object and ConvertTo-XML
-        $Nuspec = @"
+        (Join-Path $Global:BrownserveRepoRootDirectory 'README.md')
+    )
+    # Build up the nuspec file
+    # PowerShell doesn't handle object -> XML very well so we'll use a here-string to build it reliably
+    $Nuspec = @"
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
@@ -970,12 +979,35 @@ task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, C
   </metadata>
 </package>
 "@
+    if (('nuget' -in $PublishTo) -or ('GitHub' -in $PublishTo) -or ($script:CustomNugetFeedNugetPackage -eq $true))
+    {
+        # We'll copy our build module to the nuget package and rename it to 'tools'
+        # as per the NuGet conventions
+        Write-Build White "Copying built module to $script:NugetPackageDirectory"
+        Copy-Item $global:BrownserveBuiltModuleDirectory -Destination (Join-Path $script:NugetPackageDirectory 'tools') -Recurse
+        Copy-Item $ItemsToCopy -Destination $script:NugetPackageDirectory -Force
         New-Item $script:NuspecPath -Value $Nuspec -Force | Out-Null
         $script:NuspecPath = $script:NuspecPath | Convert-Path
     }
     else
     {
-        Write-Verbose 'No NuGet feeds targetted, skipping...'
+        Write-Verbose 'No standard NuGet feeds targetted, skipping...'
+    }
+    <#
+        TODO: Notes on why we package the module differently sometimes
+    #>
+    if ($script:CustomNugetFeedModulePackage -eq $true)
+    {
+        # We'll copy our build module to the nuget package however we'll keep the module in the root of the package so it can be installed directly
+        Write-Build White "Copying built module to $script:ModulePackageDirectory"
+        Copy-Item $global:BrownserveBuiltModuleDirectory -Destination $script:ModulePackageDirectory -Recurse
+        Copy-Item $ItemsToCopy -Destination $script:ModulePackageDirectory -Force
+        New-Item $Script:ModuleNuspecPath -Value $Nuspec -Force | Out-Null
+        $script:ModuleNuspecPath = $script:ModuleNuspecPath | Convert-Path
+    }
+    else
+    {
+        Write-Verbose 'No custom feeds require a module package, skipping...'
     }
 }
 
@@ -988,9 +1020,9 @@ task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, C
     targetted
 #>
 task PackNuGetPackage PrepareNuGetPackage, {
-    if (('nuget' -in $PublishTo) -or ('GitHub' -in $PublishTo))
+    if (('nuget' -in $PublishTo) -or ('GitHub' -in $PublishTo) -or ($script:CustomNugetFeedNugetPackage -eq $true))
     {
-        Write-Build White 'Creating NuGet package'
+        Write-Build White 'Packing module as standard NuGet package'
         exec {
             # Note: the paths must be a separate index to the switch in the array
             $NugetArguments = @(
@@ -1000,7 +1032,7 @@ task PackNuGetPackage PrepareNuGetPackage, {
                 '-Version',
                 "$Global:BuildVersion",
                 '-OutputDirectory',
-                "$Global:BrownserveRepoBuildOutputDirectory"
+                "$script:NugetPackageDirectory"
             )
             # On *nix we need to use mono to invoke nuget, so fudge the arguments a bit
             if (-not $isWindows)
@@ -1010,11 +1042,40 @@ task PackNuGetPackage PrepareNuGetPackage, {
             }
             & $NugetCommand $NugetArguments
         }
-        $script:nupkgPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory "$ModuleName-$global:BuildVersion.nupkg" | Convert-Path
+        $script:nupkgPath = Join-Path $script:NugetPackageDirectory "$ModuleName-$global:BuildVersion.nupkg" | Convert-Path
     }
     else
     {
-        Write-Verbose 'Nuget and GitHub not targeted, skipping...'
+        Write-Verbose 'No feeds require a standard NuGet package, skipping...'
+    }
+
+    if (($script:CustomNugetFeedModulePackage -eq $true))
+    {
+        Write-Build White 'Packing module as PowerShell module package'
+        exec {
+            # Note: the paths must be a separate index to the switch in the array
+            $NugetArguments = @(
+                'pack',
+                "$script:ModuleNuspecPath",
+                '-NoPackageAnalysis',
+                '-Version',
+                "$Global:BuildVersion",
+                '-OutputDirectory',
+                "$script:ModulePackageDirectory"
+            )
+            # On *nix we need to use mono to invoke nuget, so fudge the arguments a bit
+            if (-not $isWindows)
+            {
+                # Mono won't have access to our NuGet PowerShell alias, so set the path using our env var
+                $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
+            }
+            & $NugetCommand $NugetArguments
+        }
+        $script:ModulePackagePath = Join-Path $script:ModulePackageDirectory "$ModuleName-$global:BuildVersion.nupkg" | Convert-Path
+    }
+    else
+    {
+        Write-Verbose 'No custom feeds require a module package, skipping...'
     }
 }
 
@@ -1209,6 +1270,16 @@ If you need to make any changes please do so on the $script:StagingBranchName br
 "@
     Write-Build Green $BuildMessage
 }
+
+<#
+.SYNOPSIS
+    Stops just short of actually pushing a release
+.DESCRIPTION
+    This task will perform all the tasks required to release the module but will not actually push the release to the
+    various endpoints.
+    This is useful for testing the release process without actually releasing anything.
+#>
+task DryRun CheckPublishingParameters, CheckPreviousReleases, CompressModule, Tests, PackNuGetPackage, CheckForUncommittedChanges, {}
 
 <#
 .SYNOPSIS
