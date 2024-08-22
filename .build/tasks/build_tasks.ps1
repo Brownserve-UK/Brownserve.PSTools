@@ -1045,7 +1045,7 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
             $AzDoUsername,
             '-p',
             $AzDoToken,
-            '-c',
+            '--configfile',
             $nugetConfigPath
         )
         # Encryption is only supported on Windows
