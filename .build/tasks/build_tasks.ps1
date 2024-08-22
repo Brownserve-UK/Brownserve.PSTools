@@ -510,6 +510,62 @@ task FormatReleaseNotes SetVersion, {
 
 <#
 .SYNOPSIS
+    Creates a temporary nuget.config for the Azure DevOps feed
+.DESCRIPTION
+    To push the module to a private Azure DevOps feed we need to create a temporary nuget.config file that contains the feed details.
+    This ensures we don't have to store the feed details in the repository with credentials or pollute any other nuget.config files.
+    We opt not to use PSResourceGet to package and push our module as it doesn't support pointing to a temporary configuration.
+    This means we'd have to add the PSRepository to the user's machine (or worse yet, build server) which could result in weirdness.
+.NOTES
+    TODO: If we want to support more feeds in the future (e.g. GitHub packages) then we should consider making this task more generic and iterating over the feeds.
+#>
+task CreateAzDoNugetConfig {
+    if ('AzDo' -in $PublishTo)
+    {
+        Write-Build White 'Creating temporary nuget.config for Azure DevOps feed'
+    }
+
+    # First create the nuget.config file in the build output directory, we don't want to commit this to the repo as we'll be storing the password in it
+    $newNugetConfig = @(
+        'new',
+        'nugetconfig',
+        '-o',
+        $Global:BrownserveRepoBuildOutputDirectory
+    )
+    # N.B. 'dotnet' must be a string while the params must be an array
+    exec {
+        & dotnet $newNugetConfig
+    }
+
+    # Then add the feed to the nuget.config file
+    $nugetConfigPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory 'nuget.config'
+    $addFeedParams = @(
+        'nuget',
+        'add',
+        'source',
+        $AzDoFeed,
+        '-n',
+        'AzDoFeed',
+        '-u',
+        $AzDoUsername,
+        '-p',
+        $AzDoToken,
+        '--configfile',
+        $nugetConfigPath
+    )
+    # Encryption is only supported on Windows
+    if ($IsWindows -eq $false)
+    {
+        $addFeedParams += '--store-password-in-clear-text'
+    }
+
+    exec {
+        & dotnet $addFeedParams
+    }
+}
+
+<#
+.SYNOPSIS
     Checks for previous releases to ensure we're not trying to release a version that already exists
 .DESCRIPTION
     This task will check for previous releases in GitHub, the PSGallery and NuGet.
@@ -519,7 +575,7 @@ task FormatReleaseNotes SetVersion, {
     Checks are performed only against the endpoints defined in $PublishTo so if a new endpoint is added or you want to
     publish to an endpoint that previously failed simply exclude the others.
 #>
-task CheckPreviousReleases SetVersion, {
+task CheckPreviousReleases SetVersion, CreateAzDoNugetConfig {
     Write-Build White 'Checking for previous releases'
     if ('GitHub' -in $PublishTo)
     {
@@ -553,6 +609,20 @@ task CheckPreviousReleases SetVersion, {
         $CurrentReleases = Find-Package `
             -Name $ModuleName `
             -Source 'https://nuget.org/api/v2' `
+            -AllVersions `
+            -AllowPrereleaseVersions `
+            -ErrorAction SilentlyContinue # We don't care if this fails, we'll just assume there's no previous release
+        if ($CurrentReleases.Version -contains $Global:BuildVersion)
+        {
+            throw "There already appears to be a $Global:BuildVersion release!"
+        }
+    }
+    if ('AzDo' -in $PublishTo)
+    {
+        Write-Verbose 'Checking for previous releases to Azure DevOps'
+        $CurrentReleases = Find-Package `
+            -Name $ModuleName `
+            -Source $AzDoFeed `
             -AllVersions `
             -AllowPrereleaseVersions `
             -ErrorAction SilentlyContinue # We don't care if this fails, we'll just assume there's no previous release
@@ -876,9 +946,9 @@ task Tests ImportModule, UpdateModuleDocumentation, {
     those endpoints are targetted.
 #>
 task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, CreateModuleHelp, {
-    if (('nuget' -in $PublishTo) -or ('GitHub' -in $PublishTo))
+    if (('nuget' -in $PublishTo) -or ('GitHub' -in $PublishTo) -or ('AzDo' -in $PublishTo))
     {
-        # We'll copy our build module to the nuget package and rename it to 'tools' 
+        # We'll copy our build module to the nuget package and rename it to 'tools'
         # as that seems to be the right way to do things
         Write-Build White "Copying built module to $script:NugetPackageDirectory"
         Copy-Item $global:BrownserveBuiltModuleDirectory -Destination (Join-Path $script:NugetPackageDirectory 'tools') -Recurse
@@ -1017,46 +1087,14 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
     {
         Write-Build White 'Pushing to Azure DevOps'
         <#
-            For AzDo we need to create a new nuget.config that contains the username and password for the feed.
+            For AzDo we opt to push a nuget package we build ourselves as opposed to using PSResourceGet to publish the module (Publish-Module).
+            This is because PSResourceGet has no way of specifying a temporary configuration meaning we'd end up polluting the PSRepository object with the AzDo feed.
+            (It may already be present but we can't be sure, and this would be bad on a shared build server)
+            Whereas we can create a new nuget.config that contains the username and password for the private feed.
             (see https://learn.microsoft.com/en-us/azure/devops/artifacts/nuget/dotnet-exe?view=azure-devops#publish-packages-from-external-sources)
         #>
 
-        # First create the nuget.config file in the build output directory, we don't want to commit this to the repo as we'll be storing the password in it
-        $newNugetConfig = @(
-            'new',
-            'nugetconfig',
-            '-o',
-            $Global:BrownserveRepoBuildOutputDirectory
-        )
-        exec {
-            & dotnet $newNugetConfig
-        }
-
-        # Then add the feed to the nuget.config file
-        $nugetConfigPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory 'nuget.config'
-        $addFeedParams = @(
-            'nuget',
-            'add',
-            'source',
-            $AzDoFeed,
-            '-n',
-            'AzDoFeed',
-            '-u',
-            $AzDoUsername,
-            '-p',
-            $AzDoToken,
-            '--configfile',
-            $nugetConfigPath
-        )
-        # Encryption is only supported on Windows
-        if ($IsWindows -eq $false)
-        {
-            $addFeedParams += '--store-password-in-clear-text'
-        }
-
-        exec {
-            & dotnet $addFeedParams
-        }
+        # Rather stupidly nuget push doesn't have a configfile parameter so we need to set the environment variable
     }
     else
     {
