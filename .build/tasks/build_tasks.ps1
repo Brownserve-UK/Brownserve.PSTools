@@ -78,7 +78,7 @@ param
         Mandatory = $False
     )]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('nuget', 'PSGallery', 'GitHub')]
+    [ValidateSet('nuget', 'PSGallery', 'GitHub', 'AzDo')]
     [string[]]
     $PublishTo,
 
@@ -127,6 +127,27 @@ param
     )]
     [string]
     $PSGalleryAPIKey,
+
+    # The username to use when publishing to Azure DevOps
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string]
+    $AzDoUsername,
+
+    # The personal access token to use when publishing to Azure DevOps
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string]
+    $AzDoToken,
+
+    # The Azure DevOps feed to publish to
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string]
+    $AzDoFeed,
 
     # If set will load the working copy of the module at the start of the build
     [Parameter(
@@ -202,6 +223,22 @@ task CheckPublishingParameters {
         if (!$GitHubReleaseToken)
         {
             throw 'GitHubReleaseToken not provided'
+        }
+    }
+
+    if ('AzDo' -in $PublishTo)
+    {
+        if (!$AzDoUsername)
+        {
+            throw 'AzDoUsername not provided'
+        }
+        if (!$AzDoToken)
+        {
+            throw 'AzDoToken not provided'
+        }
+        if (!$AzDoFeed)
+        {
+            throw 'AzDoFeed not provided'
         }
     }
 }
@@ -883,7 +920,7 @@ task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, C
     }
 }
 
-<# 
+<#
 .SYNOPSIS
     Packs the nuget package ready for shipping off to nuget.org (or a private feed)
 .DESCRIPTION
@@ -974,6 +1011,54 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
     else
     {
         Write-Verbose 'PSGallery not targeted, skipping...'
+    }
+
+    if ('AzDo' -in $PublishTo)
+    {
+        Write-Build White 'Pushing to Azure DevOps'
+        <#
+            For AzDo we need to create a new nuget.config that contains the username and password for the feed.
+            (see https://learn.microsoft.com/en-us/azure/devops/artifacts/nuget/dotnet-exe?view=azure-devops#publish-packages-from-external-sources)
+        #>
+
+        # First create the nuget.config file in the build output directory, we don't want to commit this to the repo as we'll be storing the password in it
+        $newNugetConfig = @(
+            'dotnet',
+            'new',
+            'nugetconfig',
+            '-o',
+            $Global:BrownserveRepoBuildOutputDirectory
+        )
+        exec {
+            & $newNugetConfig
+        }
+
+        # Then add the feed to the nuget.config file
+        $nugetConfigPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory 'nuget.config'
+        $addFeedParams = @(
+            'dotnet',
+            'nuget',
+            'add',
+            'source',
+            $AzDoFeed,
+            '-n',
+            'AzDoFeed',
+            '-u',
+            $AzDoUsername,
+            '-p',
+            $AzDoToken,
+            '-c',
+            $nugetConfigPath
+        )
+        # Encryption is only supported on Windows
+        if ($IsWindows -eq $false)
+        {
+            $addFeedParams += '--store-password-in-clear-text'
+        }
+    }
+    else
+    {
+        Write-Verbose 'Azure DevOps not targeted, skipping...'
     }
 
     if ('GitHub' -in $PublishTo)

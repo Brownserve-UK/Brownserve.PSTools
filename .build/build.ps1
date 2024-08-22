@@ -126,6 +126,27 @@ param
     [string]
     $PSGalleryAPIKey,
 
+    # The username to use when publishing to Azure DevOps
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string]
+    $AzDoUsername,
+
+    # The personal access token to use when publishing to Azure DevOps
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string]
+    $AzDoToken,
+
+    # The Azure DevOps feed to publish to
+    [Parameter(
+        Mandatory = $False
+    )]
+    [string]
+    $AzDoFeed,
+
     # If set will load the working copy of the module at the start of the build
     [Parameter(
         Mandatory = $false
@@ -222,6 +243,18 @@ try
     if ($GitHubReleaseToken)
     {
         $BuildParams.Add('GitHubReleaseToken', $GitHubReleaseToken)
+    }
+    if ($AzDoUsername)
+    {
+        $BuildParams.Add('AzDoUsername', $AzDoUsername)
+    }
+    if ($AzDoToken)
+    {
+        $BuildParams.Add('AzDoToken', $AzDoToken)
+    }
+    if ($AzDoFeed)
+    {
+        $BuildParams.Add('AzDoFeed', $AzDoFeed)
     }
     if ($PublishTo)
     {
