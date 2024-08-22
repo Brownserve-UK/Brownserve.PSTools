@@ -26,7 +26,7 @@ Returns the root directory of a git repository.
 ### Example 1
 
 ```powershell
- Get-GitRootDirectory
+Get-GitRootDirectory
 ```
 
 Returns the root directory of the git repository in the current directory.

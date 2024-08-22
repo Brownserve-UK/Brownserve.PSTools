@@ -91,6 +91,10 @@ Strips out illegal characters from Terraform resource names
 
 Wrapper for Get-Content that returns the content in a format that is easier to work with.
 
+### [Get-BrownserveRepositoryPaths](./Brownserve.PSTools/Get-BrownserveRepositoryPaths.md)
+
+Returns a list of all paths that are managed for a given repository.
+
 ### [Get-GitBranches](./Brownserve.PSTools/Get-GitBranches.md)
 
 Gets the current branches for the given repository
@@ -126,6 +130,10 @@ Returns a list of merge commits for a given GitHub repository
 ### [Get-GitRemoteOriginURL](./Brownserve.PSTools/Get-GitRemoteOriginURL.md)
 
 Gets the remote origin URL for a given repository
+
+### [Get-GitRootDirectory](./Brownserve.PSTools/Get-GitRootDirectory.md)
+
+Returns the root directory of a git repository.
 
 ### [Get-OpenPullRequests](./Brownserve.PSTools/Get-OpenPullRequests.md)
 
@@ -214,7 +222,7 @@ Creates a new changelog entry for a given version in the standard Brownserve for
 
 ### [New-BrownservePowerShellModule](./Brownserve.PSTools/New-BrownservePowerShellModule.md)
 
-Creates a new PowerShell module using the standard Brownserve format
+Creates a new PowerShell module in the standard Brownserve format
 
 ### [New-BrownservePowerShellModuleBuild](./Brownserve.PSTools/New-BrownservePowerShellModuleBuild.md)
 
