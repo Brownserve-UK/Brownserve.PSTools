@@ -77,23 +77,86 @@ Most of the repositories we publish to will not allow you to re-publish a releas
 
 If there's an issue with a release that requires you to re-publish it, you'll need to increment the version number of the release and perform a new release. (If the issue is serious enough you should also consider pulling the faulty release from the endpoints you've previously published to.)  
 
-The only exception to this is when either adding a new release repository or when a push to an existing repository fails (for example if the repository is down at the time of publishing, or an API key is expired etc).
+The only exception to this is when either adding a new release endpoint or when a push to an existing endpoint fails (for example if the repository is down at the time of publishing, or an API key is expired etc).
 In these cases you can run the `publish-release` GitHub action again _making sure to select the branch tag_ of the version you wish to re-publish. You should then set the `publish_to` input to only include the endpoints that don't already have the release published to them.
+
+For example to republish version `0.16.0-preview` to the PowerShell Gallery you would set the `publish_to` input to `PSGallery` and the `branch_tag` input to `0.16.0-preview`.
+
+![example](./resources/img/image.png)
+
+## Custom NuGet Feeds
+
+Sometimes it can be useful to publish the module to a custom NuGet feed, for example if you're testing a very early version of the module or for our proxy feed.
+To publish to a custom NuGet feed you'll need to pass the `CustomNugetFeeds` parameter to the `Release` task, this should be an array of objects with the following properties:
+
+* `Name` - The name of the feed (can be anything you like).
+* `Url` - The URL of the feed.
+* `Credential` a `PSCredential` object containing the username and password (or PAT) for the feed.
+* `PublishAs` whether to publish the module as a `ModulePackage` or a `NugetPackage` (see [ModulePackage vs NugetPackage](#modulepackage-vs-nugetpackage) for more information).
+
+Currently our GitHub Actions workflow does not support publishing to custom NuGet feeds so you'll need to run the `Release` task locally to publish to a private feed. Given that private feeds often require authentication it's probably best to define the feeds in the `release.yaml` workflow file using secrets if we need to publish to them regularly in the future.
+
+### Example
+
+The below example demonstrates publishing to two different custom NuGet feeds, one using a `PSCredential` object and the other using `Get-Credential` to prompt for the credentials.
+
+```powershell
+$Username = 'MyUsername'
+$Password = 'MyPassword' | ConvertTo-SecureString -AsPlainText -Force
+$Credential = New-Object System.Management.Automation.PSCredential ($Username, $Password)
+
+$customNugetFeeds = @(
+    @{
+        Name = 'MyCustomFeed'
+        Url = 'https://pkgs.dev.azure.com/MyOrg/MyFeed/_packaging/NugetFeed/nuget/v2'
+        Credential = $Credential
+        PublishAs = 'ModulePackage'
+    },
+    @{
+        Name = 'MyOtherCustomFeed'
+        Url = 'https://pkgs.dev.azure.com/MyOrg/MyOtherFeed/_packaging/NugetFeed/nuget/v3/index.json'
+        Credential = (Get-Credential)
+        PublishAs = 'NugetPackage'
+    }
+)
+```
+
+### ModulePackage vs NugetPackage
+
+By default NuGet packages store the module in a subdirectory called `tools` so when extracted it may look something like this:
+
+```plaintext
+Brownserve.PSTools
+├── tools
+│   ├── Brownserve.PSTools.psd1
+│   ├── Brownserve.PSTools.psm1
+```
+
+This is fine for most cases, however if you want the module to be installable by the `Install-Module` cmdlet then the module needs to be at the root of the package. This would look something like this:
+
+```plaintext
+Brownserve.PSTools
+├── Brownserve.PSTools.psd1
+├── Brownserve.PSTools.psm1
+```
+
+To achieve this you can set the `PublishAs` property to `ModulePackage` which will publish the module as a `ModulePackage` instead of a standard `NugetPackage`.
 
 ## Running release process locally
 
 It's entirely possible to run through the release process locally if you need to.  
 See the section on [building locally](BUILDING.md#building-locally) for information on how to get the required dependencies installed.  
-Once you're ready to release you can run the `StageRelease` and `Release` tasks from the `.build/build.ps1` script.  
+Once you're ready to release you can run the `StageRelease`, `DryRun` and `Release` tasks from the `.build/build.ps1` script.
 
 You'll need to provide the following parameters to the `StageRelease` task:
 
 * `ReleaseType` - The type of release to perform, this can be one of `Major`, `Minor` or `Patch`.
 * `GitHubStageReleaseToken` - A GitHub personal access token with enough permissions to read/write pull requests and read issues.
 
-You'll need to provide the following parameters to the `Release` task:
+You'll need to provide the following parameters to the `Release` and `DryRun` tasks:
 
-* `PublishTo` - A comma separated list of endpoints to publish the release to, this can be one or more of `PSGallery`, `GitHub` and `NuGet`
+* `PublishTo` - A comma separated list of endpoints to publish the release to, this can be one or more of `PSGallery`, `GitHub`, `CustomNugetFeeds` and `NuGet`
 * `GitHubReleaseToken` - A GitHub personal access token with enough permissions to read/write releases (if publishing to GitHub).
 * `NugetFeedApiKey` - An API key for the NuGet feed to publish to (if publishing to NuGet).
 * `PSGalleryApiKey` - An API key for the PowerShell Gallery to publish to (if publishing to PSGallery).
+* `CustomNugetFeeds` - A list of custom NuGet feeds to publish to (if required) see the [Custom NuGet Feeds](#custom-nuget-feeds) section for more information.

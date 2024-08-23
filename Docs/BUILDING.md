@@ -14,6 +14,7 @@ The following build tasks are available:
 * `BuildAndTest` - Performs the same tasks as `BuildWithDocs` but also runs the unit tests
 * `BuildTestAndCheck` - Performs the same tasks as `BuildAndTest` but also ensures there are no uncommitted changes resulting from the build (e.g. documentation). This task is used for all pull requests.
 * `StageRelease` - Stages a release (see [RELEASING](./RELEASING.md) for more information)
+* `DryRun` - Performs the same actions as `Release` but stops short of actually pushing the module out, mostly useful for debugging (see [RELEASING](./RELEASING.md) for more information)
 * `Release` - Releases the module to the configured repositories (see [RELEASING](./RELEASING.md) for more information)
 
 The [build_tasks](../.build/tasks/build_tasks.ps1) script has detailed documentation for each task should you wish to know more.
