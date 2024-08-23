@@ -126,26 +126,12 @@ param
     [string]
     $PSGalleryAPIKey,
 
-    # The username to use when publishing to Azure DevOps
+    # Any custom/private NuGet feeds to publish to
     [Parameter(
         Mandatory = $False
     )]
-    [string]
-    $AzDoUsername,
-
-    # The personal access token to use when publishing to Azure DevOps
-    [Parameter(
-        Mandatory = $False
-    )]
-    [string]
-    $AzDoToken,
-
-    # The Azure DevOps feed to publish to
-    [Parameter(
-        Mandatory = $False
-    )]
-    [string]
-    $AzDoFeed,
+    [hashtable[]]
+    $CustomNugetFeeds,
 
     # If set will load the working copy of the module at the start of the build
     [Parameter(
@@ -244,17 +230,9 @@ try
     {
         $BuildParams.Add('GitHubReleaseToken', $GitHubReleaseToken)
     }
-    if ($AzDoUsername)
+    if ($CustomNugetFeeds)
     {
-        $BuildParams.Add('AzDoUsername', $AzDoUsername)
-    }
-    if ($AzDoToken)
-    {
-        $BuildParams.Add('AzDoToken', $AzDoToken)
-    }
-    if ($AzDoFeed)
-    {
-        $BuildParams.Add('AzDoFeed', $AzDoFeed)
+        $BuildParams.Add('CustomNugetFeeds', $CustomNugetFeeds)
     }
     if ($PublishTo)
     {
