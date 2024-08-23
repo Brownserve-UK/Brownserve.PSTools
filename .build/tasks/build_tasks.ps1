@@ -73,7 +73,7 @@ param
     [string]
     $DefaultBranch,
 
-    # The Nuget feeds to publish to
+    # The various places to publish to
     [Parameter(
         Mandatory = $False
     )]

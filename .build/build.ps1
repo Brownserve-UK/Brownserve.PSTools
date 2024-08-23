@@ -73,10 +73,12 @@ param
     [string]
     $ReleaseNotice,
 
-    # Where the module should be published to
+    # The various places to publish to
     [Parameter(
-        Mandatory = $false
+        Mandatory = $False
     )]
+    [ValidateNotNullOrEmpty()]
+    [ValidateSet('nuget', 'PSGallery', 'GitHub', 'CustomNugetFeeds')]
     [string[]]
     $PublishTo,
 
