@@ -45,6 +45,7 @@ param
         'BuildAndTest',
         'BuildTestAndCheck',
         'StageRelease',
+        'DryRun',
         'Release'
     )]
     [AllowEmptyString()]
