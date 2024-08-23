@@ -1150,6 +1150,7 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
             }
             Write-Verbose "Pushing to custom NuGet feed $($_.Name)"
             $NugetArguments = @(
+                'nuget',
                 'push',
                 '--source',
                 $_.Name,
