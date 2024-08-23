@@ -622,18 +622,21 @@ task CheckPreviousReleases SetVersion, CreateTemporaryNugetConfig, {
             throw "There already appears to be a $Global:BuildVersion release!"
         }
     }
-    if ('AzDo' -in $PublishTo)
+    if ('CustomFeeds' -in $PublishTo)
     {
-        Write-Verbose 'Checking for previous releases to Azure DevOps'
-        $CurrentReleases = Find-Package `
-            -Name $ModuleName `
-            -Source $AzDoFeed `
-            -AllVersions `
-            -AllowPrereleaseVersions `
-            -ErrorAction SilentlyContinue # We don't care if this fails, we'll just assume there's no previous release
-        if ($CurrentReleases.Version -contains $Global:BuildVersion)
-        {
-            throw "There already appears to be a $Global:BuildVersion release!"
+        Write-Verbose 'Checking for previous releases to custom feeds'
+        $CustomNugetFeeds | ForEach-Object {
+            Write-Verbose "Checking for previous releases to $($_.Name)"
+            $CurrentReleases = Find-Package `
+                -Name $ModuleName `
+                -Source $_.Url `
+                -AllVersions `
+                -AllowPrereleaseVersions `
+                -ErrorAction SilentlyContinue # We don't care if this fails, we'll just assume there's no previous release
+            if ($CurrentReleases.Version -contains $Global:BuildVersion)
+            {
+                throw "There already appears to be a $Global:BuildVersion release!"
+            }
         }
     }
 }
