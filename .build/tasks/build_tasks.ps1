@@ -580,7 +580,7 @@ task CreateTemporaryNugetConfig UseWorkingCopy, CheckPublishingParameters, {
     Checks are performed only against the endpoints defined in $PublishTo so if a new endpoint is added or you want to
     publish to an endpoint that previously failed simply exclude the others.
 #>
-task CheckPreviousReleases SetVersion, CreateAzDoNugetConfig, {
+task CheckPreviousReleases SetVersion, CreateTemporaryNugetConfig, {
     Write-Build White 'Checking for previous releases'
     if ('GitHub' -in $PublishTo)
     {
