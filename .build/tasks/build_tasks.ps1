@@ -1315,7 +1315,7 @@ If you need to make any changes please do so on the $script:StagingBranchName br
     various endpoints.
     This is useful for testing the release process without actually releasing anything.
 #>
-task DryRun UseWorkingCopy, CheckPublishingParameters, CheckPreviousReleases, CompressModule, Tests, PackNuGetPackage, CheckForUncommittedChanges, {}
+task DryRun UseWorkingCopy, SetReleaseVariables, CheckPublishingParameters, CheckPreviousReleases, CompressModule, Tests, PackNuGetPackage, CheckForUncommittedChanges, {}
 
 <#
 .SYNOPSIS
