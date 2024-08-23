@@ -1133,18 +1133,50 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
         Write-Verbose 'PSGallery not targeted, skipping...'
     }
 
-    if ('AzDo' -in $PublishTo)
+    if ('CustomNugetFeeds' -in $PublishTo)
     {
-        Write-Build White 'Pushing to Azure DevOps'
-        <#
-            For AzDo we opt to push a nuget package we build ourselves as opposed to using PSResourceGet to publish the module (Publish-Module).
-            This is because PSResourceGet has no way of specifying a temporary configuration meaning we'd end up polluting the PSRepository object with the AzDo feed.
-            (It may already be present but we can't be sure, and this would be bad on a shared build server)
-            Whereas we can create a new nuget.config that contains the username and password for the private feed.
-            (see https://learn.microsoft.com/en-us/azure/devops/artifacts/nuget/dotnet-exe?view=azure-devops#publish-packages-from-external-sources)
-        #>
+        Write-Build White 'Pushing to custom NuGet feeds'
+        $CustomNugetFeeds | ForEach-Object {
+            if ($_.PublishAs -eq 'ModulePackage')
+            {
+                $PackagePath = $script:ModulePackagePath
+            }
+            else
+            {
+                $PackagePath = $script:nupkgPath
+            }
+            Write-Verbose "Pushing to custom NuGet feed $($_.Name)"
+            $NugetArguments = @(
+                'push',
+                '--source',
+                $_.Name,
+                '--api-key',
+                'AnyRandomString',
+                $PackagePath
+            )
+            # Rather stupidly `nuget push` doesn't support the `-configfile` parameter so we need to change into the directory
+            # where our nuget.config file is stored
+            # https://github.com/NuGet/Home/issues/4879
+            try
+            {
+                Push-Location
+                Set-Location $Global:BrownserveRepoBuildOutputDirectory
 
-        # Rather stupidly nuget push doesn't have a configfile parameter so we need to set the environment variable
+                & dotnet $NugetArguments
+                if ($LASTEXITCODE -ne 0)
+                {
+                    throw "Failed to push to custom NuGet feed $($_.Name)."
+                }
+            }
+            catch
+            {
+                throw "Failed to push to custom NuGet feed $($_.Name).`n$($_.Exception.Message)"
+            }
+            finally
+            {
+                Pop-Location
+            }
+        }
     }
     else
     {
