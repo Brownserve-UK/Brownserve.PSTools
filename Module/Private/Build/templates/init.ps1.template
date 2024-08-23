@@ -138,7 +138,23 @@ if ((Get-Module 'Brownserve.PSTools'))
 try
 {
     Write-Verbose 'Importing Brownserve.PSTools module'
-    Import-Module (Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Brownserve.PSTools' 'tools', 'Brownserve.PSTools.psd1') -Force -Verbose:$false
+    # Be clever with how we find the module, the location may be slightly different depending on various factors
+    $PSToolsPath = Get-ChildItem `
+        -Filter 'brownserve.pstools.psd1' `
+        -Recurse `
+        -Path (Join-Path $global:BrownserveRepoNugetPackagesDirectory 'Brownserve.PSTools') `
+        -ErrorAction 'Stop'
+    if ($PSToolsPath.Count -gt 1)
+    {
+        throw 'Found more than one instance of Brownserve.PSTools!'
+    }
+    if (!$PSToolsPath)
+    {
+        throw 'Couldn't find Brownserve.PSTools'
+    }
+    # Convert the path so we can be OS agnostic
+    $PSToolsPath = $PSToolsPath | Convert-Path
+    Import-Module $PSToolsPath -Force -Verbose:$false
 }
 catch
 {
@@ -151,7 +167,7 @@ catch
 ### End user defined _init steps
 
 # If we're not suppressing output then we'll pipe out a list of cmdlets that are now available to the user along with
-# Their synopsis. 
+# Their synopsis.
 if (!$SuppressOutput)
 {
     if ($Global:BrownserveCmdlets)
