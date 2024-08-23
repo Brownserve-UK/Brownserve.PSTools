@@ -215,7 +215,7 @@ task CheckPublishingParameters {
         }
     }
 
-    if ('AdditionalFeeds' -in $PublishTo)
+    if ('CustomNugetFeeds' -in $PublishTo)
     {
         if (!$CustomNugetFeeds)
         {
