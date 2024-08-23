@@ -1000,7 +1000,7 @@ task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, C
     {
         # We'll copy our build module to the nuget package however we'll keep the module in the root of the package so it can be installed directly
         Write-Build White "Copying built module to $script:ModulePackageDirectory"
-        Copy-Item $global:BrownserveBuiltModuleDirectory -Destination $script:ModulePackageDirectory -Recurse
+        Copy-Item $global:BrownserveBuiltModuleDirectory -Destination (Join-Path $script:ModulePackageDirectory 'Brownserve.PSTools') -Recurse
         Copy-Item $ItemsToCopy -Destination $script:ModulePackageDirectory -Force
         New-Item $Script:ModuleNuspecPath -Value $Nuspec -Force | Out-Null
         $script:ModuleNuspecPath = $script:ModuleNuspecPath | Convert-Path
