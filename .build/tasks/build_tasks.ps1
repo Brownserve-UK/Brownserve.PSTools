@@ -227,7 +227,7 @@ task CheckPublishingParameters {
                 throw 'CustomNugetFeeds must contain Name, Url, Credential and PublishAs'
             }
             # Custom feeds can either have the module packaged as a NuGet package or as a module package (more on this later)
-            if (($_.PublishAs -ne 'NugetPackage') -or ($_.PublishAs -ne 'ModulePackage'))
+            if (($_.PublishAs -ne 'NugetPackage') -and ($_.PublishAs -ne 'ModulePackage'))
             {
                 throw 'CustomNugetFeeds PublishAs must be either NugetPackage or ModulePackage'
             }
