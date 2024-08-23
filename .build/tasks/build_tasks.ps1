@@ -222,7 +222,7 @@ task CheckPublishingParameters {
             throw 'CustomNugetFeeds not provided'
         }
         $CustomNugetFeeds | ForEach-Object {
-            if ((-not $_.Name) -or - (not $_.Url) -or (-not $_.Credential) -or (-not $_.PublishAs))
+            if ((-not $_.Name) -or (-not $_.Url) -or (-not $_.Credential) -or (-not $_.PublishAs))
             {
                 throw 'CustomNugetFeeds must contain Name, Url, Credential and PublishAs'
             }
