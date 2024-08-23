@@ -1273,13 +1273,13 @@ If you need to make any changes please do so on the $script:StagingBranchName br
 
 <#
 .SYNOPSIS
-    Stops just short of actually pushing a release
+    Meta task that stops just short of actually pushing a release
 .DESCRIPTION
     This task will perform all the tasks required to release the module but will not actually push the release to the
     various endpoints.
     This is useful for testing the release process without actually releasing anything.
 #>
-task DryRun CheckPublishingParameters, CheckPreviousReleases, CompressModule, Tests, PackNuGetPackage, CheckForUncommittedChanges, {}
+task DryRun UseWorkingCopy, CheckPublishingParameters, CheckPreviousReleases, CompressModule, Tests, PackNuGetPackage, CheckForUncommittedChanges, {}
 
 <#
 .SYNOPSIS
