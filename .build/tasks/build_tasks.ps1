@@ -1042,7 +1042,7 @@ task PackNuGetPackage PrepareNuGetPackage, {
             }
             & $NugetCommand $NugetArguments
         }
-        $script:nupkgPath = Join-Path $script:NugetPackageDirectory "$ModuleName-$global:BuildVersion.nupkg" | Convert-Path
+        $script:nupkgPath = Join-Path $script:NugetPackageDirectory "$ModuleName.$global:BuildVersion.nupkg" | Convert-Path
     }
     else
     {
