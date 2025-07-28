@@ -13,12 +13,9 @@ function New-GitIgnoresFile
         [String]
         $ManualGitIgnores
     )
-    
     begin
     {
-        
     }
-    
     process
     {
         $IgnoresTemplate = "# This file is created by a tool, manual changes will be lost unless added to the designated section below.`n`n"
@@ -39,15 +36,18 @@ function New-GitIgnoresFile
         $IgnoresTemplate += @"
 ## Manually defined ignores: ##`n
 "@
-        if (($ManualGitIgnores) -and (!''))
+        if (($ManualGitIgnores) -and ($ManualGitIgnores -ne ''))
         {
             Write-Debug "Adding the following manual .gitignore items:`n$ManualGitIgnores"
             $IgnoresTemplate += $ManualGitIgnores
         }
     }
-    
     end
     {
+        <#
+            Ensure that the content is formatted correctly ready for output
+        #>
+        $IgnoresTemplate = $IgnoresTemplate | Format-BrownserveContent
         Return $IgnoresTemplate
     }
 }

@@ -9,18 +9,19 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
-Creates a new PowerShell module using the standard Brownserve format
+Creates a new PowerShell module in the standard Brownserve format
 
 ## SYNTAX
 
 ```text
-New-BrownservePowerShellModule [-Path] <String> [-ModuleName] <String> [[-ModuleGUID] <Guid>]
- [[-ModuleTags] <String[]>] [-Description] <String> [[-Customisations] <String>] [-Force] [<CommonParameters>]
+New-BrownservePowerShellModule [-ModuleName] <String> [[-Path] <String>] [[-Description] <String>]
+ [-Customisations <String>] [-RequirePowerShellVersion <String>] [-RequireBrownservePSTools <Boolean>]
+ [-IncludeBrownserveCmdletsLogic <Boolean>] [-Force] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
 
-This cmdlet creates a new custom PowerShell module using the standard format we use across our repos.
+This cmdlet will create a new PowerShell module in the standard Brownserve format. This includes the standard Brownserve header, and the Brownserve cmdlets logic. The module will be created in the specified path, with the specified name and description. The module will also include any customisations that you provide.
 
 ## EXAMPLES
 
@@ -40,7 +41,7 @@ This would create a new module in the C:\temp\TestModule folder called `TestModu
 
 ### -Customisations
 
-Any custom code you want to provide to the module, of course this can always be added later.
+Any custom code you want to provide to the module, this can always be added later after the module has been created.
 
 ```yaml
 Type: String
@@ -48,7 +49,7 @@ Parameter Sets: (All)
 Aliases: Customizations
 
 Required: False
-Position: 5
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -56,15 +57,15 @@ Accept wildcard characters: False
 
 ### -Description
 
-The description of the module, used to fill out the synopsis heading.
+The description of the module, used to fill out the description heading.
 
 ```yaml
 Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: 4
+Required: False
+Position: 2
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -86,17 +87,17 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ModuleGUID
+### -IncludeBrownserveCmdletsLogic
 
-The GUID to use for the module, if none provided one will be generated automatically
+If set to true will include the logic for exporting the list of cmdlets in the module to the `Global:BrownserveCmdlets` variable.
 
 ```yaml
-Type: Guid
+Type: Boolean
 Parameter Sets: (All)
 Aliases:
 
 Required: False
-Position: 2
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -112,23 +113,7 @@ Parameter Sets: (All)
 Aliases: name
 
 Required: True
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ModuleTags
-
-Optional set of tags to use for the module
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 3
+Position: 0
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -143,8 +128,40 @@ Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
-Position: 0
+Required: False
+Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -RequireBrownservePSTools
+
+If set to true this will add a requirement for the Brownserve.PSTools module.
+
+```yaml
+Type: Boolean
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -RequirePowerShellVersion
+
+If provided this will add a requirement for the specified version of PowerShell.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
@@ -152,7 +169,7 @@ Accept wildcard characters: False
 
 ### CommonParameters
 
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutBuffer, -OutVariable, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

@@ -3,29 +3,28 @@ function New-BrownservePowerShellModule
     [CmdletBinding()]
     param
     (
-        # The path where the PowerShell module should be created
-        [Parameter(Mandatory = $true)]
-        [string]
-        $Path,
-
         # The name of the module to be created
-        [Parameter(Mandatory = $true)]
+        [Parameter(
+            Mandatory = $true,
+            Position  = 0
+        )]
         [Alias('name')]
         [string]
         $ModuleName,
 
-        # The GUID for the module
-        [Parameter(Mandatory = $false)]
-        [guid]
-        $ModuleGUID = (New-Guid),
-
-        # The tags for this module
-        [Parameter(Mandatory = $false)]
-        [string[]]
-        $ModuleTags = @('Brownserve-UK'),
+        # The path where the PowerShell module should be created
+        [Parameter(
+            Mandatory = $false,
+            Position  = 1
+        )]
+        [string]
+        $Path = $PWD,
 
         # A description for the module
-        [Parameter(Mandatory = $true)]
+        [Parameter(
+            Mandatory = $false,
+            Position  = 2
+        )]
         [string]
         $Description,
 
@@ -35,22 +34,38 @@ function New-BrownservePowerShellModule
         [string]
         $Customisations,
 
+        # The required version of PowerShell for the module
+        [Parameter(Mandatory = $false)]
+        [string]
+        $RequirePowerShellVersion = '6.0',
+
+        # If set will require the Brownserve.PSTools module to be installed
+        [Parameter(Mandatory = $false)]
+        [bool]
+        $RequireBrownservePSTools = $true,
+
+        # If set will include the BrownserveCmdlets logic in the module
+        [Parameter(Mandatory = $false)]
+        [bool]
+        $IncludeBrownserveCmdletsLogic = $true,
+
         # Forces overwriting of files
         [Parameter(Mandatory = $false)]
         [switch]
         $Force
     )
-    
     begin
+    {
+    }
+    process
     {
         if ($ModuleName -match '\.psm1$')
         {
-            $ModuleName = $ModuleName -replace '\.psm1',''
+            $ModuleName = $ModuleName -replace '\.psm1', ''
         }
+        $ModulePath = Join-Path $Path "$ModuleName.psm1"
         try
         {
-            $ModulePath = Join-Path $Path "$ModuleName.psm1"
-            $ModuleInfoPath = Join-Path $Path 'ModuleInfo.json'
             Assert-Directory -Path $Path -ErrorAction 'Stop'
             if (Test-Path $ModulePath)
             {
@@ -60,7 +75,7 @@ function New-BrownservePowerShellModule
                 }
                 else
                 {
-                    Write-Warning 'current module will be overwritten entirely.'
+                    Write-Warning "Module '$ModulePath' will be overwritten entirely."
                 }
             }
         }
@@ -68,29 +83,26 @@ function New-BrownservePowerShellModule
         {
             throw $_.Exception.Message
         }
-    }
-    
-    process
-    {
-        # Create the JSON we'll use to store the module info
-        $ModuleInfo = [ordered]@{
-            name = $ModuleName
-            description = $Description
-            guid = $ModuleGUID
-            tags = $ModuleTags
-        } | ConvertTo-Json
-        $Params = @{}
+        $ModuleParams = @{
+            RequireBrownservePSTools      = $RequireBrownservePSTools
+            IncludeBrownserveCmdletsLogic = $IncludeBrownserveCmdletsLogic
+        }
         if ($Description)
         {
-            $Params.Add('Description', $Description)
+            $ModuleParams.Add('Description', $Description)
         }
         if ($Customisations)
         {
-            $Params.Add('Customisations', $Customisations)
+            $ModuleParams.Add('Customisations', $Customisations)
+        }
+        if ($RequirePowerShellVersion)
+        {
+            $ModuleParams.Add('RequirePowerShellVersion', $RequirePowerShellVersion)
         }
         try
         {
-            $ModuleTemplate = New-BrownservePoShModuleFromTemplate @Params -ErrorAction 'Stop'
+            $ModuleTemplate = New-BrownservePoShModuleFromTemplate @ModuleParams -ErrorAction 'Stop'
+            $ModuleContent = $ModuleTemplate | Format-BrownserveContent -ErrorAction 'Stop'
         }
         catch
         {
@@ -99,19 +111,12 @@ function New-BrownservePowerShellModule
 
         try
         {
-            New-Item $ModulePath -Value $ModuleTemplate -ItemType File -ErrorAction 'Stop' -Force:$Force
+            New-Item $ModulePath -ItemType File -ErrorAction 'Stop' -Force:$Force
+            $ModuleContent | Set-BrownserveContent -Path $ModulePath -ErrorAction 'Stop'
         }
         catch
         {
             throw "Failed to create new module.`n$($_.Exception.Message)"
-        }
-        try
-        {
-            New-Item $ModuleInfoPath -Value $ModuleInfo -ItemType File -ErrorAction 'Stop' -Force:$Force
-        }
-        catch
-        {
-            throw "Failed to create the ModuleInfo file.`n$($_.Exception.Message)"
         }
 
         try
@@ -120,27 +125,20 @@ function New-BrownservePowerShellModule
             $PublicPath = (Join-Path $Path 'Public')
             if (!(Test-Path $PublicPath))
             {
-                New-Item $PublicPath -ItemType Directory -ErrorAction 'Stop'
+                New-Item $PublicPath -ItemType Directory -ErrorAction 'Stop' | Out-Null
             }
             $PrivatePath = (Join-Path $Path 'Private')
             if (!(Test-Path $PrivatePath))
             {
-                New-Item $PrivatePath -ItemType Directory -ErrorAction 'Stop'
+                New-Item $PrivatePath -ItemType Directory -ErrorAction 'Stop' | Out-Null
             }
         }
         catch
         {
-            throw "Failed to created module public/private directories.`n$($_.Exception.Message)"
+            throw "Failed to create module public/private directories.`n$($_.Exception.Message)"
         }
     }
-    
     end
     {
-        return [BrownservePowerShellModule]@{
-            Name = $ModuleName
-            Description = $Description
-            GUID = $ModuleGUID
-            Tags = $ModuleTags
-        }
     }
 }

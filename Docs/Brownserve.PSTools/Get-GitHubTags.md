@@ -14,7 +14,8 @@ Gets a list of tags for a given GitHub repository
 ## SYNTAX
 
 ```text
-Get-GitHubTags [-RepositoryName] <String> [-RepositoryOwner] <String> -Token <String> [<CommonParameters>]
+Get-GitHubTags [-RepositoryName] <String> [-RepositoryOwner] <String> -Token <String>
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -83,7 +84,7 @@ Accept wildcard characters: False
 
 ### CommonParameters
 
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutBuffer, -OutVariable, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

@@ -29,27 +29,23 @@ function Update-PlatyPSModulePageHelpVersion
             Position = 1
         )]
         [ValidateNotNullOrEmpty()]
-        [string]
-        $ModulePagePath
+        [BrownserveContent]
+        $ModulePageContent
     )
     begin
     {
     }
     process
     {
-        $ModulePageContent = Get-Content $ModulePagePath -ErrorAction 'Stop' -Raw
-        if (!$ModulePageContent)
-        {
-            throw 'Module page content is empty'
-        }
+        $ModulePageContentString = $ModulePageContent.ToString()
         $NewHelpVersion = $HelpVersion.ToString()
-        if ($ModulePageContent -imatch 'Help Version: (?<version>.*)\n')
+        if ($ModulePageContentString -imatch 'Help Version: (?<version>.*)\n')
         {
             $CurrentHelpVersion = $Matches['version']
             if ($NewHelpVersion -ne $CurrentHelpVersion)
             {
                 Write-Verbose 'Updating help version'
-                $NewModulePageContent = $ModulePageContent.Replace("Help Version: $CurrentHelpVersion", "Help Version: $NewHelpVersion")
+                $NewModulePageContent = $ModulePageContentString.Replace("Help Version: $CurrentHelpVersion", "Help Version: $NewHelpVersion")
             }
         }
         else
@@ -57,18 +53,9 @@ function Update-PlatyPSModulePageHelpVersion
             throw 'Failed to find help version in module page'
         }
 
-        try
-        {
-            Set-Content `
-                -Path $ModulePagePath `
-                -Value $NewModulePageContent `
-                -NoNewline `
-                -ErrorAction 'Stop'
-        }
-        catch
-        {
-            throw "Failed to update module page.`n$($_.Exception.Message))"
-        }
+        $ModulePageContent.Content = $NewModulePageContent | Format-BrownserveContent | Select-Object -ExpandProperty Content
+
+        return $ModulePageContent
     }
     end
     {

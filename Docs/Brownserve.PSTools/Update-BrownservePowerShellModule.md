@@ -14,8 +14,8 @@ Updates a given Brownserve PowerShell module to use the latest template.
 ## SYNTAX
 
 ```text
-Update-BrownservePowerShellModule [-Path] <String> [[-Description] <String>] [[-Customisations] <String>]
- [-Force] [<CommonParameters>]
+Update-BrownservePowerShellModule [-Path] <String> [-Force]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -34,41 +34,9 @@ This would update the module at the given path.
 
 ## PARAMETERS
 
-### -Customisations
-
-A string containing any custom code you want to add to the module, if the existing module already contains customisations an error will be raised.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases: Customizations
-
-Required: False
-Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Description
-
-An option synopsis for the module, if one is already present in the module an error will be raised.
-
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -Force
 
-Forcefully overwrite any customisations or description that already exist in the module.
+Forcefully overwrite the module even if no changes are detected or if the customisations would be lost.
 
 ```yaml
 Type: SwitchParameter
@@ -100,7 +68,7 @@ Accept wildcard characters: False
 
 ### CommonParameters
 
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutBuffer, -OutVariable, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

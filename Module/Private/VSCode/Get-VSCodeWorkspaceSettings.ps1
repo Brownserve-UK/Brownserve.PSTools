@@ -8,12 +8,9 @@ function Get-VSCodeWorkspaceSettings
         [string]
         $WorkspacePath
     )
-    
     begin
     {
-        
     }
-    
     process
     {
         Assert-Directory $WorkspacePath -ErrorAction 'stop'
@@ -22,6 +19,7 @@ function Get-VSCodeWorkspaceSettings
 
         if (Test-Path $RepoVSCodeSettingsPath)
         {
+            Write-Verbose "Getting VSCode settings from '$RepoVSCodeSettingsPath'."
             try
             {
                 $CurrentSettings = Get-Content $RepoVSCodeSettingsPath -Raw | ConvertFrom-Json -AsHashtable
@@ -43,7 +41,6 @@ function Get-VSCodeWorkspaceSettings
             $CurrentSettings = $null
         }
     }
-    
     end
     {
         if ($CurrentSettings)

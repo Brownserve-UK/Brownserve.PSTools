@@ -89,6 +89,7 @@ root = true`n`n
     {
         if ($Return -ne $Header)
         {
+            $Return = $Return | Format-BrownserveContent
             Return $Return
         }
         else

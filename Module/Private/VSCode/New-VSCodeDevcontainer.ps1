@@ -22,7 +22,6 @@ function New-VSCodeDevcontainer
         [string[]]
         $RequiredExtensions
     )
-        
     # Make sure the snippet path is valid
     if (!(Test-Path $DevcontainerTemplateDirectory))
     {
@@ -31,7 +30,9 @@ function New-VSCodeDevcontainer
 
     try
     {
-        $DockerfileContent = Get-Content (Join-Path $DevcontainerTemplateDirectory $Dockerfile) -Raw -ErrorAction 'Stop'
+        $DockerfileContent = Get-BrownserveContent `
+            -Path (Join-Path $DevcontainerTemplateDirectory $Dockerfile) `
+            -ErrorAction 'Stop'
     }
     catch
     {
@@ -42,16 +43,16 @@ function New-VSCodeDevcontainer
     {
         $DevcontainerObject = [ordered]@{
             name = 'Ubuntu'
-            build = @{
-                dockerfile = "Dockerfile"
+            build = [ordered]@{
                 args = @{
                     VARIANT = 'focal'
                 }
+                dockerfile = "Dockerfile"
             }
-            customizations = @{
-                vscode = @{
-                    settings = @{}
+            customizations = [ordered]@{
+                vscode = [ordered]@{
                     extensions = @()
+                    settings = [ordered]@{}
                 }
             }
             remoteUser = 'vscode'
@@ -64,7 +65,7 @@ function New-VSCodeDevcontainer
 
         # TODO: Set default shell: https://stackoverflow.com/a/70796646/10843454
 
-        $DevcontainerJSON = $DevcontainerObject | ConvertTo-Json -Depth 100
+        $DevcontainerJSON = $DevcontainerObject | ConvertTo-Json -Depth 100 | Format-BrownserveContent
     }
     catch
     {
@@ -75,5 +76,4 @@ function New-VSCodeDevcontainer
         devcontainer = $DevcontainerJSON
         Dockerfile = $DockerfileContent
     }
-    
 }

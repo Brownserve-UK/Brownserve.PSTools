@@ -45,6 +45,7 @@ param
         'BuildAndTest',
         'BuildTestAndCheck',
         'StageRelease',
+        'DryRun',
         'Release'
     )]
     [AllowEmptyString()]
@@ -72,10 +73,12 @@ param
     [string]
     $ReleaseNotice,
 
-    # Where the module should be published to
+    # The various places to publish to
     [Parameter(
-        Mandatory = $false
+        Mandatory = $False
     )]
+    [ValidateNotNullOrEmpty()]
+    [ValidateSet('nuget', 'PSGallery', 'GitHub', 'CustomNugetFeeds')]
     [string[]]
     $PublishTo,
 
@@ -125,6 +128,13 @@ param
     )]
     [string]
     $PSGalleryAPIKey,
+
+    # Any custom/private NuGet feeds to publish to
+    [Parameter(
+        Mandatory = $False
+    )]
+    [hashtable[]]
+    $CustomNugetFeeds,
 
     # If set will load the working copy of the module at the start of the build
     [Parameter(
@@ -222,6 +232,10 @@ try
     if ($GitHubReleaseToken)
     {
         $BuildParams.Add('GitHubReleaseToken', $GitHubReleaseToken)
+    }
+    if ($CustomNugetFeeds)
+    {
+        $BuildParams.Add('CustomNugetFeeds', $CustomNugetFeeds)
     }
     if ($PublishTo)
     {

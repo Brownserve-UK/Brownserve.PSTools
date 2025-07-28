@@ -28,34 +28,21 @@ function Update-PlatyPSModulePageGUID
             Position = 1
         )]
         [ValidateNotNullOrEmpty()]
-        [string]
-        $ModulePagePath
+        [BrownserveContent]
+        $ModulePageContent
     )
     begin
     {
     }
     process
     {
-        $ModulePageContent = Get-Content $ModulePagePath -ErrorAction 'Stop' -Raw
-        if (!$ModulePageContent)
-        {
-            throw 'Module page content is empty'
-        }
+        $ModulePageContentString = $ModulePageContent.ToString()
         $NewModuleGUID = $ModuleGUID.ToString()
-        $NewModulePageContent = $ModulePageContent -replace 'Module Guid: ([\w|\d|-]*)', "Module Guid: $NewModuleGUID"
+        $NewModulePageContent = $ModulePageContentString -replace 'Module Guid: ([\w|\d|-]*)', "Module Guid: $NewModuleGUID"
 
-        try
-        {
-            Set-Content `
-                -Path $ModulePagePath `
-                -Value $NewModulePageContent `
-                -NoNewline `
-                -ErrorAction 'Stop'
-        }
-        catch
-        {
-            throw "Failed to update module page GUID.`n$($_.Exception.Message)"
-        }
+        $ModulePageContent.Content = $NewModulePageContent | Format-BrownserveContent | Select-Object -ExpandProperty Content
+
+        return $ModulePageContent
     }
     end
     {

@@ -43,10 +43,16 @@ function Build-ModuleDocumentation
     )
     begin
     {
+        $FilesToWrite = @()
         # Ensure the documentation directory is indeed a dir
         Assert-Directory $DocumentationPath -ErrorAction 'Stop'
 
-        # First we check if the module is already loaded
+        <#
+            Check if the module is already loaded, this is important as if we load the module then we should
+            unload it at the end of the cmdlet.
+            This is due to incompatibilities between platyPS and powershell-yaml.
+            https://github.com/PowerShell/platyPS/issues/592
+        #>
         $PreloadedPlatyPS = Import-PlatyPSModule -ErrorAction 'Stop'
 
         $Return = @()
@@ -168,26 +174,35 @@ function Build-ModuleDocumentation
                 $ErrorStep = 'Failed to update module documentation'
                 Update-MarkdownHelpModule @UpdateDocsParams -ErrorAction 'Stop' -WarningAction 'SilentlyContinue' | Out-Null
             }
-
             <#
-                Deal with the module page which has some quirks that we need to work around.
-                These were originally part of this cmdlet but have been moved to their own cmdlets to make it easier to
-                update the module page without having to rebuild the help for the module.
-                Especially useful during CI/CD pipelines.
+                Here be dragons.
+                As awesome as platyPS is, it has quite a few quirks that we need to work around.
+                (at least until the rewrite is done and v2 is released)
+                See the notes below and the individual cmdlets for more information on what we're doing here.
             #>
 
+            <#
+                First up - deal with the module page which needs a bit of molding to get it into shape.
+                We've split this out into a separate cmdlet as it's a bit of a beast and we want to keep things
+                easy to read and maintain.
+            #>
+
+            # To save having a bunch of calls to get/set content we'll just get it once and pass it around to be
+            # modified as needed.
+            $ModulePageContent = Get-BrownserveContent -Path $ModulePagePath -ErrorAction 'Stop'
+
             # First ensure the links are correct
-            Update-PlatyPSModulePageLinks `
+            $ModulePageContent = Update-PlatyPSModulePageLinks `
                 -CmdletDocumentationPath $PublicCmdletDocPath `
-                -ModulePagePath $ModulePagePath `
+                -ModulePageContent $ModulePageContent `
                 -ErrorAction 'Stop'
 
             # If we've passed in a GUID for the module then update the module page with that.
             if ($ModuleGUID)
             {
-                Update-PlatyPSModulePageGUID `
+                $ModulePageContent = Update-PlatyPSModulePageGUID `
                     -ModuleGUID $ModuleGUID `
-                    -ModulePagePath $ModulePagePath `
+                    -ModulePageContent $ModulePageContent `
                     -ErrorAction 'Stop'
             }
             <#
@@ -197,57 +212,88 @@ function Build-ModuleDocumentation
             #>
             if ($HelpVersion)
             {
-                Update-PlatyPSModulePageHelpVersion `
+                $ModulePageContent = Update-PlatyPSModulePageHelpVersion `
                     -HelpVersion $HelpVersion `
-                    -ModulePagePath $ModulePagePath `
+                    -ModulePageContent $ModulePageContent `
                     -ErrorAction 'Stop'
             }
 
             # If we've passed in a module description then update the module page with that.
             if ($ModuleDescription)
             {
-                Update-PlatyPSModulePageDescription `
+                $ModulePageContent = Update-PlatyPSModulePageDescription `
                     -ModuleDescription $ModuleDescription `
-                    -ModulePagePath $ModulePagePath `
+                    -ModulePageContent $ModulePageContent `
                     -ErrorAction 'Stop'
             }
 
-            # Get the documentation paths
+            $ErrorStep = 'Failed to format module page content.'
+
+            <#
+                PlatyPS tends to format the markdown files incorrectly and breaks Markdownlint,
+                We've got a rudimentary formatter that we can use to fix things up.
+                We then pipe it through Format-BrownserveContent to ensure we maintain line endings and the correct use
+                of whitespace.
+            #>
+            $FormattedModulePageMarkdown = Format-Markdown `
+                -Markdown $ModulePageContent.Content `
+                -ErrorAction 'Stop' |
+                    Format-BrownserveContent |
+                        Select-Object -ExpandProperty Content
+            $ModulePageContent.Content = $FormattedModulePageMarkdown
+
+            $FilesToWrite += $ModulePageContent
+
+            $ErrorStep = 'Failed to process cmdlet documentation.'
+
+            # Get the paths to all the markdown files in the public cmdlet directory
             $MarkdownDocs = Get-ChildItem `
                 -Path $PublicCmdletDocPath `
                 -Filter '*.md' `
                 -Recurse `
                 -ErrorAction 'Stop' | Select-Object -ExpandProperty FullName
 
-            $ModulePage = Get-Item $ModulePagePath -ErrorAction 'Stop' | Select-Object -ExpandProperty FullName
-
             <#
-                PlatyPS doesn't format the markdown files correctly and breaks Markdownlint, it's also inconsistent with whitespace on Linux and Windows
-                So we'll run them through a formatter to fix them up.
-                This helps to keep the markdown files consistent so they don't pollute the git history and makes it easier to read.
+                Now we need to fix the documentation for each cmdlet.
             #>
-            $ErrorStep = 'Failed to format markdown files.'
+            $ErrorStep = 'Failed to format cmdlet documentation.'
+
             $MarkdownDocs | ForEach-Object {
-                $Path = $_
-                $FormattedMarkdown = Format-Markdown `
-                    -Path $Path `
-                    -ErrorAction 'Stop'
-                Set-Content -Path $Path -Value $FormattedMarkdown -ErrorAction 'Stop'
+                $CmdletMarkdownContent = Get-BrownserveContent -Path $_ -ErrorAction 'Stop'
+
                 <#
-                    PowerShell seems to insist on doing inconsistent things with line endings when running on different OSes.
-                    This results in constant line ending change diffs in git which no amount of gitattributes seems to fix.
-                    Therefore we'll just force the line endings to be LF.
+                    Due to this issue: https://github.com/PowerShell/platyPS/issues/595
+                    We need to remove the "-ProgressAction" common parameter from the each cmdlets documentation and
+                    add it to the list of common parameters at the end of the documentation.
                 #>
-                Set-LineEndings -Path $Path -LineEnding 'LF' -ErrorAction 'Stop'
+                $CmdletMarkdownContent = Remove-PlatyPSCommonParameter `
+                    -Content $CmdletMarkdownContent `
+                    -ErrorAction 'Stop'
+                $CmdletMarkdownContent = Add-PlatyPSCommonParameter `
+                    -Content $CmdletMarkdownContent `
+                    -ErrorAction 'Stop'
+
+                <#
+                    Fix the formatting of the markdown content.
+                #>
+                $FormattedCmdletMarkdown = Format-Markdown `
+                    -Markdown $CmdletMarkdownContent.Content `
+                    -ErrorAction 'Stop' |
+                        Format-BrownserveContent |
+                            Select-Object -ExpandProperty Content
+
+                $CmdletMarkdownContent.Content = $FormattedCmdletMarkdown
+                $FilesToWrite += $CmdletMarkdownContent
             }
 
-            # Do the same for the module page
-            $ErrorStep = 'Failed to format module page.'
-            $FormattedModulePage = Format-Markdown `
-                -Path $ModulePage `
-                -ErrorAction 'Stop'
-            Set-Content -Path $ModulePage -Value $FormattedModulePage -ErrorAction 'Stop'
-            Set-LineEndings -Path $ModulePage -LineEnding 'LF' -ErrorAction 'Stop'
+            if ($FilesToWrite)
+            {
+                <#
+                    Write the files to disk and ensure they have LF line endings.
+                #>
+                $ErrorStep = 'Failed to write documentation files.'
+                $FilesToWrite | Set-BrownserveContent -ErrorAction 'Stop' -LineEnding 'LF'
+            }
 
             # Create some sensible return so that we can pipe it into a cmdlet to update the MALM
             $Return += [pscustomobject]@{
@@ -268,7 +314,7 @@ function Build-ModuleDocumentation
         }
         finally
         {
-            <# 
+            <#
                 If we've loaded platyPS as part of this cmdlet then chances are we're going to want to un-load it
                 This is due to https://github.com/PowerShell/platyPS/issues/592 and the fact we make use of powershell-yaml in places too
             #>
@@ -281,9 +327,8 @@ function Build-ModuleDocumentation
                     Write-Error 'Failed to unload platyPS module.'
                 }
             }
-        }  
+        }
     }
-    
     end
     {
         if ($Return -ne @())

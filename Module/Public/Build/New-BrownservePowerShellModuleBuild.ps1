@@ -23,7 +23,6 @@ function New-BrownservePowerShellModuleBuild
         [string]
         $RepoName
     )
-    
     begin
     {
         try
@@ -45,7 +44,6 @@ function New-BrownservePowerShellModuleBuild
             throw "Cannot determine RepoName automatically."
         }
     }
-    
     process
     {
         switch ($CICDProvider)
@@ -56,15 +54,9 @@ function New-BrownservePowerShellModuleBuild
                 $WorkflowDirectory = Join-Path $GitHubDirectory 'workflows'
                 $BuildWorkflowPath = Join-Path $WorkflowDirectory 'build.yaml'
                 $ReleaseWorkflowPath = Join-Path $WorkflowDirectory 'release.yaml'
+                $FilesToCheck = @( $BuildWorkflowPath, $ReleaseWorkflowPath)
 
-                if ((Test-Path $BuildWorkflowPath))
-                {
-                    throw "Build workflow already exists at '$BuildWorkflowPath'"
-                }
-                if ((Test-Path $ReleaseWorkflowPath))
-                {
-                    throw "Build workflow already exists at '$ReleaseWorkflowPath'"
-                }
+                $FilesToCheck | Assert-PathDoesNotExist
 
                 # These steps are always needed regardless of the build
                 $DefaultSteps = @(
@@ -77,51 +69,81 @@ function New-BrownservePowerShellModuleBuild
                     }
                 )
 
+                # This command is used to run the module build script, we build up the params separately and splat them in
+                $RunCommand = "./$($ModuleInfo.Name)/.build/build.ps1 @Params"
+
+                # Params for building/testing the module
+                $BuildTestParams = @"
+`$Params = @{
+    BranchName = `$env:GITHUB_REF
+    GitHubRepoName = '$RepoName'
+    Build = 'BuildTestAndCheck'
+    Verbose = `$true
+}
+"@
                 # Steps for building and testing the module
-                $BuildRunCommand = @"
-./$($ModuleInfo.Name)/.build/build.ps1 ``
--GitHubRepoName '$RepoName' ``
--BranchName `$env:GITHUB_REF ``
--Build BuildPackTest ``
--Verbose
+                $StageReleaseParams = @"
+`$Params = @{
+    BranchName = `$env:GITHUB_REF
+    GitHubRepoName = '$RepoName'
+    Build = 'StageRelease'
+    GitHubStageReleaseToken = `$env:GitHubPAT
+    ReleaseType = '`${{inputs.release_type}}'
+    UseWorkingCopy = `$true
+    Verbose = `$true
+    }
+    if (`$env:ReleaseNotice)
+    {
+        `$Params.Add('ReleaseNotice', `$env:ReleaseNotice)
+    }
+"@
+            $ReleaseParams = @"
+`$Params = @{
+    BranchName = `$env:GITHUB_REF
+    GitHubRepoName = '$RepoName'
+    Build = 'Release'
+    GitHubReleaseToken = `$env:GitHubPAT
+    NugetFeedAPIKey = `$env:NugetFeedAPIKey
+    PSGalleryAPIKey = `$env:PSGalleryAPIKey
+    PublishTo = `${{ inputs.publish_to }}
+    Verbose = `$true
+}
 "@
                 $BuildSteps = $DefaultSteps
                 $BuildSteps += [ordered]@{
-                    name  = 'build-and-test-module'
+                    name  = 'run-build-script'
                     shell = 'pwsh'
-                    run   = $BuildRunCommand
+                    run   = $BuildTestParams + "`n" + $RunCommand
                 }
 
                 $BuildJobs = @{
-                    JobTitle = 'build-and-test'
+                    JobTitle = 'BuildTestAndCheck'
                     RunsOn   = 'ubuntu-latest'
                     Steps    = $BuildSteps
                 }
 
-                # Steps for releasing the module
-                $ReleaseRunCommand = @"
-./$($ModuleInfo.Name)/.build/build.ps1 ``
--GitHubRepoName '$RepoName' ``
--BranchName `$env:GITHUB_REF ``
--Build release ``
--NugetFeedAPIKey `$env:NugetFeedAPIKey ``
--PSGalleryAPIKey `$env:PSGalleryAPIKey ``
--Verbose
-"@
+                $StageReleaseSteps = $DefaultSteps
+                # We need to fetch the full history so that we can determine the changelog entries from the previous release
+                $StageReleaseSteps[0].with.Add('fetch-depth', 0)
+                $StageReleaseSteps += [ordered]@{
+                    name  = 'stage-release'
+                    shell = 'pwsh'
+                    run   = $StageReleaseParams + "`n" + $RunCommand
+                }
 
                 $ReleaseSteps = $DefaultSteps
                 $ReleaseSteps += [ordered]@{
                     name  = 'build-and-release-module'
                     shell = 'pwsh'
-                    run   = $ReleaseRunCommand
+                    run   = $ReleaseParams + "`n" + $RunCommand
                 }
-                
+
                 $ReleaseJobs = @{
                     JobTitle = 'release'
                     RunsOn   = 'ubuntu-latest'
                     Steps    = $ReleaseSteps
                 }
-                
+
                 try
                 {
                     $BuildWorkflowContent = New-GitHubActionsWorkflow `
@@ -131,6 +153,14 @@ function New-BrownservePowerShellModuleBuild
                     if (!$BuildWorkflowContent)
                     {
                         throw 'Workflow content empty.'
+                    }
+                    $StageReleaseWorkflowContent = New-GitHubActionsWorkflow `
+                        -Name 'stage-release' `
+                        -ExecuteOn 'workflow_dispatch' `
+                        -Jobs $StageReleaseJobs
+                    if (!$StageReleaseWorkflowContent)
+                    {
+                        throw 'Workflow content empty'
                     }
                     $ReleaseWorkflowContent = New-GitHubActionsWorkflow `
                         -Name 'release' `
@@ -146,6 +176,7 @@ function New-BrownservePowerShellModuleBuild
                     throw "Failed to create GitHub Actions workflow.`n$($_.Exception.Message)"
                 }
                 Write-Verbose "Build workflow content:`n$BuildWorkflowContent"
+                Write-Verbose "Stage release workflow content:`n$StageReleaseWorkflowContent"
                 Write-Verbose "Release workflow content:`n$ReleaseWorkflowContent"
                 try
                 {
@@ -158,6 +189,7 @@ function New-BrownservePowerShellModuleBuild
                         New-Item $WorkflowDirectory -ItemType Directory -ErrorAction 'stop' | Out-Null
                     }
                     New-Item $BuildWorkflowPath -ItemType File -Value $BuildWorkflowContent -ErrorAction 'Stop' | Out-Null
+                    New-Item $StageReleaseWorkflowPath -ItemType File -Value $StageReleaseWorkflowContent -ErrorAction 'Stop' | Out-Null
                     New-Item $ReleaseWorkflowPath -ItemType File -Value $ReleaseWorkflowContent -ErrorAction 'Stop' | Out-Null
                 }
                 catch
@@ -171,9 +203,7 @@ function New-BrownservePowerShellModuleBuild
             }
         }
     }
-    
     end
     {
-       
     }
 }

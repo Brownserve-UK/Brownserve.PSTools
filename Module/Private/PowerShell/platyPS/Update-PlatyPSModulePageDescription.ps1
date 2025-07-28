@@ -28,39 +28,30 @@ function Update-PlatyPSModulePageDescription
             Position = 1
         )]
         [ValidateNotNullOrEmpty()]
-        [string]
-        $ModulePagePath
+        [BrownserveContent]
+        $ModulePageContent
     )
     begin
     {
     }
     process
     {
-        $ModulePageContent = Get-Content $ModulePagePath -ErrorAction 'Stop' -Raw
-        if (!$ModulePageContent)
-        {
-            throw 'Module page content is empty'
-        }
-        if ($ModulePageContent -imatch '## Description[\s\n]*{{ Fill in the Description }}')
+        $ModulePageContentString = $ModulePageContent.ToString()
+
+        # We don't yet support automatically updating the module description in the module page.
+        # only setting it if it's not already set.
+        if ($ModulePageContentString -imatch '## Description[\s\n]*{{ Fill in the Description }}')
         {
             # .Replace method doesn't work 🤷‍♀️ so use the -replace param instead.
-            $NewModulePageContent = $ModulePageContent -Replace '## Description[\s\n]*{{ Fill in the Description }}', "## Description`r`n$ModuleDescription"
-            try
-            {
-                Set-Content `
-                    -Path $ModulePagePath `
-                    -Value $NewModulePageContent `
-                    -NoNewline `
-                    -ErrorAction 'Stop'
-            }
-            catch
-            {
-                throw "Failed to update module page description.`n$($_.Exception.Message)"
-            }
+            $NewModulePageContent = $ModulePageContentString -Replace '## Description[\s\n]*{{ Fill in the Description }}', "## Description`n`n$ModuleDescription"
+            $ModulePageContent.Content = $NewModulePageContent | Format-BrownserveContent | Select-Object -ExpandProperty Content
+
+            return $ModulePageContent
         }
         else
         {
             Write-Verbose 'Module page description already set'
+            return $ModulePageContent
         }
     }
     end

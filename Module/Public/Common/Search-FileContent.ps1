@@ -26,7 +26,7 @@ function Search-FileContent
     
     begin
     {
-        
+        Write-Warning "This cmdlet is deprecated, please use Select-BrownserveContent instead."
     }
     
     process

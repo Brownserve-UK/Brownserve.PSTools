@@ -24,7 +24,8 @@ Send-SlackNotification [-Message] <String> [-Webhook] <String> [[-Channel] <Stri
 
 ```text
 Send-SlackNotification [-Message] <String> [-Webhook] <String> [[-Channel] <String>] [-Colour <String>]
- [-Title <String>] [-UpperBlocks <Array>] [-SubBlocks <Array>] [-Fields <Array>] [<CommonParameters>]
+ [-Title <String>] [-UpperBlocks <Array>] [-SubBlocks <Array>] [-Fields <Array>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -212,7 +213,7 @@ Accept wildcard characters: False
 
 ### CommonParameters
 
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutBuffer, -OutVariable, -PipelineVariable, -ProgressAction, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
 ## INPUTS
 

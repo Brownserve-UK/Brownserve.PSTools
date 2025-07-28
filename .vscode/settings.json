@@ -9,6 +9,7 @@
     "CICD",
     "Cmdlets",
     "commitish",
+    "configfile",
     "dedupe",
     "devcontainer",
     "Dont",
@@ -37,6 +38,7 @@
     "teamcity",
     "Teamcity",
     "TMPDIR",
+    "toplevel",
     "wontfix",
     "yzhang"
   ],
