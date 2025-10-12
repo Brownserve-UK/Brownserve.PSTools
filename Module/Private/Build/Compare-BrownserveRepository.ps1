@@ -82,6 +82,14 @@ function Compare-BrownserveRepository
             $RequiredTools = @('dotnet')
             Write-Verbose 'Checking for required tooling'
             Assert-Command $RequiredTools
+
+            # Just having dotnet isn't enough, we need to ensure at least one SDK is installed
+            # Otherwise `dotnet new` won't work
+            $DotNetSDKs = & dotnet --list-sdks
+            if (-not $DotNetSDKs)
+            {
+                throw "No .NET SDKs are installed. Please install a .NET SDK to continue."
+            }
         }
         catch
         {
