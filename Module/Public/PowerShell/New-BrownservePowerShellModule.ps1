@@ -44,6 +44,11 @@ function New-BrownservePowerShellModule
         [bool]
         $RequireBrownservePSTools = $true,
 
+        # If set will include the temporary location logic in the module
+        [Parameter(Mandatory = $false)]
+        [bool]
+        $IncludeTemporaryLocationLogic = $true,
+
         # If set will include the BrownserveCmdlets logic in the module
         [Parameter(Mandatory = $false)]
         [bool]
@@ -98,6 +103,10 @@ function New-BrownservePowerShellModule
         if ($RequirePowerShellVersion)
         {
             $ModuleParams.Add('RequirePowerShellVersion', $RequirePowerShellVersion)
+        }
+        if ($IncludeTemporaryLocationLogic)
+        {
+            $ModuleParams.Add('IncludeTempLocationLogic', $IncludeTemporaryLocationLogic)
         }
         try
         {
