@@ -25,7 +25,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: Brownserve.PSTools
-      # Step 3: Run the build script
+      # Step 3: Install Mono (required to run NuGet.exe on Linux)
+      - name: install-mono
+        run: sudo apt-get install -y mono-complete
+      # Step 4: Run the build script
       - name: run-build-script
         shell: pwsh
         env:

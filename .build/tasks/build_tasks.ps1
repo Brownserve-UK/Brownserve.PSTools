@@ -172,7 +172,12 @@ if ($DefaultBranch -eq $BranchName)
     $PreRelease = $false
 }
 
+# On non-windows platforms mono is required to run NuGet 🤢
 $NugetCommand = 'nuget'
+if (-not $isWindows)
+{
+    $NugetCommand = 'mono'
+}
 
 # BuildTask is a variable that is set by Invoke-Build to indicate the build task that has been called
 # it might be useful to have specific logic for certain tasks
@@ -1038,14 +1043,23 @@ task PackNuGetPackage PrepareNuGetPackage, {
     {
         Write-Build White 'Packing module as standard NuGet package'
         exec {
-            if ($isWindows)
+            # Note: the paths must be a separate index to the switch in the array
+            $NugetArguments = @(
+                'pack',
+                "$script:NuspecPath",
+                '-NoPackageAnalysis',
+                '-Version',
+                "$Global:BuildVersion",
+                '-OutputDirectory',
+                "$script:NugetPackageDirectory"
+            )
+            # On *nix we need to use mono to invoke nuget, so fudge the arguments a bit
+            if (-not $isWindows)
             {
-                & $NugetCommand pack "$script:NuspecPath" -NoPackageAnalysis -Version "$Global:BuildVersion" -OutputDirectory "$script:NugetPackageDirectory"
+                # Mono won't have access to our NuGet PowerShell alias, so set the path using our env var
+                $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
             }
-            else
-            {
-                & dotnet nuget pack "$script:NuspecPath" --output "$script:NugetPackageDirectory"
-            }
+            & $NugetCommand $NugetArguments
         }
         $script:nupkgPath = Join-Path $script:NugetPackageDirectory "$ModuleName.$global:BuildVersion.nupkg" | Convert-Path
     }
@@ -1058,14 +1072,23 @@ task PackNuGetPackage PrepareNuGetPackage, {
     {
         Write-Build White 'Packing module as PowerShell module package'
         exec {
-            if ($isWindows)
+            # Note: the paths must be a separate index to the switch in the array
+            $NugetArguments = @(
+                'pack',
+                "$script:ModuleNuspecPath",
+                '-NoPackageAnalysis',
+                '-Version',
+                "$Global:BuildVersion",
+                '-OutputDirectory',
+                "$script:ModulePackageDirectory"
+            )
+            # On *nix we need to use mono to invoke nuget, so fudge the arguments a bit
+            if (-not $isWindows)
             {
-                & $NugetCommand pack "$script:ModuleNuspecPath" -NoPackageAnalysis -Version "$Global:BuildVersion" -OutputDirectory "$script:ModulePackageDirectory"
+                # Mono won't have access to our NuGet PowerShell alias, so set the path using our env var
+                $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
             }
-            else
-            {
-                & dotnet nuget pack "$script:ModuleNuspecPath" --output "$script:ModulePackageDirectory"
-            }
+            & $NugetCommand $NugetArguments
         }
         $script:ModulePackagePath = Join-Path $script:ModulePackageDirectory "$ModuleName.$global:BuildVersion.nupkg" | Convert-Path
     }
@@ -1086,17 +1109,21 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
     # Only push to nuget if we want to
     if ('nuget' -in $PublishTo)
     {
+        $NugetArguments = @(
+            'push',
+            $script:nupkgPath,
+            '-Source',
+            'nuget',
+            '-ApiKey',
+            $NugetFeedApiKey
+        )
+        if (-not $isWindows)
+        {
+            $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
+        }
         Write-Build White 'Pushing to nuget'
         # Be careful - Invoke-BuildExec requires curly braces to be on the same line!
-        if ($isWindows)
-        {
-            $NugetArguments = @('push', $script:nupkgPath, '-Source', 'nuget', '-ApiKey', $NugetFeedApiKey)
-            exec { & $NugetCommand $NugetArguments }
-        }
-        else
-        {
-            exec { & dotnet nuget push $script:nupkgPath --source 'https://api.nuget.org/v3/index.json' --api-key $NugetFeedApiKey }
-        }
+        exec { & $NugetCommand $NugetArguments }
     }
     else
     {
