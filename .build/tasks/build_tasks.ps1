@@ -608,6 +608,18 @@ task CheckPreviousReleases SetVersion, CreateTemporaryNugetConfig, {
         {
             throw "There already appears to be a $Global:BuildVersion release!"
         }
+        # For pre-releases, also check that the stable base version doesn't already exist in PSGallery.
+        # PSGallery rejects pre-release versions that are lower in SemVer than an existing stable
+        # (e.g. 0.16.0-preview2 is blocked if 0.16.0 already exists).
+        if ($script:PreRelease -eq $true)
+        {
+            $semver = [semver]$Global:BuildVersion
+            $StableBaseVersion = "$($semver.Major).$($semver.Minor).$($semver.Patch)"
+            if ($CurrentReleases.Version -contains $StableBaseVersion)
+            {
+                throw "Cannot publish pre-release '$Global:BuildVersion' to PSGallery: stable version '$StableBaseVersion' already exists. Pre-releases must be published before their stable counterpart."
+            }
+        }
     }
     if ('nuget' -in $PublishTo)
     {
@@ -621,6 +633,15 @@ task CheckPreviousReleases SetVersion, CreateTemporaryNugetConfig, {
         if ($CurrentReleases.Version -contains $Global:BuildVersion)
         {
             throw "There already appears to be a $Global:BuildVersion release!"
+        }
+        if ($script:PreRelease -eq $true)
+        {
+            $semver = [semver]$Global:BuildVersion
+            $StableBaseVersion = "$($semver.Major).$($semver.Minor).$($semver.Patch)"
+            if ($CurrentReleases.Version -contains $StableBaseVersion)
+            {
+                throw "Cannot publish pre-release '$Global:BuildVersion' to NuGet: stable version '$StableBaseVersion' already exists. Pre-releases must be published before their stable counterpart."
+            }
         }
     }
     if ('CustomFeeds' -in $PublishTo)
