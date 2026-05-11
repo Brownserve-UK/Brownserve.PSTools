@@ -17,7 +17,8 @@ Creates a new changelog entry for a given version in the standard Brownserve for
 New-BrownserveChangelogEntry [[-ChangelogPath] <String>] [-Version] <SemanticVersion> -RepositoryOwner <String>
  -RepositoryName <String> [-GitHubToken <String>] [-Notice <String>] [-Features <String[]>]
  [-Bugfixes <String[]>] [-KnownIssues <String[]>] [-IssueLabelsToInclude <String[]>]
- [-IssueLabelsToExclude <String[]>] [-Auto] [-SinceVersion <SemanticVersion>] [<CommonParameters>]
+ [-IssueLabelsToExclude <String[]>] [-Auto] [-SinceVersion <SemanticVersion>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
