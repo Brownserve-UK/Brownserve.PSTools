@@ -115,6 +115,16 @@ function New-BrownserveChangelogEntry
         [switch]
         $Auto,
 
+        # The version to treat as the baseline when collecting merges and issues.
+        # Defaults to the most recent changelog entry, but pass the last stable version here
+        # when promoting a pre-release to stable so that all changes since the stable release are included.
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [System.Management.Automation.SemanticVersion]
+        $SinceVersion,
+
         # Special hidden parameter to allow the cmdlet to be called from the pipeline using input already collected from Read-BrownserveChangelog
         [Parameter(
             Mandatory = $false,
@@ -158,6 +168,18 @@ function New-BrownserveChangelogEntry
         }
 
         $LastReleasedVersion = $ChangelogObject.LatestVersion
+
+        if ($SinceVersion)
+        {
+            $SinceVersionEntry = $ChangelogObject.VersionHistory |
+                Where-Object { $_.Version -eq $SinceVersion } |
+                    Select-Object -First 1
+            if (!$SinceVersionEntry)
+            {
+                throw "SinceVersion '$SinceVersion' not found in changelog"
+            }
+            $LastReleasedVersion = $SinceVersionEntry
+        }
 
         if ($Auto)
         {
@@ -280,6 +302,7 @@ function New-BrownserveChangelogEntry
             RepositoryOwner = $RepositoryOwner
             RepositoryName  = $RepositoryName
             Features        = $Features
+            SinceVersion    = $LastReleasedVersion.Version
         }
         if ($Notice)
         {

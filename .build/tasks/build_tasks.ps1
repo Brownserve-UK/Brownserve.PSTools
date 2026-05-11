@@ -437,6 +437,7 @@ task CreateChangelogEntry SetVersion, {
         RepositoryOwner = $GitHubRepoOwner
         RepositoryName  = $GitHubRepoName
         ChangelogObject = $script:Changelog
+        SinceVersion    = $script:CurrentVersion
     }
     if ($ReleaseNotice)
     {

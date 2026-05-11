@@ -79,7 +79,15 @@ function New-BrownserveChangelogBlock
             ValueFromPipelineByPropertyName = $true
         )]
         [string]
-        $RepositoryHost = 'github.com'
+        $RepositoryHost = 'github.com',
+
+        # The version this entry is being compared against, used to make the wording more specific
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [semver]
+        $SinceVersion
     )
     begin
     {
@@ -99,12 +107,13 @@ function New-BrownserveChangelogBlock
             }
             $VersionHeader = $VersionHeader + "`n$Notice`n"
         }
-        $FeaturesBlock = "### Features`n`nThese are the changes that have been made since the last release:`n`n"
+        $SinceLabel = if ($SinceVersion) { "v$SinceVersion" } else { 'the last release' }
+        $FeaturesBlock = "### Features`n`nThese are the changes that have been made since $($SinceLabel):`n`n"
         foreach ($Feature in $Features)
         {
             $FeaturesBlock = $FeaturesBlock + "- $Feature`n"
         }
-        $BugfixBlock = "### Bugfixes`n`nThe following bugs have been closed since the last release:`n`n"
+        $BugfixBlock = "### Bugfixes`n`nThe following bugs have been closed since $($SinceLabel):`n`n"
         # If we've got some bug fixes, list them out otherwise simply add and N/A
         if ($Bugfixes)
         {
@@ -118,7 +127,7 @@ function New-BrownserveChangelogBlock
             $BugfixBlock = $BugfixBlock + "- *N/A*`n"
         }
         # Same for known issues
-        $KnownIssueBlock = "### Known Issues`n`nThe following bugs have been raised since the last release and remain unresolved:`n`n"
+        $KnownIssueBlock = "### Known Issues`n`nThe following bugs have been raised since $($SinceLabel) and remain unresolved:`n`n"
         if ($KnownIssues)
         {
             foreach ($KnownIssue in $KnownIssues)

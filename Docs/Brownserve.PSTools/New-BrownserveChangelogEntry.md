@@ -17,7 +17,8 @@ Creates a new changelog entry for a given version in the standard Brownserve for
 New-BrownserveChangelogEntry [[-ChangelogPath] <String>] [-Version] <SemanticVersion> -RepositoryOwner <String>
  -RepositoryName <String> [-GitHubToken <String>] [-Notice <String>] [-Features <String[]>]
  [-Bugfixes <String[]>] [-KnownIssues <String[]>] [-IssueLabelsToInclude <String[]>]
- [-IssueLabelsToExclude <String[]>] [-Auto] [<CommonParameters>]
+ [-IssueLabelsToExclude <String[]>] [-Auto] [-SinceVersion <SemanticVersion>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -210,6 +211,23 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -SinceVersion
+
+The version to treat as the baseline when collecting merges and issues.
+Defaults to the most recent changelog entry. Pass the last stable version when promoting a pre-release to stable so that all changes since that stable release are included in the new entry.
+
+```yaml
+Type: SemanticVersion
+Parameter Sets: (All)
+Aliases:
+
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: True (ByPropertyName)
