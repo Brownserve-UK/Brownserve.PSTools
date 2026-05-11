@@ -240,6 +240,14 @@ Creates a temporary file in a known good location.
 
 Creates a new branch in a given git repository
 
+### [New-GitHubBranch](./Brownserve.PSTools/New-GitHubBranch.md)
+
+Creates a new remote branch in a GitHub repository.
+
+### [New-GitHubCommit](./Brownserve.PSTools/New-GitHubCommit.md)
+
+Creates a commit on a GitHub repository branch via the GitHub API.
+
 ### [New-GitHubPullRequest](./Brownserve.PSTools/New-GitHubPullRequest.md)
 
 Creates a new GitHub pull request
