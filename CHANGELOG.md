@@ -5,7 +5,7 @@ This project conforms to the [SemVer v2.0.0 spec](https://semver.org/spec/v2.0.0
 
 ## Release
 
-## [v0.16.0-preview2](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.16.0-preview2) (2026-05-11)
+## [v0.16.1-preview1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.16.1-preview1) (2026-05-11)
 
 ### Features
 
