@@ -1038,17 +1038,14 @@ task PackNuGetPackage PrepareNuGetPackage, {
     {
         Write-Build White 'Packing module as standard NuGet package'
         exec {
-            # Note: the paths must be a separate index to the switch in the array
-            $NugetArguments = @(
-                'pack',
-                "$script:NuspecPath",
-                '-NoPackageAnalysis',
-                '-Version',
-                "$Global:BuildVersion",
-                '-OutputDirectory',
-                "$script:NugetPackageDirectory"
-            )
-            & $NugetCommand $NugetArguments
+            if ($isWindows)
+            {
+                & $NugetCommand pack "$script:NuspecPath" -NoPackageAnalysis -Version "$Global:BuildVersion" -OutputDirectory "$script:NugetPackageDirectory"
+            }
+            else
+            {
+                & dotnet nuget pack "$script:NuspecPath" --output "$script:NugetPackageDirectory"
+            }
         }
         $script:nupkgPath = Join-Path $script:NugetPackageDirectory "$ModuleName.$global:BuildVersion.nupkg" | Convert-Path
     }
@@ -1061,17 +1058,14 @@ task PackNuGetPackage PrepareNuGetPackage, {
     {
         Write-Build White 'Packing module as PowerShell module package'
         exec {
-            # Note: the paths must be a separate index to the switch in the array
-            $NugetArguments = @(
-                'pack',
-                "$script:ModuleNuspecPath",
-                '-NoPackageAnalysis',
-                '-Version',
-                "$Global:BuildVersion",
-                '-OutputDirectory',
-                "$script:ModulePackageDirectory"
-            )
-            & $NugetCommand $NugetArguments
+            if ($isWindows)
+            {
+                & $NugetCommand pack "$script:ModuleNuspecPath" -NoPackageAnalysis -Version "$Global:BuildVersion" -OutputDirectory "$script:ModulePackageDirectory"
+            }
+            else
+            {
+                & dotnet nuget pack "$script:ModuleNuspecPath" --output "$script:ModulePackageDirectory"
+            }
         }
         $script:ModulePackagePath = Join-Path $script:ModulePackageDirectory "$ModuleName.$global:BuildVersion.nupkg" | Convert-Path
     }
@@ -1092,18 +1086,16 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
     # Only push to nuget if we want to
     if ('nuget' -in $PublishTo)
     {
-        $NugetArguments = @(
-            'push',
-            $script:nupkgPath,
-            '-Source',
-            'nuget',
-            '-ApiKey',
-            $NugetFeedApiKey
-        )
         Write-Build White 'Pushing to nuget'
         # Be careful - Invoke-BuildExec requires curly braces to be on the same line!
-        exec {
-            & $NugetCommand $NugetArguments
+        if ($isWindows)
+        {
+            $NugetArguments = @('push', $script:nupkgPath, '-Source', 'nuget', '-ApiKey', $NugetFeedApiKey)
+            exec { & $NugetCommand $NugetArguments }
+        }
+        else
+        {
+            exec { & dotnet nuget push $script:nupkgPath --source 'https://api.nuget.org/v3/index.json' --api-key $NugetFeedApiKey }
         }
     }
     else
