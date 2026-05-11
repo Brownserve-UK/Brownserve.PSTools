@@ -523,49 +523,49 @@ task CreateTemporaryNugetConfig UseWorkingCopy, CheckPublishingParameters, {
     if ('CustomNugetFeeds' -in $PublishTo)
     {
         Write-Build White 'Creating temporary nuget.config for custom feeds'
-    }
 
-    # First create the nuget.config file in the build output directory, we don't want to commit this to the repo as we'll be storing the password in it
-    $newNugetConfig = @(
-        'new',
-        'nugetconfig',
-        '-o',
-        $Global:BrownserveRepoBuildOutputDirectory
-    )
-    # N.B. 'dotnet' must be a string while the params must be an array
-    exec {
-        & dotnet $newNugetConfig
-    }
-
-    # Then go through and add the feeds to the nuget.config file
-    $CustomNugetFeeds | ForEach-Object {
-        $nugetConfigPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory 'nuget.config'
-        $FeedUrl = $_.Url
-        $FeedName = $_.Name
-        $FeedUsername = $_.Credential.UserName
-        $FeedPassword = $_.Credential.GetNetworkCredential().Password
-        $addFeedParams = @(
-            'nuget',
-            'add',
-            'source',
-            $FeedUrl,
-            '-n',
-            $FeedName,
-            '-u',
-            $FeedUsername,
-            '-p',
-            $FeedPassword,
-            '--configfile',
-            $nugetConfigPath
+        # First create the nuget.config file in the build output directory, we don't want to commit this to the repo as we'll be storing the password in it
+        $newNugetConfig = @(
+            'new',
+            'nugetconfig',
+            '-o',
+            $Global:BrownserveRepoBuildOutputDirectory
         )
-        # Encryption is only supported on Windows 😭
-        if ($IsWindows -eq $false)
-        {
-            $addFeedParams += '--store-password-in-clear-text'
+        # N.B. 'dotnet' must be a string while the params must be an array
+        exec {
+            & dotnet $newNugetConfig
         }
 
-        exec {
-            & dotnet $addFeedParams
+        # Then go through and add the feeds to the nuget.config file
+        $CustomNugetFeeds | ForEach-Object {
+            $nugetConfigPath = Join-Path $Global:BrownserveRepoBuildOutputDirectory 'nuget.config'
+            $FeedUrl = $_.Url
+            $FeedName = $_.Name
+            $FeedUsername = $_.Credential.UserName
+            $FeedPassword = $_.Credential.GetNetworkCredential().Password
+            $addFeedParams = @(
+                'nuget',
+                'add',
+                'source',
+                $FeedUrl,
+                '-n',
+                $FeedName,
+                '-u',
+                $FeedUsername,
+                '-p',
+                $FeedPassword,
+                '--configfile',
+                $nugetConfigPath
+            )
+            # Encryption is only supported on Windows 😭
+            if ($IsWindows -eq $false)
+            {
+                $addFeedParams += '--store-password-in-clear-text'
+            }
+
+            exec {
+                & dotnet $addFeedParams
+            }
         }
     }
 }
