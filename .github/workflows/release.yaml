@@ -24,7 +24,7 @@ jobs:
         env:
           GitHubPAT: ${{ secrets.AUTOMATED_BUILD_GITHUB_PAT }}
           NugetFeedAPIKey: ${{ secrets.NUGET_API_KEY }}
-          PSGalleryAPIKey: ${{ secrets.PSGALLERY_API_KEY }}
+          PSGalleryAPIKey: ${{ secrets.POWERSHELL_GALLERY_API_KEY }}
         run: |
             ./Brownserve.PSTools/.build/build.ps1 `
               -BranchName $env:GITHUB_REF `
