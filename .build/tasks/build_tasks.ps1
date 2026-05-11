@@ -814,15 +814,17 @@ task CreateStagingBranch SetVersion, {
     Write-Build White "Creating branch: $Script:StagingBranchName"
     try
     {
-        New-GitBranch `
-            -RepositoryPath $Global:BrownserveRepoRootDirectory `
+        New-GitHubBranch `
+            -RepositoryOwner $GitHubRepoOwner `
+            -RepositoryName $GitHubRepoName `
             -BranchName $Script:StagingBranchName `
-            -Checkout $true `
+            -SHA $script:CurrentCommitHash `
+            -Token $GitHubStageReleaseToken `
             -ErrorAction 'Stop'
     }
     catch
     {
-        throw "Failed to create git branch $Blah.`n$($_.Exception.Message)"
+        throw "Failed to create branch '$Script:StagingBranchName'.`n$($_.Exception.Message)"
     }
 }
 
@@ -841,10 +843,20 @@ task CommitTrackedChanges UpdateChangelog, UpdateModuleDocumentation, CreateStag
         Write-Build White 'Committing tracked changes'
         try
         {
-            $script:TrackedFiles | Add-GitChanges -RepositoryPath $Global:BrownserveRepoRootDirectory
-            Submit-GitChanges `
-                -RepositoryPath $Global:BrownserveRepoRootDirectory `
-                -Message $CommitMessage
+            $Files = $script:TrackedFiles | ForEach-Object {
+                @{
+                    Path    = [System.IO.Path]::GetRelativePath($Global:BrownserveRepoRootDirectory, $_).Replace('\', '/')
+                    Content = Get-Content -Path $_ -Raw
+                }
+            }
+            New-GitHubCommit `
+                -RepositoryOwner $GitHubRepoOwner `
+                -RepositoryName $GitHubRepoName `
+                -BranchName $Script:StagingBranchName `
+                -CommitMessage $CommitMessage `
+                -Files $Files `
+                -Token $GitHubStageReleaseToken `
+                -ErrorAction 'Stop'
         }
         catch
         {
@@ -905,7 +917,7 @@ task CheckForUncommittedChanges {
     When staging a release we'll need to create a pull request with our staged changelog/documentation changes to bring
     them into main ready for release.
 #>
-task CreatePullRequest PushBranch, CheckForUncommittedChanges, {
+task CreatePullRequest CommitTrackedChanges, {
     Write-Build White 'Creating pull request'
     try
     {
