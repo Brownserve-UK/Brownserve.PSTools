@@ -27,7 +27,12 @@ function New-BrownservePoShModuleFromTemplate
         # If set will include the BrownserveCmdlets logic in the module
         [Parameter(Mandatory = $false)]
         [bool]
-        $IncludeBrownserveCmdletsLogic = $true
+        $IncludeBrownserveCmdletsLogic = $true,
+
+        # If set will include the temporary location logic in the module
+        [Parameter(Mandatory = $false)]
+        [bool]
+        $IncludeTempLocationLogic = $true
     )
     begin
     {
@@ -98,6 +103,33 @@ function New-BrownservePoShModuleFromTemplate
         else
         {
             $ModuleContent = $ModuleContent.Replace('###CUSTOMISATIONS###', '')
+        }
+        if ($IncludeTempLocationLogic)
+        {
+            $ModuleContent = $ModuleContent.Replace('###BROWNSERVE_TEMP_LOCATION###', @'
+<#
+    Some cmdlets will need to make use of temporary files so we need somewhere to store them.
+    _If_ we're in a repository then store them in the repositories temp location, otherwise use the system temp drive.
+    (This allows us to easily get at temp files created during builds etc and means we don't have to override them in each cmdlet)
+#>
+$script:BrownserveTempLocation = (Get-PSDrive Temp).Root
+if ($Global:BrownserveRepoTempDirectory)
+{
+    # Only set the path if it's valid, we don't want to set a duff path!
+    if ((Test-Path $Global:BrownserveRepoTempDirectory))
+    {
+        $script:BrownserveTempLocation = $Global:BrownserveRepoTempDirectory
+    }
+    else
+    {
+        Write-Warning "The `$global:sBrownserveRepoTempDirectory path '$($global:BrownserveRepoTempDirectory)' does not appear to be a valid path and therefore will be ignored."
+    }
+}
+'@)
+        }
+        else
+        {
+            $ModuleContent = $ModuleContent.Replace("###BROWNSERVE_TEMP_LOCATION###`n", '')
         }
         if ($IncludeBrownserveCmdletsLogic)
         {
