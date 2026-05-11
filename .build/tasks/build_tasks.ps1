@@ -172,12 +172,7 @@ if ($DefaultBranch -eq $BranchName)
     $PreRelease = $false
 }
 
-# On non-windows platforms mono is required to run NuGet 🤢
 $NugetCommand = 'nuget'
-if (-not $isWindows)
-{
-    $NugetCommand = 'mono'
-}
 
 # BuildTask is a variable that is set by Invoke-Build to indicate the build task that has been called
 # it might be useful to have specific logic for certain tasks
@@ -1053,12 +1048,6 @@ task PackNuGetPackage PrepareNuGetPackage, {
                 '-OutputDirectory',
                 "$script:NugetPackageDirectory"
             )
-            # On *nix we need to use mono to invoke nuget, so fudge the arguments a bit
-            if (-not $isWindows)
-            {
-                # Mono won't have access to our NuGet PowerShell alias, so set the path using our env var
-                $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
-            }
             & $NugetCommand $NugetArguments
         }
         $script:nupkgPath = Join-Path $script:NugetPackageDirectory "$ModuleName.$global:BuildVersion.nupkg" | Convert-Path
@@ -1082,12 +1071,6 @@ task PackNuGetPackage PrepareNuGetPackage, {
                 '-OutputDirectory',
                 "$script:ModulePackageDirectory"
             )
-            # On *nix we need to use mono to invoke nuget, so fudge the arguments a bit
-            if (-not $isWindows)
-            {
-                # Mono won't have access to our NuGet PowerShell alias, so set the path using our env var
-                $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
-            }
             & $NugetCommand $NugetArguments
         }
         $script:ModulePackagePath = Join-Path $script:ModulePackageDirectory "$ModuleName.$global:BuildVersion.nupkg" | Convert-Path
@@ -1117,10 +1100,6 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
             '-ApiKey',
             $NugetFeedApiKey
         )
-        if (-not $isWindows)
-        {
-            $NugetArguments = @($Global:BrownserveNugetPath) + $NugetArguments
-        }
         Write-Build White 'Pushing to nuget'
         # Be careful - Invoke-BuildExec requires curly braces to be on the same line!
         exec {
