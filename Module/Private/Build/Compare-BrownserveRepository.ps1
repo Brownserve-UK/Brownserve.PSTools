@@ -34,6 +34,11 @@ function Compare-BrownserveRepository
         [BrownserveRepoProjectType]
         $ProjectType = 'generic',
 
+        # The PowerShell module metadata, required when ProjectType is 'PowerShellModule' or 'BrownservePSTools'
+        [Parameter(Mandatory = $false)]
+        [BrownservePowerShellModule]
+        $ModuleInfo,
+
         # Forces the recreation of files even if they already exist
         [Parameter(Mandatory = $false)]
         [switch]
@@ -131,6 +136,7 @@ function Compare-BrownserveRepository
         $MissingFiles = @()
         $ChangedFiles = @()
         $MissingDirectories = @()
+        $IncludeWorkflows = $false
 
         <#
             We type constrain these variables to ensure that we can easily add to them later on.
@@ -367,6 +373,7 @@ function Compare-BrownserveRepository
                     IncludeBuildTestTools = $true
                 }
                 $LicenseType = 'MIT'
+                $IncludeWorkflows = $true
             }
             <#
                 For the repo that houses this very PowerShell module we want to do things a little differently.
@@ -393,6 +400,7 @@ function Compare-BrownserveRepository
                     IncludePlatyPS        = $true
                     IncludeBuildTestTools = $true
                 }
+                $IncludeWorkflows = $true
             }
             Default
             {
@@ -405,6 +413,11 @@ function Compare-BrownserveRepository
                     IncludeBuildTestTools = $false
                 }
             }
+        }
+
+        if ($IncludeWorkflows -and -not $ModuleInfo)
+        {
+            throw "A '-ModuleInfo' value is required for '$ProjectType' repositories."
         }
 
         if ($UnParsableFiles.Count -gt 0 -and !$Force)
@@ -1210,6 +1223,79 @@ function Compare-BrownserveRepository
                     Path       = $LicensePath
                     Content    = $NewLicenseContent.Content
                     LineEnding = 'LF'
+                }
+            }
+        }
+
+        if ($IncludeWorkflows)
+        {
+            $GitHubDirectory = Join-Path $RepositoryPath '.github'
+            $WorkflowDirectory = Join-Path $GitHubDirectory 'workflows'
+            $BuildsWorkflowPath = Join-Path $WorkflowDirectory 'builds.yaml'
+            $StageReleaseWorkflowPath = Join-Path $WorkflowDirectory 'stage-release.yaml'
+            $ReleaseWorkflowPath = Join-Path $WorkflowDirectory 'release.yaml'
+
+            try
+            {
+                $NewBuildsWorkflowContent = New-BrownserveGitHubBuildsWorkflow -ModuleName $ModuleInfo.Name | Format-BrownserveContent
+                $NewStageReleaseWorkflowContent = New-BrownserveGitHubStageReleaseWorkflow -ModuleName $ModuleInfo.Name | Format-BrownserveContent
+                $NewReleaseWorkflowContent = New-BrownserveGitHubReleaseWorkflow -ModuleName $ModuleInfo.Name | Format-BrownserveContent
+            }
+            catch
+            {
+                throw "Failed to generate GitHub Actions workflow content.`n$($_.Exception.Message)"
+            }
+
+            if (!(Test-Path $GitHubDirectory))
+            {
+                $MissingDirectories += [pscustomobject]@{ Path = $GitHubDirectory }
+            }
+            if (!(Test-Path $WorkflowDirectory))
+            {
+                $MissingDirectories += [pscustomobject]@{ Path = $WorkflowDirectory }
+            }
+
+            $WorkflowFiles = @(
+                @{ Path = $BuildsWorkflowPath; Content = $NewBuildsWorkflowContent },
+                @{ Path = $StageReleaseWorkflowPath; Content = $NewStageReleaseWorkflowContent },
+                @{ Path = $ReleaseWorkflowPath; Content = $NewReleaseWorkflowContent }
+            )
+            foreach ($WorkflowFile in $WorkflowFiles)
+            {
+                try
+                {
+                    if (Test-Path $WorkflowFile.Path)
+                    {
+                        Write-Verbose "Checking for changes to '$($WorkflowFile.Path)'"
+                        $CurrentWorkflowContent = Get-BrownserveContent -Path $WorkflowFile.Path -ErrorAction 'Stop'
+                        $WorkflowCompare = Compare-Object `
+                            -ReferenceObject $CurrentWorkflowContent.Content `
+                            -DifferenceObject $WorkflowFile.Content.Content `
+                            -SyncWindow 1 `
+                            -ErrorAction 'Stop'
+                        if ($WorkflowCompare)
+                        {
+                            Write-Verbose "Changes detected in '$($WorkflowFile.Path)'"
+                            $ChangedFiles += [BrownserveContent]@{
+                                Path       = $WorkflowFile.Path
+                                Content    = $WorkflowFile.Content.Content
+                                LineEnding = 'LF'
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Write-Verbose "No existing workflow file found at '$($WorkflowFile.Path)', will create a new one."
+                        $MissingFiles += [BrownserveContent]@{
+                            Path       = $WorkflowFile.Path
+                            Content    = $WorkflowFile.Content.Content
+                            LineEnding = 'LF'
+                        }
+                    }
+                }
+                catch
+                {
+                    throw "Failed to process '$($WorkflowFile.Path)'.`n$($_.Exception.Message)"
                 }
             }
         }

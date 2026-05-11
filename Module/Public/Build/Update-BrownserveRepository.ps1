@@ -87,19 +87,46 @@ function Update-BrownserveRepository
         {
             throw "Failed to read repository manifest file.`n$($_.Exception.Message)"
         }
+        if ($RepositoryType -in @('PowerShellModule', 'BrownservePSTools'))
+        {
+            try
+            {
+                $RepositoryPathsConfig = Read-ConfigurationFromFile $RepositoryPathsConfigFile
+                $BuildDirectory = Join-Path $RepositoryPath ($RepositoryPathsConfig.Defaults.PermanentPaths |
+                    Where-Object { $_.VariableName -eq 'BrownserveRepoBuildDirectory' }).Path
+                $ModuleInfoPath = Join-Path $BuildDirectory 'ModuleInfo.json'
+                if (!(Test-Path $ModuleInfoPath))
+                {
+                    throw "ModuleInfo.json not found at '$ModuleInfoPath'."
+                }
+                $ModuleInfoData = Get-Content $ModuleInfoPath -Raw | ConvertFrom-Json -AsHashtable
+                $ModuleInfo = [BrownservePowerShellModule]$ModuleInfoData
+            }
+            catch
+            {
+                throw "Failed to load module info.`n$($_.Exception.Message)"
+            }
+        }
+
         try
         {
-            $RepositoryState = Compare-BrownserveRepository `
-                -RepositoryPath $RepositoryPath `
-                -ProjectType $RepositoryType `
-                -GitIgnoreConfigFile $GitIgnoreConfigFile `
-                -PaketDependenciesConfigFile $PaketDependenciesConfigFile `
-                -RepositoryPathsConfigFile $RepositoryPathsConfigFile `
-                -DevcontainerConfigFile $DevcontainerConfigFile `
-                -VSCodeExtensionsConfigFile $VSCodeExtensionsConfigFile `
-                -PackageAliasConfigFile $PackageAliasConfigFile `
-                -EditorConfigConfigFile $EditorConfigConfigFile `
-                -ErrorAction 'Stop'
+            $CompareParams = @{
+                RepositoryPath             = $RepositoryPath
+                ProjectType                = $RepositoryType
+                GitIgnoreConfigFile        = $GitIgnoreConfigFile
+                PaketDependenciesConfigFile = $PaketDependenciesConfigFile
+                RepositoryPathsConfigFile  = $RepositoryPathsConfigFile
+                DevcontainerConfigFile     = $DevcontainerConfigFile
+                VSCodeExtensionsConfigFile = $VSCodeExtensionsConfigFile
+                PackageAliasConfigFile     = $PackageAliasConfigFile
+                EditorConfigConfigFile     = $EditorConfigConfigFile
+                ErrorAction               = 'Stop'
+            }
+            if ($ModuleInfo)
+            {
+                $CompareParams.ModuleInfo = $ModuleInfo
+            }
+            $RepositoryState = Compare-BrownserveRepository @CompareParams
         }
         catch
         {
