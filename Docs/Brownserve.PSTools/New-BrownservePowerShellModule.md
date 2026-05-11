@@ -16,7 +16,8 @@ Creates a new PowerShell module in the standard Brownserve format
 ```text
 New-BrownservePowerShellModule [-ModuleName] <String> [[-Path] <String>] [[-Description] <String>]
  [-Customisations <String>] [-RequirePowerShellVersion <String>] [-RequireBrownservePSTools <Boolean>]
- [-IncludeBrownserveCmdletsLogic <Boolean>] [-Force] [<CommonParameters>]
+ [-IncludeTemporaryLocationLogic <Boolean>] [-IncludeBrownserveCmdletsLogic <Boolean>] [-Force]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -90,6 +91,22 @@ Accept wildcard characters: False
 ### -IncludeBrownserveCmdletsLogic
 
 If set to true will include the logic for exporting the list of cmdlets in the module to the `Global:BrownserveCmdlets` variable.
+
+```yaml
+Type: Boolean
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -IncludeTemporaryLocationLogic
+
+If set to true will include the logic for setting up a temporary location for the module to use for storing temporary files.
 
 ```yaml
 Type: Boolean
