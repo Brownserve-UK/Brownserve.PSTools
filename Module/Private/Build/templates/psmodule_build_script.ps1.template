@@ -40,13 +40,17 @@ param
     )]
     [ValidateSet(
         'Build',
+        'BuildAndImport',
+        'BuildWithDocs',
         'BuildAndTest',
         'BuildTestAndCheck',
-        'StageRelease'
+        'StageRelease',
+        'DryRun',
+        'Release'
     )]
     [AllowEmptyString()]
     [string]
-    $Build = 'Build',
+    $Build = 'BuildWithDocs',
 
     # When preparing a release this denotes the type of changes that have been made.
     # This is used to determine the version number to use for the release.
@@ -62,10 +66,19 @@ param
     [string]
     $ReleaseType = 'minor',
 
-    # Where the module should be published to
+    # An optional release notice to include in the release
     [Parameter(
         Mandatory = $false
     )]
+    [string]
+    $ReleaseNotice,
+
+    # The various places to publish to
+    [Parameter(
+        Mandatory = $False
+    )]
+    [ValidateNotNullOrEmpty()]
+    [ValidateSet('nuget', 'PSGallery', 'GitHub', 'CustomNugetFeeds')]
     [string[]]
     $PublishTo,
 
@@ -85,13 +98,22 @@ param
     [string]
     $GitHubRepoName = 'Brownserve.PSTools',
 
-    # The PAT for pushing to GitHub
+    # GitHub token used during the StageRelease build, must have the following permissions:
+    #   * Read/Write pull requests
+    #   * Read issues
     [Parameter(
         Mandatory = $false
     )]
-    [ValidateNotNullOrEmpty()]
     [string]
-    $GitHubPAT,
+    $GitHubStageReleaseToken,
+
+    # GitHub token used during the Release build, must have the following permissions:
+    #   * Read/write releases
+    [Parameter(
+        Mandatory = $false
+    )]
+    [string]
+    $GitHubReleaseToken,
 
     # The API key to use when publishing to a NuGet feed, this is always needed but may not always be used
     [Parameter(
@@ -105,7 +127,21 @@ param
         Mandatory = $false
     )]
     [string]
-    $PSGalleryAPIKey
+    $PSGalleryAPIKey,
+
+    # Any custom/private NuGet feeds to publish to
+    [Parameter(
+        Mandatory = $False
+    )]
+    [hashtable[]]
+    $CustomNugetFeeds,
+
+    # If set will load the working copy of the module at the start of the build
+    [Parameter(
+        Mandatory = $false
+    )]
+    [switch]
+    $UseWorkingCopy
 )
 # Always stop on errors
 $ErrorActionPreference = 'Stop'
@@ -167,6 +203,7 @@ try
         ModuleAuthor      = $ModuleAuthor
         ModuleGuid        = $ModuleInfo.GUID
         ModuleTags        = $ModuleInfo.Tags
+        UseWorkingCopy    = ($PSBoundParameters['UseWorkingCopy'] -eq $true)
     }
     if ($ReleaseType)
     {
@@ -188,9 +225,17 @@ try
     {
         $BuildParams.Add('PSGalleryAPIKey', $PSGalleryAPIKey)
     }
-    if ($GitHubPAT)
+    if ($GitHubStageReleaseToken)
     {
-        $BuildParams.Add('GitHubPAT', $GitHubPAT)
+        $BuildParams.Add('GitHubStageReleaseToken', $GitHubStageReleaseToken)
+    }
+    if ($GitHubReleaseToken)
+    {
+        $BuildParams.Add('GitHubReleaseToken', $GitHubReleaseToken)
+    }
+    if ($CustomNugetFeeds)
+    {
+        $BuildParams.Add('CustomNugetFeeds', $CustomNugetFeeds)
     }
     if ($PublishTo)
     {
