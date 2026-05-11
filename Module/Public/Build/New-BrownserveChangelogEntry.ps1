@@ -209,7 +209,9 @@ function New-BrownserveChangelogEntry
                 }
                 else
                 {
-                    throw "Failed to find pull request for merge commit '$MergeCommit'"
+                    # Not every merge commit corresponds to a PR: branch sync merges (e.g. "Merge branch 'main' into feature")
+                    # appear in git log but have no matching closed PR, so we skip them rather than throwing.
+                    Write-Verbose "Merge commit '$MergeCommit' has no corresponding pull request, skipping (likely a branch sync merge)"
                 }
             }
 
