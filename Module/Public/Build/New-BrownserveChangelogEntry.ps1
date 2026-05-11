@@ -302,6 +302,7 @@ function New-BrownserveChangelogEntry
             RepositoryOwner = $RepositoryOwner
             RepositoryName  = $RepositoryName
             Features        = $Features
+            SinceVersion    = $LastReleasedVersion.Version
         }
         if ($Notice)
         {
