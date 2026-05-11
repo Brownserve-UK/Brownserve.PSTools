@@ -1244,7 +1244,7 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
         {
             Write-Build White 'Uploading compressed module as release asset'
             Add-GitHubReleaseAsset `
-                -UploadURL = $ReleaseResponse.upload_url `
+                -UploadUrl $ReleaseResponse.upload_url `
                 -Token $GitHubReleaseToken `
                 -FilePath $script:CompressedModule `
                 -ErrorAction 'Stop'
@@ -1253,7 +1253,7 @@ task PublishRelease CheckPreviousReleases, CompressModule, Tests, PackNuGetPacka
         {
             Write-Build White 'Uploading nupkg as release asset'
             Add-GitHubReleaseAsset `
-                -UploadURL = $ReleaseResponse.upload_url `
+                -UploadUrl $ReleaseResponse.upload_url `
                 -Token $GitHubReleaseToken `
                 -FilePath $script:nupkgPath `
                 -ErrorAction 'Stop'
