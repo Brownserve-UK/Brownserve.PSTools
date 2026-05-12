@@ -1,0 +1,81 @@
+---
+name: label-pr
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+    branches:
+      - main
+
+jobs:
+  label-pr:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: apply-changelog-label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const prNumber = context.payload.pull_request.number;
+
+            const changelogLabels = ['bug', 'enhancement', 'documentation'];
+
+            const labelMap = [
+              { pattern: /^\[?feat(ure)?!?\]?:/i,  label: 'enhancement'  },
+              { pattern: /^\[?(fix|bug)!?\]?:/i,    label: 'bug'          },
+              { pattern: /^\[?docs?!?\]?:/i,        label: 'documentation'},
+            ];
+
+            let matched = null;
+            for (const { pattern, label } of labelMap) {
+              if (pattern.test(title)) {
+                matched = label;
+                break;
+              }
+            }
+
+            if (!matched) {
+              core.setFailed(
+                `PR title "${title}" does not match a recognised prefix.\n` +
+                `Please begin your PR title with one of:\n` +
+                `  Features : [feat]: / [feature]: / feat: / feature:\n` +
+                `  Bug fixes: [fix]: / [bug]: / fix: / bug:\n` +
+                `  Docs     : [docs]: / [doc]: / docs: / doc:\n` +
+                `Add ! before the colon to flag a breaking change, e.g. [feat!]: / fix!:`
+              );
+              return;
+            }
+
+            const isBreaking = /^\[?\w+!\]?:/i.test(title);
+            const labelsToApply = isBreaking ? [matched, 'breaking'] : [matched];
+
+            const existingLabels = context.payload.pull_request.labels.map(l => l.name);
+
+            // Remove any changelog labels that no longer apply
+            for (const label of [...changelogLabels, 'breaking']) {
+              if (!labelsToApply.includes(label) && existingLabels.includes(label)) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  name: label
+                });
+              }
+            }
+
+            // Apply any labels not already present
+            for (const label of labelsToApply) {
+              if (!existingLabels.includes(label)) {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  labels: [label]
+                });
+              }
+            }
