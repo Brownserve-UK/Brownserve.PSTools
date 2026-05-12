@@ -2,13 +2,25 @@
 .SYNOPSIS
     Initializes this repository
 .NOTES
-    THIS FILE IS MAINTAINED BY A TOOL.
-    MANUAL CHANGES WILL BE LOST UNLESS ADDED TO THE "user defined _init" SECTION.
+    !!! THIS FILE IS MAINTAINED BY A TOOL !!!
+    !!! MANUAL CHANGES WILL BE LOST UNLESS IN THE "user defined _init steps" SECTION  BELOW !!!
+    !!! YOU CAN UPDATE THIS FILE BY RUNNING `Update-BrownserveRepository` IN THE ROOT OF THE REPOSITORY !!!
+
+    This script is responsible for setting up the repository for use, it will:
+        - Set up various well-known global variables to store important paths for the repository
+        - Ensure ephemeral paths are recreated on each run
+        - Install paket dependencies
+        - Install the Brownserve.PSTools module
+        - Install any external tooling
+        - Set up any package aliases
+        - Run any custom init steps
+        - Output a list of commands that are now available to the user along with their synopsis
 #>
 #Requires -Version 6.0
 [CmdletBinding()]
-param (
-    # If set will disable the compatible/incompatible cmdlet output at the end of the script
+param
+(
+    # If set will disable the cmdlet output at the end of the script
     [Parameter(
         Mandatory = $false
     )]
@@ -29,7 +41,7 @@ if ($env:TEAMCITY_VERSION)
     Write-Verbose 'Running on Teamcity, setting $env:CI'
     $env:CI = $true
 }
-    
+
 # Suppress output on CI/CD - it's noisy
 if ($env:CI)
 {
@@ -49,12 +61,12 @@ $Global:BrownserveModuleDirectory = Join-Path $global:BrownserveRepoRootDirector
 $Global:BrownserveRepoTestsDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath '.build' -AdditionalChildPath 'tests' | Convert-Path
 
 
-# Get the name of the repo
+# Guess the name of the repo by it's name on disk
 $Global:BrownserveRepoName = Split-Path $Global:BrownserveRepoRootDirectory -Leaf
 
 # Set-up our ephemeral paths, that is those that will be destroyed and then recreated each time this script is called
 # EphemeralDirectories are destroyed and recreated by this script
-# EphemeralPaths are destroyed but are not recreated, we assume whatever created them in the first place will do so again (e.g. paket.lock)
+# EphemeralFiles are destroyed but are not recreated, we assume whatever created them in the first place will do so again (e.g. paket.lock)
 $EphemeralDirectories = @(
     ($BrownserveRepoTempDirectory = Join-Path -Path $global:BrownserveRepoRootDirectory -ChildPath '.tmp'),
     ($BrownserveRepoLogDirectory = Join-Path -Path $global:BrownserveRepoRootDirectory -ChildPath '.tmp' -AdditionalChildPath 'logs'),
@@ -114,22 +126,22 @@ $global:BrownserveRepoPaketFilesDirectory = $BrownserveRepoPaketFilesDirectory |
 # We use paket for managing our dependencies and we get that via dotnet
 Push-Location
 Set-Location $Global:BrownserveRepoRootDirectory
-Write-Verbose "Restoring dotnet tools"
+Write-Verbose 'Restoring dotnet tools'
 $DotnetOutput = & dotnet tool restore
 if ($LASTEXITCODE -ne 0)
 {
     Pop-Location
     $DotnetOutput
-    throw "dotnet tool restore failed"
+    throw 'dotnet tool restore failed'
 }
 
-Write-Verbose "Installing paket dependencies"
+Write-Verbose 'Installing paket dependencies'
 $PaketOutput = & dotnet paket install
 if ($LASTEXITCODE -ne 0)
 {
     Pop-Location
     $PaketOutput
-    throw "Failed to install paket dependencies"
+    throw 'Failed to install paket dependencies'
 }
 Pop-Location
 
@@ -139,8 +151,8 @@ if ((Get-Module 'Brownserve.PSTools'))
 {
     try
     {
-        Write-Warning "The Brownserve.PSTools module is already loaded in this PSSession, this will be unloaded to Ensure the correct version for this repository is used"
-        Write-Verbose "Unloading Brownserve.PSTools"
+        Write-Warning 'The Brownserve.PSTools module is already loaded in this PSSession, this will be unloaded to Ensure the correct version for this repository is used'
+        Write-Verbose 'Unloading Brownserve.PSTools'
         Remove-Module 'Brownserve.PSTools' -Force -Confirm:$false -Verbose:$False
     }
     catch
@@ -151,8 +163,24 @@ if ((Get-Module 'Brownserve.PSTools'))
 # Import the downloaded version of Brownserve.PSTools
 try
 {
-    Write-Verbose "Importing Brownserve.PSTools module"
-    Import-Module (Join-Path $Global:BrownserveRepoNugetPackagesDirectory 'Brownserve.PSTools' 'tools', 'Brownserve.PSTools.psd1') -Force -Verbose:$false
+    Write-Verbose 'Importing Brownserve.PSTools module'
+    # Be clever with how we find the module, the location may be slightly different depending on various factors
+    $PSToolsPath = Get-ChildItem `
+        -Filter 'brownserve.pstools.psd1' `
+        -Recurse `
+        -Path (Join-Path $global:BrownserveRepoNugetPackagesDirectory 'Brownserve.PSTools') `
+        -ErrorAction 'Stop'
+    if ($PSToolsPath.Count -gt 1)
+    {
+        throw 'Found more than one instance of Brownserve.PSTools!'
+    }
+    if (!$PSToolsPath)
+    {
+        throw "Couldn't find Brownserve.PSTools"
+    }
+    # Convert the path so we can be OS agnostic
+    $PSToolsPath = $PSToolsPath | Convert-Path
+    Import-Module $PSToolsPath -Force -Verbose:$false
 }
 catch
 {
@@ -224,7 +252,7 @@ catch
     throw "Failed to import build/test modules.`n$($_.Exception.Message)"
 }
 
-<# 
+<#
     Sometimes packages we install from Paket/NuGet may already exist on the system, so we set aliases to ensure we only use the local versions
     However aliases are only recognised by _this_ PowerShell session, so if we start another process or call a native command then it won't work.
     Therefore we can choose to set a Global variable that we can use to pass to child processes
@@ -248,14 +276,14 @@ catch
 }
 
 
-# Place any custom code below, this will be preserved whenever you update your _init script
+# Place any custom code below, this will be preserved whenever you update your _init script (DO NOT REMOVE THIS SECTION)
 ### Start user defined _init steps
 # TODO: This should be part of the permanent paths
 $Global:BrownserveRepoDocsDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath 'Docs' | Convert-Path
 ### End user defined _init steps
 
 # If we're not suppressing output then we'll pipe out a list of cmdlets that are now available to the user along with
-# Their synopsis. 
+# Their synopsis.
 if (!$SuppressOutput)
 {
     if ($Global:BrownserveCmdlets)
