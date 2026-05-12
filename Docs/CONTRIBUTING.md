@@ -10,4 +10,19 @@ For more information on how to build the module see the [build documentation](./
 Our branch protection rules **require** all commits to be [signed](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).  
 While we can rebase and sign commits for you it's much more likely that your PR will be merged promptly if you ensure your commits are signed before submitting the PR.
 
-We also try to use the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) standard for our commit messages though this is not currently a hard requirement.
+We use the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) standard for PR titles and **this is a hard requirement.** Your PR title must begin with a recognised prefix so that an automated workflow can classify the change for the changelog. A second check will block merge if no valid label has been applied.
+
+Supported prefixes (brackets are optional):
+
+| Prefix examples | Type |
+| --- | --- |
+| `[feat]:` `feat:` `[feature]:` `feature:` | New feature or enhancement |
+| `[fix]:` `fix:` `[bug]:` `bug:` | Bug fix |
+| `[docs]:` `docs:` `[doc]:` `doc:` | Documentation update |
+| `[ci]:` `ci:` `[cicd]:` `cicd:` | CI/CD changes |
+| `[chore]:` `[refactor]:` `[ops]:` `[test]:` `[style]:` (and without brackets) | Maintenance |
+
+Add `!` before the colon to flag a breaking change, e.g. `[feat!]: remove legacy parameter` or `fix!: rename cmdlet`.
+
+>**ℹ Please Note:**
+If your PR title does not match a recognised prefix the check will fail and a comment will be posted on the PR explaining what to fix. Simply update the title and the checks will re-run automatically.
