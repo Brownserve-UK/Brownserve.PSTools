@@ -49,7 +49,6 @@ jobs:
               Build = 'StageRelease'
               GitHubStageReleaseToken = $env:GitHubPAT
               ReleaseType = '${{ inputs.release_type}}'
-              UseWorkingCopy = $true
               Verbose = $true
             }
             if ($env:ReleaseNotice) {

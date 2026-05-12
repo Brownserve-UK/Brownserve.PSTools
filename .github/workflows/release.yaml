@@ -44,7 +44,6 @@ jobs:
               -NugetFeedAPIKey $env:NugetFeedAPIKey `
               -PSGalleryAPIKey $env:PSGalleryAPIKey `
               -PublishTo ${{ inputs.publish_to }} `
-              -UseWorkingCopy `
               -Verbose
       # Step 5: Push a notification to Slack
       - name: notify-slack
