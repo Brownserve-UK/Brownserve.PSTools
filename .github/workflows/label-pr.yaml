@@ -16,9 +16,16 @@ jobs:
       issues: write
       pull-requests: write
     steps:
+      - name: generate-app-token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.BROWNSERVE_ISSUES_APP_ID }}
+          private-key: ${{ secrets.BROWNSERVE_ISSUES_APP_PRIVATE_KEY }}
       - name: apply-changelog-label
         uses: actions/github-script@v7
         with:
+          github-token: ${{ steps.app-token.outputs.token }}
           script: |
             const headRef = context.payload.pull_request.head.ref;
             if (headRef.startsWith('release/')) {
