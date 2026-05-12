@@ -1004,6 +1004,7 @@ task PrepareNuGetPackage SetVersion, CreateModuleManifest, FormatReleaseNotes, C
     <version>$Global:BuildVersion</version>
     <authors>$ModuleAuthor</authors>
     <owners>Brownserve UK</owners>
+    <license type="file">LICENSE</license>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>$ModuleDescription</summary>
     <description>$ModuleDescription</description>
