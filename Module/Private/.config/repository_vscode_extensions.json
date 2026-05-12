@@ -73,6 +73,10 @@
         {
           "ExtensionID": "EditorConfig.EditorConfig",
           "CustomSettings": {}
+        },
+        {
+            "ExtensionID": "DavidAnson.vscode-markdownlint",
+            "CustomSettings": {}
         }
     ]
 }

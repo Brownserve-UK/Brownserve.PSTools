@@ -62,7 +62,12 @@ function Initialize-BrownserveRepository
         # The config file that stores any editorconfig settings we'd like to create
         [Parameter(Mandatory = $false, DontShow)]
         [string]
-        $EditorConfigConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'editorconfig_config.json')
+        $EditorConfigConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'editorconfig_config.json'),
+
+        # The config file that stores markdownlint settings
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $MarkdownlintConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'markdownlint_config.json')
     )
     begin
     {
@@ -93,6 +98,7 @@ function Initialize-BrownserveRepository
                 -VSCodeExtensionsConfigFile $VSCodeExtensionsConfigFile `
                 -PackageAliasConfigFile $PackageAliasConfigFile `
                 -EditorConfigConfigFile $EditorConfigConfigFile `
+                -MarkdownlintConfigFile $MarkdownlintConfigFile `
                 -ModuleInfo $ModuleInfo `
                 -ErrorAction 'Stop'
         }

@@ -77,7 +77,12 @@ function Compare-BrownserveRepository
         # The config file that stores any editorconfig settings we'd like to create
         [Parameter(Mandatory = $false, DontShow)]
         [string]
-        $EditorConfigConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'editorconfig_config.json')
+        $EditorConfigConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'editorconfig_config.json'),
+
+        # The config file that stores markdownlint settings
+        [Parameter(Mandatory = $false, DontShow)]
+        [string]
+        $MarkdownlintConfigFile = (Join-Path $Script:BrownservePSToolsConfigDirectory 'markdownlint_config.json')
     )
     begin
     {
@@ -113,6 +118,7 @@ function Compare-BrownserveRepository
             $VSCodeExtensionsConfig = Read-ConfigurationFromFile $VSCodeExtensionsConfigFile -AsHashtable
             # Load EditorConfig as a hashtable as our [EditorConfigSection] type cannot process psobject's
             $EditorConfigConfig = Read-ConfigurationFromFile $EditorConfigConfigFile -AsHashtable
+            $MarkdownlintConfig = Read-ConfigurationFromFile $MarkdownlintConfigFile
         }
         catch
         {
@@ -137,6 +143,7 @@ function Compare-BrownserveRepository
         $ChangedFiles = @()
         $MissingDirectories = @()
         $IncludeWorkflows = $false
+        $IncludeMarkdownlint = $false
 
         <#
             We type constrain these variables to ensure that we can easily add to them later on.
@@ -184,6 +191,7 @@ function Compare-BrownserveRepository
         $DevcontainerPath = Join-Path $DevcontainerDirectoryPath 'devcontainer.json'
         $DockerfilePath = Join-Path $DevcontainerDirectoryPath 'Dockerfile'
         $EditorConfigPath = Join-Path $RepositoryPath '.editorconfig'
+        $MarkdownlintConfigPath = Join-Path $RepositoryPath '.markdownlint.json'
         $ChangelogPath = Join-Path $RepositoryPath 'CHANGELOG.md'
         $LicensePath = Join-Path $RepositoryPath 'LICENSE'
 
@@ -374,6 +382,7 @@ function Compare-BrownserveRepository
                 }
                 $LicenseType = 'MIT'
                 $IncludeWorkflows = $true
+                $IncludeMarkdownlint = $true
             }
             <#
                 For the repo that houses this very PowerShell module we want to do things a little differently.
@@ -401,6 +410,7 @@ function Compare-BrownserveRepository
                     IncludeBuildTestTools = $true
                 }
                 $IncludeWorkflows = $true
+                $IncludeMarkdownlint = $true
             }
             Default
             {
@@ -1224,6 +1234,54 @@ function Compare-BrownserveRepository
                     Content    = $NewLicenseContent.Content
                     LineEnding = 'LF'
                 }
+            }
+        }
+
+        <#
+            We deliberately overwrite any existing .markdownlint.json.
+            We want a consistent gold standard across all our repos rather than per-repo drift,
+            so any local customisations will be lost on the next init/update.
+        #>
+        if ($IncludeMarkdownlint)
+        {
+            try
+            {
+                $NewMarkdownlintContent = ConvertTo-Json `
+                    -InputObject $MarkdownlintConfig `
+                    -Depth 100 `
+                    -ErrorAction 'Stop' | Format-BrownserveContent
+                if ((Test-Path $MarkdownlintConfigPath))
+                {
+                    Write-Verbose 'Checking for changes to .markdownlint.json'
+                    $CurrentMarkdownlintContent = Get-BrownserveContent -Path $MarkdownlintConfigPath -ErrorAction 'Stop'
+                    $MarkdownlintCompare = Compare-Object `
+                        -ReferenceObject $CurrentMarkdownlintContent.Content `
+                        -DifferenceObject $NewMarkdownlintContent.Content `
+                        -SyncWindow 1 `
+                        -ErrorAction 'Stop'
+                    if ($MarkdownlintCompare)
+                    {
+                        Write-Verbose 'Changes detected in .markdownlint.json'
+                        $ChangedFiles += [BrownserveContent]@{
+                            Path       = $MarkdownlintConfigPath
+                            Content    = $NewMarkdownlintContent.Content
+                            LineEnding = 'LF'
+                        }
+                    }
+                }
+                else
+                {
+                    Write-Verbose 'No existing .markdownlint.json found, will create a new one.'
+                    $MissingFiles += [BrownserveContent]@{
+                        Path       = $MarkdownlintConfigPath
+                        Content    = $NewMarkdownlintContent.Content
+                        LineEnding = 'LF'
+                    }
+                }
+            }
+            catch
+            {
+                throw "Failed to process '$MarkdownlintConfigPath'.`n$($_.Exception.Message)"
             }
         }
 
