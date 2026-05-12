@@ -650,8 +650,13 @@ function Compare-BrownserveRepository
         # As will the dotnet tools manifest
         try
         {
-            $dotnetToolsConfigTempPath = Join-Path $TempDir '.config'
-            $dotnetToolsTempPath = Join-Path $dotnetToolsConfigTempPath 'dotnet-tools.json'
+            <#
+                Newer .NET SDK versions create dotnet-tools.json in the working directory root rather than
+                in a .config/ subdirectory, so we look at the root of the temp dir for the staging file.
+                The destination in the actual repo remains at .config/dotnet-tools.json, which is the
+                documented standard location that dotnet tool restore checks.
+            #>
+            $dotnetToolsTempPath = Join-Path $TempDir 'dotnet-tools.json'
             Invoke-NativeCommand `
                 -FilePath 'dotnet' `
                 -ArgumentList 'new', 'tool-manifest' `
