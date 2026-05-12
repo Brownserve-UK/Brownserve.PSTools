@@ -14,6 +14,11 @@ function Initialize-BrownserveRepository
         [BrownserveRepoProjectType]
         $ProjectType = 'generic',
 
+        # The PowerShell module metadata, required when repo houses a PowerShell module.
+        [Parameter(Mandatory = $false)]
+        [BrownservePowerShellModule]
+        $ModuleInfo,
+
         # The owner of the repository (used for licensing and other metadata)
         [Parameter(Mandatory = $false)]
         [string]
@@ -88,6 +93,7 @@ function Initialize-BrownserveRepository
                 -VSCodeExtensionsConfigFile $VSCodeExtensionsConfigFile `
                 -PackageAliasConfigFile $PackageAliasConfigFile `
                 -EditorConfigConfigFile $EditorConfigConfigFile `
+                -ModuleInfo $ModuleInfo `
                 -ErrorAction 'Stop'
         }
         catch

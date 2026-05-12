@@ -15,7 +15,8 @@ Prepares a repository for use for a given project
 
 ```text
 Initialize-BrownserveRepository [[-RepositoryPath] <String>] [-ProjectType <BrownserveRepoProjectType>]
- [-Owner <String>] [-Force] [<CommonParameters>]
+ [-ModuleInfo <BrownservePowerShellModule>] [-Owner <String>] [-Force]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -40,6 +41,22 @@ Forces an overwrite of any files that already exist
 
 ```yaml
 Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ModuleInfo
+
+The PowerShell module metadata, required when repo houses a PowerShell module.
+
+```yaml
+Type: BrownservePowerShellModule
 Parameter Sets: (All)
 Aliases:
 
