@@ -5,6 +5,42 @@ This project conforms to the [SemVer v2.0.0 spec](https://semver.org/spec/v2.0.0
 
 ## Release
 
+## [v0.17.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.17.0) (2026-05-13)
+
+### Features
+
+These are the changes that have been made since v0.16.1:
+
+- [style!]: make auto-changelog entries follow the "Keep a Changelog" format in [#128](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/128) by [@shoddyguard](https://github.com/shoddyguard)
+- [cicd]: update the auto labeller to include the new labels in [#127](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/127) by [@shoddyguard](https://github.com/shoddyguard)
+- [docs]: updating the contributing guide to cover new PR format in [#124](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/124) by [@shoddyguard](https://github.com/shoddyguard)
+- [cicd]: Attempt to fix the PR labeller in [#122](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/122) by [@shoddyguard](https://github.com/shoddyguard)
+- [cicd]: add new workflow to validate pr's are in correct format in [#119](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/119) by [@shoddyguard](https://github.com/shoddyguard)
+- cicd: cleanup build notifications. in [#117](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/117) by [@shoddyguard](https://github.com/shoddyguard)
+- fix: NuGet license warning in [#116](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/116) by [@shoddyguard](https://github.com/shoddyguard)
+- ops: remove use of -UseWorkingCopy in [#115](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/115) by [@shoddyguard](https://github.com/shoddyguard)
+- ops: remove snippet-creator in [#114](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/114) by [@shoddyguard](https://github.com/shoddyguard)
+- chore: update repo to latest standard in [#113](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/113) by [@shoddyguard](https://github.com/shoddyguard)
+- fix: dotnet tool temp location in [#112](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/112) by [@shoddyguard](https://github.com/shoddyguard)
+- feat: update repo templating in [#111](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/111) by [@shoddyguard](https://github.com/shoddyguard)
+- feat: move GitHub Actions builds to templates in [#110](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/110) by [@shoddyguard](https://github.com/shoddyguard)
+- fix: update init templates in [#109](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/109) by [@shoddyguard](https://github.com/shoddyguard)
+- docs: cleanup changelog in [#107](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/107) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Bugfixes
+
+The following bugs have been closed since v0.16.1:
+
+- [#78](https://github.com/Brownserve-UK/Brownserve.PSTools/issues/78) - [BUG]: Snippet Creator is deprecated
+
+### Known Issues
+
+The following bugs have been raised since v0.16.1 and remain unresolved:
+
+- *N/A*
+
+For a full list of current known issues see the project's [issues page](https://github.com/Brownserve-UK/Brownserve.PSTools/issues).
+
 ## [v0.16.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.16.1) (2026-05-11)
 
 ### Features
