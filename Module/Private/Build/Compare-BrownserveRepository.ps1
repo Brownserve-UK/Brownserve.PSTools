@@ -145,6 +145,8 @@ function Compare-BrownserveRepository
         $IncludeWorkflows = $false
         $IncludeMarkdownlint = $false
         $IncludeDependabot = $false
+        $IncludeLabelPR = $false
+        $WorkflowUseWorkingCopyOption = $false
 
         <#
             We type constrain these variables to ensure that we can easily add to them later on.
@@ -195,6 +197,8 @@ function Compare-BrownserveRepository
         $MarkdownlintConfigPath = Join-Path $RepositoryPath '.markdownlint.json'
         $ChangelogPath = Join-Path $RepositoryPath 'CHANGELOG.md'
         $LicensePath = Join-Path $RepositoryPath 'LICENSE'
+        $GitHubDirectory = Join-Path $RepositoryPath '.github'
+        $WorkflowDirectory = Join-Path $GitHubDirectory 'workflows'
 
         <#
             To help with consistency we store a special manifest file in the repository that contains some basic information
@@ -385,6 +389,7 @@ function Compare-BrownserveRepository
                 $IncludeWorkflows = $true
                 $IncludeMarkdownlint = $true
                 $IncludeDependabot = $true
+                $IncludeLabelPR = $true
                 $DependabotParams = @{
                     Updates = @(
                         @{ Ecosystem = 'github-actions'; Directory = '/';       Interval = 'weekly' },
@@ -420,6 +425,8 @@ function Compare-BrownserveRepository
                 $IncludeWorkflows = $true
                 $IncludeMarkdownlint = $true
                 $IncludeDependabot = $true
+                $IncludeLabelPR = $true
+                $WorkflowUseWorkingCopyOption = $true
                 $DependabotParams = @{
                     Updates = @(
                         @{ Ecosystem = 'github-actions'; Directory = '/';       Interval = 'weekly' },
@@ -1307,17 +1314,21 @@ function Compare-BrownserveRepository
 
         if ($IncludeWorkflows)
         {
-            $GitHubDirectory = Join-Path $RepositoryPath '.github'
-            $WorkflowDirectory = Join-Path $GitHubDirectory 'workflows'
             $BuildsWorkflowPath = Join-Path $WorkflowDirectory 'builds.yaml'
             $StageReleaseWorkflowPath = Join-Path $WorkflowDirectory 'stage-release.yaml'
             $ReleaseWorkflowPath = Join-Path $WorkflowDirectory 'release.yaml'
 
+            $WorkflowCommonParams = @{ ModuleName = $ModuleInfo.Name }
+            if ($WorkflowUseWorkingCopyOption)
+            {
+                $WorkflowCommonParams['IncludeUseWorkingCopyOption'] = $true
+            }
+
             try
             {
                 $NewBuildsWorkflowContent = New-BrownserveGitHubBuildsWorkflow -ModuleName $ModuleInfo.Name | Format-BrownserveContent
-                $NewStageReleaseWorkflowContent = New-BrownserveGitHubStageReleaseWorkflow -ModuleName $ModuleInfo.Name | Format-BrownserveContent
-                $NewReleaseWorkflowContent = New-BrownserveGitHubReleaseWorkflow -ModuleName $ModuleInfo.Name | Format-BrownserveContent
+                $NewStageReleaseWorkflowContent = New-BrownserveGitHubStageReleaseWorkflow @WorkflowCommonParams | Format-BrownserveContent
+                $NewReleaseWorkflowContent = New-BrownserveGitHubReleaseWorkflow @WorkflowCommonParams | Format-BrownserveContent
             }
             catch
             {
@@ -1375,6 +1386,57 @@ function Compare-BrownserveRepository
                 {
                     throw "Failed to process '$($WorkflowFile.Path)'.`n$($_.Exception.Message)"
                 }
+            }
+        }
+
+        if ($IncludeLabelPR)
+        {
+            $LabelPRWorkflowPath = Join-Path $WorkflowDirectory 'label-pr.yaml'
+
+            if (!(Test-Path $GitHubDirectory) -and ($MissingDirectories.Path -notcontains $GitHubDirectory))
+            {
+                $MissingDirectories += [pscustomobject]@{ Path = $GitHubDirectory }
+            }
+            if (!(Test-Path $WorkflowDirectory) -and ($MissingDirectories.Path -notcontains $WorkflowDirectory))
+            {
+                $MissingDirectories += [pscustomobject]@{ Path = $WorkflowDirectory }
+            }
+
+            try
+            {
+                $NewLabelPRWorkflowContent = New-BrownserveGitHubLabelPRWorkflow | Format-BrownserveContent
+                if (Test-Path $LabelPRWorkflowPath)
+                {
+                    Write-Verbose "Checking for changes to '$LabelPRWorkflowPath'"
+                    $CurrentLabelPRWorkflowContent = Get-BrownserveContent -Path $LabelPRWorkflowPath -ErrorAction 'Stop'
+                    $LabelPRCompare = Compare-Object `
+                        -ReferenceObject $CurrentLabelPRWorkflowContent.Content `
+                        -DifferenceObject $NewLabelPRWorkflowContent.Content `
+                        -SyncWindow 1 `
+                        -ErrorAction 'Stop'
+                    if ($LabelPRCompare)
+                    {
+                        Write-Verbose "Changes detected in '$LabelPRWorkflowPath'"
+                        $ChangedFiles += [BrownserveContent]@{
+                            Path       = $LabelPRWorkflowPath
+                            Content    = $NewLabelPRWorkflowContent.Content
+                            LineEnding = 'LF'
+                        }
+                    }
+                }
+                else
+                {
+                    Write-Verbose "No existing label-pr.yaml found, will create a new one."
+                    $MissingFiles += [BrownserveContent]@{
+                        Path       = $LabelPRWorkflowPath
+                        Content    = $NewLabelPRWorkflowContent.Content
+                        LineEnding = 'LF'
+                    }
+                }
+            }
+            catch
+            {
+                throw "Failed to process '$LabelPRWorkflowPath'.`n$($_.Exception.Message)"
             }
         }
     }
