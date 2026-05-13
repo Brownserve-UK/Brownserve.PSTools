@@ -241,6 +241,10 @@ try
     {
         $BuildParams.Add('PublishTo', $PublishTo)
     }
+    if ($ReleaseNotice)
+    {
+        $BuildParams.Add('ReleaseNotice', $ReleaseNotice)
+    }
     Write-Verbose "Invoking build: $Build"
     Invoke-Build @BuildParams -Verbose:($PSBoundParameters['Verbose'] -eq $true)
 }
