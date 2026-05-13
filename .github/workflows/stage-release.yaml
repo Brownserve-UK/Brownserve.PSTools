@@ -16,6 +16,11 @@ on:
         description: 'An optional notice to display on this release'
         required: false
         type: string
+      use_working_copy:
+        description: 'Use the working copy of Brownserve.PSTools instead of the published NuGet package'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   stage-release:
@@ -50,7 +55,9 @@ jobs:
               GitHubStageReleaseToken = $env:GitHubPAT
               ReleaseType = '${{ inputs.release_type}}'
               Verbose = $true
-              UseWorkingCopy = $true
+            }
+            if ('${{ inputs.use_working_copy }}' -eq 'true') {
+              $Params.Add('UseWorkingCopy', $true)
             }
             if ($env:ReleaseNotice) {
               $Params.Add('ReleaseNotice', $env:ReleaseNotice)
