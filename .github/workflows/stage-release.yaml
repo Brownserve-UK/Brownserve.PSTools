@@ -16,6 +16,7 @@ on:
         description: 'An optional notice to display on this release'
         required: false
         type: string
+
 jobs:
   stage-release:
     runs-on: ubuntu-latest

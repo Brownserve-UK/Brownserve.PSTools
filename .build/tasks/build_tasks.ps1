@@ -804,7 +804,7 @@ task CreateModuleHelp UpdateModuleDocumentation, {
 task CompressModule CreateModuleHelp, {
     if ('GitHub' -in $PublishTo)
     {
-        $script:CompressedModule = Join-Path $global:BrownserveRepoBuildOutputDirectory "Brownserve.PSTools-$($Global:BuildVersion).tgz"
+        $script:CompressedModule = Join-Path $global:BrownserveRepoBuildOutputDirectory "$ModuleName-$($Global:BuildVersion).tgz"
         Write-Build White 'Compressing PowerShell module'
         try
         {
