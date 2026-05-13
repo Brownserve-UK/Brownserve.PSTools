@@ -72,26 +72,30 @@ jobs:
             }
 
             const title = context.payload.pull_request.title;
-            const changelogLabels = ['bug', 'enhancement', 'documentation', 'cicd', 'maintenance'];
+            const changelogLabels = ['bug', 'enhancement', 'documentation', 'cicd', 'maintenance', 'deprecation', 'removed', 'security'];
 
             const labelMap = [
-              { pattern: /^\[?feat(ure)?!?\]?:/i,                        label: 'enhancement'  },
-              { pattern: /^\[?(fix|bug)!?\]?:/i,                         label: 'bug'          },
-              { pattern: /^\[?docs?!?\]?:/i,                             label: 'documentation'},
-              { pattern: /^\[?ci(cd)?!?\]?:/i,                           label: 'cicd'         },
-              { pattern: /^\[?(chore|ops|refactor|tests?|style)!?\]?:/i, label: 'maintenance'  },
+              { pattern: /^\[?feat(ure)?!?\]?:/i,                        label: 'enhancement'                     },
+              { pattern: /^\[?(fix|bug)!?\]?:/i,                         label: 'bug'                             },
+              { pattern: /^\[?docs?!?\]?:/i,                             label: 'documentation'                   },
+              { pattern: /^\[?ci(cd)?!?\]?:/i,                           label: 'cicd'                            },
+              { pattern: /^\[?(chore|ops|refactor|tests?|style)!?\]?:/i, label: 'maintenance'                     },
+              { pattern: /^\[?deprecat(ed|ion)?!?\]?:/i,                 label: 'deprecation'                     },
+              { pattern: /^\[?removed?!?\]?:/i,                          label: 'removed',  alwaysBreaking: true  },
+              { pattern: /^\[?sec(urity)?!?\]?:/i,                       label: 'security'                        },
             ];
 
-            let matched = null;
-            for (const { pattern, label } of labelMap) {
-              if (pattern.test(title)) {
-                matched = label;
+            let matchedEntry = null;
+            for (const entry of labelMap) {
+              if (entry.pattern.test(title)) {
+                matchedEntry = entry;
                 break;
               }
             }
 
-            if (matched) {
-              const isBreaking = /^\[?\w+!\]?:/i.test(title);
+            if (matchedEntry) {
+              const matched = matchedEntry.label;
+              const isBreaking = matchedEntry.alwaysBreaking || /^\[?\w+!\]?:/i.test(title);
               const labelsToApply = isBreaking ? [matched, 'breaking'] : [matched];
               const existingLabels = context.payload.pull_request.labels.map(l => l.name);
 
@@ -134,12 +138,16 @@ jobs:
                 `This PR does not have a recognised changelog label. Please update your PR title to begin with one of the following:\n\n` +
                 `| Prefix | Examples |\n` +
                 `| --- | --- |\n` +
-                `| Features    | \`[feat]:\` \`feat:\` \`[feature]:\` |\n` +
-                `| Bug fixes   | \`[fix]:\` \`fix:\` \`[bug]:\` |\n` +
-                `| Docs        | \`[docs]:\` \`docs:\` \`[doc]:\` |\n` +
-                `| CI/CD       | \`[ci]:\` \`ci:\` \`[cicd]:\` |\n` +
-                `| Maintenance | \`[chore]:\` \`[refactor]:\` \`[ops]:\` \`[test]:\` \`[style]:\` |\n\n` +
-                `Add \`!\` before the colon to flag a breaking change, e.g. \`[feat!]:\` or \`fix!:\``
+                `| Features       | \`[feat]:\` \`feat:\` \`[feature]:\` |\n` +
+                `| Bug fixes      | \`[fix]:\` \`fix:\` \`[bug]:\` |\n` +
+                `| Docs           | \`[docs]:\` \`docs:\` \`[doc]:\` |\n` +
+                `| Deprecations   | \`[deprecat]:\` \`[deprecated]:\` \`[deprecation]:\` |\n` +
+                `| Removals       | \`[remove]:\` \`remove:\` \`[removed]:\` |\n` +
+                `| Security       | \`[security]:\` \`security:\` \`[sec]:\` |\n` +
+                `| CI/CD          | \`[ci]:\` \`ci:\` \`[cicd]:\` |\n` +
+                `| Maintenance    | \`[chore]:\` \`[refactor]:\` \`[ops]:\` \`[test]:\` \`[style]:\` |\n\n` +
+                `Add \`!\` before the colon to flag a breaking change, e.g. \`[feat!]:\` or \`fix!:\`\n` +
+                `Note: \`[remove]:\` / \`[removed]:\` always implies breaking.`
               );
               core.setFailed('PR is missing a changelog label.');
             } else {
