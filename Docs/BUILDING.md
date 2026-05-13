@@ -33,6 +33,22 @@ When you're ready to test your changes properly you can run the `BuildAndTest` t
 
 >ℹ To ensure stability of builds the `_init.ps1` will always download and use the latest stable version of `Brownserve.PSTools` to build the module. If you want to test how your changes are likely to affect the build process of the module then you can pass the `-UseWorkingCopy` parameter.
 
+## Self-consuming builds
+
+This repository uses itself to build itself: the build scripts call cmdlets from `Brownserve.PSTools`, and `_init.ps1` satisfies that dependency by downloading the latest stable published version of the module from NuGet. Only the PowerShell module is packaged; the build scripts themselves always run from the local working copy.
+
+### Shipping changes the build scripts depend on
+
+Because the build scripts pull the module from NuGet, you can't update them to use new cmdlet behaviour until that behaviour is published. The recommended sequence is:
+
+1. Make your module changes and test locally. If the cmdlet you changed is one the build scripts call, pass `-UseWorkingCopy` so the build loads your local copy of the module rather than the stable NuGet version, confirming your changes don't break the build.
+2. Cut a new release following [RELEASING](./RELEASING.md).
+3. Open a new branch and update the build scripts to use the new functionality from the published version.
+
+**Deprecate before removing.** If you need to remove or rename a cmdlet or parameter that the build scripts use, deprecate it in one release and remove it in the next. This keeps the build working across the version boundary and gives other consumers time to migrate.
+
+**Pinning as an escape hatch.** If a bad release creates a bootstrapping problem, you can pin the module to a known-good version in `paket.dependencies` while you work out a fix.
+
 ## Building locally
 
 There are two ways to get all the dependencies you need to build locally, either using the included `.devcontainer` or manually installing them.
