@@ -8,6 +8,11 @@ on:
         required: true
         default: '"nuget", "PSGallery", "GitHub"'
         type: string
+      use_working_copy:
+        description: 'Use the working copy of Brownserve.PSTools instead of the published NuGet package'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   release:
@@ -36,15 +41,20 @@ jobs:
           NugetFeedAPIKey: ${{ secrets.NUGET_API_KEY }}
           PSGalleryAPIKey: ${{ secrets.POWERSHELL_GALLERY_API_KEY }}
         run: |
-            ./Brownserve.PSTools/.build/build.ps1 `
-              -BranchName $env:GITHUB_REF `
-              -GitHubRepoName 'Brownserve.PSTools' `
-              -Build 'release' `
-              -GitHubReleaseToken $env:GitHubToken `
-              -NugetFeedAPIKey $env:NugetFeedAPIKey `
-              -PSGalleryAPIKey $env:PSGalleryAPIKey `
-              -PublishTo ${{ inputs.publish_to }} `
-              -Verbose
+            $Params = @{
+              BranchName = $env:GITHUB_REF
+              GitHubRepoName = 'Brownserve.PSTools'
+              Build = 'Release'
+              GitHubReleaseToken = $env:GitHubToken
+              NugetFeedApiKey = $env:NugetFeedAPIKey
+              PSGalleryAPIKey = $env:PSGalleryAPIKey
+              PublishTo = ${{ inputs.publish_to }}
+              Verbose = $true
+            }
+            if ('${{ inputs.use_working_copy }}' -eq 'true') {
+              $Params.Add('UseWorkingCopy', $true)
+            }
+            ./Brownserve.PSTools/.build/build.ps1 @Params
       # Step 5: Push a notification to Slack
       - name: notify-slack
         shell: pwsh
