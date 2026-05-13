@@ -146,7 +146,8 @@ function Compare-BrownserveRepository
         $IncludeMarkdownlint = $false
         $IncludeDependabot = $false
         $IncludeLabelPR = $false
-        $WorkflowUseWorkingCopyOption = $false
+        $IncludeBuildScripts = $false
+        $BuildScriptUseWorkingCopyOption = $false
 
         <#
             We type constrain these variables to ensure that we can easily add to them later on.
@@ -199,6 +200,8 @@ function Compare-BrownserveRepository
         $LicensePath = Join-Path $RepositoryPath 'LICENSE'
         $GitHubDirectory = Join-Path $RepositoryPath '.github'
         $WorkflowDirectory = Join-Path $GitHubDirectory 'workflows'
+        $BuildDirectory = Join-Path $RepositoryPath '.build'
+        $BuildTasksDirectory = Join-Path $BuildDirectory 'tasks'
 
         <#
             To help with consistency we store a special manifest file in the repository that contains some basic information
@@ -390,6 +393,7 @@ function Compare-BrownserveRepository
                 $IncludeMarkdownlint = $true
                 $IncludeDependabot = $true
                 $IncludeLabelPR = $true
+                $IncludeBuildScripts = $true
                 $DependabotParams = @{
                     Updates = @(
                         @{ Ecosystem = 'github-actions'; Directory = '/';       Interval = 'weekly' },
@@ -426,7 +430,8 @@ function Compare-BrownserveRepository
                 $IncludeMarkdownlint = $true
                 $IncludeDependabot = $true
                 $IncludeLabelPR = $true
-                $WorkflowUseWorkingCopyOption = $true
+                $IncludeBuildScripts = $true
+                $BuildScriptUseWorkingCopyOption = $true
                 $DependabotParams = @{
                     Updates = @(
                         @{ Ecosystem = 'github-actions'; Directory = '/';       Interval = 'weekly' },
@@ -1319,10 +1324,6 @@ function Compare-BrownserveRepository
             $ReleaseWorkflowPath = Join-Path $WorkflowDirectory 'release.yaml'
 
             $WorkflowCommonParams = @{ ModuleName = $ModuleInfo.Name }
-            if ($WorkflowUseWorkingCopyOption)
-            {
-                $WorkflowCommonParams['IncludeUseWorkingCopyOption'] = $true
-            }
 
             try
             {
@@ -1437,6 +1438,80 @@ function Compare-BrownserveRepository
             catch
             {
                 throw "Failed to process '$LabelPRWorkflowPath'.`n$($_.Exception.Message)"
+            }
+        }
+
+        if ($IncludeBuildScripts)
+        {
+            $BuildScriptPath = Join-Path $BuildDirectory 'build.ps1'
+            $BuildTasksScriptPath = Join-Path $BuildTasksDirectory 'build_tasks.ps1'
+
+            $BuildScriptParams = @{}
+            if ($BuildScriptUseWorkingCopyOption)
+            {
+                $BuildScriptParams['IncludeUseWorkingCopyOption'] = $true
+            }
+
+            try
+            {
+                $NewBuildScriptContent = New-BrownserveBuildScript @BuildScriptParams | Format-BrownserveContent
+                $NewBuildTasksScriptContent = New-BrownserveBuildTasksScript @BuildScriptParams | Format-BrownserveContent
+            }
+            catch
+            {
+                throw "Failed to generate build script content.`n$($_.Exception.Message)"
+            }
+
+            if (!(Test-Path $BuildDirectory))
+            {
+                $MissingDirectories += [pscustomobject]@{ Path = $BuildDirectory }
+            }
+            if (!(Test-Path $BuildTasksDirectory))
+            {
+                $MissingDirectories += [pscustomobject]@{ Path = $BuildTasksDirectory }
+            }
+
+            $BuildFiles = @(
+                @{ Path = $BuildScriptPath; Content = $NewBuildScriptContent },
+                @{ Path = $BuildTasksScriptPath; Content = $NewBuildTasksScriptContent }
+            )
+            foreach ($BuildFile in $BuildFiles)
+            {
+                try
+                {
+                    if (Test-Path $BuildFile.Path)
+                    {
+                        Write-Verbose "Checking for changes to '$($BuildFile.Path)'"
+                        $CurrentBuildFileContent = Get-BrownserveContent -Path $BuildFile.Path -ErrorAction 'Stop'
+                        $BuildFileCompare = Compare-Object `
+                            -ReferenceObject $CurrentBuildFileContent.Content `
+                            -DifferenceObject $BuildFile.Content.Content `
+                            -SyncWindow 1 `
+                            -ErrorAction 'Stop'
+                        if ($BuildFileCompare)
+                        {
+                            Write-Verbose "Changes detected in '$($BuildFile.Path)'"
+                            $ChangedFiles += [BrownserveContent]@{
+                                Path       = $BuildFile.Path
+                                Content    = $BuildFile.Content.Content
+                                LineEnding = 'LF'
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Write-Verbose "No existing build file found at '$($BuildFile.Path)', will create a new one."
+                        $MissingFiles += [BrownserveContent]@{
+                            Path       = $BuildFile.Path
+                            Content    = $BuildFile.Content.Content
+                            LineEnding = 'LF'
+                        }
+                    }
+                }
+                catch
+                {
+                    throw "Failed to process '$($BuildFile.Path)'.`n$($_.Exception.Message)"
+                }
             }
         }
     }

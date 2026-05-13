@@ -16,7 +16,6 @@ on:
         description: 'An optional notice to display on this release'
         required: false
         type: string
-###USE_WORKING_COPY_INPUT###
 
 jobs:
   stage-release:
@@ -52,7 +51,6 @@ jobs:
               ReleaseType = '${{ inputs.release_type}}'
               Verbose = $true
             }
-###USE_WORKING_COPY_CONDITIONAL###
             if ($env:ReleaseNotice) {
               $Params.Add('ReleaseNotice', $env:ReleaseNotice)
             }

@@ -8,12 +8,6 @@ on:
         required: true
         default: '"nuget", "PSGallery", "GitHub"'
         type: string
-      use_working_copy:
-        description: 'Use the working copy of Brownserve.PSTools instead of the published NuGet package'
-        required: false
-        type: boolean
-        default: false
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -50,9 +44,6 @@ jobs:
               PSGalleryAPIKey = $env:PSGalleryAPIKey
               PublishTo = ${{ inputs.publish_to }}
               Verbose = $true
-            }
-            if ('${{ inputs.use_working_copy }}' -eq 'true') {
-              $Params.Add('UseWorkingCopy', $true)
             }
             ./Brownserve.PSTools/.build/build.ps1 @Params
       # Step 5: Push a notification to Slack

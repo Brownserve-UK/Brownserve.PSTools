@@ -8,7 +8,6 @@ on:
         required: true
         default: '"nuget", "PSGallery", "GitHub"'
         type: string
-###USE_WORKING_COPY_INPUT###
 
 jobs:
   release:
@@ -47,7 +46,6 @@ jobs:
               PublishTo = ${{ inputs.publish_to }}
               Verbose = $true
             }
-###USE_WORKING_COPY_CONDITIONAL###
             ./###MODULE_NAME###/.build/build.ps1 @Params
       # Step 5: Push a notification to Slack
       - name: notify-slack
