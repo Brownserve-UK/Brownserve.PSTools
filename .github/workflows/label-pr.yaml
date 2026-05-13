@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
     steps:
       - name: apply-changelog-label
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const COMMENT_MARKER = '<!-- changelog-label-check -->';
