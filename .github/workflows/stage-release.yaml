@@ -50,6 +50,7 @@ jobs:
               GitHubStageReleaseToken = $env:GitHubPAT
               ReleaseType = '${{ inputs.release_type}}'
               Verbose = $true
+              UseWorkingCopy = $true
             }
             if ($env:ReleaseNotice) {
               $Params.Add('ReleaseNotice', $env:ReleaseNotice)
