@@ -144,6 +144,7 @@ function Compare-BrownserveRepository
         $MissingDirectories = @()
         $IncludeWorkflows = $false
         $IncludeMarkdownlint = $false
+        $IncludeDependabot = $false
 
         <#
             We type constrain these variables to ensure that we can easily add to them later on.
@@ -383,6 +384,13 @@ function Compare-BrownserveRepository
                 $LicenseType = 'MIT'
                 $IncludeWorkflows = $true
                 $IncludeMarkdownlint = $true
+                $IncludeDependabot = $true
+                $DependabotParams = @{
+                    Updates = @(
+                        @{ Ecosystem = 'github-actions'; Directory = '/';       Interval = 'weekly' },
+                        @{ Ecosystem = 'nuget';          Directory = '/.config'; Interval = 'weekly' }
+                    )
+                }
             }
             <#
                 For the repo that houses this very PowerShell module we want to do things a little differently.
@@ -411,6 +419,13 @@ function Compare-BrownserveRepository
                 }
                 $IncludeWorkflows = $true
                 $IncludeMarkdownlint = $true
+                $IncludeDependabot = $true
+                $DependabotParams = @{
+                    Updates = @(
+                        @{ Ecosystem = 'github-actions'; Directory = '/';       Interval = 'weekly' },
+                        @{ Ecosystem = 'nuget';          Directory = '/.config'; Interval = 'weekly' }
+                    )
+                }
             }
             Default
             {
@@ -1366,6 +1381,56 @@ function Compare-BrownserveRepository
     end
     {
         # Return an object that contains all the information we've gathered
+        if ($IncludeDependabot)
+        {
+            $DependabotGitHubDirectory = Join-Path $RepositoryPath '.github'
+            $DependabotPath = Join-Path $DependabotGitHubDirectory 'dependabot.yml'
+
+            # Ensure .github exists; guard against duplicates when $IncludeWorkflows has already added it
+            if (!(Test-Path $DependabotGitHubDirectory) -and ($MissingDirectories.Path -notcontains $DependabotGitHubDirectory))
+            {
+                $MissingDirectories += [pscustomobject]@{ Path = $DependabotGitHubDirectory }
+            }
+
+            try
+            {
+                $NewDependabotContent = New-BrownserveDependabotConfig @DependabotParams |
+                    Format-BrownserveContent
+                if (Test-Path $DependabotPath)
+                {
+                    Write-Verbose 'Checking for changes to dependabot.yml'
+                    $CurrentDependabotContent = Get-BrownserveContent -Path $DependabotPath -ErrorAction 'Stop'
+                    $DependabotCompare = Compare-Object `
+                        -ReferenceObject $CurrentDependabotContent.Content `
+                        -DifferenceObject $NewDependabotContent.Content `
+                        -SyncWindow 1 `
+                        -ErrorAction 'Stop'
+                    if ($DependabotCompare)
+                    {
+                        Write-Verbose 'Changes detected in dependabot.yml'
+                        $ChangedFiles += [BrownserveContent]@{
+                            Path       = $DependabotPath
+                            Content    = $NewDependabotContent.Content
+                            LineEnding = 'LF'
+                        }
+                    }
+                }
+                else
+                {
+                    Write-Verbose 'No existing dependabot.yml found, will create a new one.'
+                    $MissingFiles += [BrownserveContent]@{
+                        Path       = $DependabotPath
+                        Content    = $NewDependabotContent.Content
+                        LineEnding = 'LF'
+                    }
+                }
+            }
+            catch
+            {
+                throw "Failed to process '$DependabotPath'.`n$($_.Exception.Message)"
+            }
+        }
+
         $Return = [pscustomobject]@{
             MissingFiles       = $MissingFiles
             ChangedFiles       = $ChangedFiles
