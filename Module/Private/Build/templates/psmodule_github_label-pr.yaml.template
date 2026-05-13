@@ -12,15 +12,18 @@ on:
     branches:
       - main
 
+permissions: {}
+
 jobs:
   label-pr:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       issues: write
       pull-requests: write
     steps:
       - name: apply-changelog-label
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9
         with:
           script: |
             const COMMENT_MARKER = '<!-- changelog-label-check -->';
