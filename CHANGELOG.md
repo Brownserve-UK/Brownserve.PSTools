@@ -5,6 +5,17 @@ This project conforms to the [SemVer v2.0.0 spec](https://semver.org/spec/v2.0.0
 
 ## Release
 
+## [v0.17.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.17.0) (2026-05-13)
+
+### Breaking Changes
+
+- [style!]: make auto-changelog entries follow the "Keep a Changelog" format in [#128](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/128) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Fixed
+
+- [docs]: updating the contributing guide to cover new PR format in [#124](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/124) by [@shoddyguard](https://github.com/shoddyguard)
+
+
 ## [v0.16.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.16.1) (2026-05-11)
 
 ### Features
