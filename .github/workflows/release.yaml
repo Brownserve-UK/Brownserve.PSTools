@@ -16,7 +16,7 @@ jobs:
       # Step 1: Generate a short-lived token from the GitHub App
       - name: generate-app-token
         id: app-token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.BROWNSERVE_CI_APP_ID }}
           private-key: ${{ secrets.BROWNSERVE_CI_APP_PRIVATE_KEY }}
