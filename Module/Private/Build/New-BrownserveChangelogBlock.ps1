@@ -1,8 +1,10 @@
 <#
 .SYNOPSIS
-    Formats a changelog block for use in a Brownserve changelog.
+    Formats a Keep a Changelog block for a Brownserve changelog.
 .DESCRIPTION
-    Very simple that will create a properly formatted changelog block for use in a Brownserve changelog.
+    Creates a properly formatted changelog block following the Keep a Changelog standard.
+    Only sections that contain entries are emitted. Section order: Breaking Changes, Added,
+    Fixed, Deprecated, Removed, Changed, Security.
 #>
 function New-BrownserveChangelogBlock
 {
@@ -18,7 +20,7 @@ function New-BrownserveChangelogBlock
         [semver]
         $Version,
 
-        # Optional notice to be displayed at the top of the changelog
+        # Optional notice displayed between the version header and the first section
         [Parameter(
             Mandatory = $false,
             Position = 2,
@@ -27,37 +29,65 @@ function New-BrownserveChangelogBlock
         [string]
         $Notice,
 
-        # The new features that have been added in this version
-        [Parameter(
-            Mandatory = $true,
-            Position = 3,
-            ValueFromPipelineByPropertyName = $true
-        )]
-        [array]
-        $Features,
-
-        # Any bugfixes that have been introduced in this version
+        # Breaking changes (non-backwards-compatible)
         [Parameter(
             Mandatory = $false,
-            Position = 4,
             ValueFromPipelineByPropertyName = $true
         )]
-        [array]
-        $Bugfixes,
+        [string[]]
+        $BreakingChanges,
 
-        # Any known issues
+        # New features / additions
         [Parameter(
             Mandatory = $false,
-            Position = 5,
             ValueFromPipelineByPropertyName = $true
         )]
-        [array]
-        $KnownIssues,
+        [string[]]
+        $Added,
+
+        # Bug fixes
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [string[]]
+        $Fixed,
+
+        # Deprecations
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [string[]]
+        $Deprecated,
+
+        # Removed features
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [string[]]
+        $Removed,
+
+        # Backwards-compatible changes
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [string[]]
+        $Changed,
+
+        # Security fixes
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [string[]]
+        $Security,
 
         # The repository owner
         [Parameter(
             Mandatory = $true,
-            Position = 6,
             ValueFromPipelineByPropertyName = $true
         )]
         [string]
@@ -66,7 +96,6 @@ function New-BrownserveChangelogBlock
         # The repository name
         [Parameter(
             Mandatory = $true,
-            Position = 7,
             ValueFromPipelineByPropertyName = $true
         )]
         [string]
@@ -75,13 +104,12 @@ function New-BrownserveChangelogBlock
         # The repository host
         [Parameter(
             Mandatory = $false,
-            Position = 8,
             ValueFromPipelineByPropertyName = $true
         )]
         [string]
         $RepositoryHost = 'github.com',
 
-        # The version this entry is being compared against, used to make the wording more specific
+        # The previous version, used to generate a comparison link
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true
@@ -89,62 +117,48 @@ function New-BrownserveChangelogBlock
         [semver]
         $SinceVersion
     )
-    begin
-    {
-    }
+    begin {}
     process
     {
-        # Make sure our repo URL doesn't have a trailing slash
-        $RepoURL = $RepoURL -replace '\/$', ''
+        $VersionStr = $Version.ToString()
+        $RepoBase = "https://$RepositoryHost/$RepositoryOwner/$RepositoryName"
 
-        # Start by creating each header
-        $VersionHeader = "## [v$($Version.ToString())](https://$RepositoryHost/$RepositoryOwner/$RepositoryName/tree/v$($Version.ToString())) ($(Get-Date -Format yyyy-MM-dd))`n"
+        $Block = "## [v$VersionStr]($RepoBase/tree/v$VersionStr) ($(Get-Date -Format 'yyyy-MM-dd'))`n"
+
         if ($Notice)
         {
-            if ($Notice -notmatch ('^_(.*)_$'))
+            if ($Notice -notmatch '^_(.*)_$')
             {
-                $Notice = "_$($Notice)_"
+                $Notice = "_$Notice_"
             }
-            $VersionHeader = $VersionHeader + "`n$Notice`n"
+            $Block += "`n$Notice`n"
         }
-        $SinceLabel = if ($SinceVersion) { "v$SinceVersion" } else { 'the last release' }
-        $FeaturesBlock = "### Features`n`nThese are the changes that have been made since $($SinceLabel):`n`n"
-        foreach ($Feature in $Features)
-        {
-            $FeaturesBlock = $FeaturesBlock + "- $Feature`n"
+
+        $Sections = [ordered]@{
+            'Breaking Changes' = $BreakingChanges
+            'Added'            = $Added
+            'Fixed'            = $Fixed
+            'Deprecated'       = $Deprecated
+            'Removed'          = $Removed
+            'Changed'          = $Changed
+            'Security'         = $Security
         }
-        $BugfixBlock = "### Bugfixes`n`nThe following bugs have been closed since $($SinceLabel):`n`n"
-        # If we've got some bug fixes, list them out otherwise simply add and N/A
-        if ($Bugfixes)
+
+        foreach ($Name in $Sections.Keys)
         {
-            foreach ($Bugfix in $Bugfixes)
+            $Entries = $Sections[$Name]
+            if ($Entries)
             {
-                $BugfixBlock = $BugfixBlock + "- $Bugfix`n"
-            }
-        }
-        else
-        {
-            $BugfixBlock = $BugfixBlock + "- *N/A*`n"
-        }
-        # Same for known issues
-        $KnownIssueBlock = "### Known Issues`n`nThe following bugs have been raised since $($SinceLabel) and remain unresolved:`n`n"
-        if ($KnownIssues)
-        {
-            foreach ($KnownIssue in $KnownIssues)
-            {
-                $KnownIssueBlock = $KnownIssueBlock + "- $KnownIssue`n"
+                $Block += "`n### $Name`n`n"
+                foreach ($Entry in $Entries)
+                {
+                    $Block += "- $Entry`n"
+                }
             }
         }
-        else
-        {
-            $KnownIssueBlock = $KnownIssueBlock + "- *N/A*`n"
-        }
-        $KnownIssueBlock += "`nFor a full list of current known issues see the project's [issues page](https://$RepositoryHost/$($RepositoryOwner)/$($RepositoryName)/issues)."
-        # Now concatenate all the bits together with some spacers and return it
-        $FinalBlock = $VersionHeader + "`n" + $FeaturesBlock + "`n" + $BugfixBlock + "`n" + $KnownIssueBlock
     }
     end
     {
-        Return $FinalBlock
+        return $Block
     }
 }

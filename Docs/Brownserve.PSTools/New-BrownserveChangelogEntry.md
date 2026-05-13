@@ -15,9 +15,9 @@ Creates a new changelog entry for a given version in the standard Brownserve for
 
 ```text
 New-BrownserveChangelogEntry [[-ChangelogPath] <String>] [-Version] <SemanticVersion> -RepositoryOwner <String>
- -RepositoryName <String> [-GitHubToken <String>] [-Notice <String>] [-Features <String[]>]
- [-Bugfixes <String[]>] [-KnownIssues <String[]>] [-IssueLabelsToInclude <String[]>]
- [-IssueLabelsToExclude <String[]>] [-Auto] [-SinceVersion <SemanticVersion>]
+ -RepositoryName <String> [-GitHubToken <String>] [-Notice <String>] [-BreakingChanges <String[]>]
+ [-Added <String[]>] [-Fixed <String[]>] [-Deprecated <String[]>] [-Removed <String[]>] [-Changed <String[]>]
+ [-Security <String[]>] [-Auto] [-SinceVersion <SemanticVersion>]
  [<CommonParameters>]
 ```
 
@@ -39,6 +39,22 @@ This would generate a changelog entry for version 1.0.0 of the Brownserve.PSTool
 
 ## PARAMETERS
 
+### -Added
+
+New additions to include (manual override, used without -Auto)
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
 ### -Auto
 
 An optional flag to indicate that the cmdlet should attempt to automatically populate the changelog entry with features, bugfixes and known issues
@@ -55,9 +71,25 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -Bugfixes
+### -BreakingChanges
 
-An optional list of bugfixes to add to the changelog (these will be added alongside any auto-generated bugfixes)
+Breaking changes to include (manual override, used without -Auto)
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Changed
+
+Backwards-compatible changes to include (manual override, used without -Auto)
 
 ```yaml
 Type: String[]
@@ -87,9 +119,25 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: True
 ```
 
-### -Features
+### -Deprecated
 
-An optional list of features to add to the changelog (these will be added alongside any auto-generated features)
+Deprecations to include (manual override, used without -Auto)
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Fixed
+
+Bug fixes to include (manual override, used without -Auto)
 
 ```yaml
 Type: String[]
@@ -119,60 +167,28 @@ Accept pipeline input: True (ByPropertyName)
 Accept wildcard characters: False
 ```
 
-### -IssueLabelsToExclude
-
-An optional list of labels to use to filter bug fixes/known issues when auto-generating the changelog entry
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -IssueLabelsToInclude
-
-An optional list of labels to use to filter bug fixes/known issues when auto-generating the changelog entry
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
-### -KnownIssues
-
-An optional list of known issues to add to the changelog (these will be added alongside any auto-generated known issues)
-
-```yaml
-Type: String[]
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: True (ByPropertyName)
-Accept wildcard characters: False
-```
-
 ### -Notice
 
 An optional notice to attach to this release, it will appear between the release header and the features section.
 
 ```yaml
 Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Removed
+
+Removed features to include (manual override, used without -Auto)
+
+```yaml
+Type: String[]
 Parameter Sets: (All)
 Aliases:
 
@@ -211,6 +227,22 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
+Position: Named
+Default value: None
+Accept pipeline input: True (ByPropertyName)
+Accept wildcard characters: False
+```
+
+### -Security
+
+Security fixes to include (manual override, used without -Auto)
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases:
+
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: True (ByPropertyName)

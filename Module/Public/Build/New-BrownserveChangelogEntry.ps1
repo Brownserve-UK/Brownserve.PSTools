@@ -1,10 +1,14 @@
 <#
 .SYNOPSIS
-    Creates a new changelog entry for a given version in the standard Brownserve format.
+    Creates a new Keep a Changelog entry for a given version in the standard Brownserve format.
 .DESCRIPTION
-    This cmdlet will generate a new changelog entry in the standard Brownserve format.
-    Providing the -Auto parameter will cause the cmdlet to attempt to automatically populate the changelog entry with features, bugfixes and known issues
-    based on the GitHub pull requests and issues that have been open/closed since the last release.
+    Generates a new changelog entry following the Keep a Changelog standard.
+    Providing the -Auto parameter causes the cmdlet to query merged GitHub pull requests since
+    the last release and categorise them into sections (Breaking Changes, Added, Fixed,
+    Deprecated, Removed, Changed, Security) based on their GitHub labels.
+    PRs labelled 'cicd' are excluded from the changelog. PRs labelled 'removed' appear in
+    both the Breaking Changes and Removed sections. All other PRs with a 'breaking' label
+    appear only in Breaking Changes.
 #>
 function New-BrownserveChangelogEntry
 {
@@ -20,7 +24,7 @@ function New-BrownserveChangelogEntry
         [ValidateNotNullOrEmpty()]
         [SupportsWildcards()]
         [string]
-        $ChangelogPath = (Join-Path $PWD "CHANGELOG.md"),
+        $ChangelogPath = (Join-Path $PWD 'CHANGELOG.md'),
 
         # The version number to use for the new entry
         [Parameter(
@@ -50,7 +54,7 @@ function New-BrownserveChangelogEntry
         [string]
         $RepositoryName,
 
-        # The GitHub token to use for API calls
+        # The GitHub token to use for API calls (required when using -Auto)
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true
@@ -59,7 +63,7 @@ function New-BrownserveChangelogEntry
         [string]
         $GitHubToken,
 
-        # An optional notice to attach to this release, it will appear between the release header and the features section.
+        # An optional notice to attach to this release
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true
@@ -67,47 +71,63 @@ function New-BrownserveChangelogEntry
         [string]
         $Notice,
 
-        # An optional list of features to add to the changelog (these will be added alongside the auto-generated features)
+        # Breaking changes to include (manual override, used without -Auto)
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true
         )]
         [string[]]
-        $Features,
+        $BreakingChanges,
 
-        # An optional list of bugfixes to add to the changelog (these will be added alongside the auto-generated bugfixes)
+        # New additions to include (manual override, used without -Auto)
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true
         )]
         [string[]]
-        $Bugfixes,
+        $Added,
 
-        # An optional list of known issues to add to the changelog (these will be added alongside the auto-generated known issues)
+        # Bug fixes to include (manual override, used without -Auto)
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true
         )]
         [string[]]
-        $KnownIssues,
+        $Fixed,
 
-        # An optional list of labels to use to filter bug fixes/known issues
+        # Deprecations to include (manual override, used without -Auto)
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true
         )]
         [string[]]
-        $IssueLabelsToInclude = @('bug', 'documentation'),
+        $Deprecated,
 
-        # An optional list of labels to use to filter bug fixes/known issues
+        # Removed features to include (manual override, used without -Auto)
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true
         )]
         [string[]]
-        $IssueLabelsToExclude = @('feature request', 'enhancement', 'duplicate', 'unable to reproduce', 'wontfix'),
+        $Removed,
 
-        # An optional flag to indicate that the cmdlet should attempt to automatically populate the changelog entry with features, bugfixes and known issues
+        # Backwards-compatible changes to include (manual override, used without -Auto)
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [string[]]
+        $Changed,
+
+        # Security fixes to include (manual override, used without -Auto)
+        [Parameter(
+            Mandatory = $false,
+            ValueFromPipelineByPropertyName = $true
+        )]
+        [string[]]
+        $Security,
+
+        # Attempt to automatically populate the entry from merged PRs and their labels
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true
@@ -115,9 +135,9 @@ function New-BrownserveChangelogEntry
         [switch]
         $Auto,
 
-        # The version to treat as the baseline when collecting merges and issues.
+        # The version to treat as the baseline when collecting merges.
         # Defaults to the most recent changelog entry, but pass the last stable version here
-        # when promoting a pre-release to stable so that all changes since the stable release are included.
+        # when promoting a pre-release to stable so all changes since the stable release are included.
         [Parameter(
             Mandatory = $false,
             ValueFromPipelineByPropertyName = $true
@@ -125,7 +145,7 @@ function New-BrownserveChangelogEntry
         [System.Management.Automation.SemanticVersion]
         $SinceVersion,
 
-        # Special hidden parameter to allow the cmdlet to be called from the pipeline using input already collected from Read-BrownserveChangelog
+        # Special hidden parameter to allow the cmdlet to be called from the pipeline
         [Parameter(
             Mandatory = $false,
             ValueFromPipeline = $true,
@@ -137,18 +157,15 @@ function New-BrownserveChangelogEntry
     )
     begin
     {
-        if ($Auto)
+        if ($Auto -and !$GitHubToken)
         {
-            if (!$GitHubToken)
-            {
-                throw 'You must provide a GitHub token when using the -Auto parameter'
-            }
+            throw 'You must provide a GitHub token when using the -Auto parameter'
         }
     }
     process
     {
         $Return = $null
-        $PullRequestDetails = @()
+
         if (!$ChangelogObject)
         {
             try
@@ -158,7 +175,7 @@ function New-BrownserveChangelogEntry
             }
             catch
             {
-                throw "Failed to read changelog file '$ChangelogFullPath'. `n$($_.Exception.Message)"
+                throw "Failed to read changelog file '$ChangelogPath'.`n$($_.Exception.Message)"
             }
         }
 
@@ -183,21 +200,12 @@ function New-BrownserveChangelogEntry
 
         if ($Auto)
         {
-            <#
-                We'll get a list of all the merges since the last release.
-                We use these to form the basis of the "features" section of the changelog entry.
-            #>
             try
             {
                 $MergesSinceLastRelease = Get-GitMerges `
                     -RepositoryPath $ChangelogPath `
                     -ReferenceBranch "v$($LastReleasedVersion.Version)" `
                     -ErrorAction 'Stop'
-                <#
-                    We raise an error if there are no merges since the last release.
-                    This is because the "features" section should contain a list of all changes since the last release.
-                    Even if this only contains bugfixes, we still want to list them here.
-                #>
                 if (!$MergesSinceLastRelease)
                 {
                     throw 'No merges found since last release'
@@ -205,10 +213,9 @@ function New-BrownserveChangelogEntry
             }
             catch
             {
-                throw "Failed to get git merges since last release. `n$($_.Exception.Message)"
+                throw "Failed to get git merges since last release.`n$($_.Exception.Message)"
             }
 
-            # Now we'll reconcile the merge commit hashes with the pull requests to get the details we need for the changelog entry
             try
             {
                 $PullRequests = Get-GitHubPullRequests `
@@ -220,80 +227,80 @@ function New-BrownserveChangelogEntry
             }
             catch
             {
-                throw "Failed to get GitHub pull requests. `n$($_.Exception.Message)"
+                throw "Failed to get GitHub pull requests.`n$($_.Exception.Message)"
             }
+
+            $PullRequestDetails = @()
             $MergesSinceLastRelease | ForEach-Object {
                 $MergeCommit = $_
-                $PullRequest = $PullRequests | Where-Object { $_.merge_commit_sha -eq $MergeCommit }
-                if ($PullRequest)
+                $MatchedPR = $PullRequests | Where-Object { $_.merge_commit_sha -eq $MergeCommit }
+                if ($MatchedPR)
                 {
-                    $PullRequestDetails += $PullRequest
+                    $PullRequestDetails += $MatchedPR
                 }
                 else
                 {
-                    # Not every merge commit corresponds to a PR: branch sync merges (e.g. "Merge branch 'main' into feature")
-                    # appear in git log but have no matching closed PR, so we skip them rather than throwing.
                     Write-Warning "Merge commit '$MergeCommit' has no corresponding pull request, skipping (likely a branch sync merge)"
                 }
             }
 
-            # Now we'll get a list of all the issues that were closed/opened since the last release
-            try
+            foreach ($PR in $PullRequestDetails)
             {
-                $IssuesSinceLastRelease = Get-GitHubIssues `
-                    -RepositoryOwner $RepositoryOwner `
-                    -RepositoryName $RepositoryName `
-                    -GitHubToken $GitHubToken `
-                    -State 'all' `
-                    -ErrorAction 'Stop' |
-                    Where-Object { [datetime]$_.updated_at -gt $LastReleasedVersion.ReleaseDate.Date }
-                # We don't raise an error if there are no issues since the last release.
+                $Labels = $PR.labels.name
+                $Entry = "$($PR.title) in [#$($PR.number)]($($PR.html_url)) by [@$($PR.user.login)]($($PR.user.html_url))"
+
+                if ('removed' -in $Labels)
+                {
+                    # removed always implies breaking; surfaces in both sections
+                    $BreakingChanges += $Entry
+                    $Removed += $Entry
+                }
+                elseif ('breaking' -in $Labels)
+                {
+                    $BreakingChanges += $Entry
+                }
+                elseif ('enhancement' -in $Labels)
+                {
+                    $Added += $Entry
+                }
+                elseif ('bug' -in $Labels -or 'documentation' -in $Labels)
+                {
+                    $Fixed += $Entry
+                }
+                elseif ('deprecation' -in $Labels)
+                {
+                    $Deprecated += $Entry
+                }
+                elseif ('security' -in $Labels)
+                {
+                    $Security += $Entry
+                }
+                elseif ('maintenance' -in $Labels)
+                {
+                    $Changed += $Entry
+                }
+                elseif ('cicd' -in $Labels)
+                {
+                    Write-Verbose "Skipping CI/CD PR #$($PR.number): '$($PR.title)'"
+                }
+                else
+                {
+                    Write-Warning "PR #$($PR.number) '$($PR.title)' has no recognised changelog label, skipping"
+                }
             }
-            catch
+
+            $HasEntries = $BreakingChanges -or $Added -or $Fixed -or $Deprecated -or $Removed -or $Changed -or $Security
+            if (!$HasEntries)
             {
-                throw "Failed to get GitHub issues. `n$($_.Exception.Message)"
-            }
-
-            if ($IssueLabelsToInclude)
-            {
-                $IssuesSinceLastRelease = $IssuesSinceLastRelease |
-                    Where-Object { $_.labels.name -in $IssueLabelsToInclude }
-            }
-
-            if ($IssueLabelsToExclude)
-            {
-                $IssuesSinceLastRelease = $IssuesSinceLastRelease |
-                    Where-Object { $_.labels.name -notin $IssueLabelsToExclude }
-            }
-
-            # Work out which issues have been closed since the last release
-            $ClosedIssues = $IssuesSinceLastRelease |
-                Where-Object { $_.state -eq 'closed' } |
-                    Where-Object { [datetime]$_.closed_at -gt [datetime]$LastReleasedVersion.ReleaseDate.Date }
-
-            $ClosedIssues | ForEach-Object {
-                $Bugfixes += "[#$($_.number)]($($_.html_url)) - $($_.title)"
-            }
-
-            # Work out which issues have been opened since the last release
-            $NewIssues = $IssuesSinceLastRelease |
-                Where-Object { $_.state -eq 'open' } |
-                    Where-Object { [datetime]$_.created_at -gt [datetime]$LastReleasedVersion.ReleaseDate.Date }
-
-            $NewIssues | ForEach-Object {
-                $KnownIssues += "[#$($_.number)]($($_.html_url)) - $($_.title)"
-            }
-
-            # Create a "feature" entry for each pull request
-            $PullRequestDetails | ForEach-Object {
-                $Features += "$($_.title) in [#$($_.number)]($($_.html_url)) by [@$($_.user.login)]($($_.user.html_url))"
+                Write-Warning 'No user-facing changes found among merged PRs - the changelog entry will have no sections'
             }
         }
         else
         {
-            if (!$Features)
+            $HasEntries = $BreakingChanges -or $Added -or $Fixed -or $Deprecated -or $Removed -or $Changed -or $Security
+            if (!$HasEntries)
             {
-                throw 'You must provide a list of features when not using the -Auto parameter'
+                throw 'You must provide at least one section of entries when not using the -Auto parameter'
             }
         }
 
@@ -301,21 +308,16 @@ function New-BrownserveChangelogEntry
             Version         = $Version
             RepositoryOwner = $RepositoryOwner
             RepositoryName  = $RepositoryName
-            Features        = $Features
             SinceVersion    = $LastReleasedVersion.Version
         }
-        if ($Notice)
-        {
-            $ChangelogBlockParams.Add('Notice', $Notice)
-        }
-        if ($KnownIssues)
-        {
-            $ChangelogBlockParams.Add('KnownIssues', $KnownIssues)
-        }
-        if ($Bugfixes)
-        {
-            $ChangelogBlockParams.Add('Bugfixes', $Bugfixes)
-        }
+        if ($Notice)          { $ChangelogBlockParams['Notice']         = $Notice         }
+        if ($BreakingChanges) { $ChangelogBlockParams['BreakingChanges'] = $BreakingChanges }
+        if ($Added)           { $ChangelogBlockParams['Added']          = $Added           }
+        if ($Fixed)           { $ChangelogBlockParams['Fixed']          = $Fixed           }
+        if ($Deprecated)      { $ChangelogBlockParams['Deprecated']     = $Deprecated      }
+        if ($Removed)         { $ChangelogBlockParams['Removed']        = $Removed         }
+        if ($Changed)         { $ChangelogBlockParams['Changed']        = $Changed         }
+        if ($Security)        { $ChangelogBlockParams['Security']       = $Security        }
 
         try
         {
