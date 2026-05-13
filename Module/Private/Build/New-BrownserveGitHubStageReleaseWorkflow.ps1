@@ -29,16 +29,16 @@ function New-BrownserveGitHubStageReleaseWorkflow
         if ($IncludeUseWorkingCopyOption)
         {
             $UseWorkingCopyInput = @'
-        use_working_copy:
-          description: 'Use the working copy of Brownserve.PSTools instead of the published NuGet package'
-          required: false
-          type: boolean
-          default: false
+      use_working_copy:
+        description: 'Use the working copy of Brownserve.PSTools instead of the published NuGet package'
+        required: false
+        type: boolean
+        default: false
 '@
             $UseWorkingCopyConditional = @'
-              if ('${{ inputs.use_working_copy }}' -eq 'true') {
-                $Params.Add('UseWorkingCopy', $true)
-              }
+            if ('${{ inputs.use_working_copy }}' -eq 'true') {
+              $Params.Add('UseWorkingCopy', $true)
+            }
 '@
             $Template = $Template -replace '###USE_WORKING_COPY_INPUT###\r?\n', "$UseWorkingCopyInput`n"
             $Template = $Template -replace '###USE_WORKING_COPY_CONDITIONAL###\r?\n', "$UseWorkingCopyConditional`n"
