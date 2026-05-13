@@ -8,6 +8,7 @@ on:
         required: true
         default: '"nuget", "PSGallery", "GitHub"'
         type: string
+
 jobs:
   release:
     runs-on: ubuntu-latest
