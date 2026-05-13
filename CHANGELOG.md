@@ -5,6 +5,26 @@ This project conforms to the [SemVer v2.0.0 spec](https://semver.org/spec/v2.0.0
 
 ## Release
 
+## [v0.17.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.17.0) (2026-05-13)
+
+### Breaking Changes
+
+- [style!]: make auto-changelog entries follow the "Keep a Changelog" format in [#128](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/128) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Added
+
+- [feat]: update repo templates for PowerShell modules in [#138](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/138) by [@shoddyguard](https://github.com/shoddyguard)
+- [feat]: add dependabot to our PowerShell repos in [#132](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/132) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Fixed
+
+- [docs]: updating the contributing guide to cover new PR format in [#124](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/124) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Changed
+
+- [build]: Bump paket from 8.0.3 to 10.3.1 in [#137](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/137) by [@dependabot[bot]](https://github.com/apps/dependabot)
+
+
 ## [v0.16.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.16.1) (2026-05-11)
 
 ### Features
