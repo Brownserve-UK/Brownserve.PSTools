@@ -8,6 +8,8 @@ on:
 jobs:
   BuildTestAndCheck:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       # Step 1: Checkout the repo
       - name: checkout-module
