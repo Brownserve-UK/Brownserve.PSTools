@@ -134,14 +134,7 @@ param
         Mandatory = $False
     )]
     [hashtable[]]
-    $CustomNugetFeeds,
-
-    # If set will load the working copy of the module at the start of the build
-    [Parameter(
-        Mandatory = $false
-    )]
-    [switch]
-    $UseWorkingCopy
+    $CustomNugetFeeds###USE_WORKING_COPY_PARAM###
 )
 # Always stop on errors
 $ErrorActionPreference = 'Stop'
@@ -202,8 +195,7 @@ try
         ModuleDescription = $ModuleInfo.Description
         ModuleAuthor      = $ModuleAuthor
         ModuleGuid        = $ModuleInfo.GUID
-        ModuleTags        = $ModuleInfo.Tags
-        UseWorkingCopy    = ($PSBoundParameters['UseWorkingCopy'] -eq $true)
+        ModuleTags        = $ModuleInfo.Tags###USE_WORKING_COPY_BUILDPARAM###
     }
     if ($ReleaseType)
     {

@@ -3,13 +3,15 @@ function New-BrownserveBuildScript
     [CmdletBinding()]
     param
     (
+        [Parameter(Mandatory = $false)]
+        [switch]
+        $IncludeUseWorkingCopyOption
     )
     begin
     {
     }
     process
     {
-        # Import the template
         try
         {
             $ScriptTemplate = Get-Content (Join-Path $PSScriptRoot 'templates' psmodule_build_script.ps1.template) -Raw
@@ -19,7 +21,30 @@ function New-BrownserveBuildScript
             throw "Failed to import build script template.`n$($_.Exception.Message)"
         }
 
-        # Right now our build script is completely static and has no customisations so we can just return it as is
+        if ($IncludeUseWorkingCopyOption)
+        {
+            $UseWorkingCopyParam = @'
+,
+
+    # If set will load the working copy of the module at the start of the build
+    [Parameter(
+        Mandatory = $false
+    )]
+    [switch]
+    $UseWorkingCopy
+'@
+            $UseWorkingCopyBuildParam = @'
+
+        UseWorkingCopy    = ($PSBoundParameters['UseWorkingCopy'] -eq $true)
+'@
+            $ScriptTemplate = $ScriptTemplate -replace '###USE_WORKING_COPY_PARAM###', $UseWorkingCopyParam
+            $ScriptTemplate = $ScriptTemplate -replace '###USE_WORKING_COPY_BUILDPARAM###', $UseWorkingCopyBuildParam
+        }
+        else
+        {
+            $ScriptTemplate = $ScriptTemplate -replace '###USE_WORKING_COPY_PARAM###', ''
+            $ScriptTemplate = $ScriptTemplate -replace '###USE_WORKING_COPY_BUILDPARAM###', ''
+        }
     }
     end
     {
