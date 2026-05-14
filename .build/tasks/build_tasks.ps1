@@ -773,6 +773,10 @@ task UpdateModuleDocumentation ImportModule, {
         Resolve-Path to fail.
     #>
     $Script:ModulePagePath = Join-Path $Global:BrownserveRepoDocsDirectory "$ModuleName.md" | Resolve-Path
+    if ($script:Stage -eq $true)
+    {
+        $script:TrackedFiles += ($Script:ModulePagePath | Convert-Path)
+    }
 }
 
 <#
