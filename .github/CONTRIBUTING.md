@@ -4,7 +4,7 @@ Pull requests are welcome but please do bear in mind that these tools are design
 
 Code should follow the guidelines below and must have complete documentation before being submitted (it will fail CI/CD if it doesn't).
 Documentation will be generated for you when you run the `BuildWithDocs` task locally however some sections will be missing and will need to be completed manually.
-For more information on how to build the module see the [build documentation](./BUILDING.md).
+For more information on how to build the module see the [build documentation](../Docs/BUILDING.md).
 
 >**ℹ Please Note:**
 Our branch protection rules **require** all commits to be [signed](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).  

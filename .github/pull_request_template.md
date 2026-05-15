@@ -10,6 +10,6 @@ Please fill out the information below to aid in getting this PR merged as quickl
 Please ensure you have completed the following before submitting your PR:
 
 - [ ] Read the [contributing guide](https://github.com/brownserve-uk/brownserve.pstools#contributing)
-- [ ] Read our [style guidelines](https://github.com/Brownserve-UK/Brownserve.PSTools/blob/main/Docs/CONTRIBUTING.md#style-guidelines)
+- [ ] Read our [style guidelines](https://github.com/Brownserve-UK/Brownserve.PSTools/blob/main/.github/CONTRIBUTING.md#style-guidelines)
 - [ ] Read our [code of conduct](https://github.com/Brownserve-UK/Brownserve.PSTools/blob/main/Docs/CODE_OF_CONDUCT.md)
 - [ ] Updated help documentation (if creating/updating a cmdlet)
