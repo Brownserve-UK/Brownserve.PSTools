@@ -3,6 +3,10 @@
 !!! note
     These tools have been designed for use within Brownserve projects and will likely have limited use outside of that.
 
+## Prerequisites
+
+This module requires **PowerShell 6.0 or later**. You can download it from the [official PowerShell repository](https://github.com/PowerShell/PowerShell/releases).
+
 ## Installing the module
 
 To make the module available in your PowerShell session, install it from the PSGallery:
