@@ -59,6 +59,7 @@ $Global:BrownserveRepoBuildTasksDirectory = Join-Path $global:BrownserveRepoRoot
 $Global:BrownserveModuleDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath 'Module' | Convert-Path
 # Stores any tests that we pass to Pester
 $Global:BrownserveRepoTestsDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath '.build' -AdditionalChildPath 'tests' | Convert-Path
+$Global:BrownserveRepoDocsDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath 'pages' -AdditionalChildPath 'reference' | Convert-Path
 
 
 # Guess the name of the repo by it's name on disk
@@ -278,8 +279,6 @@ catch
 
 # Place any custom code below, this will be preserved whenever you update your _init script (DO NOT REMOVE THIS SECTION)
 ### Start user defined _init steps
-# TODO: This should be part of the permanent paths
-$Global:BrownserveRepoDocsDirectory = Join-Path $global:BrownserveRepoRootDirectory -ChildPath 'Docs' | Convert-Path
 ### End user defined _init steps
 
 # If we're not suppressing output then we'll pipe out a list of cmdlets that are now available to the user along with
