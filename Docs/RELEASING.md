@@ -82,7 +82,7 @@ In these cases you can run the `publish-release` GitHub action again _making sur
 
 For example to republish version `0.16.0-preview` to the PowerShell Gallery you would set the `publish_to` input to `PSGallery` and the `branch_tag` input to `0.16.0-preview`.
 
-![example](./resources/img/image.png)
+![example](./assets/img/publish_example.png)
 
 ## Custom NuGet Feeds
 
