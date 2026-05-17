@@ -68,10 +68,15 @@ function New-BrownservePowerShellModule
         {
             $ModuleName = $ModuleName -replace '\.psm1', ''
         }
-        $ModulePath = Join-Path $Path "$ModuleName.psm1"
+        $ModuleDirectory = Join-Path $Path 'Module'
+        $ModulePath = Join-Path $ModuleDirectory "$ModuleName.psm1"
         try
         {
             Assert-Directory -Path $Path -ErrorAction 'Stop'
+            if (!(Test-Path $ModuleDirectory))
+            {
+                New-Item $ModuleDirectory -ItemType Directory -ErrorAction 'Stop' | Out-Null
+            }
             if (Test-Path $ModulePath)
             {
                 if (!$Force)
@@ -131,12 +136,12 @@ function New-BrownservePowerShellModule
         try
         {
             # NEVER try to overwrite the public/private directories if they exist, they may have cmdlets in them
-            $PublicPath = (Join-Path $Path 'Public')
+            $PublicPath = (Join-Path $ModuleDirectory 'Public')
             if (!(Test-Path $PublicPath))
             {
                 New-Item $PublicPath -ItemType Directory -ErrorAction 'Stop' | Out-Null
             }
-            $PrivatePath = (Join-Path $Path 'Private')
+            $PrivatePath = (Join-Path $ModuleDirectory 'Private')
             if (!(Test-Path $PrivatePath))
             {
                 New-Item $PrivatePath -ItemType Directory -ErrorAction 'Stop' | Out-Null
