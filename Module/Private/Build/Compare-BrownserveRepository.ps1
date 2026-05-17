@@ -897,7 +897,7 @@ function Compare-BrownserveRepository
         <#
             We don't perform any modifications to the dotnet tools manifest, so we'll just test for it's existence
         #>
-        if (!(Test-Path $dotnetToolsConfigPath))
+        if (!(Test-Path $dotnetToolsConfigPath) -and ($MissingDirectories.Path -notcontains $dotnetToolsConfigPath))
         {
             $MissingDirectories += [pscustomobject]@{
                 Path = $dotnetToolsConfigPath
@@ -978,7 +978,7 @@ function Compare-BrownserveRepository
         }
 
         # Ensure the VS Code directory exists
-        if (!(Test-Path $VSCodePath))
+        if (!(Test-Path $VSCodePath) -and ($MissingDirectories.Path -notcontains $VSCodePath))
         {
             $MissingDirectories += [pscustomobject]@{
                 Path = $VSCodePath
@@ -1319,6 +1319,52 @@ function Compare-BrownserveRepository
             }
         }
 
+        if ($ModuleInfo)
+        {
+            $ModuleInfoPath = Join-Path $BuildDirectory 'ModuleInfo.json'
+            try
+            {
+                $NewModuleInfoContent = [ordered]@{
+                    Name        = $ModuleInfo.Name
+                    Description = $ModuleInfo.Description
+                    GUID        = $ModuleInfo.GUID
+                    Tags        = $ModuleInfo.Tags
+                } | ConvertTo-Json -Depth 100 -ErrorAction 'Stop' | Format-BrownserveContent
+                if (Test-Path $ModuleInfoPath)
+                {
+                    Write-Verbose 'Checking for changes to ModuleInfo.json'
+                    $CurrentModuleInfoContent = Get-BrownserveContent -Path $ModuleInfoPath -ErrorAction 'Stop'
+                    $ModuleInfoCompare = Compare-Object `
+                        -ReferenceObject $CurrentModuleInfoContent.Content `
+                        -DifferenceObject $NewModuleInfoContent.Content `
+                        -SyncWindow 1 `
+                        -ErrorAction 'Stop'
+                    if ($ModuleInfoCompare)
+                    {
+                        Write-Verbose 'Changes detected in ModuleInfo.json'
+                        $ChangedFiles += [BrownserveContent]@{
+                            Path       = $ModuleInfoPath
+                            Content    = $NewModuleInfoContent.Content
+                            LineEnding = 'LF'
+                        }
+                    }
+                }
+                else
+                {
+                    Write-Verbose 'No existing ModuleInfo.json found, will create a new one.'
+                    $MissingFiles += [BrownserveContent]@{
+                        Path       = $ModuleInfoPath
+                        Content    = $NewModuleInfoContent.Content
+                        LineEnding = 'LF'
+                    }
+                }
+            }
+            catch
+            {
+                throw "Failed to process '$ModuleInfoPath'.`n$($_.Exception.Message)"
+            }
+        }
+
         if ($IncludeWorkflows)
         {
             $BuildsWorkflowPath = Join-Path $WorkflowDirectory 'builds.yaml'
@@ -1338,11 +1384,11 @@ function Compare-BrownserveRepository
                 throw "Failed to generate GitHub Actions workflow content.`n$($_.Exception.Message)"
             }
 
-            if (!(Test-Path $GitHubDirectory))
+            if (!(Test-Path $GitHubDirectory) -and ($MissingDirectories.Path -notcontains $GitHubDirectory))
             {
                 $MissingDirectories += [pscustomobject]@{ Path = $GitHubDirectory }
             }
-            if (!(Test-Path $WorkflowDirectory))
+            if (!(Test-Path $WorkflowDirectory) -and ($MissingDirectories.Path -notcontains $WorkflowDirectory))
             {
                 $MissingDirectories += [pscustomobject]@{ Path = $WorkflowDirectory }
             }
@@ -1464,11 +1510,11 @@ function Compare-BrownserveRepository
                 throw "Failed to generate build script content.`n$($_.Exception.Message)"
             }
 
-            if (!(Test-Path $BuildDirectory))
+            if (!(Test-Path $BuildDirectory) -and ($MissingDirectories.Path -notcontains $BuildDirectory))
             {
                 $MissingDirectories += [pscustomobject]@{ Path = $BuildDirectory }
             }
-            if (!(Test-Path $BuildTasksDirectory))
+            if (!(Test-Path $BuildTasksDirectory) -and ($MissingDirectories.Path -notcontains $BuildTasksDirectory))
             {
                 $MissingDirectories += [pscustomobject]@{ Path = $BuildTasksDirectory }
             }
