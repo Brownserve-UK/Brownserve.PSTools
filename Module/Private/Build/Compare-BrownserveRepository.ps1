@@ -1319,6 +1319,52 @@ function Compare-BrownserveRepository
             }
         }
 
+        if ($ModuleInfo)
+        {
+            $ModuleInfoPath = Join-Path $BuildDirectory 'ModuleInfo.json'
+            try
+            {
+                $NewModuleInfoContent = [ordered]@{
+                    Name        = $ModuleInfo.Name
+                    Description = $ModuleInfo.Description
+                    GUID        = $ModuleInfo.GUID
+                    Tags        = $ModuleInfo.Tags
+                } | ConvertTo-Json -Depth 100 -ErrorAction 'Stop' | Format-BrownserveContent
+                if (Test-Path $ModuleInfoPath)
+                {
+                    Write-Verbose 'Checking for changes to ModuleInfo.json'
+                    $CurrentModuleInfoContent = Get-BrownserveContent -Path $ModuleInfoPath -ErrorAction 'Stop'
+                    $ModuleInfoCompare = Compare-Object `
+                        -ReferenceObject $CurrentModuleInfoContent.Content `
+                        -DifferenceObject $NewModuleInfoContent.Content `
+                        -SyncWindow 1 `
+                        -ErrorAction 'Stop'
+                    if ($ModuleInfoCompare)
+                    {
+                        Write-Verbose 'Changes detected in ModuleInfo.json'
+                        $ChangedFiles += [BrownserveContent]@{
+                            Path       = $ModuleInfoPath
+                            Content    = $NewModuleInfoContent.Content
+                            LineEnding = 'LF'
+                        }
+                    }
+                }
+                else
+                {
+                    Write-Verbose 'No existing ModuleInfo.json found, will create a new one.'
+                    $MissingFiles += [BrownserveContent]@{
+                        Path       = $ModuleInfoPath
+                        Content    = $NewModuleInfoContent.Content
+                        LineEnding = 'LF'
+                    }
+                }
+            }
+            catch
+            {
+                throw "Failed to process '$ModuleInfoPath'.`n$($_.Exception.Message)"
+            }
+        }
+
         if ($IncludeWorkflows)
         {
             $BuildsWorkflowPath = Join-Path $WorkflowDirectory 'builds.yaml'
