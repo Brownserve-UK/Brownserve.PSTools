@@ -5,6 +5,15 @@ This project conforms to the [SemVer v2.0.0 spec](https://semver.org/spec/v2.0.0
 
 ## Release
 
+## [v0.18.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.18.0) (2026-05-17)
+
+### Fixed
+
+- docs: move module documentation over to using mkdocs in [#156](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/156) by [@shoddyguard](https://github.com/shoddyguard)
+- docs: refactor repo documentation in [#155](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/155) by [@shoddyguard](https://github.com/shoddyguard)
+- fix: module help version updater in [#153](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/153) by [@shoddyguard](https://github.com/shoddyguard)
+
+
 ## [v0.17.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.17.0) (2026-05-13)
 
 _Going forward this Changelog will use the "Keep a Changelog" format_
