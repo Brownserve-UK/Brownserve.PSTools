@@ -394,6 +394,7 @@ function Compare-BrownserveRepository
                 $IncludeDependabot = $true
                 $IncludeLabelPR = $true
                 $IncludeBuildScripts = $true
+                $IncludeMkDocs = $true
                 $DependabotParams = @{
                     Updates = @(
                         @{ Ecosystem = 'github-actions'; Directory = '/';       Interval = 'weekly' },
@@ -431,6 +432,7 @@ function Compare-BrownserveRepository
                 $IncludeDependabot = $true
                 $IncludeLabelPR = $true
                 $IncludeBuildScripts = $true
+                $IncludeMkDocs = $true
                 $BuildScriptUseWorkingCopyOption = $true
                 $DependabotParams = @{
                     Updates = @(
@@ -1511,6 +1513,79 @@ function Compare-BrownserveRepository
                 catch
                 {
                     throw "Failed to process '$($BuildFile.Path)'.`n$($_.Exception.Message)"
+                }
+            }
+        }
+
+        if ($IncludeMkDocs)
+        {
+            $PagesDirectory          = Join-Path $RepositoryPath 'pages'
+            $PagesReferenceDirectory = Join-Path $PagesDirectory 'reference'
+            $PagesModuleDirectory    = Join-Path $PagesReferenceDirectory $ModuleInfo.Name
+
+            foreach ($Dir in @($PagesDirectory, $PagesReferenceDirectory, $PagesModuleDirectory))
+            {
+                if (!(Test-Path $Dir) -and ($MissingDirectories.Path -notcontains $Dir))
+                {
+                    $MissingDirectories += [pscustomobject]@{ Path = $Dir }
+                }
+            }
+
+            try
+            {
+                $NewMkDocsConfigContent      = New-MkDocsConfig      -ModuleName $ModuleInfo.Name | Format-BrownserveContent
+                $NewMkDocsRequirementsContent = New-MkDocsRequirements                             | Format-BrownserveContent
+                $NewMkDocsIndexContent       = New-MkDocsIndexPage   -ModuleName $ModuleInfo.Name | Format-BrownserveContent
+                $NewMkDocsPagesContent       = New-MkDocsPagesFile                                 | Format-BrownserveContent
+            }
+            catch
+            {
+                throw "Failed to generate MkDocs file content.`n$($_.Exception.Message)"
+            }
+
+            $MkDocsFiles = @(
+                @{ Path = (Join-Path $RepositoryPath 'mkdocs.yml');                          Content = $NewMkDocsConfigContent },
+                @{ Path = (Join-Path $RepositoryPath 'requirements.txt');                    Content = $NewMkDocsRequirementsContent },
+                @{ Path = (Join-Path $PagesDirectory 'index.md');                            Content = $NewMkDocsIndexContent },
+                @{ Path = (Join-Path $PagesModuleDirectory '.pages');                        Content = $NewMkDocsPagesContent }
+            )
+
+            foreach ($MkDocsFile in $MkDocsFiles)
+            {
+                try
+                {
+                    if (Test-Path $MkDocsFile.Path)
+                    {
+                        Write-Verbose "Checking for changes to '$($MkDocsFile.Path)'"
+                        $CurrentMkDocsContent = Get-BrownserveContent -Path $MkDocsFile.Path -ErrorAction 'Stop'
+                        $MkDocsCompare = Compare-Object `
+                            -ReferenceObject $CurrentMkDocsContent.Content `
+                            -DifferenceObject $MkDocsFile.Content.Content `
+                            -SyncWindow 1 `
+                            -ErrorAction 'Stop'
+                        if ($MkDocsCompare)
+                        {
+                            Write-Verbose "Changes detected in '$($MkDocsFile.Path)'"
+                            $ChangedFiles += [BrownserveContent]@{
+                                Path       = $MkDocsFile.Path
+                                Content    = $MkDocsFile.Content.Content
+                                LineEnding = 'LF'
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Write-Verbose "No existing file found at '$($MkDocsFile.Path)', will create a new one."
+                        $MissingFiles += [BrownserveContent]@{
+                            Path       = $MkDocsFile.Path
+                            Content    = $MkDocsFile.Content.Content
+                            LineEnding = 'LF'
+                        }
+                    }
+                }
+                catch
+                {
+                    throw "Failed to process '$($MkDocsFile.Path)'.`n$($_.Exception.Message)"
                 }
             }
         }

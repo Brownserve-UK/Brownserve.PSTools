@@ -1,0 +1,6 @@
+# ###MODULE_NAME###
+
+A collection of PowerShell tools used in various Brownserve projects.
+
+See the [Module Reference](reference/###MODULE_NAME###.md) for all available commands,
+or head to the [GitHub repository](https://github.com/Brownserve-UK/###MODULE_NAME###).
