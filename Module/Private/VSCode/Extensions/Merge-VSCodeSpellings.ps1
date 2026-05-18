@@ -46,6 +46,7 @@ function Merge-VSCodeSpellings
                     }
                 }
             }
+            $NewList = $NewList | Sort-Object
         }
         catch
         {
