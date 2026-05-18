@@ -65,3 +65,26 @@ jobs:
               -Webhook $env:BUILD_NOTIFICATION_WEBHOOK `
               -RepoBranch $env:BUILD_BRANCH `
               -RepoName $global:BrownserveRepoName
+
+  deploy-docs:
+    name: Deploy documentation
+    needs: [release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # needed for gh-deploy to push to gh-pages branch
+    steps:
+      # Step 1: Checkout the repo
+      - name: checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+      # Step 2: Set up Python
+      - name: setup-python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: '3.x'
+      # Step 3: Install MkDocs and build/deploy the site
+      - name: deploy-docs
+        run: |
+          pip install -r requirements.txt
+          mkdocs gh-deploy --force

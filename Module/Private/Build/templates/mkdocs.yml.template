@@ -24,6 +24,7 @@ plugins:
 
 nav:
   - Home: index.md
+  - Getting Started: getting-started.md
   - Module Reference:
     - Overview: reference/###MODULE_NAME###.md
     - ...
