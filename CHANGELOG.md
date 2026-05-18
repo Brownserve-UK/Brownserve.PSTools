@@ -5,6 +5,25 @@ This project conforms to the [SemVer v2.0.0 spec](https://semver.org/spec/v2.0.0
 
 ## Release
 
+## [v0.18.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.18.0) (2026-05-18)
+
+_
+
+### Added
+
+- feat: add pester test templates for documentation in [#163](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/163) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Fixed
+
+- fix: ensure New-BrownservePowerShellModule sets directory in [#162](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/162) by [@shoddyguard](https://github.com/shoddyguard)
+- fix: ensure unique file paths and create ModuleInfo.json in [#161](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/161) by [@shoddyguard](https://github.com/shoddyguard)
+- docs: refactor documentation for clarity and accessibility in [#160](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/160) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Deprecated
+
+- deprecated: deprecate several unused cmdlets in [#164](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/164) by [@shoddyguard](https://github.com/shoddyguard)
+
+
 ## [v0.17.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.17.1) (2026-05-17)
 
 ### Added
