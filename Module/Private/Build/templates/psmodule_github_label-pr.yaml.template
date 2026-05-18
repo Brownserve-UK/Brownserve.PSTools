@@ -79,14 +79,14 @@ jobs:
             const changelogLabels = ['bug', 'enhancement', 'documentation', 'cicd', 'maintenance', 'deprecation', 'removed', 'security'];
 
             const labelMap = [
-              { pattern: /^\[?feat(ure)?!?\]?:/i,                        label: 'enhancement'                     },
-              { pattern: /^\[?(fix|bug)!?\]?:/i,                         label: 'bug'                             },
-              { pattern: /^\[?docs?!?\]?:/i,                             label: 'documentation'                   },
-              { pattern: /^\[?ci(cd)?!?\]?:/i,                           label: 'cicd'                            },
-              { pattern: /^\[?(chore|ops|refactor|tests?|style)!?\]?:/i, label: 'maintenance'                     },
-              { pattern: /^\[?deprecat(ed|ion)?!?\]?:/i,                 label: 'deprecation'                     },
-              { pattern: /^\[?removed?!?\]?:/i,                          label: 'removed',  alwaysBreaking: true  },
-              { pattern: /^\[?sec(urity)?!?\]?:/i,                       label: 'security'                        },
+              { pattern: /^\[?feat(ure)?(\([^)]+\))?!?\]?:/i,                        label: 'enhancement'                     },
+              { pattern: /^\[?(fix|bug)(\([^)]+\))?!?\]?:/i,                         label: 'bug'                             },
+              { pattern: /^\[?docs?(\([^)]+\))?!?\]?:/i,                             label: 'documentation'                   },
+              { pattern: /^\[?ci(cd)?(\([^)]+\))?!?\]?:/i,                           label: 'cicd'                            },
+              { pattern: /^\[?(chore|ops|refactor|tests?|style)(\([^)]+\))?!?\]?:/i, label: 'maintenance'                     },
+              { pattern: /^\[?deprecat(ed|ion)?(\([^)]+\))?!?\]?:/i,                 label: 'deprecation'                     },
+              { pattern: /^\[?removed?(\([^)]+\))?!?\]?:/i,                          label: 'removed',  alwaysBreaking: true  },
+              { pattern: /^\[?sec(urity)?(\([^)]+\))?!?\]?:/i,                       label: 'security'                        },
             ];
 
             // Dependabot PRs: auto-label based on ecosystem, then skip normal flow
@@ -128,7 +128,7 @@ jobs:
 
             if (matchedEntry) {
               const matched = matchedEntry.label;
-              const isBreaking = matchedEntry.alwaysBreaking || /^\[?\w+!\]?:/i.test(title);
+              const isBreaking = matchedEntry.alwaysBreaking || /^\[?\w+(\([^)]+\))?!\]?:/i.test(title);
               const labelsToApply = isBreaking ? [matched, 'breaking'] : [matched];
               const existingLabels = context.payload.pull_request.labels.map(l => l.name);
 
@@ -180,6 +180,7 @@ jobs:
                 `| CI/CD          | \`[ci]:\` \`ci:\` \`[cicd]:\` |\n` +
                 `| Maintenance    | \`[chore]:\` \`[refactor]:\` \`[ops]:\` \`[test]:\` \`[style]:\` |\n\n` +
                 `Add \`!\` before the colon to flag a breaking change, e.g. \`[feat!]:\` or \`fix!:\`\n` +
+                `Scopes are also supported: \`feat(scope):\`, \`fix(scope)!:\`, etc.\n` +
                 `Note: \`[remove]:\` / \`[removed]:\` always implies breaking.`
               );
               core.setFailed('PR is missing a changelog label.');
