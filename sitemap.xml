@@ -2,370 +2,374 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/getting-started/</loc>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Add-BrownserveChangelogEntry/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Add-ChangelogEntry/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Add-GitChanges/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Add-GitHubReleaseAsset/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Add-ModuleHelp/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Add-PullRequestComment/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Assert-Command/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Assert-Directory/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Assert-Path/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Build-ModuleDocumentation/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/ConvertTo-BlockComment/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/ConvertTo-HTTPSRepoURL/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/ConvertTo-SortedHashtable/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Copy-GitRemoteRepository/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Format-BrownserveContent/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Format-Markdown/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Format-NuGetPackageVersion/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Format-TerraformResourceName/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-BrownserveContent/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-BrownserveRepositoryPaths/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-GitBranches/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-GitChanges/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-GitCurrentBranch/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-GitHubIssues/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-GitHubPullRequests/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-GitHubRelease/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-GitHubTags/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-GitMerges/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-GitRemoteOriginURL/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-GitRootDirectory/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-OpenPullRequests/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-Response/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-SPDXLicenseIDs/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-Terraform/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-TerraformResource/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-Vault/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Get-VaultSecret/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Import-PlatyPSModule/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Initialize-BrownserveRepository/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Install-ChocolateyPackage/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Invoke-ConvertFromYaml/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Invoke-ConvertToYaml/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Invoke-DownloadMethod/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Invoke-NativeCommand/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Invoke-TerraformApply/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Invoke-TerraformInit/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Invoke-TerraformPlan/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Invoke-TerraformShow/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Invoke-TerraformValidate/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Merge-Hashtable/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-BrownserveChangelogEntry/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-BrownservePowerShellModule/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-BrownservePowerShellModuleBuild/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-BrownserveTemporaryDirectory/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-BrownserveTemporaryFile/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-GitBranch/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-GitHubBranch/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-GitHubCommit/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-GitHubPullRequest/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-GitHubRelease/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-NuGetPackageVersion/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-PullRequest/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-SPDXLicense/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/New-TerraformResourceBlock/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Publish-TeamcityArtifact/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Push-GitChanges/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Read-BrownserveChangelog/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Read-Changelog/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Read-ConfigurationFromFile/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Remove-Markdown/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Search-FileContent/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Select-BrownserveContent/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Send-BuildNotification/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Send-SlackNotification/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Set-BrownserveContent/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Set-LineEndings/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Set-TeamcityBuildNumber/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Set-TerraformLogLevel/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Split-URI/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Submit-GitChanges/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Switch-GitBranch/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Test-Administrator/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Test-Numeric/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Test-OperatingSystem/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Update-BrownservePowerShellModule/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Update-BrownserveRepository/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Update-Changelog/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Update-Version/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Write-TeamcityBuildProblem/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
     <url>
          <loc>https://docs.brownserve.co.uk/Brownserve.PSTools/reference/Brownserve.PSTools/Write-TeamcityStatus/</loc>
-         <lastmod>2026-05-17</lastmod>
+         <lastmod>2026-05-18</lastmod>
     </url>
 </urlset>
