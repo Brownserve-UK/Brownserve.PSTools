@@ -18,11 +18,6 @@ A collection of PowerShell tools used across various Brownserve projects to aid 
 
 Inserts a new changelog entry into a given changelog file
 
-### [Add-ChangelogEntry](./Brownserve.PSTools/Add-ChangelogEntry.md)
-
-**This cmdlet is deprecated. Please use Add-BrownserveChangelogEntry instead.**
-Inserts a new changelog entry into a given changelog file
-
 ### [Add-GitChanges](./Brownserve.PSTools/Add-GitChanges.md)
 
 This cmdlet is a wrapper for the git command 'git add \<path\>'.
@@ -298,11 +293,6 @@ Pushes local git changes to the remote repository.
 
 Reads in a changelog file and returns the contents as a custom object.
 
-### [Read-Changelog](./Brownserve.PSTools/Read-Changelog.md)
-
-**This cmdlet is deprecated and will be removed in a future release, please use Read-BrownserveChangelog instead.**
-Retrieves version information and release notes from a CHANGELOG.md file.
-
 ### [Read-ConfigurationFromFile](./Brownserve.PSTools/Read-ConfigurationFromFile.md)
 
 Reads values from a configuration file
@@ -310,10 +300,6 @@ Reads values from a configuration file
 ### [Remove-Markdown](./Brownserve.PSTools/Remove-Markdown.md)
 
 This cmdlet removes markdown from a string.
-
-### [Search-FileContent](./Brownserve.PSTools/Search-FileContent.md)
-
-Searches a file for a given set of regex and returns any text between them.
 
 ### [Select-BrownserveContent](./Brownserve.PSTools/Select-BrownserveContent.md)
 
@@ -376,10 +362,6 @@ Updates a given Brownserve PowerShell module to use the latest template.
 ### [Update-BrownserveRepository](./Brownserve.PSTools/Update-BrownserveRepository.md)
 
 Updates a given repository to use the latest tooling and settings
-
-### [Update-Changelog](./Brownserve.PSTools/Update-Changelog.md)
-
-Updates a repo's changelog according to the semver v1.0.0 spec.
 
 ### [Update-Version](./Brownserve.PSTools/Update-Version.md)
 
