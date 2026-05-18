@@ -131,11 +131,6 @@ Gets the remote origin URL for a given repository
 
 Returns the root directory of a git repository.
 
-### [Get-OpenPullRequests](./Brownserve.PSTools/Get-OpenPullRequests.md)
-
-*This cmdlet is deprecated. Please use Get-GitHubOpenPullRequests instead*
-Gets the open Pull requests for a given repository
-
 ### [Get-Response](./Brownserve.PSTools/Get-Response.md)
 
 Prompts a user for a response.
@@ -260,11 +255,6 @@ Creates a new GitHub pull request
 ### [New-GitHubRelease](./Brownserve.PSTools/New-GitHubRelease.md)
 
 Creates a release on GitHub
-
-### [New-PullRequest](./Brownserve.PSTools/New-PullRequest.md)
-
-**This cmdlet is deprecated. Please use New-GitHubPullRequest instead.**
-Creates a new pull request in GitHub
 
 ### [New-SPDXLicense](./Brownserve.PSTools/New-SPDXLicense.md)
 
