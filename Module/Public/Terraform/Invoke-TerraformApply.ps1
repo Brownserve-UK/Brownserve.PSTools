@@ -67,6 +67,7 @@ function Invoke-TerraformApply
         [int]
         $Parallelism
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     if ($Target -and $PlanFilePath)
     {
         throw "Cannot specify both -Target and -PlanFilePath"

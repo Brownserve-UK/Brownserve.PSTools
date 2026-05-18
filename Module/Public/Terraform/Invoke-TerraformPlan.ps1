@@ -71,6 +71,7 @@ function Invoke-TerraformPlan
         [bool]
         $EnableColor = $false
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     $ValidExitCodes = @(0)
     $PlanArgs = @('plan')
     if ($EnableColor -eq $false)

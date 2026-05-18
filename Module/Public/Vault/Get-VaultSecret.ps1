@@ -13,6 +13,7 @@ function Get-VaultSecret
         [string]
         $SecretPath
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     try
     {
         Write-Verbose "Attempting to read $SecretPath from vault"

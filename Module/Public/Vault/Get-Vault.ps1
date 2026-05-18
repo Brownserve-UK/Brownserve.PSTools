@@ -22,6 +22,7 @@ function Get-Vault
         [string]
         $DownloadPath
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     # Make sure the directory path is good
     try
     {

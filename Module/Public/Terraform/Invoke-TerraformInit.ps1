@@ -30,6 +30,7 @@ function Invoke-TerraformInit
         [bool]
         $EnableColor = $false
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     $InitArgs = @('init')
     if (-not $EnableColor)
     {

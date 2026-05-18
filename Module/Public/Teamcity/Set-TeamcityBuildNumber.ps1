@@ -18,5 +18,6 @@ function Set-TeamcityBuildNumber
         [switch]
         $AppendCurrentBuildNumber
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     Write-Host "##teamcity[buildNumber '$BuildNumber$(if ($AppendCurrentBuildNumber){"_{build.number}"})']"
 }

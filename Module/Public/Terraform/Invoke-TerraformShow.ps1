@@ -37,6 +37,7 @@ function Invoke-TerraformShow
         [string]
         $InputFile
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     $ShowArgs = @('show -json')
     # If we've got an InputFile, validate it and add to the show command argument list
     if ($InputFile)

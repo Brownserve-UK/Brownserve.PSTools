@@ -9,6 +9,7 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Writes a Teamcity build problem to StdOut and the same message to StdErr.
 
 ## SYNTAX
