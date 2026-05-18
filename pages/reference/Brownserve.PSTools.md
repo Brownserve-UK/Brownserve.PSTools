@@ -2,7 +2,7 @@
 Module Name: Brownserve.PSTools
 Module Guid: 44b45ef7-6e06-4d07-901a-210b8df05b96
 Download Help Link: https://github.com/Brownserve-UK/Brownserve.PSTools/tree/main/pages/reference/Brownserve.PSTools
-Help Version: 0.17.1
+Help Version: 0.18.0
 Locale: en-US
 ---
 
