@@ -147,6 +147,7 @@ function Compare-BrownserveRepository
         $IncludeDependabot = $false
         $IncludeLabelPR = $false
         $IncludeBuildScripts = $false
+        $IncludeHelpTests = $false
         $BuildScriptUseWorkingCopyOption = $false
 
         <#
@@ -394,6 +395,7 @@ function Compare-BrownserveRepository
                 $IncludeDependabot = $true
                 $IncludeLabelPR = $true
                 $IncludeBuildScripts = $true
+                $IncludeHelpTests = $true
                 $IncludeMkDocs = $true
                 $DependabotParams = @{
                     Updates = @(
@@ -432,6 +434,7 @@ function Compare-BrownserveRepository
                 $IncludeDependabot = $true
                 $IncludeLabelPR = $true
                 $IncludeBuildScripts = $true
+                $IncludeHelpTests = $true
                 $IncludeMkDocs = $true
                 $BuildScriptUseWorkingCopyOption = $true
                 $DependabotParams = @{
@@ -1560,6 +1563,62 @@ function Compare-BrownserveRepository
                 {
                     throw "Failed to process '$($BuildFile.Path)'.`n$($_.Exception.Message)"
                 }
+            }
+        }
+
+        if ($IncludeHelpTests)
+        {
+            $BuildTestsDirectory = Join-Path $BuildDirectory 'tests'
+            $HelpTestsPath = Join-Path $BuildTestsDirectory 'Help.Tests.ps1'
+
+            try
+            {
+                $NewHelpTestsContent = New-BrownserveHelpTestsScript -ModuleName $ModuleInfo.Name | Format-BrownserveContent
+            }
+            catch
+            {
+                throw "Failed to generate Help.Tests.ps1 content.`n$($_.Exception.Message)"
+            }
+
+            if (!(Test-Path $BuildTestsDirectory) -and ($MissingDirectories.Path -notcontains $BuildTestsDirectory))
+            {
+                $MissingDirectories += [pscustomobject]@{ Path = $BuildTestsDirectory }
+            }
+
+            try
+            {
+                if (Test-Path $HelpTestsPath)
+                {
+                    Write-Verbose "Checking for changes to '$HelpTestsPath'"
+                    $CurrentHelpTestsContent = Get-BrownserveContent -Path $HelpTestsPath -ErrorAction 'Stop'
+                    $HelpTestsCompare = Compare-Object `
+                        -ReferenceObject $CurrentHelpTestsContent.Content `
+                        -DifferenceObject $NewHelpTestsContent.Content `
+                        -SyncWindow 1 `
+                        -ErrorAction 'Stop'
+                    if ($HelpTestsCompare)
+                    {
+                        Write-Verbose "Changes detected in '$HelpTestsPath'"
+                        $ChangedFiles += [BrownserveContent]@{
+                            Path       = $HelpTestsPath
+                            Content    = $NewHelpTestsContent.Content
+                            LineEnding = 'LF'
+                        }
+                    }
+                }
+                else
+                {
+                    Write-Verbose "No existing Help.Tests.ps1 found, will create a new one."
+                    $MissingFiles += [BrownserveContent]@{
+                        Path       = $HelpTestsPath
+                        Content    = $NewHelpTestsContent.Content
+                        LineEnding = 'LF'
+                    }
+                }
+            }
+            catch
+            {
+                throw "Failed to process '$HelpTestsPath'.`n$($_.Exception.Message)"
             }
         }
 
