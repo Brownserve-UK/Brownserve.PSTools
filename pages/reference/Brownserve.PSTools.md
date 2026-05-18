@@ -261,11 +261,6 @@ Creates a new GitHub pull request
 
 Creates a release on GitHub
 
-### [New-NuGetPackageVersion](./Brownserve.PSTools/New-NuGetPackageVersion.md)
-
-*This cmdlet has been deprecated and will be removed in a future release, please use Format-NuGetPackageVersion instead*
-Obtains a NuGet package version based on the build version number and branch name.
-
 ### [New-PullRequest](./Brownserve.PSTools/New-PullRequest.md)
 
 **This cmdlet is deprecated. Please use New-GitHubPullRequest instead.**
