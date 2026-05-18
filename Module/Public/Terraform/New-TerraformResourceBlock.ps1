@@ -21,7 +21,7 @@ function New-TerraformResourceBlock
     
     begin
     {
-        
+        Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     }
     
     process

@@ -9,6 +9,7 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Tells Teamcity to export a given file/folder as an artifact.
 
 ## SYNTAX

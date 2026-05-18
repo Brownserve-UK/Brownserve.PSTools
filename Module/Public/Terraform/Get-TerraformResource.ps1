@@ -31,7 +31,8 @@ function Get-TerraformResource
         [string]
         $TerraformConfigPath = $PWD
     )
-    
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
+
     # Remove quotations from resource types, we define them in our regex.
     $ResourceType = $ResourceType -replace '"', ''
     $ResourceName = $ResourceName -replace '"', ''

@@ -17,6 +17,7 @@ function Write-TeamcityBuildProblem
         [switch]
         $TerminatingError
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     $Message = $Message -replace "`n", "" -replace "`r", ""
     Write-Host "##teamcity[buildProblem description='$Message']" -ForegroundColor Red
     if ($TerminatingError)

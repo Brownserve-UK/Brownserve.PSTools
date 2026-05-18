@@ -9,6 +9,7 @@ schema: 2.0.0
 
 ## SYNOPSIS
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Creates a Terraform resource block that can easily be inserted into Terraform code.
 
 ## SYNTAX

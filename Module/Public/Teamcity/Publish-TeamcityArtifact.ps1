@@ -18,6 +18,7 @@ function Publish-TeamcityArtifact
         [string]
         $TargetDirectory
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     if ((Test-Path $ArtifactPath) -ne $true)
     {
         Write-Error "Artifact path $ArtifactPath is not valid"

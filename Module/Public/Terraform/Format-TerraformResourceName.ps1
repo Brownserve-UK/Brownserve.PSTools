@@ -21,6 +21,7 @@ function Format-TerraformResourceName
         [string]
         $ValidCharacters = '[^0-9a-zA-Z\-_]+'
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     $SanitizedName = $ResourceName -replace $ValidCharacters,''
     # Terraform breaks if a resource name starts with a digit, fix that up here.
     if ($SanitizedName -match '^\d')

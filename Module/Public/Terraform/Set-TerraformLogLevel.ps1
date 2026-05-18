@@ -12,6 +12,7 @@ function Set-TerraformLogLevel
         [string]
         $LogLevel = 'none'
     )
+    Write-Warning "This cmdlet is deprecated and will be removed in a future release."
     # Set TF_LOG to a blank string first - it's the only way to be sure we get the correct log-level
     $env:TF_LOG = ''
     if ($LogLevel -ne 'none')
