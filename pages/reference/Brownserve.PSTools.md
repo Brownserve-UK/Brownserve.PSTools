@@ -85,6 +85,7 @@ Formats a version number to ensure compatibility with NuGet and nuget.org
 
 ### [Format-TerraformResourceName](./Brownserve.PSTools/Format-TerraformResourceName.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Strips out illegal characters from Terraform resource names
 
 ### [Get-BrownserveContent](./Brownserve.PSTools/Get-BrownserveContent.md)
@@ -150,18 +151,22 @@ Attempts to get the latest SPDX license short ID list.
 
 ### [Get-Terraform](./Brownserve.PSTools/Get-Terraform.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Downloads the given version of Terraform for your OS
 
 ### [Get-TerraformResource](./Brownserve.PSTools/Get-TerraformResource.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Searches for and returns a given Terraform resource block.
 
 ### [Get-Vault](./Brownserve.PSTools/Get-Vault.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Downloads the given version of Vault for your OS
 
 ### [Get-VaultSecret](./Brownserve.PSTools/Get-VaultSecret.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Returns a secret from a given vault path
 
 ### [Import-PlatyPSModule](./Brownserve.PSTools/Import-PlatyPSModule.md)
@@ -194,22 +199,27 @@ Invokes a native command while gracefully handling the output and error streams.
 
 ### [Invoke-TerraformApply](./Brownserve.PSTools/Invoke-TerraformApply.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Invokes 'terraform apply' with a given set of arguments
 
 ### [Invoke-TerraformInit](./Brownserve.PSTools/Invoke-TerraformInit.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Performs a \`terraform init\`
 
 ### [Invoke-TerraformPlan](./Brownserve.PSTools/Invoke-TerraformPlan.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Invokes a Terraform plan with a selection of given parameters
 
 ### [Invoke-TerraformShow](./Brownserve.PSTools/Invoke-TerraformShow.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Runs the `terraform show` command and converts the output into a PowerShell object.
 
 ### [Invoke-TerraformValidate](./Brownserve.PSTools/Invoke-TerraformValidate.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Performs a 'terraform validate'
 
 ### [Merge-Hashtable](./Brownserve.PSTools/Merge-Hashtable.md)
@@ -272,10 +282,12 @@ Creates a new licence using the SPDX format
 
 ### [New-TerraformResourceBlock](./Brownserve.PSTools/New-TerraformResourceBlock.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Creates a Terraform resource block that can easily be inserted into Terraform code.
 
 ### [Publish-TeamcityArtifact](./Brownserve.PSTools/Publish-TeamcityArtifact.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Tells Teamcity to export a given file/folder as an artifact.
 
 ### [Push-GitChanges](./Brownserve.PSTools/Push-GitChanges.md)
@@ -325,10 +337,12 @@ Sets the line endings of a file to either CRLF or LF
 
 ### [Set-TeamcityBuildNumber](./Brownserve.PSTools/Set-TeamcityBuildNumber.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Sets the build number in Teamcity.
 
 ### [Set-TerraformLogLevel](./Brownserve.PSTools/Set-TerraformLogLevel.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Provides an easy way to set the Terraform log level.
 
 ### [Split-URI](./Brownserve.PSTools/Split-URI.md)
@@ -373,8 +387,10 @@ A simple function to increment a semantic version number.
 
 ### [Write-TeamcityBuildProblem](./Brownserve.PSTools/Write-TeamcityBuildProblem.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Writes a Teamcity build problem to StdOut and the same message to StdErr.
 
 ### [Write-TeamcityStatus](./Brownserve.PSTools/Write-TeamcityStatus.md)
 
+**This cmdlet is deprecated and will be removed in a future release.**
 Writes a status message to StdOut
