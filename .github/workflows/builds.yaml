@@ -4,6 +4,12 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - "module/**"
+      - ".build/**"
+      - ".config/**"
+      - "pages/reference/**"
+      - "nuget.config"
 
 permissions: {}
 
