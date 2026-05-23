@@ -16,7 +16,7 @@ This will build markdown PowerShell module documentation using PlatyPS
 ```text
 Build-ModuleDocumentation [-ModuleName] <String> [-ModulePath] <String> [-DocumentationPath] <String>
  [-ReloadModule] [-IncludeDontShow] [[-ModuleGUID] <Guid>] [[-HelpVersion] <SemanticVersion>]
- [<CommonParameters>]
+ [-NoModuleSubdirectory] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -130,6 +130,22 @@ Aliases:
 
 Required: True
 Position: 1
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -NoModuleSubdirectory
+
+If passed, the documentation will be generated without creating a subdirectory for the module.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
 Default value: None
 Accept pipeline input: False
 Accept wildcard characters: False
