@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release
 
+## [v0.19.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.19.0) (2026-05-23)
+
+### Breaking Changes
+
+- refactor!: remove TeamCity, Vault, Terraform cmdlets in [#182](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/182) by [@shoddyguard](https://github.com/shoddyguard)
+- refactor!: remove deprecated GitHub cmdlets in [#169](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/169) by [@shoddyguard](https://github.com/shoddyguard)
+- refactor!: remove `New-NuGetPackageVersion` in [#167](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/167) by [@shoddyguard](https://github.com/shoddyguard)
+- refactor!: remove `New-ChangelogBlock` in [#166](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/166) by [@shoddyguard](https://github.com/shoddyguard)
+- refactor!: remove `Read-Changelog` and `Search-FileContent` in [#168](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/168) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Added
+
+- feat: ensure new changelogs get our standard header by default in [#179](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/179) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Fixed
+
+- fix: remove unused ReleaseNotice logic in [#181](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/181) by [@shoddyguard](https://github.com/shoddyguard)
+- fix(ci): make check case insensitive in [#180](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/180) by [@shoddyguard](https://github.com/shoddyguard)
+- docs: update changelog header to mention `keep a changelog` in [#176](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/176) by [@shoddyguard](https://github.com/shoddyguard)
+- fix(templates): update repo templates in [#175](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/175) by [@shoddyguard](https://github.com/shoddyguard)
+- docs: switch mkdocs from using tabs to sidebar nav in [#174](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/174) by [@shoddyguard](https://github.com/shoddyguard)
+- fix: PR title interpolation in [#173](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/173) by [@shoddyguard](https://github.com/shoddyguard)
+- fix: make the module tests actually useful in [#171](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/171) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Changed
+
+- refactor: remove unused private cmdlets in [#172](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/172) by [@shoddyguard](https://github.com/shoddyguard)
+
+
 ## [v0.18.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.18.0) (2026-05-18)
 
 ### Added
