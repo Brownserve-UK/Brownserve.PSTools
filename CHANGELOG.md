@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release
 
+## [v0.19.2](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.19.2) (2026-05-23)
+
+### Added
+
+- feat: rework mkdocs structure in [#187](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/187) by [@shoddyguard](https://github.com/shoddyguard)
+
+### Fixed
+
+- fix: small fixes in [#189](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/189) by [@shoddyguard](https://github.com/shoddyguard)
+
+
 ## [v0.19.1](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.19.1) (2026-05-23)
 
 ### Fixed
