@@ -357,6 +357,7 @@ class BrownserveChangelog
     [BrownserveVersionHistory]$LatestVersion
     hidden [string]$ChangelogPath
     hidden [string[]]$Content
+    [bool]$HasPlaceholder
 
     BrownserveChangelog([BrownserveVersionHistory[]]$VersionHistory, [int]$NewEntryInsertLine, [string]$ChangelogPath, [string[]]$Content)
     {
@@ -390,6 +391,7 @@ class BrownserveChangelog
         $this.LatestVersion = $this.VersionHistory[0]
         $this.ChangelogPath = $Changelog.ChangelogPath
         $this.Content = $Changelog.Content
+        $this.HasPlaceholder = [bool]$Changelog.HasPlaceholder
     }
 
     BrownserveChangelog([hashtable]$Changelog)
@@ -415,6 +417,7 @@ class BrownserveChangelog
         $this.LatestVersion = $this.VersionHistory[0]
         $this.ChangelogPath = $Changelog.ChangelogPath
         $this.Content = $Changelog.Content
+        $this.HasPlaceholder = [bool]$Changelog.HasPlaceholder
     }
 }
 
