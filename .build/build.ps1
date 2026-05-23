@@ -66,13 +66,6 @@ param
     [string]
     $ReleaseType = 'minor',
 
-    # An optional release notice to include in the release
-    [Parameter(
-        Mandatory = $false
-    )]
-    [string]
-    $ReleaseNotice,
-
     # The various places to publish to
     [Parameter(
         Mandatory = $False
@@ -240,10 +233,6 @@ try
     if ($PublishTo)
     {
         $BuildParams.Add('PublishTo', $PublishTo)
-    }
-    if ($ReleaseNotice)
-    {
-        $BuildParams.Add('ReleaseNotice', $ReleaseNotice)
     }
     Write-Verbose "Invoking build: $Build"
     Invoke-Build @BuildParams -Verbose:($PSBoundParameters['Verbose'] -eq $true)
