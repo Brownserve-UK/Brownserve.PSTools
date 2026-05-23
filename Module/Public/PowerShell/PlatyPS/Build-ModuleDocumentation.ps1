@@ -260,7 +260,9 @@ function Build-ModuleDocumentation
                 -Path $PublicCmdletDocPath `
                 -Filter '*.md' `
                 -Recurse `
-                -ErrorAction 'Stop' | Select-Object -ExpandProperty FullName
+                -ErrorAction 'Stop' |
+                    Where-Object { $_.FullName -ne $ModulePagePath } |
+                        Select-Object -ExpandProperty FullName
 
             <#
                 Now we need to fix the documentation for each cmdlet.
