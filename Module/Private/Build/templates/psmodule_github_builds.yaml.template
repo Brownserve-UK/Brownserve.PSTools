@@ -8,7 +8,31 @@ on:
 permissions: {}
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - name: check-relevant-changes
+        id: filter
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FILES=$(gh pr view ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --json files --jq '.files[].path')
+          if echo "$FILES" | grep -qE '^(module/|\.build/|\.config/|pages/reference/|nuget\.config$)'; then
+            echo "relevant=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No relevant files changed, skipping build"
+            echo "relevant=false" >> "$GITHUB_OUTPUT"
+          fi
+
   BuildTestAndCheck:
+    needs: check-changes
+    if: needs.check-changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
