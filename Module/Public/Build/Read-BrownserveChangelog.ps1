@@ -200,11 +200,13 @@ function Read-BrownserveChangelog
             URL          = $PreviousURL
             ReleaseNotes = $LastReleaseNotes
         }
+        $HasPlaceholder = $VersionHistory.Count -eq 1 -and $VersionHistory[0].Version -eq [semver]'0.0.0'
         $Return += [BrownserveChangelog]@{
             VersionHistory     = $VersionHistory
             NewEntryInsertLine = $NewChangelogLine # This will be the line that we can start inserting new entries into
             ChangelogPath      = $ChangelogPath
             Content            = $Changelog
+            HasPlaceholder     = $HasPlaceholder
         }
     }
     end

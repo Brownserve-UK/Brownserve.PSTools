@@ -66,7 +66,14 @@ function Add-BrownserveChangelogEntry
         {
             Write-Verbose 'Splitting text to insert the new values'
             $Text1 = $ChangelogContent[0..$InsertLine]
-            $Text2 = $ChangelogContent[$InsertLine..$ChangelogContent.Length]
+            if ($ChangelogObject.HasPlaceholder)
+            {
+                $Text2 = @()
+            }
+            else
+            {
+                $Text2 = $ChangelogContent[$InsertLine..$ChangelogContent.Length]
+            }
             # Split our text by newline to get a nice array to merge with the others
             $NewText = $NewContent -split "`n"
             $NewText = $Text1 + $NewContent + $Text2
