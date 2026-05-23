@@ -142,6 +142,7 @@ function Compare-BrownserveRepository
         $MissingFiles = @()
         $ChangedFiles = @()
         $MissingDirectories = @()
+        $IncludeChangelog = $false
         $IncludeWorkflows = $false
         $IncludeMarkdownlint = $false
         $IncludeDependabot = $false
@@ -382,7 +383,7 @@ function Compare-BrownserveRepository
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
                 $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
                 $ExtraEditorConfig = $EditorConfigConfig.PowerShellModule
-                $Changelog = $true
+                $IncludeChangelog = $true
                 $InitParams = @{
                     IncludeModuleLoader   = $true
                     IncludePowerShellYaml = $true
@@ -422,7 +423,7 @@ function Compare-BrownserveRepository
                 $ExtraVSCodeExtensions = $VSCodeExtensionsConfig.PowerShellModule
                 $ExtraPackageAliases = $PackageAliasConfig.PowerShellModule
                 $ExtraEditorConfig = $EditorConfigConfig.PowerShellModule
-                $Changelog = $true
+                $IncludeChangelog = $true
                 $InitParams = @{
                     IncludeModuleLoader   = $false # we don't want to load the module locally, we want the stable version from nuget
                     IncludePowerShellYaml = $true
@@ -1244,15 +1245,25 @@ function Compare-BrownserveRepository
         }
 
         <#
-            For the changelog we only test to ensure it exists, we don't want to make any changes to it.
+            For the changelog we only create it if it doesn't already exist.
+            We never overwrite it as it contains manual release notes.
         #>
-        if ($Changelog -eq $true)
+        if ($IncludeChangelog)
         {
             if (!(Test-Path $ChangelogPath))
             {
+                try
+                {
+                    $NewChangelogContent = New-BrownserveChangelogHeader -ErrorAction 'Stop' | Format-BrownserveContent
+                }
+                catch
+                {
+                    throw "Failed to generate CHANGELOG.md content.`n$($_.Exception.Message)"
+                }
+                Write-Verbose 'No existing CHANGELOG.md found, will create a new one.'
                 $MissingFiles += [BrownserveContent]@{
                     Path       = $ChangelogPath
-                    Content    = ''
+                    Content    = $NewChangelogContent.Content
                     LineEnding = 'LF'
                 }
             }
