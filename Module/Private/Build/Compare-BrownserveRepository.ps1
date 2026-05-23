@@ -1636,7 +1636,7 @@ function Compare-BrownserveRepository
         if ($IncludeMkDocs)
         {
             $PagesDirectory          = Join-Path $RepositoryPath 'pages'
-            $PagesReferenceDirectory = Join-Path $PagesDirectory 'reference'
+            $PagesReferenceDirectory = Join-Path $PagesDirectory 'Cmdlet reference'
             $PagesModuleDirectory    = Join-Path $PagesReferenceDirectory $ModuleInfo.Name
 
             foreach ($Dir in @($PagesDirectory, $PagesReferenceDirectory, $PagesModuleDirectory))

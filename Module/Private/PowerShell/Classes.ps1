@@ -10,11 +10,14 @@ class BrownservePowerShellModule
         $RequiredKeys = @('name','description','guid','tags')
         foreach ($Key in $RequiredKeys)
         {
-            if (!$Hashtable.$Key)
+            # ConvertFrom-Json -AsHashtable returns a case-sensitive hashtable in PS7,
+            # so find the matching key case-insensitively.
+            $MatchingKey = $Hashtable.Keys | Where-Object { $_ -ieq $Key } | Select-Object -First 1
+            if (!$MatchingKey)
             {
-                "Hashtable missing key '$Key'"
+                throw "Hashtable missing required key '$Key'"
             }
-            $this.$Key = $Hashtable.$Key
+            $this.$Key = $Hashtable[$MatchingKey]
         }
     }
 }
