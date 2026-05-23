@@ -200,11 +200,16 @@ function Build-ModuleDocumentation
             # modified as needed.
             $ModulePageContent = Get-BrownserveContent -Path $ModulePagePath -ErrorAction 'Stop'
 
-            # First ensure the links are correct
-            $ModulePageContent = Update-PlatyPSModulePageLinks `
-                -CmdletDocumentationPath $PublicCmdletDocPath `
-                -ModulePageContent $ModulePageContent `
-                -ErrorAction 'Stop'
+            # When cmdlets are in the same directory as the module page, PlatyPS already generates
+            # correct bare-filename links so no adjustment is needed.
+            # However, when cmdlet documentation is in a subdirectory, we need to update the links in the module page to point to the correct location.
+            if (!$NoModuleSubdirectory)
+            {
+                $ModulePageContent = Update-PlatyPSModulePageLinks `
+                    -CmdletDocumentationPath $PublicCmdletDocPath `
+                    -ModulePageContent $ModulePageContent `
+                    -ErrorAction 'Stop'
+            }
 
             # If we've passed in a GUID for the module then update the module page with that.
             if ($ModuleGUID)
