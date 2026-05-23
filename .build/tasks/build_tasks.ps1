@@ -52,13 +52,6 @@ param
     [string]
     $ReleaseType,
 
-    # An optional release notice to include in the release
-    [Parameter(
-        Mandatory = $false
-    )]
-    [string]
-    $ReleaseNotice,
-
     # The branch this is being built from
     [Parameter(
         Mandatory = $true
@@ -438,10 +431,6 @@ task CreateChangelogEntry SetVersion, {
         RepositoryName  = $GitHubRepoName
         ChangelogObject = $script:Changelog
         SinceVersion    = $script:CurrentVersion
-    }
-    if ($ReleaseNotice)
-    {
-        $NewChangelogEntryParams.Add('Notice', $ReleaseNotice)
     }
     if ($GitHubStageReleaseToken)
     {

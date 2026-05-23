@@ -12,10 +12,6 @@ on:
           - major
           - minor
           - patch
-      notice:
-        description: 'An optional notice to display on this release'
-        required: false
-        type: string
 
 permissions: {}
 
@@ -44,7 +40,6 @@ jobs:
         shell: pwsh
         env:
           GitHubPAT: ${{ steps.app-token.outputs.token }}
-          ReleaseNotice: ${{ inputs.notice }}
         run: |
             $Params = @{
               BranchName = $env:GITHUB_REF
@@ -53,8 +48,5 @@ jobs:
               GitHubStageReleaseToken = $env:GitHubPAT
               ReleaseType = '${{ inputs.release_type}}'
               Verbose = $true
-            }
-            if ($env:ReleaseNotice) {
-              $Params.Add('ReleaseNotice', $env:ReleaseNotice)
             }
             ./Brownserve.PSTools/.build/build.ps1 @Params

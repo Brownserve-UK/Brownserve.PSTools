@@ -9,8 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.18.0](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.18.0) (2026-05-18)
 
-_
-
 ### Added
 
 - feat: add pester test templates for documentation in [#163](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/163) by [@shoddyguard](https://github.com/shoddyguard)
