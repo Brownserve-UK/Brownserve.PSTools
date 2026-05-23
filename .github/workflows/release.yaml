@@ -48,6 +48,7 @@ jobs:
               PSGalleryAPIKey = $env:PSGalleryAPIKey
               PublishTo = ${{ inputs.publish_to }}
               Verbose = $true
+              UseWorkingCopy = $true
             }
             ./Brownserve.PSTools/.build/build.ps1 @Params
       # Step 5: Push a notification to Slack

@@ -39,7 +39,13 @@ function Build-ModuleDocumentation
             ValueFromPipelineByPropertyName = $true
         )]
         [System.Management.Automation.SemanticVersion]
-        $HelpVersion
+        $HelpVersion,
+
+        # If set, cmdlet docs are written directly to DocumentationPath (no module-named subdirectory).
+        # The module page is written as Commands.md instead of {ModuleName}.md.
+        [Parameter(Mandatory = $false)]
+        [switch]
+        $NoModuleSubdirectory
     )
     begin
     {
@@ -110,20 +116,22 @@ function Build-ModuleDocumentation
             #     $HelpDocsLink = $ModuleRepoURL + "/tree/v$HelpVersion/$DocumentationPath/$ModuleName"
             # }
 
-            # Create a directory with the name of module to be used to store the docs
-            $ModuleDocumentationDirectory = Join-Path $DocumentationPath $ModuleName
-            if (!(Test-Path $ModuleDocumentationDirectory))
+            if ($NoModuleSubdirectory)
             {
-                $ErrorStep = 'Failed to create module documentation directory'
-                New-Item $ModuleDocumentationDirectory -ItemType Directory -ErrorAction 'Stop' | Out-Null
+                $PublicCmdletDocPath = $DocumentationPath
+                $ModulePagePath = Join-Path $DocumentationPath 'Commands.md'
             }
-            $PublicCmdletDocPath = $ModuleDocumentationDirectory
-            $ModulePagePath = Join-Path $DocumentationPath "$($ModuleName).md"
-
-            if (!(Test-Path $PublicCmdletDocPath))
+            else
             {
-                $ErrorStep = 'Failed to create public cmdlet directory.'
-                New-Item $PublicCmdletDocPath -ItemType Directory -ErrorAction 'Stop' | Out-Null
+                # Create a directory with the name of module to be used to store the docs
+                $ModuleDocumentationDirectory = Join-Path $DocumentationPath $ModuleName
+                if (!(Test-Path $ModuleDocumentationDirectory))
+                {
+                    $ErrorStep = 'Failed to create module documentation directory'
+                    New-Item $ModuleDocumentationDirectory -ItemType Directory -ErrorAction 'Stop' | Out-Null
+                }
+                $PublicCmdletDocPath = $ModuleDocumentationDirectory
+                $ModulePagePath = Join-Path $DocumentationPath "$($ModuleName).md"
             }
 
             $PlatyParams = @{
@@ -138,9 +146,10 @@ function Build-ModuleDocumentation
             # Check for the presence of either a module page or existing markdown documentation
             # If either exist then we should run the update command instead of the new command.
             $ExistingDocs = Get-ChildItem `
-                -Path $ModuleDocumentationDirectory `
+                -Path $PublicCmdletDocPath `
                 -Filter '*.md' `
-                -Recurse
+                -Recurse |
+                    Where-Object { $_.FullName -ne $ModulePagePath }
             $ExistingModulePage = Get-Item $ModulePagePath -ErrorAction 'SilentlyContinue'
 
             if (!$ExistingDocs -and !$ExistingModulePage)
@@ -251,7 +260,9 @@ function Build-ModuleDocumentation
                 -Path $PublicCmdletDocPath `
                 -Filter '*.md' `
                 -Recurse `
-                -ErrorAction 'Stop' | Select-Object -ExpandProperty FullName
+                -ErrorAction 'Stop' |
+                    Where-Object { $_.FullName -ne $ModulePagePath } |
+                        Select-Object -ExpandProperty FullName
 
             <#
                 Now we need to fix the documentation for each cmdlet.

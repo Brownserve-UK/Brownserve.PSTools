@@ -51,4 +51,5 @@ jobs:
               -GitHubRepoName 'Brownserve.PSTools' `
               -BranchName $env:GITHUB_REF `
               -Build 'BuildTestAndCheck' `
-              -Verbose
+              -Verbose `
+              -UseWorkingCopy

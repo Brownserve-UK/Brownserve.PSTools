@@ -723,10 +723,11 @@ You may wish to run _init.ps1 again to reload the current stable version of this
 task UpdateModuleDocumentation ImportModule, {
     Write-Build White 'Updating markdown documentation'
     $DocsParams = @{
-        ModuleName        = $ModuleName
-        ModulePath        = $Script:BuiltModulePath
-        DocumentationPath = $Global:BrownserveRepoDocsDirectory
-        ModuleGUID        = $ModuleGUID
+        ModuleName           = $ModuleName
+        ModulePath           = $Script:BuiltModulePath
+        DocumentationPath    = $Global:BrownserveRepoDocsDirectory
+        ModuleGUID           = $ModuleGUID
+        NoModuleSubdirectory = $true
     }
     # When we're preparing to release a new version then we should update the help version in the module page
     if ($script:Stage -eq $true)
@@ -739,7 +740,7 @@ task UpdateModuleDocumentation ImportModule, {
         We do this _after_ we've generated the docs as the module page might not exist before which will cause
         Resolve-Path to fail.
     #>
-    $Script:ModulePagePath = Join-Path $Global:BrownserveRepoDocsDirectory "$ModuleName.md" | Resolve-Path
+    $Script:ModulePagePath = Join-Path $Global:BrownserveRepoDocsDirectory 'Commands.md' | Resolve-Path
     if ($script:Stage -eq $true)
     {
         $script:TrackedFiles += ($Script:ModulePagePath | Convert-Path)
@@ -759,7 +760,7 @@ task CreateModuleHelp UpdateModuleDocumentation, {
     New-Item (Join-Path $global:BrownserveBuiltModuleDirectory 'en-US') -ItemType Directory | Out-Null
     $HelpParams = @{
         ModuleDirectory   = $global:BrownserveBuiltModuleDirectory
-        DocumentationPath = (Join-Path $global:BrownserveRepoDocsDirectory $ModuleName)
+        DocumentationPath = $global:BrownserveRepoDocsDirectory
     }
     Add-ModuleHelp @HelpParams | Out-Null
 }

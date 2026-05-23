@@ -48,5 +48,6 @@ jobs:
               GitHubStageReleaseToken = $env:GitHubPAT
               ReleaseType = '${{ inputs.release_type}}'
               Verbose = $true
+              UseWorkingCopy = $true
             }
             ./Brownserve.PSTools/.build/build.ps1 @Params
