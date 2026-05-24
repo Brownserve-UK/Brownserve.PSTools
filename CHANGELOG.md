@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release
 
+## [v0.19.3](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.19.3) (2026-05-24)
+
+### Fixed
+
+- fix: PlatyPS links in [#193](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/193) by [@shoddyguard](https://github.com/shoddyguard)
+- fix(ci): update checked paths in [#191](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/191) by [@shoddyguard](https://github.com/shoddyguard)
+- docs: fix mkdocs pathing in [#192](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/192) by [@shoddyguard](https://github.com/shoddyguard)
+
+
 ## [v0.19.2](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.19.2) (2026-05-23)
 
 ### Added
