@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Release
 
+## [v0.19.4](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.19.4) (2026-05-24)
+
+### Fixed
+
+- fix: empty repo logic in [#195](https://github.com/Brownserve-UK/Brownserve.PSTools/pull/195) by [@shoddyguard](https://github.com/shoddyguard)
+
+
 ## [v0.19.3](https://github.com/Brownserve-UK/Brownserve.PSTools/tree/v0.19.3) (2026-05-24)
 
 ### Fixed
