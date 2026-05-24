@@ -202,10 +202,23 @@ function New-BrownserveChangelogEntry
         {
             try
             {
-                $MergesSinceLastRelease = Get-GitMerges `
-                    -RepositoryPath $ChangelogPath `
-                    -ReferenceBranch "v$($LastReleasedVersion.Version)" `
-                    -ErrorAction 'Stop'
+                $GetGitMergesParams = @{
+                    RepositoryPath = $ChangelogPath
+                    ErrorAction    = 'Stop'
+                }
+                <#
+                    When the changelog contains only the 0.0.0 placeholder entry seeded by
+                    Initialize-BrownserveRepository, no corresponding git tag exists. Passing it
+                    as a reference range to git would fail with "unknown revision or path not in
+                    the working tree". For a first release we want all merges from the beginning
+                    of the repo, so we omit ReferenceBranch. Get-GitMerges already handles this
+                    case by falling back to all-history mode when no ReferenceBranch is given.
+                #>
+                if (-not $ChangelogObject.HasPlaceholder)
+                {
+                    $GetGitMergesParams['ReferenceBranch'] = "v$($LastReleasedVersion.Version)"
+                }
+                $MergesSinceLastRelease = Get-GitMerges @GetGitMergesParams
                 if (!$MergesSinceLastRelease)
                 {
                     throw 'No merges found since last release'

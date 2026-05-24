@@ -1637,9 +1637,8 @@ function Compare-BrownserveRepository
         {
             $PagesDirectory          = Join-Path $RepositoryPath 'pages'
             $PagesReferenceDirectory = Join-Path $PagesDirectory 'Cmdlet reference'
-            $PagesModuleDirectory    = Join-Path $PagesReferenceDirectory $ModuleInfo.Name
 
-            foreach ($Dir in @($PagesDirectory, $PagesReferenceDirectory, $PagesModuleDirectory))
+            foreach ($Dir in @($PagesDirectory, $PagesReferenceDirectory))
             {
                 if (!(Test-Path $Dir) -and ($MissingDirectories.Path -notcontains $Dir))
                 {
@@ -1663,7 +1662,7 @@ function Compare-BrownserveRepository
                 @{ Path = (Join-Path $RepositoryPath 'mkdocs.yml');                          Content = $NewMkDocsConfigContent },
                 @{ Path = (Join-Path $RepositoryPath 'requirements.txt');                    Content = $NewMkDocsRequirementsContent },
                 @{ Path = (Join-Path $PagesDirectory 'index.md');                            Content = $NewMkDocsIndexContent },
-                @{ Path = (Join-Path $PagesModuleDirectory '.pages');                        Content = $NewMkDocsPagesContent }
+                @{ Path = (Join-Path $PagesReferenceDirectory '.pages');                     Content = $NewMkDocsPagesContent }
             )
 
             foreach ($MkDocsFile in $MkDocsFiles)
