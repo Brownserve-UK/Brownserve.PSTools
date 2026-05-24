@@ -4,6 +4,6 @@ function New-MkDocsPagesFile
     param()
     process
     {
-        return 'order: asc'
+        return "title: Module Reference`nnav:`n  - Commands: Commands.md`n  - ..."
     }
 }
