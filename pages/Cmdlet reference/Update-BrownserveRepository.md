@@ -14,7 +14,7 @@ Updates a given repository to use the latest tooling and settings
 ## SYNTAX
 
 ```text
-Update-BrownserveRepository [[-RepositoryPath] <String>] [-Owner <String>] [-Force]
+Update-BrownserveRepository [[-RepositoryPath] <String>] [-Owner <String>] [-Force] [-RepoName <String>]
  [<CommonParameters>]
 ```
 
@@ -53,6 +53,22 @@ Accept wildcard characters: False
 ### -Owner
 
 The owner of the repository, this is used to populate the copyright holder in the licence.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -RepoName
+
+The name of the repository, defaults to the name of the folder that the repository is in if not specified, this is used to populate the paths for builds.
 
 ```yaml
 Type: String

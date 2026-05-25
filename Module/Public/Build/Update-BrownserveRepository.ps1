@@ -18,6 +18,12 @@ function Update-BrownserveRepository
         [switch]
         $Force,
 
+        # The GitHub repository name, if different from the local directory name.
+        # Defaults to the leaf name of RepositoryPath if not provided.
+        [Parameter(Mandatory = $false)]
+        [string]
+        $RepoName,
+
         # The config file to use for setting our .gitignore content
         [Parameter(Mandatory = $false, DontShow)]
         [string]
@@ -120,6 +126,7 @@ function Update-BrownserveRepository
                 VSCodeExtensionsConfigFile = $VSCodeExtensionsConfigFile
                 PackageAliasConfigFile     = $PackageAliasConfigFile
                 EditorConfigConfigFile     = $EditorConfigConfigFile
+                RepoName                  = $RepoName
                 ErrorAction               = 'Stop'
             }
             if ($ModuleInfo)

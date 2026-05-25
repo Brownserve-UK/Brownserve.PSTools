@@ -19,6 +19,12 @@ function Initialize-BrownserveRepository
         [BrownservePowerShellModule]
         $ModuleInfo,
 
+        # The GitHub repository name, if different from the local directory name.
+        # Defaults to the leaf name of RepositoryPath if not provided.
+        [Parameter(Mandatory = $false)]
+        [string]
+        $RepoName,
+
         # The owner of the repository (used for licensing and other metadata)
         [Parameter(Mandatory = $false)]
         [string]
@@ -100,6 +106,7 @@ function Initialize-BrownserveRepository
                 -EditorConfigConfigFile $EditorConfigConfigFile `
                 -MarkdownlintConfigFile $MarkdownlintConfigFile `
                 -ModuleInfo $ModuleInfo `
+                -RepoName $RepoName `
                 -ErrorAction 'Stop'
         }
         catch

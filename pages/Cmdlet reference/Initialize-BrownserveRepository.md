@@ -15,7 +15,7 @@ Prepares a repository for use for a given project
 
 ```text
 Initialize-BrownserveRepository [[-RepositoryPath] <String>] [-ProjectType <BrownserveRepoProjectType>]
- [-ModuleInfo <BrownservePowerShellModule>] [-Owner <String>] [-Force]
+ [-ModuleInfo <BrownservePowerShellModule>] [-RepoName <String>] [-Owner <String>] [-Force]
  [<CommonParameters>]
 ```
 
@@ -92,6 +92,22 @@ Type: BrownserveRepoProjectType
 Parameter Sets: (All)
 Aliases:
 Accepted values: PowerShellModule, BrownservePSTools, Generic
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -RepoName
+
+The name of the repository, defaults to the name of the folder that the repository is in if not specified, this is used to populate the paths for builds.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases:
 
 Required: False
 Position: Named

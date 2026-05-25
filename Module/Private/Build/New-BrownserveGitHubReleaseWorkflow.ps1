@@ -5,7 +5,12 @@ function New-BrownserveGitHubReleaseWorkflow
     (
         [Parameter(Mandatory = $true)]
         [string]
-        $ModuleName
+        $ModuleName,
+
+        # The GitHub repository name, if different from the module name
+        [Parameter(Mandatory = $false)]
+        [string]
+        $RepoName = $ModuleName
     )
     begin
     {
@@ -20,9 +25,7 @@ function New-BrownserveGitHubReleaseWorkflow
     }
     process
     {
-        $Template = $Template -replace '###MODULE_NAME###', $ModuleName
-
-        return $Template
+        return $Template -replace '###REPO_NAME###', $RepoName
     }
     end
     {
