@@ -42,13 +42,13 @@ jobs:
       - name: checkout-module
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
-          path: ###MODULE_NAME###
+          path: ###REPO_NAME###
       # Step 2: Run the build script
       - name: run-build-script
         shell: pwsh
         run: |
-            ./###MODULE_NAME###/.build/build.ps1 `
-              -GitHubRepoName '###MODULE_NAME###' `
+            ./###REPO_NAME###/.build/build.ps1 `
+              -GitHubRepoName '###REPO_NAME###' `
               -BranchName $env:GITHUB_REF `
               -Build 'BuildTestAndCheck' `
               -Verbose

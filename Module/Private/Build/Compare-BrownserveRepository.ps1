@@ -39,6 +39,12 @@ function Compare-BrownserveRepository
         [BrownservePowerShellModule]
         $ModuleInfo,
 
+        # The GitHub repository name, if different from the local directory name.
+        # Defaults to the leaf name of RepositoryPath if not provided.
+        [Parameter(Mandatory = $false)]
+        [string]
+        $RepoName,
+
         # Forces the recreation of files even if they already exist
         [Parameter(Mandatory = $false)]
         [switch]
@@ -1381,15 +1387,20 @@ function Compare-BrownserveRepository
 
         if ($IncludeWorkflows)
         {
+            if (-not $RepoName)
+            {
+                $RepoName = Split-Path $RepositoryPath -Leaf
+            }
+
             $BuildsWorkflowPath = Join-Path $WorkflowDirectory 'builds.yaml'
             $StageReleaseWorkflowPath = Join-Path $WorkflowDirectory 'stage-release.yaml'
             $ReleaseWorkflowPath = Join-Path $WorkflowDirectory 'release.yaml'
 
-            $WorkflowCommonParams = @{ ModuleName = $ModuleInfo.Name }
+            $WorkflowCommonParams = @{ ModuleName = $ModuleInfo.Name; RepoName = $RepoName }
 
             try
             {
-                $NewBuildsWorkflowContent = New-BrownserveGitHubBuildsWorkflow -ModuleName $ModuleInfo.Name | Format-BrownserveContent
+                $NewBuildsWorkflowContent = New-BrownserveGitHubBuildsWorkflow -ModuleName $ModuleInfo.Name -RepoName $RepoName | Format-BrownserveContent
                 $NewStageReleaseWorkflowContent = New-BrownserveGitHubStageReleaseWorkflow @WorkflowCommonParams | Format-BrownserveContent
                 $NewReleaseWorkflowContent = New-BrownserveGitHubReleaseWorkflow @WorkflowCommonParams | Format-BrownserveContent
             }
